@@ -1,0 +1,105 @@
+
+.pp-website-card {
+
+    display: inline-block;
+
+    position: relative;
+
+    width: 460px;
+
+    padding: 12px 0;
+
+    margin-bottom: 20px; 
+
+    border: 1px solid #bedbf8;
+    background-color: #fbfcff;
+    
+    border-radius: 3px;
+
+}
+
+.pp-website-card:hover, .pp-website-card:hover a{
+    background-color:rgb(243, 247, 255) !important;
+}
+
+.pp-website-card a {
+
+    text-decoration: none;
+    color: black;
+    width: 100%; /* otherwise size of icon column and url column will vary */
+
+}
+
+.websiteDescription {
+
+    width: 100%;
+    margin-bottom: 0.25rem !important;
+    line-height: 1.05;
+    overflow-wrap: break-word;
+    font-size: 18px;
+    font-weight: bold;
+
+}
+
+.websiteUrl {
+
+    width: 100%;
+    margin-bottom: 0.25rem !important;    
+    font-size: 16px;
+    line-height: 0.95;
+    word-break: break-all;
+
+}
+
+@media screen and (max-width: 768px) {
+
+    .pp-website-card {
+
+        width: 315px;
+    
+        padding: 5px 0;
+        margin-bottom: 20px;
+    
+    
+    }
+    
+
+    .websiteDescription {
+
+        font-size: 15px;
+
+    }
+
+    .websiteUrl {
+        
+        font-size: 13px;
+
+    }
+
+}
+
+@media screen and (max-width: 580px) {
+
+    .pp-website-card{
+
+        max-width: 100%;
+        margin:0;
+        margin-bottom: 9px;
+        border: 1px solid #d4e7fa;
+    }
+
+    .websiteDescription {
+
+        font-weight: normal;
+        font-size: 15px;
+
+    }
+
+    .websiteUrl {
+
+        font-weight: normal;
+        font-size: 12px;
+
+    }
+
+}

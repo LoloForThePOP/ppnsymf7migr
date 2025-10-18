@@ -1,17 +1,176 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
 
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
+<html>
+
+    <head>
+
+        {# Open Graph enables any web page to become a rich object in a social graph (see https://ogp.me/) #}
+
+        {% macro openGraph (title, siteName, pageUrl, description, type, imageUrl = null, updatedAt = null) %}
+
+            <meta property="og:title" content="{{title}}">
+            <meta property="og:site_name" content="{{siteName}}">
+            <meta property="og:url" content="{{pageUrl}}">
+            <meta property="og:description" content="{{description}}">
+            <meta property="og:type" content="{{type}}">
+
+            {% if imageUrl is not empty %}
+            
+                <meta property="og:image" content="{{imageUrl}}">
+            
+            {% endif %}
+
+            {% if updatedAt is not empty %}
+            
+                <meta property="og:updated_time" content="{{updatedAt}}">
+            
+            {% endif %}
+
+        {% endmacro %}
+
+        <meta charset="UTF-8">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        {# Allow each specific webpage to add more content in head tag #}
+        {% block headTag %}{% endblock %}
+
+
+        {# Favicon set #}
+
+        <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-title" content="Propon" />
+        <link rel="manifest" href="/site.webmanifest" />
+
+
+        {# Google Fonts #}
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+
+        <title>{% block title %}Bienvenue sur Propon{% endblock %}</title>
+
+
+        {# Global CSS #}
+
+        <link href="/css/bootstrap.css" rel="stylesheet"> {# Bootstrap is currently used #}
+        <link href="/css/app.css" rel="stylesheet"> {# General stylesheet for Propon #}
+
+        {% block stylesheets %}{% endblock %}
+
+
+        {% block priorJavascipts %}{% endblock %}
+
+
+        {# Some Bootstrap components use a specific javascript #}
+        <script src="/js/bootstrap.js"></script>
+
+        {# I know it's outdated... but it's so easy to use #}
+        <script src="/js/jquery-3.6.0.js"></script>
+
+
+
+
+        {# Cookies and tracking #}
+        
+        {% if app.environment != 'dev' %}
+
+            <script src="/js/tracking.js"></script> {# Manages some user tracking #}
+
+            <!-- Google tag (gtag.js) - Google Analytics -->
+
+            <script async src="https://www.googletagmanager.com/gtag/js?id=UA-245896945-1"></script>
+
+            <script>{# Init Google tag #}
+
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', 'UA-245896945-1');
+            
+            </script>
+
+        {% endif %}
+
+
+
+        {# Google Map inclusion by default for geographical searches, along with Google Places(Google places is used for locations autocompletes form fields) #}
+            
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyByeac-uQWF2vbkmpxGa0ISzV1M4aCrVVk&libraries=places&language=fr"></script>
+
+
+        {# Allow to add event listeners and dispatch custom events in vanilla js #}
+
+        <script>
+
+            var customEvents = document.createElement("forCustomEvents"); 
+            /*
+                Ex of use: customEvents.dispatchEvent(new Event("greeting", {'name': Fabien}));
+                customEvents.addEventListener("greeting", function(e) { console.log("hello"+e.name); });*/
+
+        </script>
+
+
+        {# check if user device is a tiny screen #}
+
+
+        <script>
+
+            var tinyScreen = false;
+
+            function checkTinyScreen(){
+
+            if ($(window).width() < 590) {
+                tinyScreen = true;
+                }else {
+                tinyScreen = false;
+                } 
+
+            }
+
+            checkTinyScreen(); //check on page load
+            
+
+            $(window).on('resize', function() { //check if resized page
+
+                checkTinyScreen();
+
+            });
+
+        </script>
+
+
+
+        {# Allow to display some html chunks when user clicks on some buttons instead of reloading the entire webpage #}
+
+        <script> 
+
+            {# storing in a javascript variable the url of the route that manages getting the appropriate html chunk #}
+            var getChunkRouteName = '{{url("ajax_render_chunk")}}'; 
+            
+        </script> 
+
+        {# Manage chunks demand and display #}
+        <script src="/js/ajax_chunk.js"></script>
+
+        {# End of js chunks management #}
+        
+
+
+        {% block javascripts %}{% endblock %}
+
     </head>
+
+
     <body>
         {% block body %}{% endblock %}
     </body>
+
+    
 </html>

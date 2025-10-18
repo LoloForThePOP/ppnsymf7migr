@@ -1,0 +1,61 @@
+
+.bc-outer{
+    position: relative;
+    width: 330px;
+    max-width: 100%;
+    padding: 18px;
+    margin-bottom: 22px;
+    border: 1px solid rgb(171, 173, 190);
+    border-radius: 4px;
+}
+
+.bc-content-wrapper{
+    border-left: 3px solid #e0ddfe;
+    padding-left: 10px;
+}
+
+
+.contactCardTitle {
+
+    font-size: 19px;
+    font-weight: bold;
+    margin-bottom: 20px;
+
+}
+
+.contact-card-icon{
+    width : 16px;
+    height: 16px;
+    margin-bottom : 3px;
+    margin-right : 5px;
+}
+
+
+
+@media screen and (max-width: 768px) {
+
+    .bc-outer{
+
+        width: 290px;
+
+    }
+
+}
+
+@media screen and (max-width: 580px) {
+
+    .bc-outer{
+
+        padding: 12px;
+        border: 1px solid rgb(215, 216, 220);
+
+    }
+    
+    .contactCardTitle {
+
+        font-size: 17px;
+        font-weight: normal;
+
+    }
+    
+}

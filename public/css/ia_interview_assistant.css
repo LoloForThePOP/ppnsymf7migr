@@ -1,0 +1,131 @@
+
+/* Global CSS for Propon Project Presentation AI Interview Assistant */
+
+body {
+  font-family: Montserrat, sans-serif;
+}
+
+
+#main-ui form {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 600px;
+}
+
+#main-ui .form-group {
+  margin-bottom: 1rem;
+}
+
+#main-ui label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: bold;
+}
+
+#main-ui input[type='text'],
+#main-ui textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+#main-ui textarea {
+  height: 70px;
+  resize: none;
+  outline: none;
+}
+
+#main-ui #assistant-question{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #227422;
+}
+
+#main-ui .assistant-advice {
+	padding: 8px 8px 10px 8px;
+	border-radius: 8px;
+}
+
+
+#main-ui .assistant-advice-label{
+  text-align: center;
+  color: #5c5cae;
+  font-weight: bold;
+}
+
+
+#main-ui .send-button-container {
+	display: flex;
+  justify-content: center;
+}
+
+#main-ui button {
+
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #d2d5e4;
+  background-color: rgb(251, 254, 255);
+  color: rgb(72, 72, 72);
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+#main-ui .send-button {
+
+  display: flex;
+  align-items: center;
+  
+}
+
+#main-ui button:hover {
+  background-color: #ededf2;
+}
+
+
+
+/* RGPD Show more */
+
+/* Initially hide "Learn More" content */
+.more-content {
+  display: none;
+
+}
+
+/* Styles for "Learn More" button */
+.learn-more {
+  color: #0073e6;
+  cursor: pointer;
+}
+
+.learn-more:hover {
+  text-decoration: none;
+}
+
+/* End of RGPD Show more */
+
+
+@media screen and (max-width: 580px) {
+
+  #main-ui form {
+    padding: 2rem 0.8rem ;
+    width: 100%;
+  }
+
+  #main-ui textarea {
+    height: 92px;
+  }
+
+  #assistant-question{
+    margin: -5px;
+    font-size: 1.05em;
+  }  
+
+}

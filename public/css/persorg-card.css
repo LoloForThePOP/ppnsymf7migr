@@ -1,0 +1,16 @@
+.persorg-card{
+
+    position: relative;
+
+    width: 140px;
+    min-height: 204px;
+
+    padding: 0 13px 18px 15px;
+
+    margin-right: 15px;
+    margin-bottom: 20px;
+
+    border: 1px solid #2C3E50;
+    border-radius: 4px;
+    
+}

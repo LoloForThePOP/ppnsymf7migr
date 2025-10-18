@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   sodipodi:docname="transport.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   id="svg219"
+   version="1.1"
+   viewBox="0 0 1280 1280"
+   height="338.66666mm"
+   width="338.66666mm"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs213" />
+  <sodipodi:namedview
+     inkscape:window-maximized="1"
+     inkscape:window-y="-8"
+     inkscape:window-x="-8"
+     inkscape:window-height="705"
+     inkscape:window-width="1366"
+     inkscape:showpageshadow="false"
+     fit-margin-bottom="0"
+     fit-margin-right="0"
+     fit-margin-left="0"
+     fit-margin-top="0"
+     showgrid="false"
+     inkscape:document-rotation="0"
+     inkscape:current-layer="layer2"
+     inkscape:document-units="px"
+     inkscape:cy="572.85714"
+     inkscape:cx="1344.2857"
+     inkscape:zoom="0.35"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     borderopacity="1.0"
+     bordercolor="#666666"
+     pagecolor="#262626"
+     id="base"
+     inkscape:pagecheckerboard="false" />
+  <metadata
+     id="metadata216">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Contents"
+     id="layer2"
+     inkscape:groupmode="layer">
+    <circle
+       style="fill:#3a4bd5;fill-opacity:1;stroke:none;stroke-width:35.6274"
+       id="path1326-8"
+       cx="1108.9429"
+       cy="172.76877"
+       r="159.6041" />
+    <circle
+       style="fill:#268bed;fill-opacity:1;stroke:none;stroke-width:35.6274"
+       id="path1326-8-5"
+       cx="175.4808"
+       cy="1110.7588"
+       r="159.6041" />
+    <g
+       id="g2499"
+       style="fill:#3a4b41;fill-opacity:1"
+       transform="translate(5.7751477,-0.40897774)">
+      <path
+         style="fill:#d8b516;fill-opacity:1;stroke:#d8b516;stroke-width:0.0741525px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 912.18097,606.05763 c -1.94576,7.82623 -5.32886,14.15433 -11.00983,20.01502 -5.57614,5.86277 -11.58153,9.67147 -19.39018,11.92173 -7.8086,2.25021 -14.89327,2.47006 -22.77313,0.57554 -7.87982,-1.89428 -14.1543,-5.32868 -20.0172,-10.90492 v 0 L 673.33721,470.19162 c -5.75803,-5.57395 -9.51311,-11.63072 -11.81463,-19.49285 -2.30377,-7.75733 -2.52149,-14.94678 -0.57572,-22.77314 1.89444,-7.87984 5.27533,-14.10301 10.90498,-20.01722 5.62961,-5.91419 11.68639,-9.66927 19.44151,-11.86815 v 0 l 219.14943,-64.72612 c 7.80866,-2.25031 14.9981,-2.46794 22.77318,-0.57576 7.87978,1.89446 14.1543,5.3289 20.06847,10.95858 5.91641,5.52471 9.618,11.63276 11.81679,19.38797 2.25021,7.80858 2.52162,14.94673 0.62711,22.82654 v 0 l -53.54736,222.14616"
+         id="path14924" />
+      <path
+         style="fill:#006c00;fill-opacity:1;stroke:#d8b516;stroke-width:100;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 856.41815,457.53943 C 362.6183,936.8619 362.6183,936.8619 362.6183,936.8619"
+         id="path2361" />
+    </g>
+  </g>
+  <inkscape:templateinfo>
+    <inkscape:name>Dark Canvas</inkscape:name>
+    <inkscape:date>2020-07-13</inkscape:date>
+  </inkscape:templateinfo>
+  <inkscape:templateinfo>
+    <inkscape:name>Dark Theme</inkscape:name>
+    <inkscape:date>2021-11-06</inkscape:date>
+  </inkscape:templateinfo>
+</svg>

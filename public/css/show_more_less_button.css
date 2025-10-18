@@ -1,0 +1,43 @@
+/* When there are too much vertical space used by a project collection display or else, we hide some content with a show more or less button. This sheet handle display rendering (for logic handling see show_more_less_button.js). */
+
+
+.hide-too-long {
+    height: 100%;
+    overflow: hidden;
+}
+
+.hide-335 {
+    max-height: 330px;
+}
+
+.hide-525 {
+    max-height: 660px;
+}
+
+.read-more:focus {
+    outline: none;
+}
+
+.read-more::-moz-focus-inner {
+    border: 0;
+}
+
+
+
+@media screen and (max-width: 580px) {
+        
+    .hide-too-long.show-tiny-screens {
+        max-height: initial;
+    }
+        
+    .hide-too-long.show-tiny-screens .read-more{
+        display: none;
+    }
+        
+    .hide-too-long {
+        
+        overflow-x: auto !important;
+    }
+
+
+}

@@ -1,0 +1,30 @@
+/* td {
+	max-width: 150px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+} */
+
+.datagrid thead th {
+
+	max-width: 100px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+
+}
+
+
+#header-logo {
+	padding-top: 15px;
+}
+
+#header-logo .logo{
+	display: none !important;
+}
+
+#header-logo a{
+	text-align: center;
+}
+
+#header-logo a:hover{
+	background-color: aliceblue;
+}
