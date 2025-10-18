@@ -102,7 +102,7 @@
 
         {# Google Map inclusion by default for geographical searches, along with Google Places(Google places is used for locations autocompletes form fields) #}
             
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyByeac-uQWF2vbkmpxGa0ISzV1M4aCrVVk&libraries=places&language=fr"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key | e('url') }}&libraries=places&language=fr" async defer></script>
 
 
         {# Allow to add event listeners and dispatch custom events in vanilla js #}
@@ -169,8 +169,20 @@
 
 
     <body>
+
+        {# GDPR Frontend (modal box cookies user selection) #}
+
+        {% include "_partials/GDPR.html.twig" %}
+
+        {# Header Navbar #}
+
+        {% include "_partials/header_navbar.html.twig" %}
+
+
+
+
         {% block body %}{% endblock %}
     </body>
 
-    
+
 </html>

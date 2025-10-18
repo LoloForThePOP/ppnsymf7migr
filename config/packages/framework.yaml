@@ -5,6 +5,35 @@ framework:
     # Note that the session will be started ONLY if you read or write from it.
     session: true
 
+    assets:
+        base_path: /
+        packages:
+            static:
+                base_path: /media/static/
+            icons:
+                base_path: /media/static/images/icons/
+            pp_edit:
+                base_path: /media/static/images/icons/edit_presentation/
+            pp_wysiwyg: 
+                base_path: /media/static/images/icons/edit_presentation/wysiwyg/
+            pp_edition_menu: 
+                base_path: /media/static/images/icons/edit_presentation/menu
+            pp_consult: 
+                base_path: /media/static/images/icons/consult_presentation/
+            business_card: 
+                base_path: /media/static/images/icons/business_card/
+            popular_website_logo: 
+                base_path: /media/static/images/icons/popular_websites/
+            misc: 
+                base_path: /media/static/images/icons/miscellaneous/
+            larger: 
+                base_path: /media/static/images/larger/
+            tutorial: 
+                base_path: /media/static/images/larger/tutorials/
+            videos: 
+                base_path: /media/static/videos/
+        
+
     #esi: true
     #fragments: true
 

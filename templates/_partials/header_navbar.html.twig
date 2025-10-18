@@ -1,0 +1,415 @@
+{# Header Navbar #}
+
+<header>
+
+  <nav class="navbar navbar-expand-md fixed-top navbar-light bg-white" style="border-bottom: 2px solid orange;">
+
+    <div class="container-fluid ps-3 ps-md-5">
+
+      {# Website Logo #}
+
+      <a class="navbar-brand py-0 me-0 me-lg-4" href="/">
+
+        <img class="website-logo" src="/media/static/images/propon_logo.svg" alt="website logo" loading="lazy"/>
+
+      </a>
+
+      <style>
+
+        .website-logo{
+
+          width: 88px;
+
+        }
+      
+      </style>
+
+      {# Static Menu #}
+
+      <ul class="navbar-nav d-flex align-items-center static-menu fw-bold" style="flex-direction: inherit;">
+
+        <li class="nav-item fs-5 me-3 d-none d-md-inline">
+
+          <a class="nav-link text-body" href="{{ path("index_articles")}}">Articles</a>
+
+        </li>
+
+        {# Add a Project Button #}
+          
+          <li class="nav-item fs-5 me-4 d-none d-md-inline">
+
+            <a href="{{path ('project_presentation_helper')}}">
+
+              <button type="button" class="create-presentation-button btn btn-success text-white">
+
+                <img class="bordered-plus-sign" src="{{asset ('bordered-plus-sign-add-something.svg', 'misc')}}" class="" alt="" loading="lazy" width="15" height="15">
+
+                Présenter un Projet
+                
+              </button>
+
+              <style>
+
+              .create-presentation-button{
+                border-radius: 15px;
+              }
+
+                .bordered-plus-sign{
+
+                  margin-bottom: 4px;
+
+                  filter: invert(100%) sepia(100%) saturate(1%) hue-rotate(305deg) brightness(103%) contrast(101%); /* white svg color */
+
+                }
+
+                header .create-presentation-button:hover {
+                  background-color: #1fab1fff;
+                }
+              
+              </style>
+
+            </a>
+
+          </li>
+
+        {# User's new messages count #}
+
+        {% if app.user %}
+
+          {% set unreadMessagesCount = app.user.data.unreadMessagesCount %}
+
+          {% if unreadMessagesCount > 0 %}
+
+            {# large screen display #}
+
+            <li class="nav-item fs-5 me-3 d-none d-md-inline">
+
+              <a href="{{path ('user_manage_messages')}}">
+
+                <button type="button" class="btn btn-success rounded">
+                  Messages <span class="badge bg-warning text-body">{{unreadMessagesCount}}</span>
+                </button>
+
+              </a>
+
+            </li>
+
+          {% endif %}
+
+          {# tiny screen display #}
+
+          <li class="nav-item d-md-none">
+
+            {% if unreadMessagesCount > 0 %}
+
+              <a href="{{path ('user_manage_messages')}}">
+
+                <button type="button" class="btn btn-sm btn-success rounded me-2">
+                  Messages <span class="badge bg-warning text-body">{{unreadMessagesCount}}</span>
+                </button>
+
+              </a>
+
+            {% endif %}
+
+          </li>
+
+        {% endif %}
+
+
+
+        {# tiny screens display #}
+        
+        <li class="nav-item d-md-none">
+
+          {# search icon on mobile, triggers a search bar appearance on click #}
+
+          <img id="search_icon_small_screens" class="" src="{{ asset('search.svg', 'misc')}}" alt="search icon" style="height:26px;">
+
+          {# search bar html structure + js + styles handling on tiny screens #}
+
+          {% include "_partials/search_bar_sm.html.twig" %}
+
+        </li>
+
+        {# search bar for large screens #}
+
+        <form class="d-none d-md-block">
+
+          <input id="navbar_md_search_input" class="form-control d-inline me-2" type="search" placeholder="Rechercher un Projet" aria-label="Search">
+
+        </form>
+
+        {# styles for search bar for large screens #}
+
+        <style>
+
+          #navbar_md_search_input{
+
+            width: unset;
+
+          }
+
+          @media screen and (max-width: 860px) {
+
+            #navbar_md_search_input{
+              width: 169px;
+            }
+
+          }
+
+        </style>
+
+      </ul>
+
+      {# User Account Menu #}
+
+      {% set userAccountMenu %} {# The html structure is stored in a variable so that we reuse it according to tiny screens or large screens #}
+
+        {% if app.user %}
+
+          <div class="bg-white">
+
+            {# Displaying user pseudo #}
+
+            <div class="container d-flex align-items-center justify-content-center text-center my-3">
+              {{app.user.userName}}
+            </div>
+
+            <ul class="ps-0" style="list-style:none;">
+
+              {# Access add a project presentation button #}
+
+              <li>
+    
+                <a class="dropdown-item" href="{{path ('project_presentation_helper')}}">Ajouter un Projet</a>
+    
+              </li>
+
+              {# Access user presented projects list button #}
+    
+              <li>
+    
+                <a class="dropdown-item" href="{{path("show_user_profile", {'userNameSlug': app.user.userNameSlug})}}">
+                  Mes Projets présentés
+                </a>
+    
+              </li>
+    
+              {# Dropdown Divider #}
+    
+              <li>
+    
+                <hr class="dropdown-divider">
+    
+              </li>
+
+              {# Access user account button #}
+    
+              <li>
+    
+                <a class="dropdown-item" href="{{path("show_user_profile", {'userNameSlug': app.user.userNameSlug})}}">
+                  Mon Compte
+                </a>
+    
+              </li>
+    
+              {# Dropdown Divider #}
+    
+              <li>
+    
+                <hr class="dropdown-divider">
+    
+              </li>
+    
+              {# logout button #}
+    
+              <li>
+    
+                <a class="dropdown-item" href="{{path('app_logout')}}">
+    
+                  Déconnexion
+    
+                </a>
+    
+              </li>
+            
+            </ul>
+
+          </div>
+      
+        {% endif %}
+
+      {% endset %}
+      
+      
+      {# Tiny screens only: button to trigger hide menu / show menu #}
+
+      <button class="btn text-body navbar-toggler" data-bs-target="#navbarSMToggle" aria-controls="navbarSMToggle" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Toggle navigation">
+
+        <span class="navbar-toggler-icon"></span>
+
+      </button>
+
+      {# Some navbar elements #}
+      
+      <div id="navbarSMToggle" class="collapse navbar-collapse text-center">{# Note : tiny screens elements are collapsed in this #navbarSMToggle div panel (toggle button just above), but >= md screens elements appearsnormally in the navbar without toggling a button #}
+      
+        {# This div is collapsed and displayed only on small screens #}
+
+        <div class="d-md-none">
+
+          {{ userAccountMenu }} {# Setted above #}
+
+        </div>
+
+        <ul class="navbar-nav ms-md-auto gap-2">
+
+          {# Access admin panel icon (admins only) #}
+
+          {% if is_granted("ROLE_ADMIN") or is_granted("ROLE_ARTICLE_EDIT") %}
+          
+            <li class="nav-item d-none d-md-inline">
+
+              <a href="{{path ('admin')}}">
+
+                <img class="bg-white px-1 py-1 mt-1 rounded" src="{{ asset('key.svg', 'misc')}}" alt="key icon" style="height:32px;">
+
+              </a>
+
+            </li>
+        
+          {% endif %}
+
+          {% if not app.user %}
+
+            {# login access button (>= md screens) #}
+
+            <a href="{{path('app_login')}}">
+
+              <button type="button" class="d-none d-md-block btn btn-outline-primary fw-bold me-2">Connexion</button>
+
+            </a>
+
+            {# login access button (sm screens) #}
+
+            <div class="d-md-none text-center">
+
+              <h4 class="fw-bold text-center mt-4 mb-3">Connexion 👇</h4>
+
+              {# login with Google button #}
+                
+              <a href="{{ path('connect_google_start') }}">
+
+                <button class="sm-connect-btn btn">
+
+                    <img src="{{asset ('connect/google.svg', 'misc')}}" class="" alt="Google Logo" loading="lazy" width="50" height="50">
+
+                    <span class="ms-2">Avec Google</span>
+
+                </button>
+
+              </a>
+
+              {# login with Facebook button #}
+
+              <a href="{{ path('connect_facebook_start') }}">
+
+                  <button class="sm-connect-btn btn">
+
+                      <img src="{{asset ('connect/facebook.svg', 'misc')}}" class="" alt="Facebook Logo" loading="lazy" width="50" height="50">
+
+                      <span class="ms-2">Avec Facebook</span>
+
+                  </button>
+
+              </a>
+
+              {# login with Email button #}
+              
+              <a href="{{path('app_login')}}">
+
+                <button class="sm-connect-btn btn">
+
+                  <img src="{{asset ('connect/email.svg', 'misc')}}" class="" alt="Facebook Logo" loading="lazy" width="50" height="50">
+
+                  <span class="ms-2">Avec E-mail</span>
+
+                </button>
+
+              </a>
+
+              {# Styles for tiny screens login button #}
+
+              <style>
+
+                .sm-connect-btn{
+
+                    width: 210px;
+
+                }
+              
+              </style>
+
+            </div>
+
+          {% endif %}
+
+          {# This dropdown menu is displayed only >= md screens #}
+
+          {# User Account Dropdown Menu #}
+
+          {% if app.user %}
+
+            <li class="d-none d-md-block nav-item dropdown rounded">
+            
+            {# Trigger wrap dropdown / unwrap dropdown button #}
+
+              <a id="userAccountDropdown" class="dropdown-toggle btn btn-outline-primary fw-bold" href="#"
+                role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                style="padding: 6px 9px; margin-right: 10px;">
+
+                Compte
+
+              </a>
+
+              {# User Account Dropdown Menu Content #}
+
+              <ul aria-labelledby="userAccountDropdown" class="dropdown-menu dropdown-menu-end" style="width: 260px;">
+
+                {{ userAccountMenu }} {# Setted above #}
+
+              </ul>
+
+
+            </li>
+
+          {% endif %}
+
+        </ul>
+
+      </div>
+
+    </div>
+
+  </nav>
+
+</header>
+
+<style>
+
+  .dropdown-item{
+    font-size: 1.15em;
+  }
+
+  @media screen and (max-width: 580px) {
+
+    .static-menu {
+
+      display: contents;
+
+    }
+
+  }
+
+</style>

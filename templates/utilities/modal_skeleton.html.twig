@@ -1,0 +1,71 @@
+{#
+    Skeleton for Bootstrap 5 Modal Box
+
+    Blocks : modalBody, footerButtons
+    
+    Parameter(s) : 
+    
+        - required : modal_id; modal_title
+        - optional : modal_size (Bootstrap 5 classes to manage device display)
+
+    class disabled is added to this modal to inactive sortable behaviour.
+    
+#}
+
+<div class="modal disabled" id="{{modal_id}}" tabindex="-1" aria-labelledby="" aria-hidden="true" {% block modalStatic %}{% endblock %}  >
+        
+    <div class="modal-dialog modal-dialog-centered {{modal_size ?? ""}}">
+
+        <div class="modal-content">
+
+            {% block modalHeader %}
+
+                <div class="modal-header">
+
+                    <h3 class="h5 modal-title w-100 fw-bold {{title_classes ?? ""}}" id="">{{modal_title | raw}}</h3>
+
+                    {% block closingCross %}
+
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+                    {% endblock %}
+
+                </div>
+
+            {% endblock %}
+
+            <div class="modal-body ui-front {{modal_body_classes ?? ""}}"> {# ui-front is used by jquery autocomplete (when included) #}
+
+                {% block modalBody %}{% endblock %}
+
+            </div>
+
+            {% block modalFooter %}
+
+                <div class="modal-footer {{modal_footer_classes ?? ""}}">
+
+                    {% block footerCloseButton %}
+                    
+                        <button type="button" class="btn btn-go-back me-2" data-bs-dismiss="modal">❌ Retour</button>
+                    
+                    {% endblock %}
+                    
+                    {% block footerButtons %}{% endblock %}
+
+                </div>
+
+            {% endblock %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{# When modal contains a form #}
+{# If form errors, we have to trigger modal box display to show these errors to user #}
+
+{% block formErrors %}
+
+{% endblock %}
+  
