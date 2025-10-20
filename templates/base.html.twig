@@ -179,9 +179,65 @@
         {% include "_partials/header_navbar.html.twig" %}
 
 
+        <!--Main Content Container -->
+
+        <div class="main-container container-fluid"> 
+
+            <div class="row" style="min-height:500px;">
+
+                <!-- A Sidebar can be used if needed -->
+                
+                {% block sidebar %}{% endblock %}
+                
+                <!-- Main Body Content -->
+
+                <div class="col">
+
+                    {# Search experience 
+
+                    to fill
+
+                    {% include "_partials/search_experience.html.twig" %}#}
+
+                    <!-- Flash Messages Display (see app.css for appearance and cosmetic) -->
+
+                    <div id="flash-messages" class="">
+
+                        {# If some flash messages are provided by backend, we display them successively #}
+
+                        {% for label, messages in app.flashes %}
+                        
+                            <div class="flash-message alert alert-{{label}}">
+                        
+                                {% for message in messages %}
+                        
+                                <p class="p-0 m-0 text-center">{{message | raw}}</p>
+                        
+                                {% endfor %}
+                        
+                            </div>
+                    
+                        {% endfor %}
+
+                    </div>
+
+                    <!-- End of Flash Messages Display -->
+
+                    {# Main body container #}
+
+                    <div id="main-body-container">
+                        
+                        {% block body %}{% endblock %}
+                                    
+                    </div>
+                    
+                </div>
+
+            </div>
+
+        </div>  
 
 
-        {% block body %}{% endblock %}
     </body>
 
 

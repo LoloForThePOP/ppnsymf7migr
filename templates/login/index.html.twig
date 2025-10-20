@@ -1,37 +1,221 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello LoginController!{% endblock %}
+{% block title %}Connexion{% endblock %}
+
+
 
 {% block body %}
 
-    {% if error %}
-        <div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-    {% endif %}
-
-    <form action="{{ path('app_login') }}" method="post">
-
-        <label for="username">Email:</label>
-        <input type="text" id="username" name="_username" value="{{ last_username }}" required>
-
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="_password" required>
+{% include "utilities/_toggle_password_visibility.html.twig" %}
 
 
+<div class="container page-container px-2 px-md-4">
 
-        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+    <div class="row mt-2">
+
+        <div class="mx-auto col-md-8 col-lg-5">
+
+            <div class="py-3 px-md-3 text-center">
+
+                <h3 class="fw-bold mb-4">Connexion</h3>
+
+                <div class="container mb-4 pb-3 px-0">
+
+                    <a href="{{ path('connect_google_start') }}">
+
+                        <button class="connect-btn btn btn-outline-dark me-0 me-md-3 mb-3 mb-md-0">
+
+                            <img src="{{asset ('connect/google.svg', 'misc')}}" class="" alt="Google Logo" loading="lazy" width="50" height="50">
+
+                            <span class="">Avec Google</span>
+
+                        </button>
+
+                    </a>
+
+                    <a href="{{ path('connect_facebook_start') }}">
+
+                        <button class="connect-btn btn btn-outline-dark">
+
+                            <img src="{{asset ('connect/facebook.svg', 'misc')}}" class="" alt="Facebook Logo" loading="lazy" width="50" height="50">
+
+                            <span class="">Avec Facebook</span>
+
+                        </button>
+
+                    </a>
+
+                    <style>
+
+                        .connect-btn{
+
+                            width: 190px;
+                            border-color: #c0c0c4;
+
+                        }
+
+                        .connect-btn img{
+
+                            width: 30px;
+                            margin-right: 5px;
+
+                        }
 
 
-    <div class="checkbox mb-3">
-        <label>
-            <input type="checkbox" name="_remember_me"> Remember me
-        </label>
+                    </style>
+
+
+                </div>
+
+                <div class="container px-0 mb-3">
+
+                    <h5 class="email-connect-title fw-bold">Ou utilisez votre adresse e-mail</h5>
+
+                    <style>
+                    
+                        @media (max-width: 580px) {
+
+                            .email-connect-title{
+
+                                font-size: 1.15em;
+                            }
+
+
+                        }
+                    
+                    
+                    </style>
+
+                </div>
+
+                <form class="mb-3" method="post">
+
+                    {# security errors display #}
+
+                    {% if error %}
+
+                        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+
+                    {% endif %}
+
+                    {# case user has already logged in #}
+
+                    {% if app.user %}
+
+                        <div class="mb-3">
+                            Vous êtes déjà connecté avec l'adresse {{ app.user.email }}, <a
+                                href="{{ path('app_logout') }}">se
+                                déconnecter</a>
+                        </div>
+
+                    {% endif %}
+
+                    {# Email input #}
+
+                    <div class="form-group mb-4">
+
+                        <input type="email" value="{{ last_username }}" name="email" id="inputEmail" placeholder="E-mail" class="form-control" autocomplete="email" required>
+
+                    </div>
+
+                    {# Password Input #}
+                    {# see included utilities for password visibiliy toggle #}
+
+                    <div class="form-group mb-4"> <input type="password" name="password" id="inputPassword"
+                            placeholder="Mot de passe" class="form-control" autocomplete="current-password" required>
+                    </div>
+
+                    {# csrf_token #}
+
+                    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+
+
+                    <!-- "Remember Me" Check-Box -->
+
+                    <div class="mb-4">
+
+                        <input class="me-2" type="checkbox" id="remember_me" name="_remember_me" checked />
+                        <label for="remember_me">Se souvenir de moi</label>
+
+                    </div>
+
+                   
+                    <!-- Action Buttons -->
+
+                    <div class="form-group">
+
+                        <!-- Go back button -->
+
+                        <a href="{{path('homepage')}}">
+                            <button type="button" value="" class="btn btn-go-back me-3">
+                                <span class="fw-bold">Retour</span>
+                            </button>
+                        </a>
+
+                        <!-- Login button -->
+
+                        <input type="submit" value="Connexion ✔️" class="btn btn-validate fw-bold" style="border: none !important;">
+
+
+                    </div>
+
+                    {# If you want to control the URL the user is redirected to on success
+                    <input type="hidden" name="_target_path" value="/account"> #}
+
+                </form>
+
+
+                <div id="login-other-choices" class="mt-4">
+
+                    <!-- New account access button -->
+
+                    <div class="fw-bold h5 mb-3">
+                        Pas encore inscrit ?
+                        <a href="{{path('app_registration')}}" class="text-decoration-none">Rejoignez-nous.</a>
+                    </div>
+
+                    <!-- Forgotten password access button -->
+
+                    <div class="fw-bold h5">Mot de passe oublié ?
+                        <a href="{{path('reset_password_request')}}" class="text-decoration-none">C'est ici.</a>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 
+</div>
 
-        {# If you want to control the URL the user is redirected to on success
-        <input type="hidden" name="_target_path" value="/account"> #}
 
-        <button type="submit">login</button>
-    </form>
+<style>
+
+    
+
+    .page-container {
+
+        padding-top: 34px; /* Overides usual padding-top */
+
+    }
+
+    @media screen and (max-width: 820px) {
+
+        .page-container{
+            padding-top: 30px;
+        } 
+        
+
+        #login-other-choices > * {
+            font-size: 16px;
+        }
+
+    }
+
+</style>
+
+
 
 {% endblock %}

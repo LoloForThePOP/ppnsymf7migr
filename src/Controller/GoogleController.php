@@ -13,9 +13,8 @@ class GoogleController extends AbstractController
 {
     /**
      * Link to this controller to start the "connect" process
-     *
-     * @Route("/connect/google", name="connect_google_start")
-     */
+    */
+    #[Route('/connect/google', name: 'connect_google_start')]
     public function connectAction(ClientRegistry $clientRegistry)
     {
         // will redirect to Google!
@@ -30,10 +29,9 @@ class GoogleController extends AbstractController
      * After going to Google, you're redirected back here
      * because this is the "redirect_route" you configured
      * in config/packages/knpu_oauth2_client.yaml
-     *
-     * @Route("/connect/google/check", name="connect_google_check")
      */
-    public function connectCheckAction(Request $request, ClientRegistry $clientRegistry)
+    #[Route('/connect/google/check', name: 'connect_google_check')]
+    public function connectCheckAction(Request $request, ClientRegistry $clientRegistry): void
     {
         // ** if you want to *authenticate* the user, then
         // leave this method blank and create a Guard authenticator
