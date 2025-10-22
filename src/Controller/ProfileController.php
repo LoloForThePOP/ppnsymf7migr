@@ -4,6 +4,9 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\ProfileType;
+use App\Form\UserAccountEmailType;
+use Symfony\Component\Form\FormError;
+use App\Form\UpdateAccountPasswordType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,13 +14,14 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-#[Route('/user')]
+
 final class ProfileController extends AbstractController
 {
 
 
-    #[Route('/{usernameSlug}', name: 'user_profile_show')]
+    #[Route('/user/{usernameSlug}', name: 'user_profile_show')]
     public function show(
         #[MapEntity(mapping: ['usernameSlug' => 'usernameSlug'])] User $user
     ): Response
@@ -61,5 +65,109 @@ final class ProfileController extends AbstractController
 
         
     }
+
+
+    #[Route('account/update/menu', name: 'update_account_menu', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function accessUpdateAccountMenu(): Response
+    {
+        return $this->render('user_profile/update_account_menu.html.twig');
+    }    
+
+
+
+
+    #[Route('account/update/email', name: 'update_account_email', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function updateEmail(Request $request, EntityManagerInterface $em): Response
+    {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+
+        $form = $this->createForm(UserAccountEmailType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+
+            $this->addFlash('success', 'Adresse e-mail modifiée.');
+
+            return $this->redirectToRoute('user_profile_show', [
+                'usernameSlug' => $user->getUsernameSlug(),
+            ]);
+        }
+
+        return $this->render('user_profile/update_account_email.html.twig', [
+            'form' => $form->createView(),
+        ]);
+
+    }
+
+
+
+    #[Route('account/update/password', name: 'update_account_password', methods: ['GET', 'POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function updatePassword(
+        Request $request,
+        UserPasswordHasherInterface $hasher,
+        EntityManagerInterface $em
+    ): Response {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+
+        $form = $this->createForm(UpdateAccountPasswordType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if (!$hasher->isPasswordValid($user, $form->get('oldPassword')->getData())) {
+                $form->get('oldPassword')->addError(new FormError('Mot de passe actuel incorrect.'));
+            } else {
+                $newPassword = $form->get('newPassword')->getData();
+                $user->setPassword($hasher->hashPassword($user, $newPassword));
+                $em->flush();
+
+                $this->addFlash('success', 'Votre mot de passe a été modifié avec succès.');
+
+                return $this->redirectToRoute('homepage');
+            }
+        }
+
+        return $this->render('user_profile/update_account_password.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
 }

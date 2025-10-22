@@ -8,7 +8,7 @@
 
     <div class="container px-0 px-md-3 col-md-10 col-lg-6 my-4 my-md-5">
 
-        <h3 class="text-success fw-bold mb-4">Informations visibles par les autres utilisateurs</h3>
+        <h3 class="text-success fw-bold mb-4">Vos informations visibles par les autres utilisateurs</h3>
 
         <div class="row">
 
@@ -124,12 +124,12 @@
 
                     <div class="mt-4">
 
-                        <button class="btn btn-validate me-2">✔️ Enregistrer</button>
-    
                         <a href="{{path('user_profile_show', {'usernameSlug': app.user.usernameSlug})}}">
-                            <button type="button" class="btn btn-go-back">❌ Retour</button>
+                            <button type="button" class="btn btn-go-back me-2">❌ Retour</button>
                         </a>
-                        
+
+                        <button class="btn btn-validate">✔️ Enregistrer</button>
+    
                     </div>
 
                     {{ form_end(profileForm) }}
