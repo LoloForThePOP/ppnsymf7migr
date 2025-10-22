@@ -6,7 +6,6 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\String\Slugger\AsciiSlugger;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -95,6 +94,9 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
 
     #[ORM\Column(length: 120)]
     private ?string $usernameSlug = null;
+
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?Profile $profile = null;
 
 
 
@@ -338,6 +340,28 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
     public function setUsernameSlug(string $usernameSlug): static
     {
         $this->usernameSlug = $usernameSlug;
+
+        return $this;
+    }
+
+    public function getProfile(): ?Profile
+    {
+        return $this->profile;
+    }
+
+    public function setProfile(?Profile $profile): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($profile === null && $this->profile !== null) {
+            $this->profile->setUser(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($profile !== null && $profile->getUser() !== $this) {
+            $profile->setUser($this);
+        }
+
+        $this->profile = $profile;
 
         return $this;
     }

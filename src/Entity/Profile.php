@@ -2,16 +2,21 @@
 
 namespace App\Entity;
 
-use App\Repository\UserProfileRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-
-use Symfony\Component\Validator\Constraints as Assert;
+use App\Repository\ProfileRepository;
 
 use App\Entity\Traits\TimestampableTrait;
 
-#[ORM\Entity(repositoryClass: UserProfileRepository::class)]
-class UserProfile
+use Symfony\Component\HttpFoundation\File\File;
+
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Symfony\Component\Validator\Constraints as Assert;
+
+
+#[Vich\Uploadable]
+#[ORM\Entity(repositoryClass: ProfileRepository::class)]
+class Profile
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -44,6 +49,20 @@ class UserProfile
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
+
+
+    /**
+     * This is not a mapped field of entity metadata, just a simple property.
+     */
+    #[Vich\UploadableField(mapping: 'persorg_image', fileNameProperty: 'image')]
+    #[Assert\Image(
+        maxSize: '1500k',
+        maxSizeMessage: 'Poids maximal accepté pour l\'image : 1500 k',
+        mimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'],
+        mimeTypesMessage: 'Le format de fichier ({{ type }}) n\'est pas pris en compte. Les formats acceptés sont : {{ types }}'
+    )]
+    private ?File $imageFile = null;
+
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $postalMail = null;
 
@@ -59,6 +78,26 @@ class UserProfile
 
     #[ORM\Column(nullable: true)]
     private ?array $extra = null;
+
+    #[ORM\OneToOne(inversedBy: 'profile', cascade: ['persist', 'remove'])]
+    private ?User $user = null;
+
+
+
+    public function __serialize(): array
+{
+    $data = get_object_vars($this);
+    unset($data['imageFile']); // prevent File object serialization
+    return $data;
+}
+
+public function __unserialize(array $data): void
+{
+    foreach ($data as $key => $value) {
+        $this->$key = $value;
+    }
+}
+
 
     public function getId(): ?int
     {
@@ -125,6 +164,21 @@ class UserProfile
         return $this;
     }
 
+    public function setImageFile(?File $imageFile = null): void
+    {   
+        $this->imageFile = $imageFile;
+
+        if ($imageFile) {
+            // Update a timestamp to force Doctrine update
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+    }
+
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+
     public function getPostalMail(): ?string
     {
         return $this->postalMail;
@@ -169,6 +223,18 @@ class UserProfile
     public function setExtra(?array $extra): static
     {
         $this->extra = $extra;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }

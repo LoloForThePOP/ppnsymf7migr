@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Entity\UserProfile;
+use App\Entity\Profile;
 
 /**
  * Manage arbitrary structured data stored in UserProfile::$extra (JSON column).
@@ -45,7 +45,7 @@ class UserExtra
     /**
      * Get all extras merged with defaults. Auto-initializes if empty.
      */
-    public function all(UserProfile $profile): array
+    public function all(Profile $profile): array
     {
         $extra = $this->initializeIfNeeded($profile);
         return array_merge($this->defaults, $extra);
@@ -54,7 +54,7 @@ class UserExtra
     /**
      * Get a specific key (returns default if not set).
      */
-    public function get(UserProfile $profile, string $key, mixed $fallback = null): mixed
+    public function get(Profile $profile, string $key, mixed $fallback = null): mixed
     {
         $extra = $this->initializeIfNeeded($profile);
         return $extra[$key] ?? $this->defaults[$key] ?? $fallback;
@@ -63,7 +63,7 @@ class UserExtra
     /**
      * Set a specific key, validating its type.
      */
-    public function set(UserProfile $profile, string $key, mixed $value): void
+    public function set(Profile $profile, string $key, mixed $value): void
     {
         if (!array_key_exists($key, $this->defaults)) {
             throw new \InvalidArgumentException("Unknown extra key '$key'.");
@@ -79,7 +79,7 @@ class UserExtra
     /**
      * Reset to defaults.
      */
-    public function reset(UserProfile $profile): void
+    public function reset(Profile $profile): void
     {
         $profile->setExtra($this->defaults);
     }
@@ -103,7 +103,7 @@ class UserExtra
     // Internal helpers
     // -------------------------------------------------------------
 
-    private function initializeIfNeeded(UserProfile $profile): array
+    private function initializeIfNeeded(Profile $profile): array
     {
         $extra = $profile->getExtra() ?? [];
 

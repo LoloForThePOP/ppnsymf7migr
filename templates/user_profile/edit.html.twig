@@ -1,0 +1,161 @@
+{% extends 'base.html.twig' %}
+
+{% block headTag %}<meta name="robots" content="noindex,nofollow" />{% endblock %}
+
+{% block title %}Informations publiques{% endblock %}
+
+{% block body %}
+
+    <div class="container px-0 px-md-3 col-md-10 col-lg-6 my-4 my-md-5">
+
+        <h3 class="text-success fw-bold mb-4">Informations visibles par les autres utilisateurs</h3>
+
+        <div class="row">
+
+            <div class="">
+
+                <!-- Form Display -->
+
+                <div class="mt-4">
+
+                    {{ form_start(profileForm) }}
+
+                    <!-- Persorg Image -->
+
+                    <div class="mb-5 p-5" style="border:1px solid black;">
+
+                        <h5 class="mt-2 mb-5 fw-bold">Une photo, image ou logo ?</h5>
+
+                        <!-- If an image already exists, we display it -->
+
+                        {% if profile.image is not empty %}
+
+                            <img class="img-fluid mb-5" src="{{ vich_uploader_asset(app.user.profile)  | imagine_filter('persorg_thumbnail_sm') }}" width="90" height="90">
+
+                            <h5 class="mt-2 mb-3 font-weight-bold">Modifier l'image</h5>
+
+                        {% endif %}
+                            
+                        {{ form_widget(profileForm.imageFile) }}
+                                            
+
+                    </div>
+
+                    <div class="mb-5">
+
+                        <h4 class="fw-bold h5 mb-4">Une description de vous ou de votre organisation</h4>
+
+                        {{ form_widget(profileForm.description) }}
+
+                    </div>
+
+                    <div class="mb-5">
+
+                        <h4 class="fw-bold h5 mb-4">Site web ou réseau social </h4>
+
+                        {{ form_widget(profileForm.website1) }}
+
+                    </div>
+
+
+                    <!-- Other Websites -->
+
+                    
+                <!-- Form Set Event Dates (in a Collapsible) -->
+
+                    <div class="my-4">
+
+                        <!-- Collapsible Trigger Button -->
+    
+                        <a class="btn btn-light mb-4" onclick="this.remove();" data-bs-toggle="collapse" href="#collapseOtherWebsites" role="button" aria-expanded="false" aria-controls="collapseOtherWebsites">Ajouter des sites webs ou réseaux sociaux</a>
+    
+    
+                        <!-- Collapsible Other Websites Container -->
+    
+                        <div class="collapse" id="collapseOtherWebsites">
+                            
+                            <div class="mb-md-5">
+
+                                <h4 class="fw-bold h5 mb-4">Site web ou réseau social 2 </h4>
+        
+                                {{ form_widget(profileForm.website2) }}
+        
+                            </div>
+        
+                            <div class="mb-md-5">
+        
+                                <h4 class="fw-bold h5">Site web ou réseau social 3 </h4>
+        
+                                {{ form_widget(profileForm.website3) }}
+        
+                            </div>
+
+
+                            {#
+
+                                to fill
+                                
+                                <div class="mb-md-5">
+            
+                                    <h4 class="fw-bold h5">Site web ou réseau social 4 </h4>
+            
+                                    {{ form_widget(profileForm.website4) }}
+            
+                                </div>
+                            
+                            
+                            
+                             #}
+        
+    
+                        </div>
+    
+                    </div>
+
+
+
+                    <div class="d-none">
+
+                        {{ form_rest(profileForm) }}
+
+                    </div>
+
+                    <!-- Action Buttons -->
+
+                    <div class="mt-4">
+
+                        <button class="btn btn-validate me-2">✔️ Enregistrer</button>
+    
+                        <a href="{{path('user_profile_show', {'usernameSlug': app.user.usernameSlug})}}">
+                            <button type="button" class="btn btn-go-back">❌ Retour</button>
+                        </a>
+                        
+                    </div>
+
+                    {{ form_end(profileForm) }}
+
+                </div> 
+
+            </div>
+
+        </div>
+        
+    </div>
+    
+{% endblock %}
+
+
+{% block javascripts %}
+
+  <script>
+    
+      $(document).ready(function(){
+
+        $(".form-check-label").html("Supprimer l'image");
+        $(".form-check").addClass("mt-5").addClass("mb-2");
+
+      });
+
+  </script>
+
+{% endblock %}

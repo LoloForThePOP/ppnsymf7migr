@@ -1,0 +1,81 @@
+# See dos how to configure the bundle: https://symfony.com/doc/current/bundles/LiipImagineBundle/basic-usage.html
+liip_imagine:
+    # valid drivers options include "gd" or "gmagick" or "imagick"
+    driver: "gd"
+
+    default_filter_set_settings:
+        format: webp
+
+    resolvers :
+        default :
+            web_path : ~
+
+    filter_sets :
+        cache : ~
+
+        slide_thumbnail :
+            # list of transformations to apply
+            filters :
+
+                # create a thumbnail: set size to 80x50 and use the "outbound" mode
+                # to crop the image when the size ratio of the input differs
+                thumbnail  : { size : [80, 50], mode : outbound }
+
+
+        persorg_thumbnail_sm:
+
+            # list of transformations to apply
+            filters:
+
+                # use and setup the "scale" filter
+                scale:
+
+                    # input ?x? px -> output ?x? px (relative down-scale)
+                    dim: [ 110, 110 ]
+
+        standard_thumbnail_sm:
+
+            # list of transformations to apply
+            filters:
+
+                # use and setup the "scale" filter
+                scale:
+
+                    # input ?x? px -> output ?x? px (relative down-scale)
+                    dim: [ 110, 110 ]
+
+        standard_thumbnail_md:
+            
+            quality: 50
+            filters:
+                thumbnail: { size: [300, 170], mode: inset }
+               
+            post_processors:
+                mozjpeg: { quality: 40 }
+
+        standard_thumbnail_md_test:
+
+            quality: 80
+
+            filters:
+                scale:
+
+                    # input ?x? px -> output ?x? px
+                    dim: [ 410, 410 ]
+               
+        logo:
+        
+            quality: 85
+
+            # list of transformations to apply
+            filters:
+
+                # use and setup the "scale" filter
+                scale:
+
+                    # input ?x? px -> output ?x? px 
+                    dim: [ 500, 500 ]
+
+        slide_upload:
+
+            format: jpg

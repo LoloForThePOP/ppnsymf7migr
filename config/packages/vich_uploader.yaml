@@ -1,0 +1,83 @@
+vich_uploader:
+    
+    db_driver: orm
+
+    mappings:
+
+        project_logo_image:
+
+            uri_prefix: /media/uploads/pp/logos
+            upload_destination: '%kernel.project_dir%/public/media/uploads/pp/logos'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+   
+            inject_on_load: true
+            delete_on_update: true
+            delete_on_remove: true
+
+        project_custom_thumbnail_image:
+
+            uri_prefix: /media/uploads/pp/custom_thumbnails
+            upload_destination: '%kernel.project_dir%/public/media/uploads/pp/custom_thumbnails'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+   
+            inject_on_load: true
+            delete_on_update: true
+            delete_on_remove: true
+
+        presentation_slide_file:
+
+            uri_prefix: /media/uploads/pp/slides
+            upload_destination: '%kernel.project_dir%/public/media/uploads/pp/slides'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+   
+            inject_on_load: true
+            delete_on_update: true
+            delete_on_remove: true
+
+        news_image:
+
+            uri_prefix: /media/uploads/news
+            upload_destination: '%kernel.project_dir%/public/media/uploads/news'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+   
+            inject_on_load: true
+            delete_on_update: true
+            delete_on_remove: true
+
+        presentation_document_file:
+                    
+            uri_prefix: /media/uploads/pp/documents
+            upload_destination: '%kernel.project_dir%/public/media/uploads/pp/documents'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+            
+            inject_on_load: true
+            delete_on_update: true
+            delete_on_remove: true
+
+        persorg_image:
+
+            uri_prefix: /media/uploads/persorgs_images
+            upload_destination: '%kernel.project_dir%/public/media/uploads/persorgs_images'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+   
+            inject_on_load: true
+            delete_on_update: true
+            delete_on_remove: true
+            
+        category_icon:
+                    
+            uri_prefix: /media/static/images/icons/project_categories
+            upload_destination: '%kernel.project_dir%/public/media/static/images/icons/project_categories'
+            
+            inject_on_load: true
+            delete_on_update: true
+            delete_on_remove: true
+            
+        article_thumbnail:
+                    
+            uri_prefix: /media/uploads/articles/thumbnails
+            upload_destination: '%kernel.project_dir%/public/media/uploads/articles/thumbnails'
+            
+            inject_on_load: true
+            delete_on_update: true
+            delete_on_remove: true
