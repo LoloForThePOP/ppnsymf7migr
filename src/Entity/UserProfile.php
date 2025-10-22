@@ -6,6 +6,8 @@ use App\Repository\UserProfileRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 use App\Entity\Traits\TimestampableTrait;
 
 #[ORM\Entity(repositoryClass: UserProfileRepository::class)]
@@ -17,15 +19,26 @@ class UserProfile
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(
+        max: 1000,
+        maxMessage: 'Description cannot exceed {{ limit }} characters.'
+    )]
     private ?string $description = null;
 
+    
     #[ORM\Column(length: 150, nullable: true)]
+    #[Assert\Url(message: 'Website 3 must be a valid URL.')]
+    #[Assert\Length(max: 150)]
     private ?string $website1 = null;
 
     #[ORM\Column(length: 150, nullable: true)]
+    #[Assert\Url(message: 'Website 3 must be a valid URL.')]
+    #[Assert\Length(max: 150)]
     private ?string $website2 = null;
 
     #[ORM\Column(length: 150, nullable: true)]
+    #[Assert\Url(message: 'Website 3 must be a valid URL.')]
+    #[Assert\Length(max: 150)]
     private ?string $website3 = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -35,6 +48,10 @@ class UserProfile
     private ?string $postalMail = null;
 
     #[ORM\Column(length: 25, nullable: true)]
+        #[Assert\Regex(
+        pattern: '/^\+?[0-9\s().-]{6,25}$/',
+        message: 'The phone number format is invalid.'
+    )]
     private ?string $tel1 = null;
 
     #[ORM\Column(nullable: true)]

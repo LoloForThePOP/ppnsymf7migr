@@ -1,0 +1,100 @@
+{# Template for register to the app via an email address #}
+
+{% extends 'base.html.twig' %}
+
+
+{% block title %}Créer un compte Propon{% endblock %}
+
+{% block body %}
+
+    {# Hide / show password functionnality for input[type="password"] #}
+
+    {% include "utilities/_toggle_password_visibility.html.twig" %}
+
+
+    {# Overall container #}
+
+    <div class="page-container container px-2 col-md-8 col-xxl-8">
+
+        <div class="row align-items-center text-center text-lg-start">
+
+            {# Overall title #}
+
+            <h3 class="text-success fw-bold text-center">Créer un compte Propon gratuit</h3>
+
+            <h6 class="text-center">Si vous avez déjà un compte Propon <a class="" href="{{path('app_login')}}">connectez-vous ici</a></h6>
+
+            {# Form container #}
+
+            <div class="col-lg-6 text-success pt-3">
+
+                {{form_start(registrationForm)}}
+
+                {# Email field #}
+
+                <div class="my-5  mt-lg-3 mb-lg-3">
+                    <span class="fs-4 text-warning me-2">@</span> {{ form_label(registrationForm.email) }}
+                    {{form_errors(registrationForm.email)}}
+                    {{ form_widget(registrationForm.email) }}
+                </div>
+
+                {# Password field #}
+
+                <div class="my-5 mb-lg-3">
+                    <span class="me-2">🔑</span> {{ form_label(registrationForm.plainPassword) }}
+                    {{ form_errors(registrationForm.plainPassword) }}
+                    {{ form_widget(registrationForm.plainPassword) }}
+                </div>
+
+
+                {# Username field #}
+
+                <div class="my-5 mb-lg-3">
+                    <span class="me-2">👤</span> {{ form_label(registrationForm.username) }}
+                    {{ form_errors(registrationForm.username) }}
+                    {{ form_widget(registrationForm.username) }}
+                </div>
+
+
+                {# Agree terms info 
+
+                to fill
+
+                <p class="text-body">En cliquant sur valider, vous acceptez nos <a href="{{path ('static', {'page_name': "terms",})}}" target="_blank" rel="noopener noreferrer">conditions générales d'utilisation</a>.</p> #}
+               
+
+                <!-- ui Actions Buttons -->
+
+                <div class="mt-5 d-flex justify-content-evenly">
+
+                    <a href="{{path('homepage')}}">
+                        <button type="button" value="" class="btn btn-go-back me-3 mb-2">
+                            <span class="h5 fw-bold">Retour</span>
+                        </button>
+                    </a>
+
+                    <button type="submit" value="" class="btn btn-validate mb-2">
+                        <span class="h5 fw-bold">Valider ✔️</span>
+                    </button>
+
+
+                </div>
+
+                {{form_end(registrationForm)}}
+
+            </div>
+
+            {# Illustration image (only >= md screens) #}
+
+            <div class="d-none d-lg-block col-12 col-md-8 col-lg-6 ps-lg-5">
+
+                <img src="{{asset('account/register.png', 'larger')}}" class="rounded d-block mx-lg-auto img-fluid" alt="Two men, one is showing an entry door." loading="lazy" width="420">
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+{% endblock %}

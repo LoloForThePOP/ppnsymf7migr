@@ -6,6 +6,10 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\String\Slugger\AsciiSlugger;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 use App\Entity\Traits\TimestampableTrait;
 
@@ -13,7 +17,7 @@ use App\Entity\Traits\TimestampableTrait;
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
-
+#[ORM\HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     
@@ -24,6 +28,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Assert\NotBlank(message: 'Email cannot be empty.')]
+    #[Assert\Email(message: 'Please enter a valid email address.')]
+    #[Assert\Length(max: 180, maxMessage: 'Email cannot exceed {{ limit }} characters.')]
     private ?string $email = null;
 
     /**
@@ -39,9 +46,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column]
+    #[Assert\Type('bool')]
+    #[Assert\NotNull(message: 'isVerified must not be null.')]
     private ?bool $isVerified = null;
 
     #[ORM\Column]
+    #[Assert\Type('bool')]
+    #[Assert\NotNull(message: 'isActive must not be null.')]
     private ?bool $isActive = null;
 
     #[ORM\Column]
@@ -66,7 +77,45 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $emailValidationToken = null;
 
     #[ORM\Column(length: 40)]
+    #[Assert\NotBlank(message: 'Username cannot be empty.')]
+    #[Assert\Length(min: 2, max: 40, minMessage: 'Username must be at least {{ limit }} characters long.')]
+    #[Assert\Regex(
+        pattern: '/^[a-zA-Z0-9._-]+$/',
+        message: 'Username can only contain letters, numbers, dots, underscores, and dashes.'
+    )]
     private ?string $username = null;
+
+    #[ORM\Column(length: 120)]
+    private ?string $usernameSlug = null;
+
+
+
+    public function __construct()
+    {
+        $this->roles = ['ROLE_USER'];
+        $this->isActive = true;
+        $this->isVerified = false;
+        $this->createdAt = new \DateTimeImmutable();
+    }
+
+
+
+
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function updateSlug(): void
+    {
+        if ($this->username) {
+            $slugger = new AsciiSlugger();
+            $this->usernameSlug = strtolower($slugger->slug($this->username)->toString());
+        }
+    }
+
+
+
+
+
+
 
     public function getId(): ?int
     {
@@ -271,6 +320,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(string $username): static
     {
         $this->username = $username;
+
+        return $this;
+    }
+
+    public function getUsernameSlug(): ?string
+    {
+        return $this->usernameSlug;
+    }
+
+    public function setUsernameSlug(string $usernameSlug): static
+    {
+        $this->usernameSlug = $usernameSlug;
 
         return $this;
     }

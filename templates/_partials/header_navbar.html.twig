@@ -72,15 +72,17 @@
 
           </li>
 
-        {# User's new messages count #}
+        {# User's new messages count 
 
         {% if app.user %}
+
+        to fill
 
           {% set unreadMessagesCount = app.user.data.unreadMessagesCount %}
 
           {% if unreadMessagesCount > 0 %}
-
-            {# large screen display #}
+#}
+            {# large screen display
 
             <li class="nav-item fs-5 me-3 d-none d-md-inline">
 
@@ -94,9 +96,9 @@
 
             </li>
 
-          {% endif %}
+          {% endif %} #}
 
-          {# tiny screen display #}
+          {# tiny screen display 
 
           <li class="nav-item d-md-none">
 
@@ -117,7 +119,7 @@
         {% endif %}
 
 
-
+#}
         {# tiny screens display #}
         
         <li class="nav-item d-md-none">
@@ -190,7 +192,7 @@
     
               <li>
     
-                <a class="dropdown-item" href="{{path("show_user_profile", {'userNameSlug': app.user.userNameSlug})}}">
+                <a class="dropdown-item" href="{{path("user_profile_show", {'userNameSlug': app.user.userNameSlug})}}">
                   Mes Projets présentés
                 </a>
     
@@ -208,7 +210,7 @@
     
               <li>
     
-                <a class="dropdown-item" href="{{path("show_user_profile", {'userNameSlug': app.user.userNameSlug})}}">
+                <a class="dropdown-item" href="{{path("user_profile_show", {'userNameSlug': app.user.userNameSlug})}}">
                   Mon Compte
                 </a>
     

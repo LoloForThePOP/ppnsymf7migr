@@ -5,6 +5,17 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
 
+    app.image_upload_directory: 'public/media/uploads/articles/images/'
+
+    # website contact phone 
+    app.contact_phone: "07 76 64 87 58"
+
+    app.email.noreply: "noreply@propon.org"
+    app.email.contact: "contact@propon.org"
+    # not implemented yet: app.email.support: "support@propon.org"
+    # not implemented yet: app.email.newsletter: newsletter@propon.org
+
+    
 services:
     # default configuration for services in *this* file
     _defaults:

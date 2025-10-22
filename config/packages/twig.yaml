@@ -4,6 +4,9 @@ twig:
     globals:
         google_maps_api_key: '%env(GOOGLE_MAPS_API_KEY)%'
 
+    form_themes: ['bootstrap_5_layout.html.twig']
+
+
 when@test:
     twig:
         strict_variables: true
