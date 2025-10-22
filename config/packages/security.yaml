@@ -16,7 +16,11 @@ security:
         main:
             lazy: true
             provider: app_user_provider
-            custom_authenticator:
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                enable_csrf: true
+            custom_authenticators:
                 - App\Security\AppCustomAuthenticator
                 - App\Security\FacebookAuthenticator
                 - App\Security\GoogleAuthenticator
@@ -33,7 +37,7 @@ security:
 
             logout:
                 path: /logout
-                
+                target: homepage
            
 
             remember_me:

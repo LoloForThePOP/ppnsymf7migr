@@ -51,6 +51,20 @@ public function __construct(
                 throw new CustomUserMessageAuthenticationException('Merci de vérifier votre boîte mail pour confirmer votre inscription.');
             }
 
+            if ($user->getGoogleId() && !$user->getPassword()) {
+                throw new CustomUserMessageAuthenticationException(
+                    'Merci de vous connecter avec Google, pas avec un mot de passe.'
+                );
+            }
+
+
+            if ($user->getFacebookId() && !$user->getPassword()) {
+                throw new CustomUserMessageAuthenticationException(
+                    'Merci de vous connecter avec Facebook, pas avec un mot de passe.'
+                );
+            }
+
+
             return $user;
         }),
         new PasswordCredentials($password),

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Security;
 
 use App\Entity\User; // your user entity
@@ -38,7 +37,7 @@ class FacebookAuthenticator extends OAuth2Authenticator implements Authenticatio
 
     public function authenticate(Request $request): Passport
     {
-        $client = $this->clientRegistry->getClient('facebook_main');
+        $client = $this->clientRegistry->getClient('facebook');
         $accessToken = $this->fetchAccessToken($client);
 
         return new SelfValidatingPassport(
@@ -47,6 +46,8 @@ class FacebookAuthenticator extends OAuth2Authenticator implements Authenticatio
                 $facebookUser = $client->fetchUserFromToken($accessToken);
 
                 $email = $facebookUser->getEmail();
+                $facebookId = $facebookUser->getId();
+                $fullName = $facebookUser->getName();
 
                 // 1) have they logged in with Facebook before? Easy!
                 $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['facebookId' => $facebookUser->getId()]);
@@ -58,11 +59,19 @@ class FacebookAuthenticator extends OAuth2Authenticator implements Authenticatio
                 // 2) do we have a matching user by email?
                 $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
 
-                // 3) Maybe you just want to "register" them by creating
-                // a User object
-                $user->setFacebookId($facebookUser->getId());
-                $this->entityManager->persist($user);
+
+                if (!$user) {
+                    // First-time login: create user
+                    $user = new User();
+                    $user->setEmail($email);
+                    $user->setFacebookId($facebookId);
+                    $user->setRoles(['ROLE_USER']);
+                    $user->setUsername($fullName);
+                    $user->setIsVerified(true); // Consider verified if logged in via Facebook
+                    $this->entityManager->persist($user);
+                }
                 $this->entityManager->flush();
+
 
                 return $user;
             })

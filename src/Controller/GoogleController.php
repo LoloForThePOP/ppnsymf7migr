@@ -14,16 +14,15 @@ class GoogleController extends AbstractController
     /**
      * Link to this controller to start the "connect" process
     */
+
     #[Route('/connect/google', name: 'connect_google_start')]
-    public function connectAction(ClientRegistry $clientRegistry)
-    {
-        // will redirect to Google!
-        return $clientRegistry
-            ->getClient('google_main') // key used in config/packages/knpu_oauth2_client.yaml
-            ->redirect([
-                'public_profile', 'email' // the scopes you want to access
-            ]);
-    }
+        public function connect(ClientRegistry $clientRegistry)
+        {
+            // define the scopes here, not in the config
+            return $clientRegistry
+                ->getClient('google')
+                ->redirect(['email', 'profile'], []);
+        }
 
     /**
      * After going to Google, you're redirected back here
@@ -33,28 +32,8 @@ class GoogleController extends AbstractController
     #[Route('/connect/google/check', name: 'connect_google_check')]
     public function connectCheckAction(Request $request, ClientRegistry $clientRegistry): void
     {
-        // ** if you want to *authenticate* the user, then
-        // leave this method blank and create a Guard authenticator
-        // (read below)
-
-        /** @var \KnpU\OAuth2ClientBundle\Client\Provider\GoogleClient $client */
-        $client = $clientRegistry->getClient('google_main');
-
-        try {
-            // the exact class depends on which provider you're using
-            /** @var \League\OAuth2\Client\Provider\GoogleUser $user */
-            $user = $client->fetchUser();
-
-            // do something with all this new power!
-            // e.g. $name = $user->getFirstName();
-            var_dump($user); die;
-
-            // get the user directly
-            
-        } catch (IdentityProviderException $e) {
-            // something went wrong!
-            // probably you should return the reason to the user
-            var_dump($e->getMessage()); die;
-        }
+        // Symfony Security will handle this automatically.
+        // This method must remain blank.
+        throw new \LogicException('This should never be reached!');
     }
 }

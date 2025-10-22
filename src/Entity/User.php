@@ -12,13 +12,21 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 use App\Entity\Traits\TimestampableTrait;
+use Symfony\Component\Security\Core\User\EquatableInterface;
+
+
+/**
+ * The User entity is automatically processed by:
+ * - App\EventListener\UsernameListener
+ *   → ensures unique username and generates usernameSlug before persist/update
+ */
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
 #[ORM\HasLifecycleCallbacks]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUserInterface
 {
     
 
@@ -42,7 +50,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var string The hashed password
      */
-    #[ORM\Column]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $password = null;
 
     #[ORM\Column]
@@ -80,8 +88,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank(message: 'Username cannot be empty.')]
     #[Assert\Length(min: 2, max: 40, minMessage: 'Username must be at least {{ limit }} characters long.')]
     #[Assert\Regex(
-        pattern: '/^[a-zA-Z0-9._-]+$/',
-        message: 'Username can only contain letters, numbers, dots, underscores, and dashes.'
+        pattern: '/^[\p{L}\p{N}\s._-]+$/u',
+        message: 'Username can only contain letters, numbers, spaces, dots, underscores, and dashes.'
     )]
     private ?string $username = null;
 
@@ -99,19 +107,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
 
+    // Had to add this because Social Login didn't work, Symfony thinks the database-reloaded user differs from the session user.
 
-
-    #[ORM\PrePersist]
-    #[ORM\PreUpdate]
-    public function updateSlug(): void
+    public function isEqualTo(UserInterface $user): bool
     {
-        if ($this->username) {
-            $slugger = new AsciiSlugger();
-            $this->usernameSlug = strtolower($slugger->slug($this->username)->toString());
+        if (!$user instanceof self) {
+            return false;
         }
+
+        // Only compare immutable identifying fields
+        return $this->getUserIdentifier() === $user->getUserIdentifier();
     }
-
-
 
 
 

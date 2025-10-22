@@ -14,15 +14,14 @@ class FacebookController extends AbstractController
     /**
      * Link to this controller to start the "connect" process
      */
+
     #[Route('/connect/facebook', name: 'connect_facebook_start')]
-    public function connectAction(ClientRegistry $clientRegistry)
+    public function connect(ClientRegistry $clientRegistry)
     {
-        // will redirect to Facebook!
+        // define the scopes here, not in the config
         return $clientRegistry
-            ->getClient('facebook_main') // key used in config/packages/knpu_oauth2_client.yaml
-            ->redirect([
-                'public_profile', 'email' // the scopes you want to access
-            ]);
+            ->getClient('facebook')
+            ->redirect(['email'], []);
     }
 
     /**
@@ -35,39 +34,7 @@ class FacebookController extends AbstractController
     {
         // ** if you want to *authenticate* the user, then
         // leave this method blank and create a Guard authenticator
-        // (read below)
-
-        /** @var \KnpU\OAuth2ClientBundle\Client\Provider\FacebookClient $client */
-        $client = $clientRegistry->getClient('facebook_main');
-
-        try {
-            // the exact class depends on which provider you're using
-            /** @var \League\OAuth2\Client\Provider\FacebookUser $user */
-            $user = $client->fetchUser();
-
-            // do something with all this new power!
-            // e.g. $name = $user->getFirstName();
-            var_dump($user); die;
-
-            // get the user directly
-            
-
-// OR: get the access token and then user
-// $accessToken = $client->getAccessToken();
-// $user = $client->fetchUserFromToken($accessToken);
-
-// access the underlying "provider" from league/oauth2-client
-// $provider = $client->getOAuth2Provider();
-// if you're using Facebook, then this works:
-// $longLivedToken = $provider->getLongLivedAccessToken($accessToken);
-
-
-
-            // ...
-        } catch (IdentityProviderException $e) {
-            // something went wrong!
-            // probably you should return the reason to the user
-            var_dump($e->getMessage()); die;
-        }
+       
+        
     }
 }
