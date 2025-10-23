@@ -90,7 +90,7 @@ final class ProfileController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
 
-            $this->addFlash('success', 'Adresse e-mail modifiée.');
+            $this->addFlash('success', 'L\'adresse e-mail associée à votre compte a été modifiée.');
 
             return $this->redirectToRoute('user_profile_show', [
                 'usernameSlug' => $user->getUsernameSlug(),

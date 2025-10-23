@@ -175,7 +175,7 @@
             {# Displaying user pseudo #}
 
             <div class="container d-flex align-items-center justify-content-center text-center my-3">
-              {{app.user.userName}}
+              {{app.user.username}}
             </div>
 
             <ul class="ps-0" style="list-style:none;">
@@ -371,7 +371,7 @@
                 role="button" data-bs-toggle="dropdown" aria-expanded="false"
                 style="padding: 6px 9px; margin-right: 10px;">
 
-                👤 Mon compte
+                👤 {{app.user.username | truncate (15) }}
 
               </a>
 

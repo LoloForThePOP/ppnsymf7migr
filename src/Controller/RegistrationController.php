@@ -40,6 +40,8 @@ final class RegistrationController extends AbstractController
                 <p>Pour finaliser votre inscription sur Propon veuillez cliquer sur le lien ci-dessous :</p>
                 <p><a href='{$verificationUrl}'>{$verificationUrl}</a></p>
                 <p>Si vous n'avez pas créé ce compte Propon veuillez ignorer ce message.</p>
+                <p>Merci d'utiliser Propon.</p>
+                <p>L'équipe Propon</p>
             ");
 
         $this->mailer->send($email);
