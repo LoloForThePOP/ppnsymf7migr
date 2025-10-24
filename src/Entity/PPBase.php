@@ -30,6 +30,14 @@ class PPBase
     #[ORM\Column]
     private ?int $id = null;
 
+    /**
+     * Project pages are identified with an unique sting identifier. It is randomized at the creation of the PPBase Object, it can later on be human readable and seo friendly (for example if project title is set, stringId becomes a slugified version of the title).
+    */
+    #[ORM\Column(length: 191, unique: true)]
+    #[Assert\Length(min: 1, max: 191)]
+    private ?string $stringId = null;
+
+
     #[ORM\Column(length: 400)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 10, max: 255)]
@@ -80,13 +88,6 @@ class PPBase
 
     #[ORM\Column(nullable: true)]
     private ?bool $isDeleted = false;
-
-    /**
-     * Project pages are identified with an unique sting identifier randomized first but which can be human readable and seo friendly (for example if project title is set)
-     */
-    #[ORM\Column(length: 191, unique: true)]
-    #[Assert\Length(min: 1, max: 191)]
-    private ?string $stringId = null;
 
 
     // ------------------ Lifecycle callbacks ------------------
