@@ -10,7 +10,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
-use App\Entity\Traits\TimestampableTrait;
+use App\Entity\Traits\TimestampableTrait;   
 use Symfony\Component\Security\Core\User\EquatableInterface;
 
 
@@ -27,6 +27,8 @@ use Symfony\Component\Security\Core\User\EquatableInterface;
 #[ORM\HasLifecycleCallbacks]
 class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUserInterface
 {
+
+    use TimestampableTrait; 
     
 
     #[ORM\Id]
@@ -62,8 +64,6 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
     #[Assert\NotNull(message: 'isActive must not be null.')]
     private ?bool $isActive = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $passwordResetToken = null;
@@ -73,9 +73,6 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
 
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $facebookId = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $deletedAt = null;
@@ -108,7 +105,6 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
         $this->roles = ['ROLE_USER'];
         $this->isActive = true;
         $this->isVerified = false;
-        $this->createdAt = new \DateTimeImmutable();
     }
 
 
@@ -233,17 +229,6 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
 
     public function getPasswordResetToken(): ?string
     {
@@ -281,23 +266,6 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    #[ORM\PreUpdate]
-    public function onPreUpdate(): void
-    {
-        $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
-
-        return $this;
-    }
 
     public function getDeletedAt(): ?\DateTimeImmutable
     {

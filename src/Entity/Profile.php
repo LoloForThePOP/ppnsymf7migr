@@ -6,18 +6,21 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ProfileRepository;
 
-use App\Entity\Traits\TimestampableTrait;
 
 use Symfony\Component\HttpFoundation\File\File;
 
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Symfony\Component\Validator\Constraints as Assert;
 
+use App\Entity\Traits\TimestampableTrait;
 
 #[Vich\Uploadable]
 #[ORM\Entity(repositoryClass: ProfileRepository::class)]
 class Profile
 {
+
+    use TimestampableTrait; 
+    
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -73,8 +76,6 @@ class Profile
     )]
     private ?string $tel1 = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\Column(nullable: true)]
     private ?array $extra = null;
@@ -203,17 +204,6 @@ public function __unserialize(array $data): void
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
-
-        return $this;
-    }
 
     public function getExtra(): ?array
     {

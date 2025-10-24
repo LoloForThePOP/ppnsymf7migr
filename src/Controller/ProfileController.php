@@ -135,6 +135,33 @@ final class ProfileController extends AbstractController
         return $this->render('user_profile/update_account_password.html.twig', [
             'form' => $form->createView(),
         ]);
+
+
+
+
+
+        // to fill : soft user deletion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
 
