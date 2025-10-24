@@ -29,6 +29,11 @@ class Slide
     private ?string $type = null;
 
 
+    // ────────────────────────────────────────
+    // Image (VichUploader) or URL (Youtube link)
+    // ────────────────────────────────────────
+
+
      /**
      * Adress of the media file (URL or local path) 
      */
@@ -57,6 +62,13 @@ class Slide
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $licence = null;
+
+    // ────────────────────────────────────────
+    // Relations
+    // ────────────────────────────────────────
+
+    #[ORM\ManyToOne(inversedBy: 'slides')]
+    private ?PPBase $projectPresentation = null;
 
     public function __construct()
     {
@@ -137,6 +149,18 @@ class Slide
     public function setLicence(?string $licence): self
     {
         $this->licence = $licence;
+        return $this;
+    }
+
+    public function getProjectPresentation(): ?PPBase
+    {
+        return $this->projectPresentation;
+    }
+
+    public function setProjectPresentation(?PPBase $projectPresentation): static
+    {
+        $this->projectPresentation = $projectPresentation;
+
         return $this;
     }
 

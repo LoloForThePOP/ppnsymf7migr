@@ -120,4 +120,5 @@ class Extra
         $this->shortEditorialText = $text;
         return $this;
     }
+
 }

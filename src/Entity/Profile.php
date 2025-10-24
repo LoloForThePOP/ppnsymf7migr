@@ -26,38 +26,38 @@ class Profile
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Assert\Length(
-        max: 1000,
-        maxMessage: 'Description cannot exceed {{ limit }} characters.'
-    )]
-    private ?string $description = null;
+    // ────────────────────────────────────────
+    // User related websites and social media
+    // ────────────────────────────────────────
 
     
     #[ORM\Column(length: 150, nullable: true)]
-    #[Assert\Url(message: 'Website 3 must be a valid URL.')]
+    #[Assert\Url(message: 'Veuillez indérer une adresse web valide pour le premier site web (url).')]
     #[Assert\Length(max: 150)]
     private ?string $website1 = null;
 
     #[ORM\Column(length: 150, nullable: true)]
-    #[Assert\Url(message: 'Website 3 must be a valid URL.')]
+    #[Assert\Url(message: 'Veuillez indérer une adresse web valide pour le second site web (url).')]
     #[Assert\Length(max: 150)]
     private ?string $website2 = null;
 
     #[ORM\Column(length: 150, nullable: true)]
-    #[Assert\Url(message: 'Website 3 must be a valid URL.')]
+    #[Assert\Url(message: 'Veuillez indérer une adresse web valide pour le troisième site web (url).')]
     #[Assert\Length(max: 150)]
     private ?string $website3 = null;
+    
+    
+    // ────────────────────────────────────────
+    // Image (VichUploader)
+    // ────────────────────────────────────────
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
-
-
-
+    
     /**
      * This is not a mapped field of entity metadata, just a simple property.
      */
-    #[Vich\UploadableField(mapping: 'persorg_image', fileNameProperty: 'image')]
+    #[Vich\UploadableField(mapping: 'profile_image', fileNameProperty: 'image')]
     #[Assert\Image(
         maxSize: '1500k',
         maxSizeMessage: 'Poids maximal accepté pour l\'image : 1500 k',
@@ -76,29 +76,57 @@ class Profile
     )]
     private ?string $tel1 = null;
 
+    // ──────────────────────────────────────── 
+    // User description
+    // ────────────────────────────────────────
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(
+        max: 1000,
+        maxMessage: 'Le description ne peut excéder {{ limit }} caractères.'
+    )]
+    private ?string $description = null;
+
+
+    // ────────────────────────────────────────
+    // Extensible Data (see User extra service)
+    // ────────────────────────────────────────
+
 
     #[ORM\Column(nullable: true)]
     private ?array $extra = null;
+
+
+    // ────────────────────────────────────────
+    // Relations
+    // ────────────────────────────────────────
+
 
     #[ORM\OneToOne(inversedBy: 'profile', cascade: ['persist', 'remove'])]
     private ?User $user = null;
 
 
+    // ────────────────────────────────────────
+    // Serializable Interface Implementation    
+    // ────────────────────────────────────────
 
     public function __serialize(): array
-{
-    $data = get_object_vars($this);
-    unset($data['imageFile']); // prevent File object serialization
-    return $data;
-}
-
-public function __unserialize(array $data): void
-{
-    foreach ($data as $key => $value) {
-        $this->$key = $value;
+    {
+        $data = get_object_vars($this);
+        unset($data['imageFile']); // prevent File object serialization
+        return $data;
     }
-}
 
+    public function __unserialize(array $data): void
+    {
+        foreach ($data as $key => $value) {
+            $this->$key = $value;
+        }
+    }
+
+    // ────────────────────────────────────────
+    // GETTERS / SETTERS   
+    // ────────────────────────────────────────
 
     public function getId(): ?int
     {

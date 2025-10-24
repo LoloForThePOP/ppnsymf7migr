@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -99,12 +101,31 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
     private ?string $resetPasswordToken = null;
 
 
+    // ────────────────────────────────────────
+    // Relations
+    // ────────────────────────────────────────
+
+    /**
+     * @var Collection<int, PPBase>
+     */
+    #[ORM\OneToMany(targetEntity: PPBase::class, mappedBy: 'creator')]
+    private Collection $projectPresentations;
+
+    /**
+     * @var Collection<int, Comment>
+     */
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'creator')]
+    private Collection $comments;
+
+
 
     public function __construct()
     {
         $this->roles = ['ROLE_USER'];
         $this->isActive = true;
         $this->isVerified = false;
+        $this->projectPresentations = new ArrayCollection();
+        $this->comments = new ArrayCollection();
     }
 
 
@@ -345,6 +366,66 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
     public function setResetPasswordToken(?string $resetPasswordToken): static
     {
         $this->resetPasswordToken = $resetPasswordToken;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PPBase>
+     */
+    public function getProjectPresentations(): Collection
+    {
+        return $this->projectPresentations;
+    }
+
+    public function addProjectPresentation(PPBase $projectPresentation): static
+    {
+        if (!$this->projectPresentations->contains($projectPresentation)) {
+            $this->projectPresentations->add($projectPresentation);
+            $projectPresentation->setCreator($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProjectPresentation(PPBase $projectPresentation): static
+    {
+        if ($this->projectPresentations->removeElement($projectPresentation)) {
+            // set the owning side to null (unless already changed)
+            if ($projectPresentation->getCreator() === $this) {
+                $projectPresentation->setCreator(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setCreator($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): static
+    {
+        if ($this->comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getCreator() === $this) {
+                $comment->setCreator(null);
+            }
+        }
 
         return $this;
     }
