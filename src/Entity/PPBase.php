@@ -3,18 +3,19 @@
 namespace App\Entity;
 
 use DateTimeImmutable;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Model\ProjectStatuses;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\PPBaseRepository;
+use App\Entity\Embeddables\PPBase\Extra;
 
 
 use App\Entity\Traits\TimestampableTrait;
+use Doctrine\Common\Collections\Collection;
+
 use Symfony\Component\HttpFoundation\File\File;
+use Doctrine\Common\Collections\ArrayCollection;
 
-use App\Entity\Embeddables\PPBase\Extra;
 use App\Entity\Embeddables\PPBase\OtherComponents;
-
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -146,6 +147,44 @@ class PPBase
     #[ORM\OneToMany(targetEntity: Slide::class, mappedBy: 'projectPresentation')]
     private Collection $slides;
 
+    /**
+     * @var Collection<int, Need>
+     */
+    #[ORM\OneToMany(targetEntity: Need::class, mappedBy: 'projectPresentation')]
+    private Collection $needs;
+
+    /**
+     * @var Collection<int, News>
+     */
+    #[ORM\OneToMany(targetEntity: News::class, mappedBy: 'project')]
+    private Collection $news;
+
+    /**
+     * @var Collection<int, Place>
+     */
+    #[ORM\OneToMany(targetEntity: Place::class, mappedBy: 'project')]
+    private Collection $places;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $statuses = [];
+
+    /**
+     * @var Collection<int, Document>
+     */
+    #[ORM\OneToMany(targetEntity: Document::class, mappedBy: 'projectPresentation')]
+    private Collection $documents;
+
+    /**
+     * @var Collection<int, Follow>
+     */
+    #[ORM\OneToMany(targetEntity: Follow::class, mappedBy: 'projectPresentation')]
+    private Collection $followers;
+
+    /**
+     * @var Collection<int, Like>
+     */
+    #[ORM\OneToMany(targetEntity: Like::class, mappedBy: 'projectPresentation')]
+    private Collection $likes;
 
     // ────────────────────────────────────────
     // Lifecycle
@@ -155,6 +194,12 @@ class PPBase
     {
         $this->comments = new ArrayCollection();
         $this->slides = new ArrayCollection();
+        $this->needs = new ArrayCollection();
+        $this->news = new ArrayCollection();
+        $this->places = new ArrayCollection();
+        $this->documents = new ArrayCollection();
+        $this->followers = new ArrayCollection();
+        $this->likes = new ArrayCollection();
     }
 
 
@@ -381,6 +426,291 @@ class PPBase
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Need>
+     */
+    public function getNeeds(): Collection
+    {
+        return $this->needs;
+    }
+
+    public function addNeed(Need $need): static
+    {
+        if (!$this->needs->contains($need)) {
+            $this->needs->add($need);
+            $need->setProjectPresentation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNeed(Need $need): static
+    {
+        if ($this->needs->removeElement($need)) {
+            // set the owning side to null (unless already changed)
+            if ($need->getProjectPresentation() === $this) {
+                $need->setProjectPresentation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, News>
+     */
+    public function getNews(): Collection
+    {
+        return $this->news;
+    }
+
+    public function addNews(News $news): static
+    {
+        if (!$this->news->contains($news)) {
+            $this->news->add($news);
+            $news->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNews(News $news): static
+    {
+        if ($this->news->removeElement($news)) {
+            // set the owning side to null (unless already changed)
+            if ($news->getProject() === $this) {
+                $news->setProject(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Place>
+     */
+    public function getPlaces(): Collection
+    {
+        return $this->places;
+    }
+
+    public function addPlace(Place $place): static
+    {
+        if (!$this->places->contains($place)) {
+            $this->places->add($place);
+            $place->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlace(Place $place): static
+    {
+        if ($this->places->removeElement($place)) {
+            // set the owning side to null (unless already changed)
+            if ($place->getProject() === $this) {
+                $place->setProject(null);
+            }
+        }
+
+        return $this;
+    }
+
+
+
+
+
+
+
+
+    public function getStatuses(): array
+    {
+        return $this->statuses ?? [];
+    }
+
+    public function setStatuses(array $statuses): self
+    {
+        // Optional validation: filter only valid keys
+        $validKeys = [];
+        foreach ($statuses as $status) {
+            if (ProjectStatuses::get($status)) {
+                $validKeys[] = $status;
+            }
+        }
+
+        $this->statuses = array_unique($validKeys);
+
+        return $this;
+    }
+
+    public function addStatus(string $status): self
+    {
+        if (ProjectStatuses::get($status) && !in_array($status, $this->statuses ?? [], true)) {
+            $this->statuses[] = $status;
+        }
+        return $this;
+    }
+
+    public function removeStatus(string $status): self
+    {
+        $this->statuses = array_filter(
+            $this->statuses ?? [],
+            fn ($s) => $s !== $status
+        );
+        return $this;
+    }
+
+    public function hasStatus(string $status): bool
+    {
+        return in_array($status, $this->statuses ?? [], true);
+    }
+
+    /**
+     * @return Collection<int, Document>
+     */
+    public function getDocuments(): Collection
+    {
+        return $this->documents;
+    }
+
+    public function addDocument(Document $document): static
+    {
+        if (!$this->documents->contains($document)) {
+            $this->documents->add($document);
+            $document->setProjectPresentation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDocument(Document $document): static
+    {
+        if ($this->documents->removeElement($document)) {
+            // set the owning side to null (unless already changed)
+            if ($document->getProjectPresentation() === $this) {
+                $document->setProjectPresentation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Follow>
+     */
+    public function getFollowers(): Collection
+    {
+        return $this->followers;
+    }
+
+    public function addFollower(Follow $follower): static
+    {
+        if (!$this->followers->contains($follower)) {
+            $this->followers->add($follower);
+            $follower->setProjectPresentation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFollower(Follow $follower): static
+    {
+        if ($this->followers->removeElement($follower)) {
+            // set the owning side to null (unless already changed)
+            if ($follower->getProjectPresentation() === $this) {
+                $follower->setProjectPresentation(null);
+            }
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * Returns number of followers (computed from collection).
+     */
+    public function getFollowerCount(): int
+    {
+        return $this->followers->count();
+    }
+
+    /**
+     * Checks whether a specific user follows this project.
+     */
+    public function isFollowedBy(User $user): bool
+    {
+        foreach ($this->followers as $follow) {
+            if ($follow->getUser() === $user) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return Collection<int, Like>
+     */
+    public function getLikes(): Collection
+    {
+        return $this->likes;
+    }
+
+    public function addLike(Like $like): static
+    {
+        if (!$this->likes->contains($like)) {
+            $this->likes->add($like);
+            $like->setProjectPresentation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLike(Like $like): static
+    {
+        if ($this->likes->removeElement($like)) {
+            // set the owning side to null (unless already changed)
+            if ($like->getProjectPresentation() === $this) {
+                $like->setProjectPresentation(null);
+            }
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * Returns total number of likes for the project.
+     */
+    public function getLikesCount(): int
+    {
+        return $this->likes->count();
+    }
+
+    /**
+     * Check if this project is liked by a specific user.
+     */
+    public function isLikedBy(User $user): bool
+    {
+        foreach ($this->likes as $like) {
+            if ($like->getUser() === $user) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

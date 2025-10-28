@@ -53,30 +53,9 @@ class Need
     #[ORM\Column(type: 'smallint', nullable: true)]
     private ?int $position = null;
 
-    // ────────────────────────────────────────
-    // Timestamps
-    // ────────────────────────────────────────
+    #[ORM\ManyToOne(inversedBy: 'needs')]
+    private ?PPBase $projectPresentation = null;
 
-    #[ORM\Column]
-    private \DateTimeImmutable $createdAt;
-
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $updatedAt = null;
-
-    // ────────────────────────────────────────
-    // Constructor / Lifecycle
-    // ────────────────────────────────────────
-
-    public function __construct()
-    {
-        $this->createdAt = new \DateTimeImmutable();
-    }
-
-    #[ORM\PreUpdate]
-    public function updateTimestamp(): void
-    {
-        $this->updatedAt = new \DateTimeImmutable();
-    }
 
     // ────────────────────────────────────────
     // Getters / Setters
@@ -153,35 +132,18 @@ class Need
         return $this;
     }
 
-    public function getCreatedAt(): \DateTimeImmutable
+    public function getProjectPresentation(): ?PPBase
     {
-        return $this->createdAt;
+        return $this->projectPresentation;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    public function setProjectPresentation(?PPBase $projectPresentation): static
     {
-        $this->createdAt = $createdAt;
+        $this->projectPresentation = $projectPresentation;
+
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
 
-    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): self
-    {
-        $this->updatedAt = $updatedAt;
-        return $this;
-    }
 
-    // ────────────────────────────────────────
-    // Helpers
-    // ────────────────────────────────────────
-
-    public function __toString(): string
-    {
-        return $this->title ?? 'Besoin';
-    }
-    
 }

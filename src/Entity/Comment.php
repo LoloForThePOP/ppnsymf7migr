@@ -62,6 +62,9 @@ class Comment
     #[ORM\ManyToOne(inversedBy: 'comments')]
     private ?User $creator = null;
 
+    #[ORM\ManyToOne(inversedBy: 'comments')]
+    private ?News $news = null;
+
 
     // ────────────────────────────────────────
     // Lifecycle
@@ -224,6 +227,18 @@ class Comment
     public function setCreator(?User $creator): static
     {
         $this->creator = $creator;
+
+        return $this;
+    }
+
+    public function getNews(): ?News
+    {
+        return $this->news;
+    }
+
+    public function setNews(?News $news): static
+    {
+        $this->news = $news;
 
         return $this;
     }

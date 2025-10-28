@@ -117,6 +117,21 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'creator')]
     private Collection $comments;
 
+    #[ORM\OneToOne(mappedBy: 'creator', cascade: ['persist', 'remove'])]
+    private ?News $news = null;
+
+    /**
+     * @var Collection<int, Follow>
+     */
+    #[ORM\OneToMany(targetEntity: Follow::class, mappedBy: 'user')]
+    private Collection $follows;
+
+    /**
+     * @var Collection<int, Like>
+     */
+    #[ORM\OneToMany(targetEntity: Like::class, mappedBy: 'user')]
+    private Collection $likes;
+
 
 
     public function __construct()
@@ -126,6 +141,8 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
         $this->isVerified = false;
         $this->projectPresentations = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->follows = new ArrayCollection();
+        $this->likes = new ArrayCollection();
     }
 
 
@@ -429,4 +446,113 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
 
         return $this;
     }
+
+    public function getNews(): ?News
+    {
+        return $this->news;
+    }
+
+    public function setNews(?News $news): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($news === null && $this->news !== null) {
+            $this->news->setCreator(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($news !== null && $news->getCreator() !== $this) {
+            $news->setCreator($this);
+        }
+
+        $this->news = $news;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Follow>
+     */
+    public function getFollows(): Collection
+    {
+        return $this->follows;
+    }
+
+    public function addFollow(Follow $follow): static
+    {
+        if (!$this->follows->contains($follow)) {
+            $this->follows->add($follow);
+            $follow->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFollow(Follow $follow): static
+    {
+        if ($this->follows->removeElement($follow)) {
+            // set the owning side to null (unless already changed)
+            if ($follow->getUser() === $this) {
+                $follow->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns true if the user follows a given project.
+     */
+    public function isFollowingProject(PPBase $project): bool
+    {
+        foreach ($this->follows as $follow) {
+            if ($follow->getProjectPresentation() === $project) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return Collection<int, Like>
+     */
+    public function getLikes(): Collection
+    {
+        return $this->likes;
+    }
+
+    public function addLike(Like $like): static
+    {
+        if (!$this->likes->contains($like)) {
+            $this->likes->add($like);
+            $like->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLike(Like $like): static
+    {
+        if ($this->likes->removeElement($like)) {
+            // set the owning side to null (unless already changed)
+            if ($like->getUser() === $this) {
+                $like->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Check if user has liked a given project.
+     */
+    public function hasLikedProject(PPBase $project): bool
+    {
+        foreach ($this->likes as $like) {
+            if ($like->getProjectPresentation() === $project) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
