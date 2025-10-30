@@ -58,8 +58,8 @@ class PPBase
 
     #[Vich\UploadableField(mapping: 'project_logo_image', fileNameProperty: 'logo')]
     #[Assert\Image(
-        maxSize: '5M',
-        mimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+        maxSize: '10M',
+        mimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/avif'],
         maxSizeMessage: 'Le logo ne doit pas dépasser 5 Mo.'
     )]
     private ?File $logoFile = null;
@@ -74,8 +74,8 @@ class PPBase
 
     #[Vich\UploadableField(mapping: 'project_custom_thumbnail_image', fileNameProperty: 'customThumbnail')]
     #[Assert\Image(
-        maxSize: '5.5M',
-        mimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+        maxSize: '10',
+        mimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/avif'],
         maxSizeMessage: 'La vignette ne doit pas dépasser 5,5 Mo.'
     )]
     private ?File $customThumbnailFile = null;
@@ -185,6 +185,9 @@ class PPBase
      */
     #[ORM\OneToMany(targetEntity: Like::class, mappedBy: 'projectPresentation')]
     private Collection $likes;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $isCreationFormCompleted = null;
 
     // ────────────────────────────────────────
     // Lifecycle
@@ -698,6 +701,18 @@ class PPBase
             }
         }
         return false;
+    }
+
+    public function isCreationFormCompleted(): ?bool
+    {
+        return $this->isCreationFormCompleted;
+    }
+
+    public function setIsCreationFormCompleted(?bool $isCreationFormCompleted): static
+    {
+        $this->isCreationFormCompleted = $isCreationFormCompleted;
+
+        return $this;
     }
 
 

@@ -132,6 +132,18 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
     #[ORM\OneToMany(targetEntity: Like::class, mappedBy: 'user')]
     private Collection $likes;
 
+    /**
+     * @var Collection<int, ConversationParticipant>
+     */
+    #[ORM\OneToMany(targetEntity: ConversationParticipant::class, mappedBy: 'user')]
+    private Collection $conversationParticipations;
+
+    /**
+     * @var Collection<int, ConversationMessage>
+     */
+    #[ORM\OneToMany(targetEntity: ConversationMessage::class, mappedBy: 'sender')]
+    private Collection $conversationMessages;
+
 
 
     public function __construct()
@@ -143,6 +155,8 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
         $this->comments = new ArrayCollection();
         $this->follows = new ArrayCollection();
         $this->likes = new ArrayCollection();
+        $this->conversationParticipations = new ArrayCollection();
+        $this->conversationMessages = new ArrayCollection();
     }
 
 
@@ -553,6 +567,66 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
             }
         }
         return false;
+    }
+
+    /**
+     * @return Collection<int, ConversationParticipant>
+     */
+    public function getConversationParticipations(): Collection
+    {
+        return $this->conversationParticipations;
+    }
+
+    public function addConversationParticipation(ConversationParticipant $conversationParticipation): static
+    {
+        if (!$this->conversationParticipations->contains($conversationParticipation)) {
+            $this->conversationParticipations->add($conversationParticipation);
+            $conversationParticipation->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConversationParticipation(ConversationParticipant $conversationParticipation): static
+    {
+        if ($this->conversationParticipations->removeElement($conversationParticipation)) {
+            // set the owning side to null (unless already changed)
+            if ($conversationParticipation->getUser() === $this) {
+                $conversationParticipation->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ConversationMessage>
+     */
+    public function getConversationMessages(): Collection
+    {
+        return $this->conversationMessages;
+    }
+
+    public function addConversationMessage(ConversationMessage $conversationMessage): static
+    {
+        if (!$this->conversationMessages->contains($conversationMessage)) {
+            $this->conversationMessages->add($conversationMessage);
+            $conversationMessage->setSender($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConversationMessage(ConversationMessage $conversationMessage): static
+    {
+        if ($this->conversationMessages->removeElement($conversationMessage)) {
+            // set the owning side to null (unless already changed)
+            if ($conversationMessage->getSender() === $this) {
+                $conversationMessage->setSender(null);
+            }
+        }
+
+        return $this;
     }
 
 }

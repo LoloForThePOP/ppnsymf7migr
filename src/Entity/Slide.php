@@ -47,7 +47,7 @@ class Slide
     #[Assert\Image(
         maxSize: '4500k',
         maxSizeMessage: 'Poids maximal accepté pour l\'image : {{ limit }} {{ suffix }}',
-        mimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/apng', 'image/webp', 'image/bmp'],
+        mimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/apng', 'image/webp', 'image/avif'],
         mimeTypesMessage: 'Le format ({{ type }}) n\'est pas pris en compte. Formats acceptés : {{ types }}'
     )]
     private ?File $file = null;

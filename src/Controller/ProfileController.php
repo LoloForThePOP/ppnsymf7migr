@@ -23,7 +23,7 @@ final class ProfileController extends AbstractController
 
     #[Route('/user/{usernameSlug}', name: 'user_profile_show')]
     public function show(
-        #[MapEntity(mapping: ['usernameSlug' => 'usernameSlug'])] User $user
+    #[MapEntity(mapping: ['usernameSlug' => 'usernameSlug'])] User $user
     ): Response
     {
         return $this->render('user_profile/index.html.twig', [

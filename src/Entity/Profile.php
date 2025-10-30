@@ -48,7 +48,7 @@ class Profile
     
     
     // ────────────────────────────────────────
-    // Image (VichUploader)
+    // Profile Image (VichUploader)
     // ────────────────────────────────────────
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -61,7 +61,7 @@ class Profile
     #[Assert\Image(
         maxSize: '1500k',
         maxSizeMessage: 'Poids maximal accepté pour l\'image : 1500 k',
-        mimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'],
+        mimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/avif', 'image/webp'],
         mimeTypesMessage: 'Le format de fichier ({{ type }}) n\'est pas pris en compte. Les formats acceptés sont : {{ types }}'
     )]
     private ?File $imageFile = null;
