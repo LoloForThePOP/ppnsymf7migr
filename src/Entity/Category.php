@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CategoryRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -55,6 +57,17 @@ class Category
         mimeTypesMessage: 'Format ({{ type }}) non pris en charge. Formats autorisés : {{ types }}'
     )]
     private ?File $imageFile = null;
+
+    /**
+     * @var Collection<int, PPBase>
+     */
+    #[ORM\ManyToMany(targetEntity: PPBase::class, inversedBy: 'categories')]
+    private Collection $projectPresentation;
+
+    public function __construct()
+    {
+        $this->projectPresentation = new ArrayCollection();
+    }
 
 
     // ────────────────────────────────────────
@@ -121,6 +134,30 @@ class Category
         if ($imageFile !== null) {
             $this->updatedAt = new \DateTimeImmutable();
         }
+    }
+
+    /**
+     * @return Collection<int, PPBase>
+     */
+    public function getProjectPresentation(): Collection
+    {
+        return $this->projectPresentation;
+    }
+
+    public function addProjectPresentation(PPBase $projectPresentation): static
+    {
+        if (!$this->projectPresentation->contains($projectPresentation)) {
+            $this->projectPresentation->add($projectPresentation);
+        }
+
+        return $this;
+    }
+
+    public function removeProjectPresentation(PPBase $projectPresentation): static
+    {
+        $this->projectPresentation->removeElement($projectPresentation);
+
+        return $this;
     }
     
 

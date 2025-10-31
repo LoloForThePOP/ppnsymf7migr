@@ -22,7 +22,7 @@ class SlugService
      *
      * @param object $entity The entity to generate the slug for.
      */
-    public function generateSlug(object $entity): void
+    public function generate(object $entity): void
     {
         $slug = null;
         $fieldName = null;

@@ -106,11 +106,8 @@ class PPBase
 
 
     // ────────────────────────────────────────
-    // Thumbnail (VichUploader)
+    // Other fields
     // ────────────────────────────────────────
-
-    #[ORM\Embedded(class: Extra::class)]
-    private Extra $extra;
 
     #[ORM\Column]
     private bool $isAdminValidated = false;
@@ -121,24 +118,20 @@ class PPBase
     #[ORM\Column(nullable: true)]
     private ?bool $isDeleted = false;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $isCreationFormCompleted = null;
+
+    #[ORM\Column(type: 'smallint', nullable: true, options: ['default' => 0])]
+    private ?int $score = null;
+
+    // Some other info about the project presentation,, like views count, stored in an embeddable for clarity.  
+    #[ORM\Embedded(class: Extra::class)]
+    private Extra $extra;
 
 
-    // ────────────────────────────────────────
-    // Relations
-    // ────────────────────────────────────────
-
-    /**
-     * @var Collection<int, Comment>
-     */
-    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'projectPresentation')]
-    private Collection $comments;
-
-    #[ORM\ManyToOne(inversedBy: 'projectPresentations')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $creator = null;
 
     // ────────────────────────────────────────
-    // Relations Core Components
+    // Relations Core Presentation Components (slides, needs, news, places, documents...)
     // ────────────────────────────────────────
 
     /**
@@ -174,6 +167,22 @@ class PPBase
     #[ORM\OneToMany(targetEntity: Document::class, mappedBy: 'projectPresentation')]
     private Collection $documents;
 
+
+
+    // ────────────────────────────────────────
+    // Others Relations
+    // ────────────────────────────────────────
+
+    /**
+     * @var Collection<int, Comment>
+     */
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'projectPresentation')]
+    private Collection $comments;
+
+    #[ORM\ManyToOne(inversedBy: 'projectPresentations')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $creator = null;
+
     /**
      * @var Collection<int, Follow>
      */
@@ -186,8 +195,14 @@ class PPBase
     #[ORM\OneToMany(targetEntity: Like::class, mappedBy: 'projectPresentation')]
     private Collection $likes;
 
-    #[ORM\Column(nullable: true)]
-    private ?bool $isCreationFormCompleted = null;
+    /**
+     * @var Collection<int, Category>
+     */
+    #[ORM\ManyToMany(targetEntity: Category::class, mappedBy: 'projectPresentation')]
+    private Collection $categories;
+
+
+
 
     // ────────────────────────────────────────
     // Lifecycle
@@ -203,6 +218,7 @@ class PPBase
         $this->documents = new ArrayCollection();
         $this->followers = new ArrayCollection();
         $this->likes = new ArrayCollection();
+        $this->categories = new ArrayCollection();
     }
 
 
@@ -711,6 +727,45 @@ class PPBase
     public function setIsCreationFormCompleted(?bool $isCreationFormCompleted): static
     {
         $this->isCreationFormCompleted = $isCreationFormCompleted;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Category>
+     */
+    public function getCategories(): Collection
+    {
+        return $this->categories;
+    }
+
+    public function addCategory(Category $category): static
+    {
+        if (!$this->categories->contains($category)) {
+            $this->categories->add($category);
+            $category->addProjectPresentation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCategory(Category $category): static
+    {
+        if ($this->categories->removeElement($category)) {
+            $category->removeProjectPresentation($this);
+        }
+
+        return $this;
+    }
+
+    public function getScore(): ?int
+    {
+        return $this->score;
+    }
+
+    public function setScore(?int $score): static
+    {
+        $this->score = $score;
 
         return $this;
     }

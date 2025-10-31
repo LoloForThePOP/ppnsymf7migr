@@ -5,10 +5,10 @@ namespace App\Controller;
 use App\Entity\Slide;
 use App\Entity\PPBase;
 use App\Service\SlugService;
-use App\Service\AssessQuality;
 use App\Service\CacheThumbnail;
 use App\Form\PresentationHelperType;
 use App\Service\ImageResizerService;
+use App\Service\AssessPPScoreService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,13 +16,14 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class CreateProjectPresentationController extends AbstractController
-{/* 
+{
     public function __construct(
         private EntityManagerInterface $em,
         private SlugService $slugger,
-        private CacheThumbnail $cacheThumbnail,
+        private AssessPPScoreService $assessPPScore, 
+       /*  private CacheThumbnail $cacheThumbnail,
         private ImageResizerService $imageResizer,
-        private AssessQuality $assessQuality,
+        */
     ) {}
 
     #[Route(
@@ -81,15 +82,16 @@ class CreateProjectPresentationController extends AbstractController
         }
 
         // ───────────── Case 2: updating an existing presentation ─────────────
+
         $nextPosition = $form->get('nextPosition')->getData();
         $helperType = $form->get('helperItemType')->getData();
 
-        // Final step: all done
+        // Case Final step: whole process done
         if ($nextPosition === null) {
             $this->assessQuality->assessQuality($presentation);
 
             // (Optional future improvement) mark presentation as completed for later cleanup
-            $presentation->markAsCompleted(); // if such a method exists
+            $presentation->isCreationFormCompleted(true); // if such a method exists
 
             $this->addFlash('success fs-4', <<<HTML
                 ✅ Votre page de présentation est prête.<br>
@@ -110,7 +112,7 @@ class CreateProjectPresentationController extends AbstractController
                     $presentation->setTitle($title);
 
                     // Generate slug
-                    $slug = $this->slugger->slugInput($title);
+                    $slug = $this->slugger->generate($title);
 
                     // Ensure uniqueness
                     $twin = $this->em->getRepository(PPBase::class)->findOneBy(['stringId' => $slug]);
@@ -125,7 +127,7 @@ class CreateProjectPresentationController extends AbstractController
 
             case 'imageSlide':
                 /** @var Slide|null $slide */
-               /* $slide = $form->get('imageSlide')->getData();
+               $slide = $form->get('imageSlide')->getData();
 
                 if ($slide) {
                     $slide->setType('image');
@@ -153,5 +155,5 @@ class CreateProjectPresentationController extends AbstractController
             'position' => $nextPosition,
             'repeatInstance' => $repeatInstance,
         ]);
-    }*/
+    }
 } 

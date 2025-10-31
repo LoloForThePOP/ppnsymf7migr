@@ -13,9 +13,6 @@ class Extra
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
     private bool $isRandomizedStringId = true;
 
-    #[ORM\Column(type: 'smallint', nullable: true, options: ['default' => 0])]
-    private ?int $overallQualityAssessment = 0;
-
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
     private bool $arePrivateMessagesActivated = true;
 
@@ -58,21 +55,6 @@ class Extra
     public function setIsRandomizedStringId(bool $state): self
     {
         $this->isRandomizedStringId = $state;
-        return $this;
-    }
-
-    // ────────────────────────────────────────
-    // Quality Assessment
-    // ────────────────────────────────────────
-
-    public function getOverallQualityAssessment(): ?int
-    {
-        return $this->overallQualityAssessment;
-    }
-
-    public function setOverallQualityAssessment(?int $score): self
-    {
-        $this->overallQualityAssessment = $score;
         return $this;
     }
 
