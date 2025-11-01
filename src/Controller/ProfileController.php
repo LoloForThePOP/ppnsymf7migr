@@ -26,7 +26,7 @@ final class ProfileController extends AbstractController
     #[MapEntity(mapping: ['usernameSlug' => 'usernameSlug'])] User $user
     ): Response
     {
-        return $this->render('user_profile/index.html.twig', [
+        return $this->render('user/profile/index.html.twig', [
             'user' => $user,
         ]);
     }
@@ -56,7 +56,7 @@ final class ProfileController extends AbstractController
         }
 
 
-        return $this->render('/user_profile/edit.html.twig',[
+        return $this->render('/user/profile/edit.html.twig',[
      
             'profileForm' => $profileForm->createView(),
             'profile' => $profile,
@@ -71,7 +71,7 @@ final class ProfileController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function accessUpdateAccountMenu(): Response
     {
-        return $this->render('user_profile/update_account_menu.html.twig');
+        return $this->render('user/account/update_menu.html.twig');
     }    
 
 
@@ -97,7 +97,7 @@ final class ProfileController extends AbstractController
             ]);
         }
 
-        return $this->render('user_profile/update_account_email.html.twig', [
+        return $this->render('user/account/update_email.html.twig', [
             'form' => $form->createView(),
         ]);
 
@@ -132,7 +132,7 @@ final class ProfileController extends AbstractController
             }
         }
 
-        return $this->render('user_profile/update_account_password.html.twig', [
+        return $this->render('user/account/update_password.html.twig', [
             'form' => $form->createView(),
         ]);
 

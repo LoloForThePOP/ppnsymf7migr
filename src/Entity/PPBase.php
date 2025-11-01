@@ -3,18 +3,18 @@
 namespace App\Entity;
 
 use DateTimeImmutable;
-use App\Model\ProjectStatuses;
+use App\Enum\ProjectStatuses;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\PPBaseRepository;
+
+
 use App\Entity\Embeddables\PPBase\Extra;
-
-
 use App\Entity\Traits\TimestampableTrait;
+
 use Doctrine\Common\Collections\Collection;
-
 use Symfony\Component\HttpFoundation\File\File;
-use Doctrine\Common\Collections\ArrayCollection;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use App\Entity\Embeddables\PPBase\OtherComponents;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -147,11 +147,6 @@ class PPBase
     #[ORM\OneToMany(targetEntity: Slide::class, mappedBy: 'projectPresentation')]
     private Collection $slides;
 
-    /**
-     * @var Collection<int, Need>
-     */
-    #[ORM\OneToMany(targetEntity: Need::class, mappedBy: 'projectPresentation')]
-    private Collection $needs;
 
     /**
      * @var Collection<int, News>
@@ -159,11 +154,6 @@ class PPBase
     #[ORM\OneToMany(targetEntity: News::class, mappedBy: 'project')]
     private Collection $news;
 
-    /**
-     * @var Collection<int, Place>
-     */
-    #[ORM\OneToMany(targetEntity: Place::class, mappedBy: 'project')]
-    private Collection $places;
 
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $statuses = [];
@@ -208,6 +198,18 @@ class PPBase
     #[ORM\ManyToMany(targetEntity: Category::class, mappedBy: 'projectPresentation')]
     private Collection $categories;
 
+    /**
+     * @var Collection<int, Need>
+     */
+    #[ORM\OneToMany(targetEntity: Need::class, mappedBy: 'project')]
+    private Collection $needs;
+
+    /**
+     * @var Collection<int, Place>
+     */
+    #[ORM\OneToMany(targetEntity: Place::class, mappedBy: 'project')]
+    private Collection $places;
+
 
 
 
@@ -221,11 +223,11 @@ class PPBase
         $this->slides = new ArrayCollection();
         $this->needs = new ArrayCollection();
         $this->news = new ArrayCollection();
-        $this->places = new ArrayCollection();
         $this->documents = new ArrayCollection();
         $this->followers = new ArrayCollection();
         $this->likes = new ArrayCollection();
         $this->categories = new ArrayCollection();
+        $this->places = new ArrayCollection();
     }
 
 
@@ -457,36 +459,7 @@ class PPBase
         return $this;
     }
 
-    /**
-     * @return Collection<int, Need>
-     */
-    public function getNeeds(): Collection
-    {
-        return $this->needs;
-    }
-
-    public function addNeed(Need $need): static
-    {
-        if (!$this->needs->contains($need)) {
-            $this->needs->add($need);
-            $need->setProjectPresentation($this);
-        }
-
-        return $this;
-    }
-
-    public function removeNeed(Need $need): static
-    {
-        if ($this->needs->removeElement($need)) {
-            // set the owning side to null (unless already changed)
-            if ($need->getProjectPresentation() === $this) {
-                $need->setProjectPresentation(null);
-            }
-        }
-
-        return $this;
-    }
-
+  
     /**
      * @return Collection<int, News>
      */
@@ -516,42 +489,6 @@ class PPBase
 
         return $this;
     }
-
-    /**
-     * @return Collection<int, Place>
-     */
-    public function getPlaces(): Collection
-    {
-        return $this->places;
-    }
-
-    public function addPlace(Place $place): static
-    {
-        if (!$this->places->contains($place)) {
-            $this->places->add($place);
-            $place->setProject($this);
-        }
-
-        return $this;
-    }
-
-    public function removePlace(Place $place): static
-    {
-        if ($this->places->removeElement($place)) {
-            // set the owning side to null (unless already changed)
-            if ($place->getProject() === $this) {
-                $place->setProject(null);
-            }
-        }
-
-        return $this;
-    }
-
-
-
-
-
-
 
 
     public function getStatuses(): array
@@ -791,6 +728,66 @@ class PPBase
     public function setExtra(Extra $extra): self
     {
         $this->extra = $extra;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Need>
+     */
+    public function getNeeds(): Collection
+    {
+        return $this->needs;
+    }
+
+    public function addNeed(Need $need): static
+    {
+        if (!$this->needs->contains($need)) {
+            $this->needs->add($need);
+            $need->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNeed(Need $need): static
+    {
+        if ($this->needs->removeElement($need)) {
+            // set the owning side to null (unless already changed)
+            if ($need->getProject() === $this) {
+                $need->setProject(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Place>
+     */
+    public function getPlaces(): Collection
+    {
+        return $this->places;
+    }
+
+    public function addPlace(Place $place): static
+    {
+        if (!$this->places->contains($place)) {
+            $this->places->add($place);
+            $place->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlace(Place $place): static
+    {
+        if ($this->places->removeElement($place)) {
+            // set the owning side to null (unless already changed)
+            if ($place->getProject() === $this) {
+                $place->setProject(null);
+            }
+        }
+
         return $this;
     }
 

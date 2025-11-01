@@ -4,16 +4,11 @@ namespace App\Service;
 
 use App\Entity\User;
 use App\Entity\PPBase;
+use App\Entity\Article;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-/**
- * Generates and assigns unique slugs to supported entities.
- *
- * This service does NOT persist or flush — it only modifies the entity.
- * Doctrine listeners or controllers decide when to persist.
- */
-class SlugService
+final class SlugService
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
@@ -21,38 +16,39 @@ class SlugService
     ) {}
 
     /**
+     * Check if this entity type supports slug generation.
+     */
+    public function supports(object $entity): bool
+    {
+        return $entity instanceof User || $entity instanceof PPBase || $entity instanceof Article;
+    }
+
+    /**
      * Generates a unique slug for the given entity and assigns it
-     * to the proper property (e.g. usernameSlug, stringId).
+     * to the correct property (e.g., usernameSlug, stringId).
      */
     public function generate(object $entity): void
     {
-        $repository = $this->em->getRepository($entity::class);
-
-        // Identify slug field and source text
         [$fieldName, $baseString] = $this->getSlugSource($entity);
 
         if (empty($baseString)) {
-            // No text to slugify → skip gracefully
             return;
         }
 
-        // Normalize & lowercase
+        $repository = $this->em->getRepository($entity::class);
         $baseSlug = strtolower($this->slugger->slug($baseString)->toString());
         $slug = $baseSlug;
         $counter = 1;
 
-        // If entity already has same slug, skip regeneration
         $getter = 'get' . ucfirst($fieldName);
         if (method_exists($entity, $getter) && $entity->$getter() === $slug) {
             return;
         }
 
-        // Ensure uniqueness
         while ($this->slugExists($repository, $fieldName, $slug, $entity->getId() ?? null)) {
             $slug = sprintf('%s-%d', $baseSlug, $counter++);
         }
 
-        // Assign final slug
         $setter = 'set' . ucfirst($fieldName);
         if (!method_exists($entity, $setter)) {
             throw new \LogicException(sprintf(
@@ -63,14 +59,8 @@ class SlugService
         }
 
         $entity->$setter($slug);
-        // No persist/flush here → done by Doctrine lifecycle.
     }
 
-    /**
-     * Determine which field to use for slug and what source text to base it on.
-     *
-     * @return array [slugFieldName, sourceString]
-     */
     private function getSlugSource(object $entity): array
     {
         if ($entity instanceof User) {
@@ -81,15 +71,16 @@ class SlugService
             return ['stringId', $entity->getTitle() ?: $entity->getGoal()];
         }
 
+        if ($entity instanceof Article) {
+            return ['slug', $entity->getTitle()];
+        }
+
         throw new \InvalidArgumentException(sprintf(
             'Unsupported entity type "%s" for slug generation.',
             $entity::class
         ));
     }
 
-    /**
-     * Checks whether a slug already exists (excluding current entity).
-     */
     private function slugExists(object $repository, string $fieldName, string $slug, ?int $excludeId = null): bool
     {
         $qb = $repository->createQueryBuilder('e')
@@ -101,7 +92,6 @@ class SlugService
             $qb->andWhere('e.id != :id')->setParameter('id', $excludeId);
         }
 
-        // Optional: skip soft-deleted rows
         if (property_exists($repository->getClassName(), 'deletedAt')) {
             $qb->andWhere('e.deletedAt IS NULL');
         }

@@ -146,10 +146,16 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
     #[ORM\OneToMany(targetEntity: ConversationMessage::class, mappedBy: 'sender')]
     private Collection $conversationMessages;
 
+    /**
+     * @var Collection<int, Article>
+     */
+    #[ORM\OneToMany(targetEntity: Article::class, mappedBy: 'creator')]
+    private Collection $articles;
+
 
 
     public function __construct()
-    {
+    {   
         $this->roles = ['ROLE_USER'];
         $this->isActive = true;
         $this->isVerified = false;
@@ -159,7 +165,10 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
         $this->likes = new ArrayCollection();
         $this->conversationParticipations = new ArrayCollection();
         $this->conversationMessages = new ArrayCollection();
+        $this->articles = new ArrayCollection();
+        
     }
+
 
 
     // Had to add this because Social Login didn't work, Symfony thinks the database-reloaded user differs from the session user.
@@ -625,6 +634,36 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
             // set the owning side to null (unless already changed)
             if ($conversationMessage->getSender() === $this) {
                 $conversationMessage->setSender(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Article>
+     */
+    public function getArticles(): Collection
+    {
+        return $this->articles;
+    }
+
+    public function addArticle(Article $article): static
+    {
+        if (!$this->articles->contains($article)) {
+            $this->articles->add($article);
+            $article->setCreator($this);
+        }
+
+        return $this;
+    }
+
+    public function removeArticle(Article $article): static
+    {
+        if ($this->articles->removeElement($article)) {
+            // set the owning side to null (unless already changed)
+            if ($article->getCreator() === $this) {
+                $article->setCreator(null);
             }
         }
 

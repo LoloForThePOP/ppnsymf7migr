@@ -12,7 +12,7 @@ use App\Entity\Profile;
  *  - Type validation
  *  - Automatic initialization on first access
  */
-class UserExtra
+class UserExtraService
 {
     /**
      * Default values for recognized keys.

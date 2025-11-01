@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegistrationType;
+use App\Service\SlugService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +19,12 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 final class RegistrationController extends AbstractController
 {
 
-    public function __construct(private MailerInterface $mailer) {}
+    public function __construct(
+        
+        private MailerInterface $mailer, 
+        private SlugService $slugger
+
+    ) {}
 
 
     private function sendVerificationEmail(User $user): void
@@ -71,8 +77,11 @@ final class RegistrationController extends AbstractController
             $token = bin2hex(random_bytes(16));
 
             $user->setEmailValidationToken($token);
+            //$this->slugger->generate($user);
 
+            
             $em->persist($user);
+            //dd($user);
             $em->flush();
 
             $this->sendVerificationEmail($user);

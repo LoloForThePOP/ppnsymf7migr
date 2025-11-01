@@ -16,6 +16,7 @@ use App\Entity\Traits\TimestampableTrait;
 
 #[Vich\Uploadable]
 #[ORM\Entity(repositoryClass: ProfileRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Profile
 {
 
@@ -103,6 +104,7 @@ class Profile
 
 
     #[ORM\OneToOne(inversedBy: 'profile', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?User $user = null;
 
 

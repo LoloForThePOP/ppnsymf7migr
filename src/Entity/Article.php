@@ -71,14 +71,15 @@ class Article
     // Relations
     // ────────────────────────────────────────
 
-   #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'articles')]
-    private ?User $author = null;
 
    /**
     * @var Collection<int, Comment>
     */
    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'article', cascade: ['remove'])]
    private Collection $comments;
+
+   #[ORM\ManyToOne(inversedBy: 'articles')]
+   private ?User $creator = null;
 
 
     // ────────────────────────────────────────
@@ -100,17 +101,6 @@ class Article
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getAuthor(): ?User
-    {
-        return $this->author;
-    }
-
-    public function setAuthor(?User $author): self
-    {
-        $this->author = $author;
-        return $this;
     }
 
     public function getTitle(): string
@@ -249,6 +239,18 @@ class Article
                 $comment->setArticle(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCreator(): ?User
+    {
+        return $this->creator;
+    }
+
+    public function setCreator(?User $creator): static
+    {
+        $this->creator = $creator;
 
         return $this;
     }

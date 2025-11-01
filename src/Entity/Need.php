@@ -46,15 +46,13 @@ class Need
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
-    #[ORM\ManyToOne(targetEntity: PPBase::class, inversedBy: 'needs')]
-    #[ORM\JoinColumn(onDelete: 'CASCADE')]
-    private ?PPBase $presentation = null;
-
     #[ORM\Column(type: 'smallint', nullable: true)]
     private ?int $position = null;
 
     #[ORM\ManyToOne(inversedBy: 'needs')]
-    private ?PPBase $projectPresentation = null;
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
+    private ?PPBase $project = null;
+
 
 
     // ────────────────────────────────────────
@@ -110,17 +108,6 @@ class Need
         return $this;
     }
 
-    public function getPresentation(): ?PPBase
-    {
-        return $this->presentation;
-    }
-
-    public function setPresentation(?PPBase $presentation): self
-    {
-        $this->presentation = $presentation;
-        return $this;
-    }
-
     public function getPosition(): ?int
     {
         return $this->position;
@@ -132,14 +119,14 @@ class Need
         return $this;
     }
 
-    public function getProjectPresentation(): ?PPBase
+    public function getProject(): ?PPBase
     {
-        return $this->projectPresentation;
+        return $this->project;
     }
 
-    public function setProjectPresentation(?PPBase $projectPresentation): static
+    public function setProject(?PPBase $project): static
     {
-        $this->projectPresentation = $projectPresentation;
+        $this->project = $project;
 
         return $this;
     }

@@ -2,12 +2,13 @@
 
 namespace App\Service;
 
-use App\Entity\PPBase;
 use App\Entity\Slide;
+use App\Entity\PPBase;
 use Doctrine\ORM\EntityManagerInterface;
-use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Symfony\Component\Filesystem\Filesystem;
+use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Vich\UploaderBundle\Templating\Helper\UploaderHelper;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Handles creation, refresh and cleanup of cached thumbnails for project presentations.
@@ -30,7 +31,8 @@ class CacheThumbnailService
         private readonly UploaderHelper $uploaderHelper,
         private readonly CacheManager $cacheManager,
         private readonly Filesystem $filesystem,
-        private readonly string $projectDir, // %kernel.project_dir%
+        #[Autowire(param: 'kernel.project_dir')]
+        private readonly string $projectDir,
     ) {}
 
     /**

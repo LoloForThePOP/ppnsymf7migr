@@ -43,10 +43,6 @@ class Place implements NormalizableInterface, \Stringable
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $postalCode = null;
 
-    #[ORM\ManyToOne(targetEntity: PPBase::class, inversedBy: 'places')]
-    #[ORM\JoinColumn(onDelete: 'CASCADE')]
-    private ?PPBase $presentation = null;
-
     #[ORM\Column(type: 'smallint', nullable: true)]
     private ?int $position = null;
 
@@ -173,17 +169,6 @@ class Place implements NormalizableInterface, \Stringable
         return $this;
     }
 
-    public function getPresentation(): ?PPBase
-    {
-        return $this->presentation;
-    }
-
-    public function setPresentation(?PPBase $presentation): self
-    {
-        $this->presentation = $presentation;
-        return $this;
-    }
-
     public function getPosition(): ?int
     {
         return $this->position;
@@ -224,4 +209,5 @@ class Place implements NormalizableInterface, \Stringable
 
         return $this;
     }
+
 }

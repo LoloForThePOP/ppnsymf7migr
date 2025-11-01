@@ -13,15 +13,13 @@ class ProfileCreatorListener
 {
     public function prePersist(User $user, PrePersistEventArgs $event): void
     {
-        // If the user already has a profile, skip
+        // User already has a profile → do nothing
         if ($user->getProfile()) {
             return;
         }
 
         $profile = new Profile();
         $profile->setUser($user);
-
-        // The cascade=["persist"] on the relation ensures the profile is persisted automatically
         $user->setProfile($profile);
     }
 }
