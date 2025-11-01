@@ -61,7 +61,7 @@ final class ResetUserPasswordController extends AbstractController
                 ->from(new Address($this->getParameter('app.email.noreply'), 'Projet des Projets'))
                 ->to(new Address($user->getEmail()))
                 ->subject('Propon - Réinitialisation de votre mot de passe')
-                ->htmlTemplate('user_profile/reset_user_password/email_confirm_token.html.twig')
+                ->htmlTemplate('user/account/reset_password/email_confirm_token.html.twig')
                 ->context([
                     'confirmationURL' => $url,
                     'user' => $user,
@@ -77,7 +77,7 @@ final class ResetUserPasswordController extends AbstractController
             return $this->redirectToRoute('homepage');
         }
 
-        return $this->render('user_profile/reset_user_password/forgotten_password_request.html.twig', [
+        return $this->render('user/account/reset_password/forgotten_password_request.html.twig', [
             'form' => $form,
         ]);
     }
@@ -111,7 +111,7 @@ final class ResetUserPasswordController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        return $this->render('user_profile/reset_user_password/forgotten_password_creation.html.twig', [
+        return $this->render('user/account/reset_password/forgotten_password_creation.html.twig', [
             'form' => $form,
         ]);
     }

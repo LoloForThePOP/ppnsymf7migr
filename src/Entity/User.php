@@ -20,6 +20,8 @@ use Symfony\Component\Security\Core\User\EquatableInterface;
  * The User entity is automatically processed by:
  * - App\EventListener\UsernameListener
  *   → ensures unique username and generates usernameSlug before persist/update
+ * - App\Service\ProfileCreatorListener
+ *  → ensures a Profile entity is created for each new User before persist      
  */
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]

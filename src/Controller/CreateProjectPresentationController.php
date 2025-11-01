@@ -5,11 +5,11 @@ namespace App\Controller;
 use App\Entity\Slide;
 use App\Entity\PPBase;
 use App\Service\SlugService;
-use App\Service\CacheThumbnail;
-use App\Form\PresentationHelperType;
 use App\Service\ImageResizerService;
 use App\Service\AssessPPScoreService;
+use App\Service\CacheThumbnailService;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Form\ProjectPresentationCreationType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,9 +21,9 @@ class CreateProjectPresentationController extends AbstractController
         private EntityManagerInterface $em,
         private SlugService $slugger,
         private AssessPPScoreService $assessPPScore, 
-       /*  private CacheThumbnail $cacheThumbnail,
+        private CacheThumbnailService $cacheThumbnail,
         private ImageResizerService $imageResizer,
-        */
+        
     ) {}
 
     #[Route(
@@ -54,7 +54,7 @@ class CreateProjectPresentationController extends AbstractController
         }
 
         // ───────────── Build and handle form ─────────────
-        $form = $this->createForm(PresentationHelperType::class, $presentation);
+        $form = $this->createForm(ProjectPresentationCreationType::class, $presentation);
         $form->handleRequest($request);
 
         if (!$form->isSubmitted() || !$form->isValid()) {
@@ -88,7 +88,7 @@ class CreateProjectPresentationController extends AbstractController
 
         // Case Final step: whole process done
         if ($nextPosition === null) {
-            $this->assessQuality->assessQuality($presentation);
+            $this->assessPPScore->scoreUpdate($presentation);
 
             // (Optional future improvement) mark presentation as completed for later cleanup
             $presentation->isCreationFormCompleted(true); // if such a method exists
@@ -106,6 +106,7 @@ class CreateProjectPresentationController extends AbstractController
 
         // ───────────── Handle helper type logic ─────────────
         switch ($helperType) {
+
             case 'title':
                 $title = $form->get('title')->getData();
                 if (!empty($title)) {
@@ -125,21 +126,26 @@ class CreateProjectPresentationController extends AbstractController
                 }
                 break;
 
-            case 'imageSlide':
+           case 'imageSlide':
                 /** @var Slide|null $slide */
-               $slide = $form->get('imageSlide')->getData();
+                $slide = $form->get('imageSlide')->getData();
 
-                if ($slide) {
-                    $slide->setType('image');
-                    $presentation->addSlide($slide);
-
-                    $this->em->persist($slide);
-                    $this->em->flush();
-
-                    // Post-processing
-                    $this->imageResizer->edit($slide);
-                    $this->cacheThumbnail->cacheThumbnail($presentation);
+                if (!$slide) {
+                    break;
                 }
+
+                $slide->setType('image');
+                $presentation->addSlide($slide);
+
+                // VichUploader handles moving the file
+                if ($slide->getFile()) {
+                    $this->imageResizer->edit($slide); // to fill: check if file name is manage by Vitch and manage it as unique.
+                }
+
+                $this->cacheThumbnail->updateThumbnail($presentation);
+
+                $this->em->persist($slide);
+                // no need for manual file move or path management
                 break;
 
             case 'textDescription':

@@ -1,0 +1,310 @@
+
+<div class="text-center lh-1 mb-4">{{currentItem.questionFr}}</div>
+
+
+    {{ form_start(form) }}
+
+        {{ form_errors(form) }}
+
+        <div class="text-center">
+            
+            {{ form_errors(form.imageSlide.file) }}
+            {{ form_errors(form.goal) }}
+            {{ form_errors(form.title) }}
+            {{ form_errors(form.textDescription) }}
+            {{ form_errors(form.websiteDescription) }}
+            {{ form_errors(form.url) }}
+        
+        </div>
+
+
+        {% if currentItem.type == "goal" %}
+
+
+            <div class="container col-md-9">
+            
+                {{ form_widget(form.goal) }}
+
+            </div>
+
+
+        {% endif %}
+
+        {% if currentItem.type == "title" %}
+
+            <div class="container col-lg-7 mb-3">
+
+                {{ form_widget(form.title) }}
+            
+            
+            </div>
+
+
+{#         {% if currentItem.type == "needs" %}
+
+            <div class="container col-md-6 text-center">
+
+                <div class="mb-4">
+
+                    {{ form_widget(form.needTitle) }}
+
+                </div>
+
+                <div class="mb-4">
+
+                    {{ form_widget(form.needDescription) }}
+
+                </div>
+            
+            </div>
+ #}
+
+       {#  {% elseif currentItem.type == "websites" %}
+
+
+            <div class="container col-md-7 mb-3">
+
+                <div class="mb-2">Quelle est son adresse ?</div>
+
+                {{ form_widget(form.url) }}
+            
+            
+            </div>
+
+            <div class="container col-md-7">
+
+                <div class="mb-2">Donnez un titre à cette adresse</div>
+
+                {{ form_widget(form.websiteDescription) }} #} {# formatting the right way for user displaying #}
+
+           {#  </div>    #}
+
+       {#  {% elseif currentItem.type == "logo" %}
+
+            <div class="container col-md-6 text-center">
+
+                <div class="">
+
+                    {{ form_row(form.logoFile) }}
+                
+                </div>
+
+            </div> #}
+
+        {% elseif currentItem.type == "imageSlide" %}
+
+            <div class="container col-md-6 text-center">
+
+                {% if repeatInstance =="true" %}
+
+                    <div class="text-success">
+
+                        Image ajoutée<br>
+                    
+                        Choisissez l'image suivante
+                        
+                    </div>
+                
+                {% endif %}
+
+                <div class="mb-4">
+
+                    <div id="upload-icon" class="add-image-square">
+                        
+                        <img src="{{asset ('image2.svg', 'misc')}}" class="" alt="Image icon" loading="lazy" width="50" height="50">
+
+                        <div class="plus-sign">+</div>
+                    
+                    </div>
+
+                    <style>
+
+
+                        .add-image-square {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 130px;
+                            height: 130px;
+                            border: 2px solid #094171;
+                            border-radius: 16px;
+                            margin: auto;
+                            cursor: pointer;
+                            position: relative;
+                        }
+
+                        .plus-sign {
+                            position: absolute;
+                            top: 5px;
+                            right: 20px;
+
+                            font-size: 32px;
+                            font-weight: bolder;
+                            color: #094171;
+                        }
+                    
+                    
+                    
+                    </style>
+
+                    <div class="d-none">{{ form_row(form.imageSlide.file) }}</div>
+
+                    <div id="preview-container" class = "d-flex justify-content-center" style="margin-top:1rem;">
+                        <img id="preview" src="" alt="Preview" style="max-width:200px; display:none; border:1px solid #ccc; padding:5px; border-radius:5px;">
+                    </div>
+
+
+
+                    
+
+
+                    <script>
+
+                        document.addEventListener('DOMContentLoaded', () => {
+
+                            const icon  = document.getElementById('upload-icon');
+                            const input = document.getElementById('presentation_helper_imageSlide_file');
+                                const preview  = document.getElementById('preview');
+
+                            // When the icon is clicked, simulate a click on the hidden input
+                            icon.addEventListener('click', () => {
+                                input.click();
+                            });
+
+                            // Optional: handle the file once chosen
+                            input.addEventListener('change', (event) => {
+                                const file = event.target.files[0];
+                                if (file) {
+                                    console.log('Selected file:', file.name);
+                                    // You can preview or upload here:
+                                    if (!file.type.startsWith('image/')) {
+                                        alert("Veuillez sélectionner une image.");
+                                        return;
+                                    }
+
+                                    const reader = new FileReader();
+                                    reader.onload = e => {
+                                        preview.src = e.target.result;
+                                        preview.style.display = "block";
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            });
+
+                        });
+
+                    </script>
+                
+                </div>
+
+            </div>
+
+        {% elseif currentItem.type == "textDescription" %}
+
+
+            <div class="container col-md-7 mb-3">
+
+                <div class="mb-2">Objectif du projet</div>
+
+                {{ form_widget(form.goal) }}
+            
+            
+            </div>
+
+            <div class="container col-md-7">
+
+                <div class="mb-2">Description du projet</div>
+
+                {{ form_widget(form.textDescription, {value: form.textDescription.vars.value|replace({'<br />': "\n", '<br>': "\n", '<br/>': "\n"})}) }} {# formatting the right way for user displaying #}
+
+            </div>    
+
+
+        {% endif %}
+
+        <!-- Hidden Fields -->
+
+        <div class="">
+                        
+            {{ form_widget(form.helperItemType, {'value' : currentItem.type}) }}
+
+            {{ form_widget(form.currentPosition, {'value' : position}) }}
+
+            {{ form_widget(form.nextPosition, {'value' : nextPosition}) }}
+
+        </div>
+
+        <div class="d-none">
+
+            {{ form_rest(form) }}
+
+        </div>
+
+        <!-- Action Buttons -->
+
+        <div class="action-buttons-container {% if previousPosition is null %}justify-content-center{% endif %}">{# When only one button we center it (no previous button) #}
+
+            {% if currentPosition != 0 %}
+
+                <a class="text-body " href="{{ path('project_presentation_helper', {'stringId': stringId, 'position': previousPosition }) }}"><button type="button" class="action-button btn btn-outline-dark">Retour</button></a>        
+                    
+            {% endif %}
+
+            <button type="submit" class="validate action-button btn btn-success text-white">Continuer</button>
+
+
+        </div>
+
+
+                
+
+        <style>
+
+            .action-buttons-container{
+
+                display: flex;
+                justify-content: space-evenly;
+
+                margin-top : 34px;
+
+            }
+
+
+            .action-button{
+
+                padding: 9px 19px;
+                border-radius: 25px;
+                border: 2px solid #c7f5a;
+
+            }
+                
+
+            button.validate:hover {
+                background-color: #1fab1fff;
+            }
+                            
+
+            @media screen and (max-width: 580px) {
+            
+                .action-buttons-container{
+
+                    justify-content: space-between;
+
+                    margin-left: 20px;
+                    margin-right: 20px;
+
+                }
+
+                .action-button {
+
+                    margin-bottom: 22px !important;
+
+                }
+                
+            }     
+
+        </style>
+
+
+
+    {{ form_end(form) }}

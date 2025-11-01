@@ -20,6 +20,13 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
+
+/**
+ * The PPBase entity is automatically processed by:
+ * - App\EventListener\SlugGenerationListener
+ *   → ensures unique $stringId (i.e. slug) before persist/update 
+ */
+
 #[ORM\Entity(repositoryClass: PPBaseRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[Vich\Uploadable]
@@ -209,7 +216,7 @@ class PPBase
     // ────────────────────────────────────────
 
     public function __construct()
-    {
+    {   $this->extra = new Extra();
         $this->comments = new ArrayCollection();
         $this->slides = new ArrayCollection();
         $this->needs = new ArrayCollection();
@@ -220,6 +227,10 @@ class PPBase
         $this->likes = new ArrayCollection();
         $this->categories = new ArrayCollection();
     }
+
+
+
+
 
 
     #[ORM\PrePersist]
@@ -767,6 +778,19 @@ class PPBase
     {
         $this->score = $score;
 
+        return $this;
+    }
+
+
+
+    public function getExtra(): Extra
+    {
+        return $this->extra;
+    }
+
+    public function setExtra(Extra $extra): self
+    {
+        $this->extra = $extra;
         return $this;
     }
 
