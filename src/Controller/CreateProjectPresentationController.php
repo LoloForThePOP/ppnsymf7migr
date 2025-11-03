@@ -129,14 +129,14 @@ class CreateProjectPresentationController extends AbstractController
                     $this->imageResizer->edit($slide); 
                 }
                 
-                // to do: check if file name is manage by Vitch and manage it as unique.
+                // checked: check if file name is manage by Vitch and manage it as unique.
                 // to do: check if thumbnail is updated
                 // to do: check if image is resized
 
                 $this->cacheThumbnail->updateThumbnail($presentation);
 
                 $this->em->persist($slide);
-                // no need for manual file move or path management
+                
                 break;
 
             case 'textDescription':

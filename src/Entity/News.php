@@ -35,7 +35,12 @@ class News implements \Stringable
     // Content
     // ────────────────────────────────────────
 
+
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Assert\Length(
+        max: 2000,
+        maxMessage: 'Le texte de la news ne peut pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $textContent = null;
 
 
@@ -52,13 +57,26 @@ class News implements \Stringable
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image3 = null;
 
+
     #[ORM\Column(length: 1000, nullable: true)]
+    #[Assert\Length(
+        max: 1000,
+        maxMessage: 'La légende de l’image 1 ne peut pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $captionImage1 = null;
 
     #[ORM\Column(length: 1000, nullable: true)]
+    #[Assert\Length(
+        max: 1000,
+        maxMessage: 'La légende de l’image 2 ne peut pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $captionImage2 = null;
 
     #[ORM\Column(length: 1000, nullable: true)]
+    #[Assert\Length(
+        max: 1000,
+        maxMessage: 'La légende de l’image 3 ne peut pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $captionImage3 = null;
 
     #[Vich\UploadableField(mapping: 'news_image', fileNameProperty: 'image1')]
