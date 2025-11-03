@@ -1,0 +1,20 @@
+
+
+<h5>Décrivez votre projet !</h5>
+
+<div class="container col-md-7 mb-3">
+
+    <div class="mb-2">(Rappel) Objectif de votre projet</div>
+
+    {{ form_widget(form.goal) }}
+
+
+</div>
+
+<div class="container col-md-7">
+
+    <div class="mb-2">Descrivez ici votre projet en quelques lignes</div>
+
+    {{ form_widget(form.textDescription, {value: form.textDescription.vars.value|replace({'<br />': "\n", '<br>': "\n", '<br/>': "\n"})}) }} {# formatting the right way for user displaying #}
+
+</div>  

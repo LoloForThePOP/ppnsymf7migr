@@ -1,0 +1,39 @@
+
+<div class="container d-flex justify-content-center">
+
+    <div class="col-lg-7">
+    
+
+    <h5 class="mb-1">📌 Quel est le titre de votre projet ?</h5>
+
+        <div class="mb-4 pb-2"><small class="fs-6 text-muted">Vous pouvez passer cette étape si votre projet n'a pas de titre</small></div>
+        <div class="mb-1"><small class="fs-6 text-muted">Vous pourrez le modifier</small></div>
+        
+        {# Project Title Examples #}
+
+        <div class="card shadow text-start mx-md-2 mb-4">
+
+            <div class="card-body p-3">
+
+                <h6 class="mb-3">📘 Exemples de titres</h6>
+
+                <ul class="">
+                    
+                    <li class="mb-2 text-dark">Métalisieux 2027</li>
+                    <li class="mb-2 text-dark">Bouge ton Move</li>
+                    <li class="mb-2 text-dark">Pic d'oiseau</li>
+
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<div class="container col-lg-7 mb-3">
+
+    {{ form_widget(form.title) }}
+
+</div>

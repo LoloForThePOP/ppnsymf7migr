@@ -22,7 +22,7 @@ class ProjectPresentationCreationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            // Main project data
+        
             ->add('goal', TextType::class, [
                 'label' => "Quel est l'objectif du projet ?",
                 'attr' => [
@@ -49,24 +49,6 @@ class ProjectPresentationCreationType extends AbstractType
                 'required' => false,
             ])
 
-            // Optional external website
-            ->add('websiteDescription', TextType::class, [
-                'label' => 'Titre de cette adresse',
-                'attr' => [
-                    'placeholder' => 'Exemple : Compte Instagram, site web officiel, etc.',
-                ],
-                'required' => false,
-                'mapped' => false,
-            ])
-
-            ->add('url', UrlType::class, [
-                'label' => 'Adresse du site',
-                'attr' => [
-                    'placeholder' => 'www.exemple.com',
-                ],
-                'required' => false,
-                'mapped' => false,
-            ])
 
             // Image slide upload (custom form type, not using Vich Upload Type as imageSlide is not mapped in PPBase entity)
             ->add('imageSlide', ImageSlideWithoutVichHelperType::class, [

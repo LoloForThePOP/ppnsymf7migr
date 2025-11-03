@@ -1,0 +1,109 @@
+
+<div class="mb-4">
+
+    <h5>🖼️ Ajoutez une image d'illustration (si vous en avez une)</h5>
+    
+    <div class="mt-3 mb-4 pb-3">
+
+        <small class="fs-6 text-muted">Vous pourrez en ajouter d'autres plus tard</small>
+    
+    </div>
+
+</div>
+
+{% set uploadIconId = "upload-icon" %}
+
+
+<div class="container col-md-6 text-center">
+
+    <div class="mb-4">
+
+        {# Image Upload Icon #}
+
+        <div id="{{uploadIconId}}" class="add-image-square">
+            
+            <img src="{{asset ('image2.svg', 'misc')}}" class="" alt="Image icon" loading="lazy" width="50" height="50">
+
+            <div class="plus-sign">+</div>
+        
+        </div>
+
+        <style>
+
+
+            .add-image-square {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 130px;
+                height: 130px;
+                border: 2px solid #094171;
+                border-radius: 16px;
+                margin: auto;
+                cursor: pointer;
+                position: relative;
+            }
+
+            .plus-sign {
+                position: absolute;
+                top: 5px;
+                right: 20px;
+
+                font-size: 32px;
+                font-weight: bolder;
+                color: #094171;
+            }
+        
+        
+        
+        </style>
+
+        <div class="d-none">{{ form_row(form.imageSlide.file) }}</div>
+
+        <div id="preview-container" class = "d-flex justify-content-center" style="margin-top:1rem;">
+            <img id="preview" src="" alt="Preview" style="max-width:200px; display:none; border:1px solid #ccc; padding:5px; border-radius:5px;">
+        </div>
+
+
+        <script>
+
+            // Image Upload Handling
+
+            document.addEventListener('DOMContentLoaded', () => {
+
+                const icon  = document.getElementById({{uploadIconId|json_encode|raw}});
+                const input = document.getElementById({{form.imageSlide.file.vars.id|json_encode|raw}});
+                    const preview  = document.getElementById('preview');
+
+                // When the icon is clicked, simulate a click on the hidden input
+                icon.addEventListener('click', () => {
+                    input.click();
+                });
+
+                // Optional: handle the file once chosen
+                input.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        console.log('Selected file:', file.name);
+                        // You can preview or upload here:
+                        if (!file.type.startsWith('image/')) {
+                            alert("Veuillez sélectionner une image.");
+                            return;
+                        }
+
+                        const reader = new FileReader();
+                        reader.onload = e => {
+                            preview.src = e.target.result;
+                            preview.style.display = "block";
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+            });
+
+        </script>
+    
+    </div>
+
+</div>

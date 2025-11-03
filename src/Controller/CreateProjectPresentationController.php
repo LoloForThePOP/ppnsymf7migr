@@ -17,6 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class CreateProjectPresentationController extends AbstractController
 {
+
     public function __construct(
         private EntityManagerInterface $em,
         private SlugService $slugger,
@@ -27,33 +28,30 @@ class CreateProjectPresentationController extends AbstractController
     ) {}
 
     #[Route(
-        '/step-by-step-project-presentation/{position?0}/{stringId?}/{repeatInstance}',
+        '/step-by-step-project-presentation/{position?0}/{stringId?}',
         name: 'project_presentation_helper',
-        defaults: ['repeatInstance' => 'false'],
         methods: ['GET', 'POST']
     )]
     public function origin(
         Request $request,
         ?string $stringId = null,
-        int $position = 0,
-        string $repeatInstance = 'false'
+        int $position = 0, // Step position in the creation wizard
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        // ───────────── Retrieve or create presentation ─────────────
-        $presentation = $stringId
-            ? $this->em->getRepository(PPBase::class)->findOneBy(['stringId' => $stringId])
+        // Retrieve a project presentation if stringId exists otherwise create a new project presentation
+        $presentation = $stringId ? $this->em->getRepository(PPBase::class)->findOneBy(['stringId' => $stringId])
             : new PPBase();
 
-        if ($stringId && !$presentation) {
+        if ($stringId && !$presentation) { //case a stringId is provided in url but no matching presentation
             throw $this->createNotFoundException("Présentation non trouvée.");
         }
 
-        if ($stringId) {
+        if ($stringId) { // If stringId exists we make sure user has right to edit matching presentation
             $this->denyAccessUnlessGranted('edit', $presentation);
         }
 
-        // ───────────── Build and handle form ─────────────
+        // Create / update a Project Presentation, Form presented step by step in front-end
         $form = $this->createForm(ProjectPresentationCreationType::class, $presentation);
         $form->handleRequest($request);
 
@@ -65,7 +63,7 @@ class CreateProjectPresentationController extends AbstractController
             ]);
         }
 
-        // ───────────── Case 1: new presentation (first step) ─────────────
+        // Case stringId is null we create and save a new project presentation in DB
         if ($stringId === null) {
             $goal = $form->get('goal')->getData();
             $presentation->setGoal($goal);
@@ -77,11 +75,10 @@ class CreateProjectPresentationController extends AbstractController
             return $this->redirectToRoute('project_presentation_helper', [
                 'stringId' => $presentation->getStringId(),
                 'position' => 1,
-                'repeatInstance' => $repeatInstance,
             ]);
         }
 
-        // ───────────── Case 2: updating an existing presentation ─────────────
+        // Case stringId not null we check position in step by step form
 
         $nextPosition = $form->get('nextPosition')->getData();
         $helperType = $form->get('helperItemType')->getData();
@@ -90,8 +87,8 @@ class CreateProjectPresentationController extends AbstractController
         if ($nextPosition === null) {
             $this->assessPPScore->scoreUpdate($presentation);
 
-            // (Optional future improvement) mark presentation as completed for later cleanup
-            $presentation->isCreationFormCompleted(true); // if such a method exists
+            // mark presentation as completed for later cleanup
+            $presentation->isCreationFormCompleted(true);
 
             $this->addFlash('success fs-4', <<<HTML
                 ✅ Votre page de présentation est prête.<br>
@@ -104,7 +101,7 @@ class CreateProjectPresentationController extends AbstractController
             ]);
         }
 
-        // ───────────── Handle helper type logic ─────────────
+        // Handle Form logic
         switch ($helperType) {
 
             case 'title':
@@ -112,16 +109,6 @@ class CreateProjectPresentationController extends AbstractController
                 if (!empty($title)) {
                     $presentation->setTitle($title);
 
-                    // Generate slug
-                    $slug = $this->slugger->generate($title);
-
-                    // Ensure uniqueness
-                    $twin = $this->em->getRepository(PPBase::class)->findOneBy(['stringId' => $slug]);
-                    if ($twin) {
-                        $slug .= '-' . $presentation->getId();
-                    }
-
-                    $presentation->setStringId($slug);
                     $this->em->flush();
                 }
                 break;
@@ -139,8 +126,12 @@ class CreateProjectPresentationController extends AbstractController
 
                 // VichUploader handles moving the file
                 if ($slide->getFile()) {
-                    $this->imageResizer->edit($slide); // to fill: check if file name is manage by Vitch and manage it as unique.
+                    $this->imageResizer->edit($slide); 
                 }
+                
+                // to do: check if file name is manage by Vitch and manage it as unique.
+                // to do: check if thumbnail is updated
+                // to do: check if image is resized
 
                 $this->cacheThumbnail->updateThumbnail($presentation);
 
@@ -155,11 +146,14 @@ class CreateProjectPresentationController extends AbstractController
                 break;
         }
 
-        // ───────────── Go to next step ─────────────
+        // Go to next step
         return $this->redirectToRoute('project_presentation_helper', [
             'stringId' => $presentation->getStringId(),
             'position' => $nextPosition,
-            'repeatInstance' => $repeatInstance,
         ]);
+
+
     }
+    
+
 } 

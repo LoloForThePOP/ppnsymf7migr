@@ -144,7 +144,12 @@ class PPBase
     /**
      * @var Collection<int, Slide>
      */
-    #[ORM\OneToMany(targetEntity: Slide::class, mappedBy: 'projectPresentation')]
+    #[ORM\OneToMany(
+        mappedBy: 'projectPresentation',
+        targetEntity: Slide::class,
+        cascade: ['persist', 'remove'], 
+        orphanRemoval: true           
+    )]
     private Collection $slides;
 
 
@@ -154,17 +159,28 @@ class PPBase
     #[ORM\OneToMany(targetEntity: News::class, mappedBy: 'project')]
     private Collection $news;
 
-
-    #[ORM\Column(type: 'json', nullable: true)]
-    private ?array $statuses = [];
-
     /**
      * @var Collection<int, Document>
      */
     #[ORM\OneToMany(targetEntity: Document::class, mappedBy: 'projectPresentation')]
     private Collection $documents;
 
+    /**
+     * @var Collection<int, Need>
+     */
+    #[ORM\OneToMany(targetEntity: Need::class, mappedBy: 'project')]
+    private Collection $needs;
 
+    /**
+     * @var Collection<int, Place>
+     */
+    #[ORM\OneToMany(targetEntity: Place::class, mappedBy: 'project')]
+    private Collection $places;
+
+
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $statuses = [];
 
     // ────────────────────────────────────────
     // Others Relations
@@ -197,18 +213,6 @@ class PPBase
      */
     #[ORM\ManyToMany(targetEntity: Category::class, mappedBy: 'projectPresentation')]
     private Collection $categories;
-
-    /**
-     * @var Collection<int, Need>
-     */
-    #[ORM\OneToMany(targetEntity: Need::class, mappedBy: 'project')]
-    private Collection $needs;
-
-    /**
-     * @var Collection<int, Place>
-     */
-    #[ORM\OneToMany(targetEntity: Place::class, mappedBy: 'project')]
-    private Collection $places;
 
 
 
