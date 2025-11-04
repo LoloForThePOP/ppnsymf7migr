@@ -14,13 +14,14 @@ use App\Form\ProjectPresentation\{
     NewsType,
     BusinessCardType,
     QuestionAnswerType,
-};  
-
-use App\Form\{
-    MiscDataType,
     DocumentType,
     ImageSlideType,
     VideoSlideType,
+};  
+
+use App\Form\{
+
+    
     PPBaseType,
     ContributorStructureType,
     PersorgType,
@@ -93,7 +94,6 @@ final class ProjectPresentationController extends AbstractController
                 'addWebsiteForm' => $this->createForm(WebsiteType::class),
                 'addNewsForm' => $this->createForm(NewsType::class, new News()),
                 'addBusinessCardForm' => $this->createForm(BusinessCardType::class),
-                'addDataListElemForm' => $this->createForm(MiscDataType::class),
                 'addQAForm' => $this->createForm(QuestionAnswerType::class),
                 'addDocumentForm' => $this->createForm(DocumentType::class, new Document()),
                 'addImageForm' => $this->createForm(ImageSlideType::class, (new Slide())->setType('image')),

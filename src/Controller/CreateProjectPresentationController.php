@@ -9,7 +9,7 @@ use App\Service\ImageResizerService;
 use App\Service\AssessPPScoreService;
 use App\Service\CacheThumbnailService;
 use Doctrine\ORM\EntityManagerInterface;
-use App\Form\ProjectPresentationCreationType;
+use App\Form\ProjectPresentation\ProjectPresentationCreationType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -125,7 +125,7 @@ class CreateProjectPresentationController extends AbstractController
                 $presentation->addSlide($slide);
 
                 // VichUploader handles moving the file
-                if ($slide->getFile()) {
+                if ($slide->getImageFile()) {
                     $this->imageResizer->edit($slide); 
                 }
                 

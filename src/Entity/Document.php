@@ -24,47 +24,105 @@ class Document
 
     use TimestampableTrait;
 
+    // ────────────────────────────────────────
+    // Title
+    // ────────────────────────────────────────
+
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le titre ne peut pas être vide.')]
+    #[Assert\Length(
+        min: 2,
+        max: 255,
+        minMessage: 'Le titre doit contenir au moins {{ limit }} caractères.',
+        maxMessage: 'Le titre ne peut pas dépasser {{ limit }} caractères.'
+    )]
+    #[Assert\Regex(
+        pattern: '/\S+/',
+        message: 'Le titre ne peut pas contenir uniquement des espaces.'
+    )]
     private string $title;
 
+    // ────────────────────────────────────────
+    // Position (for ordering)
+    // ────────────────────────────────────────
+
     #[ORM\Column(type: 'smallint', nullable: true)]
+    #[Assert\PositiveOrZero(message: 'La position doit être un nombre positif ou nul.')]
     private ?int $position = null;
 
+    // ────────────────────────────────────────
+    // MIME Type (stored from upload)
+    // ────────────────────────────────────────
+
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(
+        max: 255,
+        maxMessage: 'Le type MIME ne peut pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $mimeType = null;
 
+    // ────────────────────────────────────────
+    // File Name
+    // ────────────────────────────────────────
+
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le nom du fichier ne peut pas être vide.')]
+    #[Assert\Length(
+        max: 255,
+        maxMessage: 'Le nom du fichier ne peut pas dépasser {{ limit }} caractères.'
+    )]
     private string $fileName;
+
+    // ────────────────────────────────────────
+    // Virtual Upload Field (VichUploader)
+    // ────────────────────────────────────────
 
     /**
      * Virtual field used by VichUploader.
-     * 
+     *
      * @var File|null
      */
-    #[Vich\UploadableField(mapping: 'presentation_document_file', fileNameProperty: 'fileName')]
+    #[Vich\UploadableField(
+        mapping: 'presentation_document_file',
+        fileNameProperty: 'fileName',
+        mimeType: 'mimeType',
+        size: 'size'
+    )]
     #[Assert\File(
-        maxSize: '13000k',
-        maxSizeMessage: 'Ce fichier dépasse la limite de poids maximal accepté : {{ limit }} {{ suffix }}',
+        maxSize: '13M',
+        maxSizeMessage: 'Ce fichier dépasse la limite de taille maximale : {{ limit }} {{ suffix }}.',
         mimeTypes: [
+            // Documents
             'application/pdf',
             'application/x-pdf',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'application/vnd.ms-excel',
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'text/rtf',
-            'application/vnd.oasis.opendocument.text',
             'application/vnd.ms-powerpoint',
             'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'application/vnd.oasis.opendocument.text',
+            'application/vnd.oasis.opendocument.spreadsheet',
+            'application/vnd.oasis.opendocument.presentation',
+            // Other text formats
+            'text/plain',
+            'text/rtf',
+            'application/rtf',
             'application/epub+zip',
-            'text/plain'
         ],
-        mimeTypesMessage: 'Veuillez sélectionner un fichier de type PDF, Word, Excel, PowerPoint, OpenDocument, ePub, RTF ou texte.'
+        mimeTypesMessage: 'Veuillez sélectionner un fichier valide (PDF, Word, Excel, PowerPoint, OpenDocument, ePub, RTF, texte).'
     )]
     private ?File $file = null;
 
+    // ──────────────────────────────────────── 
+    // Relations    
+    // ──────────────────────────────────────── 
+
     #[ORM\ManyToOne(inversedBy: 'documents')]
     private ?PPBase $projectPresentation = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $size = null;
 
     // ─────────────────────────────────────────────
     // CONSTRUCTOR
@@ -147,28 +205,18 @@ class Document
         }
     }
 
-    // ─────────────────────────────────────────────
-    // HELPER METHODS
-    // ─────────────────────────────────────────────
-
-    public function getReadableSize(string $uploadDir): ?string
+    public function getSize(): ?int
     {
-        $filePath = $uploadDir . '/' . $this->fileName;
-
-        if (!file_exists($filePath)) {
-            return null;
-        }
-
-        $bytes = filesize($filePath);
-        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        $i = (int) floor(log($bytes, 1024));
-        return round($bytes / (1024 ** $i), 2) . ' ' . $units[$i];
+        return $this->size;
     }
 
-    public function __toString(): string
+    public function setSize(?int $size): static
     {
-        return $this->title ?? 'Document';
+        $this->size = $size;
+
+        return $this;
     }
+
 
     public function getProjectPresentation(): ?PPBase
     {
@@ -182,6 +230,10 @@ class Document
         return $this;
     }
 
+    public function __toString(): string
+    {
+        return $this->title ?? 'Document';
+    }
 
 }
 

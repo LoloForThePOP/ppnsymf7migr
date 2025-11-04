@@ -6,7 +6,7 @@ use App\Entity\User;
 use App\Form\ProfileType;
 use App\Form\UserAccountEmailType;
 use Symfony\Component\Form\FormError;
-use App\Form\UpdateAccountPasswordType;
+use App\Form\Password\UpdateAccountPasswordType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

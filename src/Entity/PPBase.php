@@ -52,8 +52,8 @@ class PPBase
     /**
      * Project presentation pages are identified with an unique sting identifier. It is randomized at the creation of the PPBase Object, it can later on be human readable and seo friendly (for example if project title is set, stringId becomes a slugified version of the title).
     */
-    #[ORM\Column(length: 191, unique: true)]
-    #[Assert\Length(min: 1, max: 191)]
+    #[ORM\Column(length: 190, unique: true)]
+    #[Assert\Length(min: 1, max: 190)]
     private ?string $stringId = null;
 
     // ────────────────────────────────────────
@@ -97,12 +97,14 @@ class PPBase
     #[Assert\Length(min: 10, max: 255)]
     private ?string $goal = null;
 
+    #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $title = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $keywords = null;
 
+    #[Assert\Length(max: 5000)]
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $textDescription = null;
 

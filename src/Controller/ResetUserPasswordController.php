@@ -5,9 +5,11 @@ namespace App\Controller;
 
 use App\Repository\UserRepository;
 use Symfony\Component\Mime\Address;
-use App\Form\ForgottenPasswordEmailType;
+use App\Form\Password\{
+    ForgottenPasswordEmailType,
+    ForgottenPasswordCreationType,
+    };
 use Doctrine\ORM\EntityManagerInterface;
-use App\Form\ForgottenPasswordCreationType;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;

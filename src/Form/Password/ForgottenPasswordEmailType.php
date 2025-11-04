@@ -1,11 +1,7 @@
 <?php
 
-namespace App\Form;
+namespace App\Form\Password;
 
-use Assert\Email;
-use Assert\Length;
-use App\Entity\User;
-use Assert\NotBlank;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;

@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Form;
+namespace App\Form\ProjectPresentation;
 
 use App\Entity\PPBase;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use App\Form\ImageSlideWithoutVichHelperType;
+use App\Form\ProjectPresentation\ImageSlideWithoutVichHelperType;
 use Symfony\Component\Form\Extension\Core\Type\{
     TextType,
     TextareaType,
-    UrlType,
     HiddenType
 };
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Form;
+namespace App\Form\ProjectPresentation;
 
 use App\Entity\Slide;
 use Symfony\Component\Form\AbstractType;
@@ -19,7 +19,7 @@ class ImageSlideWithoutVichHelperType extends AbstractType
     {
         $builder
             // Image file upload (temporary, non-Vich)
-            ->add('file', FileType::class, [
+            ->add('imageFile', FileType::class, [
                 'label' => 'Cliquer pour sélectionner une image',
                 'required' => false,
             ])

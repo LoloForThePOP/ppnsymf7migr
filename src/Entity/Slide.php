@@ -3,82 +3,117 @@
 namespace App\Entity;
 
 use App\Repository\SlideRepository;
+use App\Entity\Traits\TimestampableTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
-
-use App\Entity\Traits\TimestampableTrait;  
 
 #[ORM\Entity(repositoryClass: SlideRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[Vich\Uploadable]
 class Slide
 {
+    use TimestampableTrait;
 
-    use TimestampableTrait; 
-
-
+    // ────────────────────────────────────────
+    // Identity
+    // ────────────────────────────────────────
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    // ────────────────────────────────────────
+    // Type
+    // ────────────────────────────────────────
     #[ORM\Column(length: 30)]
-    #[Assert\Choice(['image', 'youtube_video'])]
+    #[Assert\Choice(choices: ['image', 'youtube_video'], message: 'Type de diapositive invalide.')]
     private ?string $type = null;
 
-
     // ────────────────────────────────────────
-    // Image (VichUploader) or URL (Youtube link)
+    // Image-specific fields
     // ────────────────────────────────────────
 
 
-     /**
-     * Adress of the media file (URL or local path) 
-     */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $mimeType = null;
+
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $address = null;
+    private ?string $imagePath = null;
 
-    /**
-     * File upload (not persisted)
-     */
-    #[Vich\UploadableField(mapping: 'presentation_slide_file', fileNameProperty: 'address')]
+    
+    #[Vich\UploadableField(
+        mapping: 'presentation_slide_file',
+        fileNameProperty: 'imagePath',
+        mimeType: 'mimeType'
+    )]
     #[Assert\Image(
         maxSize: '4500k',
-        maxSizeMessage: 'Poids maximal accepté pour l\'image : {{ limit }} {{ suffix }}',
+        maxSizeMessage: 'Poids maximal accepté : {{ limit }} {{ suffix }}.',
         mimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/apng', 'image/webp', 'image/avif'],
-        mimeTypesMessage: 'Le format ({{ type }}) n\'est pas pris en compte. Formats acceptés : {{ types }}'
+        mimeTypesMessage: 'Le format ({{ type }}) n’est pas pris en charge. Formats acceptés : {{ types }}.'
     )]
-    private ?File $file = null;
+    private ?File $imageFile = null;
 
-
-    #[ORM\Column(length: 400, nullable: true)]
-    private ?string $caption = null;
-
-    #[ORM\Column(type: 'smallint', nullable: true)]
-    private ?int $position = null;
-
+    // ────────────────────────────────────────
+    // Video-specific fields
+    // ────────────────────────────────────────
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url(message: 'Veuillez saisir une adresse YouTube valide.')]
+    #[Assert\Regex(
+        pattern: '/(youtube\.com|youtu\.be)/i',
+        message: 'Le lien doit provenir de YouTube.'
+    )]
+    private ?string $youtubeUrl = null;
+
+    // ────────────────────────────────────────
+    // Common content fields
+    // ────────────────────────────────────────
+
+    #[ORM\Column(length: 400, nullable: true)]
+    #[Assert\Length(max: 400, maxMessage: 'La légende ne peut pas dépasser {{ limit }} caractères.')]
+    private ?string $caption = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255, maxMessage: 'Les crédits ne peuvent pas dépasser {{ limit }} caractères.')]
     private ?string $licence = null;
+
+    #[ORM\Column(type: 'smallint', nullable: true)]
+    #[Assert\PositiveOrZero(message: 'La position doit être positive ou nulle.')]
+    private ?int $position = null;
 
     // ────────────────────────────────────────
     // Relations
     // ────────────────────────────────────────
-
     #[ORM\ManyToOne(inversedBy: 'slides')]
     private ?PPBase $projectPresentation = null;
 
+    // ────────────────────────────────────────
+    // Lifecycle
+    // ────────────────────────────────────────
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
     }
 
     // ────────────────────────────────────────
-    // Getters / Setters
+    // Helpers
     // ────────────────────────────────────────
+    public function isImage(): bool
+    {
+        return $this->type === 'image';
+    }
 
+    public function isVideo(): bool
+    {
+        return $this->type === 'youtube_video';
+    }
+
+    // ────────────────────────────────────────
+    // Getters & Setters
+    // ────────────────────────────────────────
     public function getId(): ?int
     {
         return $this->id;
@@ -95,28 +130,50 @@ class Slide
         return $this;
     }
 
-    public function getAddress(): ?string
+    public function getImagePath(): ?string
     {
-        return $this->address;
+        return $this->imagePath;
     }
 
-    public function setAddress(?string $address): self
+    public function setImagePath(?string $imagePath): self
     {
-        $this->address = $address;
+        $this->imagePath = $imagePath;
         return $this;
     }
 
-    public function getFile(): ?File
+    public function getMimeType(): ?string
     {
-        return $this->file;
+        return $this->mimeType;
     }
 
-    public function setFile(?File $file = null): void
+    public function setMimeType(?string $mimeType): self
     {
-        $this->file = $file;
-        if ($file !== null) {
+        $this->mimeType = $mimeType;
+        return $this;
+    }
+
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+
+    public function setImageFile(?File $imageFile): void
+    {
+        $this->imageFile = $imageFile;
+        if ($imageFile !== null) {
             $this->updatedAt = new \DateTimeImmutable();
         }
+    }
+
+    public function getYoutubeUrl(): ?string
+    {
+        return $this->youtubeUrl;
+    }
+
+    public function setYoutubeUrl(?string $youtubeUrl): self
+    {
+        $this->youtubeUrl = $youtubeUrl;
+        return $this;
     }
 
     public function getCaption(): ?string
@@ -127,17 +184,6 @@ class Slide
     public function setCaption(?string $caption): self
     {
         $this->caption = $caption;
-        return $this;
-    }
-
-    public function getPosition(): ?int
-    {
-        return $this->position;
-    }
-
-    public function setPosition(?int $position): self
-    {
-        $this->position = $position;
         return $this;
     }
 
@@ -152,17 +198,28 @@ class Slide
         return $this;
     }
 
+    public function getPosition(): ?int
+    {
+        return $this->position;
+    }
+
+    public function setPosition(?int $position): self
+    {
+        $this->position = $position;
+        return $this;
+    }
+
     public function getProjectPresentation(): ?PPBase
     {
         return $this->projectPresentation;
     }
 
-    public function setProjectPresentation(?PPBase $projectPresentation): static
+    public function setProjectPresentation(?PPBase $projectPresentation): self
     {
         $this->projectPresentation = $projectPresentation;
-
         return $this;
     }
+
 
 
 }
