@@ -6,9 +6,6 @@ use App\Entity\PPBase;
 use App\Entity\Slide;
 use App\Entity\News;
 use App\Entity\Document;
-use App\Entity\Persorg;
-use App\Entity\ContributorStructure;
-use App\Entity\BankAccount;
 use App\Form\ProjectPresentation\{
     WebsiteType,
     NewsType,
@@ -17,17 +14,15 @@ use App\Form\ProjectPresentation\{
     DocumentType,
     ImageSlideType,
     VideoSlideType,
+    LogoThumbnailType,
 };  
 
 use App\Form\{
 
-    
-    PPBaseType,
-    ContributorStructureType,
-    PersorgType,
-    BankAccountType,
     CreatePresentationType
+
 };
+
 use App\Service\{
     TreatItem,
     CacheThumbnailService,
@@ -35,7 +30,6 @@ use App\Service\{
     AssessQualityService,
     MailerService,
     NotificationService,
-    StripeService
 };
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\{
@@ -87,7 +81,7 @@ final class ProjectPresentationController extends AbstractController
             $em->flush();
         }
 
-        // ✅ 2. Editing allowed — show edit forms
+        // When editing is allowed — show edit forms
         if ($this->isGranted('edit', $presentation)) {
             // Group of small forms
             $forms = [
@@ -98,10 +92,7 @@ final class ProjectPresentationController extends AbstractController
                 'addDocumentForm' => $this->createForm(DocumentType::class, new Document()),
                 'addImageForm' => $this->createForm(ImageSlideType::class, (new Slide())->setType('image')),
                 'addVideoForm' => $this->createForm(VideoSlideType::class, (new Slide())->setType('youtube_video')),
-                'addLogoForm' => $this->createForm(PPBaseType::class, $presentation),
-                'addECSForm' => $this->createForm(ContributorStructureType::class, new ContributorStructure()),
-                'addPersorgForm' => $this->createForm(PersorgType::class, new Persorg()),
-                'bankAccountInfoForm' => $this->createForm(BankAccountType::class, new BankAccount()),
+                'addLogoForm' => $this->createForm(LogoThumbnailType::class, $presentation),
             ];
 
             // Handle all forms sequentially (simplified readability)
@@ -134,26 +125,6 @@ final class ProjectPresentationController extends AbstractController
                 'contactUsPhone' => $this->getParameter('app.contact_phone'),
                 'firstTimeEditor' => $firstTimeEditor,
                 ...array_map(fn($f) => $f->createView(), $forms),
-            ]);
-        }
-
-        // ✅ 3. Non-editor users (show-only)
-        $createForm = $this->createForm(CreatePresentationType::class, new PPBase());
-        $createForm->handleRequest($request);
-
-        if ($createForm->isSubmitted() && $createForm->isValid()) {
-            $projectGoal = $createForm->get('goal')->getData();
-
-            $mailer->send(
-                $this->getParameter('app.email.noreply'),
-                'Propon',
-                $this->getParameter('app.email.contact'),
-                "A New Presentation Has Been Created",
-                sprintf('Project Goal: %s', $projectGoal)
-            );
-
-            return $this->redirectToRoute('edit_presentation_as_guest_user', [
-                'goal' => $projectGoal,
             ]);
         }
 
