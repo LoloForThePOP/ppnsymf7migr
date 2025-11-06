@@ -58,7 +58,7 @@
         
         </style>
 
-        <div class="d-none">{{ form_row(form.imageSlide.file) }}</div>
+        <div class="d-none">{{ form_row(form.imageSlide.imageFile) }}</div>
 
         <div id="preview-container" class = "d-flex justify-content-center" style="margin-top:1rem;">
             <img id="preview" src="" alt="Preview" style="max-width:200px; display:none; border:1px solid #ccc; padding:5px; border-radius:5px;">
@@ -72,7 +72,7 @@
             document.addEventListener('DOMContentLoaded', () => {
 
                 const icon  = document.getElementById({{uploadIconId|json_encode|raw}});
-                const input = document.getElementById({{form.imageSlide.file.vars.id|json_encode|raw}});
+                const input = document.getElementById({{form.imageSlide.imageFile.vars.id|json_encode|raw}});
                     const preview  = document.getElementById('preview');
 
                 // When the icon is clicked, simulate a click on the hidden input

@@ -63,7 +63,6 @@
         <link href="/css/app.css" rel="stylesheet"> {# General stylesheet for Propon #}
 
         {% block stylesheets %}{% endblock %}
-            {{ encore_entry_link_tags('app') }}
 
 
         {% block priorJavascipts %}{% endblock %}
@@ -164,8 +163,11 @@
         
 
 
-        {% block javascripts %}{% endblock %}
-            {{ encore_entry_script_tags('app') }}
+        {% block javascripts %}
+        
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+            
+        {% endblock %}
 
     </head>
 

@@ -8,7 +8,7 @@
         
         {{ form_errors(form.goal) }}
         {{ form_errors(form.textDescription) }}
-        {{ form_errors(form.imageSlide.file) }}
+        {{ form_errors(form.imageSlide.imageFile) }}
         {{ form_errors(form.title) }}
     
     </div>
@@ -60,7 +60,7 @@
 
         {% if position != 0 %}
 
-            <a class="text-body " href="{{ path('project_presentation_helper', {'stringId': stringId, 'position': previousPosition }) }}"><button type="button" class="action-button btn btn-outline-dark">Retour</button></a>        
+            <a class="text-body " href="{{ path('create_project_presentation', {'stringId': stringId, 'position': previousPosition }) }}"><button type="button" class="action-button btn btn-outline-dark">Retour</button></a>        
                 
         {% endif %}
 

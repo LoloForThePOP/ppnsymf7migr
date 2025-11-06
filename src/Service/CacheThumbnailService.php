@@ -84,7 +84,7 @@ class CacheThumbnailService
             $slide = $slides->first();
 
             if ($slide->getType() === 'image') {
-                return $this->uploaderHelper->asset($slide, 'file');
+                return $this->uploaderHelper->asset($slide, 'imageFile');
             }
 
             if ($slide->getType() === 'youtube_video') {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\ProjectPresentation;
 
 use App\Entity\Slide;
 use App\Entity\PPBase;
@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class CreateProjectPresentationController extends AbstractController
+class CreateController extends AbstractController
 {
 
     public function __construct(
@@ -28,8 +28,8 @@ class CreateProjectPresentationController extends AbstractController
     ) {}
 
     #[Route(
-        '/step-by-step-project-presentation/{position?0}/{stringId?}',
-        name: 'project_presentation_helper',
+        '/create-project-presentation/{position?0}/{stringId?}',
+        name: 'create_project_presentation',
         methods: ['GET', 'POST']
     )]
     public function origin(
@@ -72,7 +72,7 @@ class CreateProjectPresentationController extends AbstractController
             $this->em->persist($presentation);
             $this->em->flush();
 
-            return $this->redirectToRoute('project_presentation_helper', [
+            return $this->redirectToRoute('create_project_presentation', [
                 'stringId' => $presentation->getStringId(),
                 'position' => 1,
             ]);
@@ -96,7 +96,7 @@ class CreateProjectPresentationController extends AbstractController
                 🙋 Si vous avez besoin d'aide, utilisez le bouton d'aide rapide en bas de page.
             HTML);
 
-            return $this->redirectToRoute('show_presentation', [
+            return $this->redirectToRoute('edit_show_project_presentation', [
                 'stringId' => $presentation->getStringId(),
             ]);
         }
@@ -126,7 +126,7 @@ class CreateProjectPresentationController extends AbstractController
 
                 // VichUploader handles moving the file
                 if ($slide->getImageFile()) {
-                    $this->imageResizer->edit($slide); 
+                   // to do $this->imageResizer->edit($slide); 
                 }
                 
                 // checked: check if file name is manage by Vitch and manage it as unique.
@@ -147,7 +147,7 @@ class CreateProjectPresentationController extends AbstractController
         }
 
         // Go to next step
-        return $this->redirectToRoute('project_presentation_helper', [
+        return $this->redirectToRoute('create_project_presentation', [
             'stringId' => $presentation->getStringId(),
             'position' => $nextPosition,
         ]);
