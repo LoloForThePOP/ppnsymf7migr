@@ -1,8 +1,43 @@
 {% extends 'base.html.twig' %}
 
-{% block headTag %}{% endblock %}
 
-{% block title %}Page de présentation de projet{% endblock %}
+{% set createdAt = presentation.createdAt | date("Y - m - d") %}
+{% set creator = presentation.creator.username %}
+
+{# SEO & Open Graph: Providing a page title #}
+{# Its composition : "{Project Title} - "(if we got one) + {Project goal (first letter uppercased)} (always got one) #}
+{% set OGTitle %}{{ presentation.title ? presentation.title ~ " - " : '' }}{{ presentation.goal[:1] | upper ~ presentation.goal[1:] }}{% endset %}
+
+{# SEO & Open Graph: Providing a page description #}
+{% set OGDescription %}{{ presentation.textDescription | slice (0, 220) | striptags }}{% endset %}
+
+{# Open Graph: Providing a page image #}
+{# We provide thumbnail url #}
+
+{% set OGImageUrl %}{{ presentation.extra.cacheThumbnailUrl ?: null }}{% endset %}
+
+{# Open Graph #}
+{% set OGPageUrl = app.request.uri %}
+
+
+{% block headTag %}
+
+
+    <meta name="description" content="{{ OGDescription }}">
+    <meta name="author" content="{{ creator }}">
+    <meta name="keywords" content="{{ presentation.keywords }}">
+    <meta name="date" content="{{ createdAt}}">
+
+    {{ _self.openGraph(OGTitle, 'Propon', OGPageUrl, OGDescription, 'article', OGImageUrl, null) }} {# Called from base.html.twig #}
+
+
+    {# Propon Project Presentation Page might be accessed with different urls, so we use a canonical tag to provide a central one for SEO #}
+
+    <link rel= "canonical" href= "{{ url ( 'edit_show_project_presentation' , {'stringId' : presentation.stringId }) }}" />
+
+{% endblock %}
+
+{% block title %}{{OGTitle}}{% endblock %}
 
 {% block body %}
 
