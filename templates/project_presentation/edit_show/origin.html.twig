@@ -1,5 +1,6 @@
 {% extends 'base.html.twig' %}
 
+{# Setting some presentation metadata for SEO, Open Graph #}
 
 {% set createdAt = presentation.createdAt | date("Y - m - d") %}
 {% set creator = presentation.creator.username %}
@@ -16,12 +17,13 @@
 
 {% set OGImageUrl %}{{ presentation.extra.cacheThumbnailUrl ?: null }}{% endset %}
 
-{# Open Graph #}
+{# Open Graph asks for a page url #}
 {% set OGPageUrl = app.request.uri %}
 
 
 {% block headTag %}
 
+    {# SEO Meta Tags #}
 
     <meta name="description" content="{{ OGDescription }}">
     <meta name="author" content="{{ creator }}">
@@ -30,21 +32,56 @@
 
     {{ _self.openGraph(OGTitle, 'Propon', OGPageUrl, OGDescription, 'article', OGImageUrl, null) }} {# Called from base.html.twig #}
 
-
     {# Propon Project Presentation Page might be accessed with different urls, so we use a canonical tag to provide a central one for SEO #}
 
     <link rel= "canonical" href= "{{ url ( 'edit_show_project_presentation' , {'stringId' : presentation.stringId }) }}" />
 
+    {# TinyMCE Script only if the user can edit the presentation (add a news, update project description #}
+
+    {% if is_granted('edit', presentation) %}
+
+        <script src="https://cdn.tiny.cloud/1/ozugcg6rtcsvf9xx1qfujj2aluoo7ezwd2pfx5xnwf4nhujq/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
+    {% endif %}
+
 {% endblock %}
+
+{% block stylesheets %}
+
+    <link href="/css/project_presentation_page.css" rel="stylesheet">
+    <link href="/css/comments.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+
+    {# WYSIWYG editor styles only if the user can edit the presentation #}
+
+    {% if is_granted('edit', presentation) %}
+
+        <link href="/css/wysiwyg.css" rel="stylesheet">
+        <link href="/css/create_news.css" rel="stylesheet">
+
+    {% endif %}
+
+{% endblock %}
+
 
 {% block title %}{{OGTitle}}{% endblock %}
 
 {% block body %}
 
-    <div class="page-container container d-flex justify-content-center text-center p-0 mt-5">
+    <div class="page-container container m-4">
 
-       {{ component('RandomNumber', { max: 20 }) }}
+
+        {% include 'project_presentation/edit_show/_partials/_follow_button.html.twig' %}
+
+
+
+
+
                
     </div>
     
+{% endblock %}
+
+{% block javascripts %}
+
 {% endblock %}

@@ -1,0 +1,134 @@
+{# Html buttons is rendered whether project is followed or not #}
+
+{% macro followButton (isFollowedClass = "") %}
+
+    <div class="follow-button {{ isFollowedClass ? 'isFollowed' }} ">
+
+        <div class="not-followed-display">
+            
+            <img class="follow-icon" src="{{ asset('follow.svg', 'misc')}}" alt="an arrow towards right direction symbolising a following" width="22" height="22">
+
+            <span class="text">Suivre</span>
+        
+        </div>
+
+        <div class="followed-display">
+            
+            <span class="text">Suivi</span>
+
+            <img class="check-icon" src="{{ asset('check.svg', 'misc')}}" alt="a check icon symbolising followed" width="14" height="14">
+        
+        </div>
+
+    </div>
+
+{% endmacro %}
+
+{# Logic to display the appropriate button according to user logged in status and follow status #}
+
+
+{% if not app.user %}
+    
+    <a href="{{path('app_login')}}">
+
+        {{ _self.followButton() }}
+
+    </a>
+
+{% else %} {# User is logged in #}
+
+    <a 
+        class="js-follow-pp" 
+        data-url="{{ path('ajax_follow_pp', { stringId: presentation.stringId }) }}"
+        data-token="{{ csrf_token('follow' ~ presentation.stringId) }}"
+    >
+
+        {% if presentation.isFollowedBy(app.user) %}
+
+            {{ _self.followButton('isFollowed') }}
+
+        {% else %}
+
+            {{ _self.followButton() }}
+
+        {% endif %}
+
+    </a>
+
+{% endif %}
+
+   
+{# Styles for the follow button #}
+
+<style>
+
+    /* These styles are overrided when avoce button is reused elsewhere */
+
+    .follow-button {
+        padding: 1px 8px 1px 8px;
+        border: 2px solid rgb(158, 196, 137);
+        border-radius: 50px;
+        color: #373737;
+        cursor: pointer;
+    }
+
+    
+    .follow-button > * {
+        display: flex;
+        align-items: center;
+    }
+    
+    .follow-button .not-followed-display .text {
+        margin-right: 2px;
+    }
+
+
+    .follow-button.isFollowed .not-followed-display{
+        display: none;
+    }
+
+    .follow-button:not(.isFollowed) .followed-display{
+        display: none;
+    }
+
+</style>
+
+
+<script>
+
+    $(document).ready(function(){
+
+        $( ".js-follow-pp" ).on( "click", function(e) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const $tag = $(this);
+            const url = $tag.data('url');
+            const token = $tag.data('token');
+
+            $.ajax({
+
+                url: url,
+                data: { _token: token },
+                type: "POST",
+                
+                success: function(data) {
+
+                    $(".follow-button").toggleClass("isFollowed");
+                    
+                },
+
+                error : function(xhr, textStatus, errorThrown) {
+
+                    console.log(errorThrown);
+
+                }  
+
+            });
+
+        });
+
+    });
+
+</script>

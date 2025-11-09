@@ -621,6 +621,32 @@ class PPBase
         return false;
     }
 
+
+
+
+    /**
+     * Toggle the follow relationship for a user.
+     * Returns the Follow entity to persist/remove, or null.
+     */
+    public function toggleFollowEntity(User $user): ?Follow
+    {
+        foreach ($this->followers as $follow) {
+
+            if ($follow->getUser() === $user) { //so we unfollow presentation
+                $this->removeFollower($follow); 
+                return $follow; // Return so the caller can remove it
+            }
+
+        }
+
+        // Means “follow”
+        $follow = new Follow();
+        $follow->setUser($user);
+        $this->addFollower($follow);
+
+        return $follow;
+    }
+
     /**
      * @return Collection<int, Like>
      */

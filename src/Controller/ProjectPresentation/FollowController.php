@@ -1,0 +1,79 @@
+<?php
+
+namespace App\Controller\ProjectPresentation;
+
+use App\Entity\Follow;
+use App\Entity\PPBase;
+use App\Repository\FollowRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
+class FollowController extends AbstractController
+{
+    /**
+     * Allow the user to follow or unfollow a presentation (AJAX).
+     */
+    #[Route('/project/{stringId}/follow', name: 'ajax_follow_pp', methods: ['POST'])]
+    public function ajaxFollow(
+        Request $request,
+        #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
+        EntityManagerInterface $manager,
+        FollowRepository $followRepo
+    ): JsonResponse {
+
+        $user = $this->getUser();
+
+        if (!$user) {
+            return new JsonResponse([
+                'error' => 'Authentication required',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        // CSRF token validation
+        $submittedToken = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('follow' . $presentation->getStringId(), $submittedToken)) {
+            return new JsonResponse([
+                'error' => 'Invalid CSRF token',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        // Check follow status
+        $existingFollow = $followRepo->findOneBy([
+            'projectPresentation' => $presentation,
+            'user' => $user,
+        ]);
+
+        if ($existingFollow) {
+            // Unfollow
+            $manager->remove($existingFollow);
+            $manager->flush();
+
+            return new JsonResponse([
+                'code' => 200,
+                'status' => 'success',
+                'action' => 'removed',
+                'message' => 'You have unfollowed this presentation.',
+            ]);
+        }
+
+        // Follow
+        $follow = (new Follow())
+            ->setUser($user)
+            ->setProjectPresentation($presentation);
+
+        $manager->persist($follow);
+        $manager->flush();
+
+        return new JsonResponse([
+            'code' => 200,
+            'status' => 'success',
+            'action' => 'created',
+            'message' => 'You are now following this presentation.',
+        ]);
+    }
+}

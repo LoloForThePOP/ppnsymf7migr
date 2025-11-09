@@ -41,12 +41,12 @@ final class ProfileType extends AbstractType
 
             ->add('website1', UrlType::class, [
                 'label' => 'Réseau social ou site web',
-                'attr' => ['placeholder' => 'Écrire ici'],
+                'attr' => ['placeholder' => 'Écrire une adresse web ici'],
                 'required' => false,
             ])
             ->add('website2', UrlType::class, [
                 'label' => 'Réseau social ou site web 2',
-                'attr' => ['placeholder' => 'Écrire ici'],
+                'attr' => ['placeholder' => 'Écrire une adresse web ici'],
                 'required' => false,
             ])
             ->add('website3', UrlType::class, [
