@@ -71,9 +71,12 @@
         {# Some Bootstrap components use a specific javascript #}
         <script src="/js/bootstrap.js"></script>
 
-        {# I know it's outdated... but it's so easy to use #}
+        {# I know it's outdated but so easy to use #}
         <script src="/js/jquery-3.6.0.js"></script>
 
+        {# Misc js functions like detect if user device is tiny, detect if user is offline... #}
+        {# Defines tinyScreen boolean js variable #}
+        <script src="/js/misc.js"></script>
 
 
 
@@ -117,33 +120,6 @@
         </script>
 
 
-        {# check if user device is a tiny screen #}
-
-
-        <script>
-
-            var tinyScreen = false;
-
-            function checkTinyScreen(){
-
-            if ($(window).width() < 590) {
-                tinyScreen = true;
-                }else {
-                tinyScreen = false;
-                } 
-
-            }
-
-            checkTinyScreen(); //check on page load
-            
-
-            $(window).on('resize', function() { //check if resized page
-
-                checkTinyScreen();
-
-            });
-
-        </script>
 
 
 
@@ -181,6 +157,15 @@
         {# Header Navbar #}
 
         {% include "_partials/header_navbar.html.twig" %}
+
+        {# feedback when no internet connection #}
+
+        <div class="no-internet-connection">
+
+            !!! Vous êtes hors-ligne.
+            <br>Veuillez vérifiez votre connexion.
+
+        </div>
 
 
         <!--Main Content Container -->

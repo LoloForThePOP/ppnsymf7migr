@@ -22,18 +22,7 @@ a{
     text-align: center;
 }
 
-/* .carousel-control-prev, .carousel-control-next {
 
-    display: flex;
-    top: unset;
-    bottom: unset;
-	z-index: 2;
-	width: 60px;
-	height: 60px;
-	border-radius: 50px;
-    opacity: unset;
-}
- */
 .bg-success-light{
     background-color: #d1e7dd
 }
@@ -51,19 +40,7 @@ a{
     h1, .h1 {
         font-size: calc(1.275rem + 1.5vw);
     }
-/* 
-    .carousel-control-prev, .carousel-control-next {
 
-        width: 31px;
-        height: 31px;
-    
-    } 
-
-    .carousel-control-prev-icon, .carousel-control-next-icon {
-
-        width: 16px;
-        
-    }*/
 
 }
 
@@ -201,6 +178,27 @@ a{
 }
 
 /* End of Covering Footer */
+
+
+/* Online / Offline "Toast" defined in base template */
+
+
+.no-internet-connection{
+    display: none;
+    position: fixed;
+    top:20%;
+    right: 0;
+    z-index: 10;
+    width: 330px;
+    padding: 10px;
+    background-color: rgb(255, 177, 177);
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+body.user-offline .no-internet-connection{
+    display: block;
+}
 
 
 /* Flash Messages (static by default below header navbar) 

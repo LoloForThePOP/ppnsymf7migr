@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class FollowController extends AbstractController
@@ -18,6 +19,7 @@ class FollowController extends AbstractController
     /**
      * Allow the user to follow or unfollow a presentation (AJAX).
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/project/{stringId}/follow', name: 'ajax_follow_pp', methods: ['POST'])]
     public function ajaxFollow(
         Request $request,
