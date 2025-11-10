@@ -1,0 +1,56 @@
+
+
+{# Tiny "comment icon + count" display anchored to comment section (shortcut to access comments section while seeing comments count) #}
+
+{% macro commentsIcon(countComments) %}
+    
+    <a class="text-body" href="#comments-struct-container">
+
+        <div class="d-flex align-items-center lh-1">
+            
+            <img class="commentIcon me-2" src="{{ asset('dialog.svg', 'misc')}}" alt="an icon representing a dialog">
+
+            <span class="">{{countComments}}</span> 
+        
+        </div>
+    
+    </a>
+    
+{% endmacro %}
+
+
+{# Edit project presentation thumbnail link #}
+
+{% macro editPresentationThumbnail(stringId) %}
+    
+    <span class="pp-edition-mode ms-2 ms-md-3"><a class="" style="color: rgb(33, 37, 41);" href="{{ path ('edit_pp_thumbnail', {'stringId': stringId}) }}">🖼️ Vignette</a></span>
+    
+{% endmacro %}
+
+
+{# Dropdown containing more info about the project #}
+
+{% macro threeDotsMoreInfo(pageInfo) %}
+    
+    <img id="" class="upper-box-page-info-icon cursor-pointer" src="{{ asset('three_dots.svg', 'misc')}}" alt="three dots icon" width="25" height="25" data-bs-toggle="dropdown" aria-expanded="false" type="button">
+
+    {# Dropdown Content #}
+
+    <ul id="page-info-dropdown-content" class="dropdown-menu px-3" aria-labelledby="page-info-dropdown" style="max-width: 360px;">
+
+        {{pageInfo}}
+
+    </ul>
+    
+{% endmacro %}
+
+
+{% set shareIcon %}
+    
+    <a href="#" class="d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#pp-share" >
+
+        <img class="shareIcon" src="{{ asset('share_light.svg', 'misc')}}" alt="share icon" width="22" height="22">
+    
+    </a>
+    
+{% endset %}

@@ -1,0 +1,130 @@
+
+
+{% macro likeButton (isLikedClass = "") %}
+
+    <div class="like-button {{ isLikedClass ? 'isLiked' }} d-flex align-items-center">
+
+        <img class="likeIcon notFilled me-2" src="{{ asset('thumb_up.svg', 'misc')}}" alt="an icon representing a thumb up" width="24" height="22">
+
+        <img class="likeIcon filled me-2" src="{{ asset('thumb_up_filled.svg', 'misc')}}" alt="an icon representing a thumb up filled with a color" width="24" height="22">
+       
+    </div>
+    
+{% endmacro %}
+
+
+{% if not app.user %} {# User can't like if not logged in, targetting to login page instead #}
+
+    <a class="d-flex align-items-center" href="{{path('app_login')}}">
+
+        {{ _self.likeButton() }}
+
+{% else %} {# Logged In User; they can like / unlike a project presentation #}
+
+    <a 
+    
+        href="#"
+        class="js-ajax-like-pp d-inline-block"
+        data-url="{{ path('ajax_like_pp', { stringId: presentation.stringId }) }}"
+        data-token="{{ csrf_token('like' ~ presentation.stringId) }}"
+        
+    >
+
+        {% if presentation.isLikedBy(app.user) %}
+
+            {{ _self.likeButton("isLiked") }}
+
+        {% else %}
+                 
+            {{ _self.likeButton() }}
+
+
+        {% endif %}
+
+        </a>
+
+        <span class="likesCount cursor-default">{{presentation.likes | length}}</span> 
+
+    </div>
+    
+{% endif %} 
+
+    </a>
+
+{# Likes count anyway #}
+
+<span class="likesCount cursor-default">{{presentation.likes | length}}</span> 
+
+
+<style>
+
+
+    .likeIcon.filled {
+        display: none;
+    }
+
+    .likeIcon.notFilled {
+        display: inline;
+    }
+
+    /* When liked */
+    .like-button.isLiked .likeIcon.filled {
+        display: inline;
+    }
+
+    .like-button.isLiked .likeIcon.notFilled {
+        display: none;
+    }
+
+    @media screen and (max-width: 580px) {
+
+        .likeIcon{
+            width: 18px;    
+        }
+
+    }
+
+</style>
+
+
+
+<script>
+
+    $(document).ready(function(){
+
+        $( ".js-ajax-like-pp" ).on( "click", function(e) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const $tag = $(this);
+            const url = $tag.data('url');
+            const token = $tag.data('token');
+
+            $.ajax({
+
+                url: url,
+                data: { _token: token },
+                type: "POST",
+                
+                success: function(data) {
+
+                    $(".like-button").toggleClass("isLiked");
+                    $(".likesCount").text(data.likesCount);
+                    
+                },
+
+                error : function(xhr, textStatus, errorThrown) {
+
+                    console.log(errorThrown);
+
+                }  
+
+            });
+
+        });
+
+    });
+
+
+</script>

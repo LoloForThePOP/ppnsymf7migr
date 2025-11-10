@@ -2,9 +2,9 @@
 
 namespace App\Controller\ProjectPresentation;
 
-use App\Entity\Follow;
+use App\Entity\Like;
 use App\Entity\PPBase;
-use App\Repository\FollowRepository;
+use App\Repository\LikeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,18 +14,18 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class FollowController extends AbstractController
+class LikeController extends AbstractController
 {
     /**
-     * Allow the user to follow or unfollow a presentation (AJAX).
+     * Allow the user to like or unlike a project presentation (AJAX).
      */
     #[IsGranted('ROLE_USER')]
-    #[Route('/project/{stringId}/follow', name: 'ajax_follow_pp', methods: ['POST'])]
-    public function ajaxFollowPP(
+    #[Route('/project/{stringId}/like', name: 'ajax_like_pp', methods: ['POST'])]
+    public function ajaxLikePP(
         Request $request,
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         EntityManagerInterface $manager,
-        FollowRepository $followRepo
+        LikeRepository $likeRepo
     ): JsonResponse {
 
         $user = $this->getUser();
@@ -38,44 +38,46 @@ class FollowController extends AbstractController
 
         // CSRF token validation
         $submittedToken = $request->request->get('_token');
-        if (!$this->isCsrfTokenValid('follow' . $presentation->getStringId(), $submittedToken)) {
+        if (!$this->isCsrfTokenValid('like' . $presentation->getStringId(), $submittedToken)) {
             return new JsonResponse([
                 'error' => 'Invalid CSRF token',
             ], Response::HTTP_FORBIDDEN);
         }
 
-        // Check follow status
-        $existingFollow = $followRepo->findOneBy([
+        // Check like status
+        $existingLike = $likeRepo->findOneBy([
             'projectPresentation' => $presentation,
             'user' => $user,
         ]);
 
-        if ($existingFollow) {
-            // Unfollow
-            $manager->remove($existingFollow);
+        if ($existingLike) {
+            // Unlike
+            $manager->remove($existingLike);
             $manager->flush();
 
             return new JsonResponse([
                 'code' => 200,
                 'status' => 'success',
                 'action' => 'removed',
-                'message' => 'You have unfollowed this presentation.',
+                "likesCount" => $likeRepo->count(["projectPresentation" => $presentation]),
+                'message' => 'You have unliked this presentation.',
             ]);
         }
 
-        // Follow
-        $follow = (new Follow())
+        // Like
+        $like = (new Like())
             ->setUser($user)
             ->setProjectPresentation($presentation);
 
-        $manager->persist($follow);
+        $manager->persist($like);
         $manager->flush();
 
         return new JsonResponse([
             'code' => 200,
             'status' => 'success',
             'action' => 'created',
-            'message' => 'You are now following this presentation.',
+            "likesCount" => $likeRepo->count(["projectPresentation" => $presentation]),
+            'message' => 'You are now liking this presentation.',
         ]);
     }
 }
