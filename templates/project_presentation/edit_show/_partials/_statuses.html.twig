@@ -112,22 +112,36 @@
 
         {% for item in presentation.getEnumStatusItems() %}
             {{ pills.pill(item) }}
-        {% else %}
-            <span class="text-muted">Aucun statut défini</span>
         {% endfor %}
+
+
+                
 
     </div>
 
-
+<div id="project-status-remarks-view" class="mt-3 w-100">
+            <div class="border-start ps-3 text-muted fst-italic">
+                {{ presentation.statusRemarks|nl2br }}
+            </div>
+        </div>
   
 
 
 <script>
 
+
+
+
 $(document).on('click', '.status-pill', function() {
     const $pill = $(this);
     const $container = $('#project-statuses-editor');
     const updateUrl = $container.data('update-url');
+    const remarks = $('#status-remarks').val();
+
+    const $feedback = $('#remarks-feedback');
+    $feedback.text('⟳ Sauvegarde...').removeClass('text-success text-danger d-none').addClass('text-muted');
+
+
 
     // Toggle UI
     $pill.toggleClass('active');
@@ -142,12 +156,14 @@ $(document).on('click', '.status-pill', function() {
 
         url: updateUrl,
         type: 'POST',
-        data: JSON.stringify({ statuses: activeStatuses }),
+        data: JSON.stringify({ statuses: activeStatuses, remarks: remarks }),
         contentType: 'application/json',
 
         success: function (response) {
-            console.log('Statuses saved:', response.statuses);
-            $(document).trigger('statuses:updated', [response.statuses]); // Sending an updated event so that we update view
+            console.log('Statuses saved:', response.enumStatuses);
+            $(document).trigger('statuses:updated', [response.enumStatuses, response.statusRemarks]); // Sending an updated event so that we update view
+                        $feedback.text('✓ Enregistré').removeClass('text-muted').addClass('text-success');
+            setTimeout(() => $feedback.addClass('d-none'), 1500);
         },
 
         error: function (xhr) {
@@ -167,7 +183,7 @@ $(document).on('click', '.status-pill', function() {
 
 
     <script>
-$(document).on('statuses:updated', function (event, newStatuses) {
+$(document).on('statuses:updated', function (event, newStatuses, newRemarks) {
     const $container = $('#project-statuses-view');
     const catalog = $container.data('catalog') || [];
 
@@ -187,6 +203,16 @@ $(document).on('statuses:updated', function (event, newStatuses) {
 
     console.log(activeItems); // ✅ Now filled correctly
     TemplateManager.renderList('#project-statuses-view', '#status-pill-template', activeItems);
+
+        const $remarkBox = $('#project-status-remarks-view');
+
+
+    // Update remark text
+    if ($remarkBox.length) {
+        $remarkBox.text(newRemarks || '');
+    }
+
+
 });
 
 

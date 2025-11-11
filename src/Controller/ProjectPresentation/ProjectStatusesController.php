@@ -41,8 +41,8 @@ class ProjectStatusesController extends AbstractController
 
         return new JsonResponse([
             'success' => true,
-            'statuses' => $project->getStatuses(),
-            'remarks' => $project->getStatusRemarks(),
+            'enumStatuses' => $project->getStatuses(),
+            'statusRemarks' => $project->getStatusRemarks(),
         ]);
     }
 
