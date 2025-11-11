@@ -1,0 +1,91 @@
+{# Modal Box for Menu Buttons #}
+
+{% embed "utilities/modal_skeleton.html.twig" 
+
+    with {
+        
+        'modal_id': "project_status_edition",
+        'modal_title': "Statut (État Actuel du Projet) ", 
+        'modal_size': "modal-fullscreen modal-dialog-scrollable"
+        
+    } 
+    
+%}
+
+    {% block modalHeader %}{% endblock %}
+    {% block closingCross %}{% endblock %}
+
+    {# Project Status Selection Buttons Display #}
+
+    {% block modalBody %}
+
+        {# Standard Modal header is fixed, here we want a non fixed header so we create a custom one #}
+
+        <div class="modal-header-in-body pt-2">
+
+            <h5 class="modal-title w-100 fw-bold text-center py-md-3">
+            
+                <img class="mb-1 me-2" src="{{ asset('progress_status.svg', 'pp_wysiwyg')}}" alt="project status icon" width="27">
+                
+                Statut <br class="d-md-none"> (État Actuel du Projet) </h5>
+
+        </div>
+
+        {# Notification to user copntainer #}
+
+        <div class="container px-0 px-md-3 my-4">
+        
+            {# Notification to user #}
+
+            <div class="alert alert-info d-flex justify-content-center align-items-center fw-bold ps-3 pe-2" role="alert">
+
+                <div class="sm-fs-6 fs-5">
+
+                    Sélectionnez les colonnes et les boutons qui correspondent à votre situation.
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="container px-2 mt-4">
+
+            {# User can choose some enumerated status types #}
+
+            <div class="d-flex flex-column flex-lg-row justify-content-around px-2 mb-2">
+
+
+                Bonjour à tous !
+
+
+            </div>
+
+            {# User can add some infos and remarks #}
+
+            <div class="d-flex flex-column align-items-center mb-5">
+
+                <h5 class="text-center fw-bold lh-sm mb-3" style="font-size: large; font-weight: normal; color: #733100;">➜ Ici vous pouvez ajouter des précisions ou des remarques sur l'avancement de votre projet</h5>
+
+                <div class="border" data-edit='{"entity": "PPBase", "id": "{{presentation.id}}",  "property": "status", "subproperty":"userRemarks"}' data-text="Écrire ici" style="width: 600px; max-width: 100%; min-height: 110px; padding: 5px 10px;">{% if projectStatus.userRemarks is defined %}{{projectStatus.userRemarks.value}}{% endif %}
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="d-flex flex-row-reverse border-top pt-3">
+
+            <div class="me-5">
+
+                <button type="button" class="btn btn-validate px-2 my-3 me-5" data-bs-dismiss="modal">Ok ✔️</button>
+
+            </div>
+
+        </div>
+
+    {% endblock %}
+
+    {% block modalFooter %}{% endblock %}
+
+{% endembed %}

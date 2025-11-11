@@ -94,82 +94,43 @@
 
 {% block body %}
 
-    <div class="page-container container m-4">
+    <div class="page-container container m-4 {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}}">
 
-
-{# templates/project/_statuses.html.twig #}
-
-{% set catalog = constant('App\\\Enum\\\ProjectStatuses::CATALOG') %}
-
-{% set thisProjectActiveStatuses = presentation.getStatuses() %}
-
-<div class="project-statuses">
-
-    {% for category in catalog %}
-        <div class="status-category mb-4">
-            <h5 class="fw-bold text-muted mb-2">
-                {{ category.categoryLabels.description_fr }}
-            </h5>
-
-            <div class="d-flex flex-wrap gap-2">
-                {% for item in category.items %}
-                {% set isActive = item.uniqueName in thisProjectActiveStatuses %}
-                    <div class="status-pill px-3 py-2 rounded-pill {{ isActive ? 'active' }}"
-                         style="background-color: {{ item.bg_color }};"
-                         title="{{ item.description_fr }}">
-                        {{ item.short_description_fr }}
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-    {% endfor %}
-
-</div>
+    <script src="/js/template_manager.js"></script>
+  {% include 'project_presentation/edit_show/_partials/_statuses.html.twig' %}
+  
 
 
 
-<style>
-
-.project-statuses {
-    margin-top: 1rem;
-}
-
-.status-pill {
-    font-size: 0.9rem;
-    color: #222;
-    border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    cursor: default;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.status-pill:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-}
-
-
-.status-pill.active {
-    outline: 2px solid #4b9c3f;
-    font-weight: 600;
-}
 
 
 
-</style>
 
 
-<script>
-
-$(document).on('click', '.status-pill', function() {
-    $(this).toggleClass('active');
-    // optional: Ajax call to save new statuses
-});
 
 
-</script>
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+        {% include 'project_presentation/edit_show/_partials/_statuses/_edit_box.html.twig' %}
+
+
+        {% include 'project_presentation/edit_show/_partials/_statuses/_edit_button.html.twig' %}
+
+
+
+        
 
 
 
@@ -180,15 +141,6 @@ $(document).on('click', '.status-pill', function() {
         {% include 'project_presentation/edit_show/_partials/_upper_box.html.twig' %}
 
 
-        {% for status in presentation.statuses %}
-        {% set info = constant('App\\\\Model\\\\ProjectStatus::class').get(status) %}
-        <span class="inline-flex items-center px-2 py-1 text-sm font-medium rounded"
-                style="background-color: {{ info.color }};">
-            {{ info.short }}
-        </span>
-        {% else %}
-        <span class="text-gray-500">Aucun statut défini</span>
-        {% endfor %}
 
 
         {% include 'project_presentation/edit_show/_partials/_follow_button.html.twig' %}

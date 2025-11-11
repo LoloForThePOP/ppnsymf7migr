@@ -180,9 +180,17 @@ class PPBase
     private Collection $places;
 
 
-
+    /**
+     * Project statuses (progress) with enum variables (ProjectStatuses class)
+     */
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $statuses = [];
+
+    /**
+     * Project status as described / detailed by user with free text
+     */
+    #[ORM\Column(length: 3000, nullable: true)]
+    private ?string $statusRemarks = null;
 
     // ────────────────────────────────────────
     // Others Relations
@@ -215,6 +223,7 @@ class PPBase
      */
     #[ORM\ManyToMany(targetEntity: Category::class, mappedBy: 'projectPresentation')]
     private Collection $categories;
+
 
 
 
@@ -539,6 +548,38 @@ class PPBase
         return in_array($status, $this->statuses ?? [], true);
     }
 
+
+
+    public function getEnumStatusItems(): array
+    {
+        $items = [];
+        foreach ($this->getStatuses() as $statusKey) {
+            $statusItem = ProjectStatuses::get($statusKey);
+            if ($statusItem) {
+                $items[$statusKey] = $statusItem;
+            }
+        }
+        return $items;
+    }
+
+
+
+    public function getStatusRemarks(): ?string
+    {
+        return $this->statusRemarks;
+    }
+
+    public function setStatusRemarks(?string $statusRemarks): static
+    {
+        $this->statusRemarks = $statusRemarks;
+
+        return $this;
+    }
+
+
+
+
+
     /**
      * @return Collection<int, Document>
      */
@@ -823,7 +864,6 @@ class PPBase
 
         return $this;
     }
-
 
 
 
