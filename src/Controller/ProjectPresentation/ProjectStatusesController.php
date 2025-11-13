@@ -5,18 +5,19 @@ namespace App\Controller\ProjectPresentation;
 use App\Entity\PPBase;
 use App\Enum\ProjectStatuses;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ProjectStatusesController extends AbstractController
 {
-    #[Route('/project/{id}/statuses/update', name: 'ajax_project_statuses_update', methods: ['POST'])]
+    #[Route('/project/{stringId}/statuses/update', name: 'ajax_project_statuses_update', methods: ['POST'])]
     #[IsGranted('edit', 'project')] // security voter protection
     public function update(
-        PPBase $project,
+        #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $project,
         Request $request,
         EntityManagerInterface $em
     ): JsonResponse {

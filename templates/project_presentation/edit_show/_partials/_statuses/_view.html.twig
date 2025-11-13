@@ -6,7 +6,9 @@
         data-status="{{ item.uniqueName }}"
         style="background-color: {{ item.bg_color }};"
         title="{{ item.description_fr }}">
+
         {{ item.short_description_fr }}
+
     </span>
 
 {% endmacro %}
@@ -21,32 +23,164 @@
 </template>
 
 
+        <script>
 
-{# Project status view (a collection of enumerated status pills + string remarks from project team) #}
+                $(document).ready(function(){ 
+                
+                    $(function () {
+                        $('[data-toggle="popover"]').popover()
+                    })
 
-{# enumerated status pills #}
+                    $('.popover-dismiss').popover({
+                       trigger: 'focus'
+                    })
+                    
 
-<div id="project-enumerated-statuses-view"
+                    const htmlContent = $('.project-statuses-view');
 
-    class="project-enumerated-statuses-view d-flex flex-wrap gap-2"
-    data-current-statuses='{{ presentation.statuses | json_encode }}'
-    data-catalog="{{ catalog | json_encode }}"
+                    new bootstrap.Popover(document.getElementById('myBtn'), {
+                      html: true,
+                      content: htmlContent,
+                      trigger: "click",
+                      sanitize: false
+                    });
 
->
 
-    {% for item in presentation.getEnumStatusItems() %}
-        {{ pills.pill(item) }}
-    {% endfor %}
+                });
 
-</div>
+        
+       
+        
+        </script>
 
-{# Project status free string remarks #}
 
-<div id="project-status-remarks-view" class="mt-3 w-100">
 
-    <div class="border-start ps-3 text-muted fst-italic">
 
-        {{ presentation.statusRemarks|nl2br }}
+<button type="button" 
+        id="myBtn" 
+        class="btn btn-primary" 
+        data-bs-toggle="popover">
+  Click me
+</button>
+
+
+<script>
+
+
+
+
+
+
+</script>
+
+
+
+
+
+
+
+        <a tabindex="0" class="btn btn-lg btn-danger popover-dismiss" role="button" data-toggle="popover" data-trigger="focus" title="Dismissible popover" data-content="And here's some amazing content. It's very engaging. Right?">Dismissible popover</a>
+
+<button type="button" class="btn btn-lg btn-danger" data-toggle="popover" title="Popover title" data-content="And here's some amazing content. It's very engaging. Right?">Click to toggle popover</button>
+
+
+
+<button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="top" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
+  Popover on top
+</button>
+
+<button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="right" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
+  Popover on right
+</button>
+
+<button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Vivamus
+sagittis lacus vel augue laoreet rutrum faucibus.">
+  Popover on bottom
+</button>
+
+<button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="left" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
+  Popover on left
+</button>
+
+{# Project statuses view (a collection of enumerated status pills + string remarks from project team) #}
+
+<div class="project-statuses-view mx-3">
+
+    {# enumerated status pills #}
+
+    <div id="project-enumerated-statuses-view"
+
+        class="project-enumerated-statuses-view d-flex flex-wrap gap-2"
+        data-current-statuses='{{ presentation.statuses | json_encode }}'
+        data-catalog="{{ statusesCatalog | json_encode }}"
+
+    >
+
+        {% for item in presentation.getEnumStatusItems() %}
+            {{ pills.pill(item) }}
+        {% endfor %}
 
     </div>
+
+    {# Project status free string remarks #}
+
+    <div id="project-status-remarks-view" class="mt-3 w-100">
+
+        <div class="content">
+
+            {{ presentation.statusRemarks|nl2br }}
+
+        </div>
+
+    </div>
+
 </div>
+
+
+
+
+{# Status pills style #}
+
+<style>
+
+    .project-statuses-view{
+        display: inline-block;
+        border: 1px solid grey;
+        padding: 17px;
+        border-radius: 6px;
+    }
+
+    .project-statuses-view .content {
+        border: 1px solid #d7d7d7;
+        padding: 4px 11px;
+        border-radius: 7px;
+    }
+
+
+
+
+    .project-statuses {
+        margin-top: 1rem;
+    }
+
+    .status-pill {
+        font-size: 0.9rem;
+        color: #222;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        cursor: default;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .status-pill:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    }
+
+
+    .status-pill.active {
+        outline: 2px solid #4b9c3f;
+        font-weight: 600;
+    }
+
+</style>

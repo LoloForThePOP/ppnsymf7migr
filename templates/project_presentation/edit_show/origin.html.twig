@@ -100,10 +100,10 @@
 
 
 {# statuses catalog #}
-{% set catalog = constant('App\\\Enum\\\ProjectStatuses::CATALOG') %}
 
+        {% set statusesCatalog = constant('App\\\Enum\\\ProjectStatuses::CATALOG') %}
 
-{% set thisProjectActiveStatuses = presentation.getStatuses() %}
+        {% set thisProjectActiveStatuses = presentation.getStatuses() %}
 
         {% include 'project_presentation/edit_show/_partials/_statuses/_edit_button.html.twig' %}
 
@@ -113,7 +113,6 @@
 
         {% include 'project_presentation/edit_show/_partials/_statuses/_javascripts.html.twig' %}
 
-        {% include 'project_presentation/edit_show/_partials/_statuses/_temp_edit.html.twig' %}
 
         {% include 'project_presentation/edit_show/_partials/_statuses/_view.html.twig' %}
 

@@ -102,6 +102,12 @@ class CreateController extends AbstractController
             ]);
         }
 
+        $allowedSteps = ['title', 'initialStatus', 'imageSlide', 'textDescription'];
+
+        if (!in_array($helperType, $allowedSteps, true)) {
+            throw $this->createAccessDeniedException('Invalid helper operation.');
+        }
+
         // Handle Form logic
         switch ($helperType) {
 

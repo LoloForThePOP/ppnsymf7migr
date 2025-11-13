@@ -42,11 +42,10 @@
         
             {# Notification to user #}
 
-            <div class="alert alert-info d-flex justify-content-center align-items-center fw-bold ps-3 pe-2" role="alert">
-
+            <div class="status-box-global-info alert alert-info d-flex justify-content-center align-items-center fw-bold ps-3 pe-2" role="alert">
                 <div class="sm-fs-6 fs-5">
 
-                    Sélectionnez les colonnes et les boutons qui correspondent à votre situation.
+                    Sélectionnez les boutons qui correspondent à votre situation.
 
                 </div>
 
@@ -61,19 +60,81 @@
             <div class="d-flex flex-column flex-lg-row justify-content-around px-2 mb-2">
 
 
-                Bonjour à tous !
+                {% for statusCategory in statusesCatalog %}
+
+                {% set uniqueCategoryName = statusCategory.categoryLabels.uniqueName %}
+
+                <div 
+                    
+                    id="project-statuses-editor"
+                    class="project-statuses status-type-list-container d-inline-block"
+                    data-update-url="{{ path('ajax_project_statuses_update', { stringId: presentation.stringId }) }}"
+                    
+                >
+
+                    <h5 class="category-title" data-bs-toggle="collapse" href="#category-{{uniqueCategoryName}}">
+                        
+                        {{statusCategory.categoryLabels.description_fr  | raw }}
+                        &nbsp;▾
+                    
+                    </h5>
+
+                    <ul id="category-{{uniqueCategoryName}}" class="list-group collapse">
+
+                        {% for item in statusCategory.items %}
+
+                        {% set isActive = item.uniqueName in thisProjectActiveStatuses %} {# Checking if surrent status item is selected #}
+                
+                            <li 
+                                class=" {{ isActive ? 'active ' }}
+                                
+                                    project-status-button 
+                                    status-pill
+                                    rounded-pill
+                                    list-group-item 
+                                    list-group-item-action 
+                                    py-3
+                                    mb-3
+
+                                " 
+
+                                data-status="{{ item.uniqueName }}"
+                                style="background-color: {{ item.bg_color }};"
+                                title="{{ item.description_fr }}"
+                                                                
+                            >
+
+                                {{item.description_fr | raw }}
+                        
+                            </li>
+                        
+                        {% endfor %}
+                            
+                    </ul>
+
+                </div>
+
+                    
+                {% endfor %}
+
 
 
             </div>
 
             {# User can add some infos and remarks #}
 
-            <div class="d-flex flex-column align-items-center mb-5">
+            <div class="textarea-container d-flex flex-column align-items-center p-4 mb-5">
 
-                <h5 class="text-center fw-bold lh-sm mb-3" style="font-size: large; font-weight: normal; color: #733100;">➜ Ici vous pouvez ajouter des précisions ou des remarques sur l'avancement de votre projet</h5>
+                <label for="status-remarks-textarea" class="form-label fw-bold">Ici vous pouvez ajouter des précisions ou des détails sur l'avancement du projet :</label>
 
-                <div class="border" data-edit='{"entity": "PPBase", "id": "{{presentation.id}}",  "property": "status", "subproperty":"userRemarks"}' data-text="Écrire ici" style="width: 600px; max-width: 100%; min-height: 110px; padding: 5px 10px;">{% if projectStatus.userRemarks is defined %}{{projectStatus.userRemarks.value}}{% endif %}
-                </div>
+                <textarea 
+                
+                    id="status-remarks-textarea"
+                    class="form-control"
+                    rows="3"
+                    placeholder="Ajoutez des précisions sur l'avancement...">{{ presentation.statusRemarks }}</textarea>
+
+                <small class="text-muted d-none" id="remarks-feedback"></small>
 
             </div>
 
@@ -89,8 +150,168 @@
 
         </div>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+<style>
+
+    .modal-header-in-body{
+
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 0;
+
+    }
+
+    .status-box-global-info{
+        background-color: #f2fdff;
+        color: 
+    }
+
+    .status-type-list-container{
+
+        min-width: 250px;
+        min-height: 390px;
+        margin-right: 1rem;
+        margin-bottom: 1rem;
+
+    }
+
+    .status-type-list-container:last-of-type{
+
+        margin-right: 0;
+
+    }
+
+    .status-type-list-container .category-title {
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 1.10rem;
+
+        text-align: center;
+        
+        height: 63px;
+
+        padding: 0 8px;
+        margin-bottom: 20px;
+        border-radius: 50px;
+
+        font-weight: bold;
+        
+        background-color:beige; 
+        cursor:pointer;
+
+    }
+
+    .status-type-list-container .category-title:hover {
+        background-color: #bcd7ff;
+    }
+
+    .project-status-button{
+        cursor: pointer;
+        font-size: 17px;
+        line-height: 1.15;
+        background-color: cornsilk;
+        display: flex;
+        align-items: center;
+    }
+
+    .status-hover{
+        cursor: pointer;
+        font-size: larger;
+    }
+
+    .project-status-button.list-group-item-action.active {
+        color: black;
+        z-index: 2;
+        background-color: #cce1ff;
+        border-color: #bcd7ff;
+    }
+
+    .statusIcon {
+        width: 20px;
+        height: 20px;
+        margin-right: 20px;
+    }
+
+
+    #project_status_edition .textarea-container {
+        background-color: #e5fdd5;
+        border-radius: 35px;
+    }
+
+
+
+
+    @media screen and (max-width: 1200px) {
+
+        .modal-header-in-body{
+
+            padding: 0.6rem 0 0.8rem 0;
+
+        }
+
+
+        .status-type-list-container{
+
+            min-height: unset;
+            margin-right: 0rem;
+
+        }
+
+        .status-type-list-container .category-title {
+
+            font-size: 1.1rem;
+        }
+
+    }
+
+</style>
+
     {% endblock %}
 
     {% block modalFooter %}{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 {% endembed %}

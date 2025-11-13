@@ -99,25 +99,25 @@ final class ProjectStatuses
             'items' => [
                 [
                     'uniqueName' => 'computer_simulation',
-                    'description_fr' => "C'est actuellement une simulation informatique",
+                    'description_fr' => "Il est actuellement à l'état de simulation informatique",
                     'short_description_fr' => "Simulation informatique",
                     'bg_color' => '#d18eff4a',
                 ],
                 [
                     'uniqueName' => 'labo_prototype',
-                    'description_fr' => "C'est actuellement un prototype testé en laboratoire",
+                    'description_fr' => "Il est actuellement à l'état de prototype testé en considitions favorables",
                     'short_description_fr' => "Prototype en labo",
                     'bg_color' => '#d18eff4a',
                 ],
                 [
                     'uniqueName' => 'real_world_prototype',
-                    'description_fr' => "C'est actuellement un prototype testé en conditions réelles",
+                    'description_fr' => "Il est actuellement à l'état de prototype testé en conditions réelles",
                     'short_description_fr' => "Prototype en conditions réelles",
                     'bg_color' => '#d18eff4a',
                 ],
                 [
                     'uniqueName' => 'realised_object',
-                    'description_fr' => "L'objet est réalisé",
+                    'description_fr' => "L'objet est réalisé en qualité distribuable",
                     'short_description_fr' => "Objet réalisé",
                     'bg_color' => '#d18eff4a',
                 ],
@@ -135,25 +135,25 @@ final class ProjectStatuses
             'items' => [
                 [
                     'uniqueName' => 'submitted',
-                    'description_fr' => "Le projet est proposé (décision en attente)",
+                    'description_fr' => "Le projet est proposé et en attente de validation",
                     'short_description_fr' => "Décision en attente",
                     'bg_color' => '#ffc0cb',
                 ],
                 [
                     'uniqueName' => 'approved',
-                    'description_fr' => "Décision acceptée",
+                    'description_fr' => "Le projet est approuvé",
                     'short_description_fr' => "Décision acceptée",
                     'bg_color' => '#ffc0cb',
                 ],
                 [
                     'uniqueName' => 'rejected',
-                    'description_fr' => "Décision rejetée",
+                    'description_fr' => "Le projet est rejeté",
                     'short_description_fr' => "Décision rejetée",
                     'bg_color' => '#ffc0cb',
                 ],
                 [
                     'uniqueName' => 'postponed',
-                    'description_fr' => "Décision reportée à une date indéterminée",
+                    'description_fr' => "La décision est reportée à une date indéterminée",
                     'short_description_fr' => "Décision reportée",
                     'bg_color' => '#ffc0cb',
                 ],
