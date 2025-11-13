@@ -1,0 +1,52 @@
+
+{# Status pills are rendered via a macro (and then via a template) so that its structure stays the same while handled via twig or via jQuery #}
+{% macro pill(item) %}
+
+    <span class="status-pill-view px-3 py-2 rounded-pill text-dark fw-semibold"
+        data-status="{{ item.uniqueName }}"
+        style="background-color: {{ item.bg_color }};"
+        title="{{ item.description_fr }}">
+        {{ item.short_description_fr }}
+    </span>
+
+{% endmacro %}
+
+{# Creating an actual reusable html status pill template #}
+{% import _self as pills %}
+
+<template id="status-pill-template">
+
+    {{ pills.pill({ uniqueName: '', bg_color: '#ddd', description_fr: '', short_description_fr: '' }) }}
+    
+</template>
+
+
+
+{# Project status view (a collection of enumerated status pills + string remarks from project team) #}
+
+{# enumerated status pills #}
+
+<div id="project-enumerated-statuses-view"
+
+    class="project-enumerated-statuses-view d-flex flex-wrap gap-2"
+    data-current-statuses='{{ presentation.statuses | json_encode }}'
+    data-catalog="{{ catalog | json_encode }}"
+
+>
+
+    {% for item in presentation.getEnumStatusItems() %}
+        {{ pills.pill(item) }}
+    {% endfor %}
+
+</div>
+
+{# Project status free string remarks #}
+
+<div id="project-status-remarks-view" class="mt-3 w-100">
+
+    <div class="border-start ps-3 text-muted fst-italic">
+
+        {{ presentation.statusRemarks|nl2br }}
+
+    </div>
+</div>

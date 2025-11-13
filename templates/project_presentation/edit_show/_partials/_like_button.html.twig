@@ -1,6 +1,6 @@
 
 
-{% macro likeButton (isLikedClass = "") %}
+{% macro likeButton (isLikedClass = "", likesCount) %}
 
     <div class="like-button {{ isLikedClass ? 'isLiked' }} d-flex align-items-center">
 
@@ -8,16 +8,21 @@
 
         <img class="likeIcon filled me-2" src="{{ asset('thumb_up_filled.svg', 'misc')}}" alt="an icon representing a thumb up filled with a color" width="24" height="22">
        
+        <span class="likesCount cursor-default">{{likesCount}}</span> 
+
     </div>
+
     
 {% endmacro %}
+
+{% set likesCount = presentation.likes | length %}
 
 
 {% if not app.user %} {# User can't like if not logged in, targetting to login page instead #}
 
     <a class="d-flex align-items-center" href="{{path('app_login')}}">
 
-        {{ _self.likeButton() }}
+        {{ _self.likeButton("", likesCount) }}
 
 {% else %} {# Logged In User; they can like / unlike a project presentation #}
 
@@ -32,18 +37,16 @@
 
         {% if presentation.isLikedBy(app.user) %}
 
-            {{ _self.likeButton("isLiked") }}
+            {{ _self.likeButton("isLiked", likesCount) }}
 
         {% else %}
                  
-            {{ _self.likeButton() }}
+            {{ _self.likeButton("", likesCount) }}
 
 
         {% endif %}
 
         </a>
-
-        <span class="likesCount cursor-default">{{presentation.likes | length}}</span> 
 
     </div>
     
@@ -51,9 +54,6 @@
 
     </a>
 
-{# Likes count anyway #}
-
-<span class="likesCount cursor-default">{{presentation.likes | length}}</span> 
 
 
 <style>

@@ -1,0 +1,123 @@
+<script>
+
+/*
+  Ajax call function when user clicks on a status pill
+*/
+$(document).on('click', '.status-pill', function() {
+
+    $(this).toggleClass('active');
+    
+    saveEnumStatusesAndRemarks();
+
+});
+
+
+/*
+  Ajax call function when user type a free status remark (project progress details)
+*/
+let statusRemarksTimer = null;
+
+$(document).on('input', '#status-remarks-textarea', function () {
+
+    const $textarea = $(this);
+
+    const newRemark = $textarea.val();
+
+    // Clear previous timer
+    clearTimeout(statusRemarksTimer);
+
+    // Debounce: wait 800ms after the last keystroke before saving
+    statusRemarksTimer = setTimeout(() => {
+        saveEnumStatusesAndRemarks(newRemark);
+    }, 800);
+    
+});
+
+
+/*
+  Actual ajax call (live save) when project statuses are updated
+*/
+function saveEnumStatusesAndRemarks() {
+
+    const $pill = $(this);
+    const $container = $('#project-statuses-editor');
+    const updateUrl = $container.data('update-url');
+    const remarks = $('#status-remarks-textarea').val();
+
+    const $feedback = $('#remarks-feedback');
+    $feedback.text('⟳ Sauvegarde...').removeClass('text-success text-danger d-none').addClass('text-muted');
+
+    // Gather all active statuses
+    const activeStatuses = $container.find('.status-pill.active').map(function() {
+        return $(this).data('status');
+    }).get();
+
+    // Send update to backend
+    $.ajax({
+
+        url: updateUrl,
+        type: 'POST',
+        data: JSON.stringify({ statuses: activeStatuses, remarks: remarks }),
+        contentType: 'application/json',
+
+        success: function (response) {
+
+            console.log('Statuses saved:', response.enumStatuses);
+
+            $(document).trigger('statuses:updated', [response.enumStatuses, response.statusRemarks]); // Sending an updated event to update view
+
+            $feedback.text('✓ Enregistré').removeClass('text-muted').addClass('text-success');
+
+            setTimeout(() => $feedback.addClass('d-none'), 1500);
+        },
+
+        error: function (xhr) {
+            console.error('Error saving statuses:', xhr.responseText);
+        }
+
+    });
+
+}
+
+
+
+/*
+  Statuses:updated Event listener to refresh UI
+*/
+$(document).on('statuses:updated', function (event, newStatuses, newRemarks) {
+    const $container = $('#project-enumerated-statuses-view');
+    const catalog = $container.data('catalog') || [];
+
+    const activeItems = [];
+    catalog.forEach(cat => {
+        (cat.items || []).forEach(item => {
+            if (newStatuses.includes(item.uniqueName)) {
+                activeItems.push({
+                    status: item.uniqueName,
+                    label: item.short_description_fr,
+                    title: item.description_fr,
+                    color: item.bg_color,
+                });
+            }
+        });
+    });
+
+    console.log(activeItems);
+    
+    TemplateManager.renderList('#project-enumerated-statuses-view', '#status-pill-template', activeItems); //given an html template we clone it with new data
+
+    const $remarkBox = $('#project-status-remarks-view');
+
+
+    // Update remark text
+    if ($remarkBox.length) {
+        $remarkBox.text(newRemarks || '');
+    }
+
+});
+
+
+
+</script>
+
+

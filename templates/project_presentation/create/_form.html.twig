@@ -29,6 +29,11 @@
 
         {% include "project_presentation/create/__form_steps/__image_slide.html.twig" %}
 
+    {% elseif currentItem.type == "initialStatus" %}
+
+
+        {% include "project_presentation/create/__form_steps/__status.html.twig" %}
+
 
     {% elseif currentItem.type == "textDescription" %}
 

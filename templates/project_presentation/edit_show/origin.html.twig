@@ -97,36 +97,38 @@
     <div class="page-container container m-4 {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}}">
 
     <script src="/js/template_manager.js"></script>
-  {% include 'project_presentation/edit_show/_partials/_statuses.html.twig' %}
-  
 
 
+{# statuses catalog #}
+{% set catalog = constant('App\\\Enum\\\ProjectStatuses::CATALOG') %}
 
 
+{% set thisProjectActiveStatuses = presentation.getStatuses() %}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        {% include 'project_presentation/edit_show/_partials/_statuses/_edit_button.html.twig' %}
 
 
         {% include 'project_presentation/edit_show/_partials/_statuses/_edit_box.html.twig' %}
 
 
-        {% include 'project_presentation/edit_show/_partials/_statuses/_edit_button.html.twig' %}
+        {% include 'project_presentation/edit_show/_partials/_statuses/_javascripts.html.twig' %}
+
+        {% include 'project_presentation/edit_show/_partials/_statuses/_temp_edit.html.twig' %}
+
+        {% include 'project_presentation/edit_show/_partials/_statuses/_view.html.twig' %}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

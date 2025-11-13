@@ -48,6 +48,10 @@ class ProjectPresentationCreationType extends AbstractType
                 'required' => false,
             ])
 
+            // Project initial status (ex: idea or production)
+
+            ->add('initialStatus', HiddenType::class, ['mapped' => false])
+
 
             // Image slide upload (custom form type, not using Vich Upload Type as imageSlide is not mapped in PPBase entity)
             ->add('imageSlide', ImageSlideWithoutVichHelperType::class, [

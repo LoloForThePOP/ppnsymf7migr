@@ -5,14 +5,15 @@ namespace App\Controller\ProjectPresentation;
 use App\Entity\Slide;
 use App\Entity\PPBase;
 use App\Service\SlugService;
+use App\Enum\ProjectStatuses;
 use App\Service\ImageResizerService;
 use App\Service\AssessPPScoreService;
 use App\Service\CacheThumbnailService;
 use Doctrine\ORM\EntityManagerInterface;
-use App\Form\ProjectPresentation\ProjectPresentationCreationType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Form\ProjectPresentation\ProjectPresentationCreationType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class CreateController extends AbstractController
@@ -109,6 +110,23 @@ class CreateController extends AbstractController
                 if (!empty($title)) {
                     $presentation->setTitle($title);
 
+                    $this->em->flush();
+                }
+                break;
+
+            case 'initialStatus':
+
+                $chosen = $form->get('initialStatus')->getData();
+
+                // Security: validate against allowed enumerated statuses
+                $allowed = ProjectStatuses::allKeys();
+
+                if (!in_array($chosen, $allowed, true)) {
+                    throw $this->createAccessDeniedException('Invalid status submitted.');
+                }
+
+                if ($chosen) {
+                    $presentation->setStatuses([$chosen]); // reset + apply chosen
                     $this->em->flush();
                 }
                 break;

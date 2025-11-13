@@ -1,0 +1,79 @@
+<div class="status-choice-container text-center my-4">
+
+    <h3 class="mb-1">Où en est votre projet&nbsp;?</h3>
+    <div class="fs-6 text-muted mb-4">Vous pourrez apporter des précisions plus tard</div>
+
+
+    <div class="d-flex justify-content-center gap-4 mx-4 mx-md-0">
+
+        {# button: IDEA #}
+        <button type="button"
+                class="status-choice-btn status-choice-idea p-4"
+                data-value="idea">
+            <div class="fs-3">💡</div>
+            <div class="fw-bold mt-2">C'est une idée</div>
+        </button>
+
+        {# button: PRODUCTION #}
+        <button type="button"
+                class="status-choice-btn status-choice-production p-4"
+                data-value="production">
+            <div class="fs-3">⚙️</div>
+            <div class="fw-bold mt-2">Le concret est lancé</div>
+        </button>
+
+    </div>
+
+</div>
+
+<style>
+
+    .status-choice-btn {
+        border: 2px solid #ddd;
+        border-radius: 12px;
+        width: 180px;
+        cursor: pointer;
+        background: white;
+        transition: all .2s;
+    }
+
+    .status-choice-btn:hover {
+        border-color: #bcd6ff;
+        background: #f7faff;
+    }
+
+    .status-choice-btn.selected {
+        border-color: #4a93ff;
+        background: #e8f0ff;
+    }
+
+
+
+
+</style>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const buttons = document.querySelectorAll('.status-choice-btn');
+    const input = document.querySelector('#project_presentation_creation_initialStatus');// hidden field updated when user chooses a status
+
+    buttons.forEach(btn => {
+
+        btn.addEventListener('click', function () {
+
+            //Refreshing ui 
+            buttons.forEach(b => b.classList.remove('selected'));
+            this.classList.add('selected');
+
+            const value = this.dataset.value;
+            input.value = value;
+            
+        });
+
+    });
+
+});
+</script>
