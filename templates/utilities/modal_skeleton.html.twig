@@ -5,8 +5,7 @@
     
     Parameter(s) : 
     
-        - required : modal_id; modal_title
-        - optional : modal_size (Bootstrap 5 classes to manage device display)
+        - required : modal_id;
 
     class disabled is added to this modal to inactive sortable behaviour.
     
@@ -22,7 +21,8 @@
 
                 <div class="modal-header">
 
-                    <h3 class="h5 modal-title w-100 fw-bold {{title_classes ?? ""}}" id="">{{modal_title | raw}}</h3>
+                    {% block modalTitle %}{% endblock %}
+
 
                     {% block closingCross %}
 
@@ -62,8 +62,8 @@
 
 </div>
 
-{# When modal contains a form #}
-{# If form errors, we have to trigger modal box display to show these errors to user #}
+{# When modal contains a form, we display form errors #}
+{# !Note: if there are form errors, we have to trigger modal box display to show these errors to user #}
 
 {% block formErrors %}
 

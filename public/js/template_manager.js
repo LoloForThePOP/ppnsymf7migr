@@ -1,6 +1,10 @@
 /**
  * Reusable utility for managing Twig <template> fragments.
  * Works with standard DOM, no dependencies.
+ * 
+ * !!! Attention: inner html is replace by first key=>value pair provided.
+ * 
+ * 
  */
 const TemplateManager = {
     /**

@@ -10,31 +10,27 @@
     with {
         
         'modal_id': "project_status_edition",
-        'modal_title': "Statut (État Actuel du Projet) ", 
         'modal_size': "modal-fullscreen modal-dialog-scrollable"
         
     } 
     
 %}
 
-    {% block modalHeader %}{% endblock %}
-    {% block closingCross %}{% endblock %}
+    {% block modalTitle %}
+    
+        <h5 class="modal-title w-100 fw-bold text-center py-md-3">
+            
+            <img class="mb-1 me-2" src="{{ asset('progress_status.svg', 'pp_wysiwyg')}}" alt="project status icon" width="27">
+                
+            Statut <br class="d-md-none"> (État Actuel du Projet)
+                
+        </h5>
+        
+    {% endblock %}
 
     {# Project Status Selection Buttons Display #}
 
     {% block modalBody %}
-
-        {# Standard Modal header is fixed, here we want a non fixed header so we create a custom one #}
-
-        <div class="modal-header-in-body pt-2">
-
-            <h5 class="modal-title w-100 fw-bold text-center py-md-3">
-            
-                <img class="mb-1 me-2" src="{{ asset('progress_status.svg', 'pp_wysiwyg')}}" alt="project status icon" width="27">
-                
-                Statut <br class="d-md-none"> (État Actuel du Projet) </h5>
-
-        </div>
 
         {# Notification to user copntainer #}
 
@@ -57,20 +53,14 @@
 
             {# User can choose some enumerated status types #}
 
-            <div class="d-flex flex-column flex-lg-row justify-content-around px-2 mb-2">
-
+            <div id="project-statuses-editor" class="d-flex flex-column flex-lg-row justify-content-around px-2 mb-2" data-update-url="{{ path('ajax_project_statuses_update', { stringId: presentation.stringId }) }}"
+>
 
                 {% for statusCategory in statusesCatalog %}
 
                 {% set uniqueCategoryName = statusCategory.categoryLabels.uniqueName %}
 
-                <div 
-                    
-                    id="project-statuses-editor"
-                    class="project-statuses status-type-list-container d-inline-block"
-                    data-update-url="{{ path('ajax_project_statuses_update', { stringId: presentation.stringId }) }}"
-                    
-                >
+                <div class="project-statuses status-type-list-container d-inline-block">
 
                     <h5 class="category-title" data-bs-toggle="collapse" href="#category-{{uniqueCategoryName}}">
                         
@@ -167,18 +157,6 @@
 
     
 <style>
-
-    .modal-header-in-body{
-
-        display: flex;
-        flex-shrink: 0;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0;
-        border-bottom: 1px solid #dee2e6;
-        border-radius: 0;
-
-    }
 
     .status-box-global-info{
         background-color: #f2fdff;

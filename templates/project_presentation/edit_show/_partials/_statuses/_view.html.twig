@@ -4,10 +4,12 @@
 
     <span class="status-pill-view px-3 py-2 rounded-pill text-dark fw-semibold"
         data-status="{{ item.uniqueName }}"
+        data-text="{{ item.short_description_fr }}"
         style="background-color: {{ item.bg_color }};"
         title="{{ item.description_fr }}">
 
         {{ item.short_description_fr }}
+
 
     </span>
 
@@ -23,88 +25,9 @@
 </template>
 
 
-        <script>
-
-                $(document).ready(function(){ 
-                
-                    $(function () {
-                        $('[data-toggle="popover"]').popover()
-                    })
-
-                    $('.popover-dismiss').popover({
-                       trigger: 'focus'
-                    })
-                    
-
-                    const htmlContent = $('.project-statuses-view');
-
-                    new bootstrap.Popover(document.getElementById('myBtn'), {
-                      html: true,
-                      content: htmlContent,
-                      trigger: "click",
-                      sanitize: false
-                    });
-
-
-                });
-
-        
-       
-        
-        </script>
-
-
-
-
-<button type="button" 
-        id="myBtn" 
-        class="btn btn-primary" 
-        data-bs-toggle="popover">
-  Click me
-</button>
-
-
-<script>
-
-
-
-
-
-
-</script>
-
-
-
-
-
-
-
-        <a tabindex="0" class="btn btn-lg btn-danger popover-dismiss" role="button" data-toggle="popover" data-trigger="focus" title="Dismissible popover" data-content="And here's some amazing content. It's very engaging. Right?">Dismissible popover</a>
-
-<button type="button" class="btn btn-lg btn-danger" data-toggle="popover" title="Popover title" data-content="And here's some amazing content. It's very engaging. Right?">Click to toggle popover</button>
-
-
-
-<button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="top" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
-  Popover on top
-</button>
-
-<button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="right" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
-  Popover on right
-</button>
-
-<button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Vivamus
-sagittis lacus vel augue laoreet rutrum faucibus.">
-  Popover on bottom
-</button>
-
-<button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="left" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
-  Popover on left
-</button>
-
 {# Project statuses view (a collection of enumerated status pills + string remarks from project team) #}
 
-<div class="project-statuses-view mx-3">
+<div class="project-statuses-view">
 
     {# enumerated status pills #}
 
@@ -124,13 +47,9 @@ sagittis lacus vel augue laoreet rutrum faucibus.">
 
     {# Project status free string remarks #}
 
-    <div id="project-status-remarks-view" class="mt-3 w-100">
+    <div class="project-status-remarks-view mt-3 w-100">
 
-        <div class="content">
-
-            {{ presentation.statusRemarks|nl2br }}
-
-        </div>
+        <div class="content">{{ presentation.statusRemarks }}</div>
 
     </div>
 
@@ -142,6 +61,13 @@ sagittis lacus vel augue laoreet rutrum faucibus.">
 {# Status pills style #}
 
 <style>
+
+
+
+    .project-status-remarks-view .content {
+        white-space: pre-wrap;
+        max-width: 390px;
+    }
 
     .project-statuses-view{
         display: inline-block;

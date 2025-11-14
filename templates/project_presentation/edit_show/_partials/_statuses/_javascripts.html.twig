@@ -52,6 +52,8 @@ function saveEnumStatusesAndRemarks() {
         return $(this).data('status');
     }).get();
 
+    console.log(activeStatuses);
+
     // Send update to backend
     $.ajax({
 
@@ -93,8 +95,8 @@ $(document).on('statuses:updated', function (event, newStatuses, newRemarks) {
         (cat.items || []).forEach(item => {
             if (newStatuses.includes(item.uniqueName)) {
                 activeItems.push({
+                    text: item.short_description_fr,
                     status: item.uniqueName,
-                    label: item.short_description_fr,
                     title: item.description_fr,
                     color: item.bg_color,
                 });
@@ -106,7 +108,7 @@ $(document).on('statuses:updated', function (event, newStatuses, newRemarks) {
     
     TemplateManager.renderList('#project-enumerated-statuses-view', '#status-pill-template', activeItems); //given an html template we clone it with new data
 
-    const $remarkBox = $('#project-status-remarks-view');
+    const $remarkBox = $('.project-status-remarks-view .content');
 
 
     // Update remark text
