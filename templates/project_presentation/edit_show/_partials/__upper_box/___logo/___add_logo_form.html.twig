@@ -1,0 +1,57 @@
+{# File input to add a project logo when none is setted #}
+{# This form is hidden #}
+{# This file contains javascript to handle click on logo placeholder (choose a file) and automaticaly submit the form when a logo is provided #}
+
+{{ form_start(addLogoForm) }}
+
+    <div class="text-center">
+
+        {{ form_errors(addLogoForm.logoFile) }}
+        
+    </div>
+
+    <div class="d-none">
+
+        {{ form_widget(addLogoForm.logoFile) }}
+
+        {{ form_rest(addLogoForm) }}
+
+        <button id="submit-logo-form" type="submit"></button>
+
+    </div>
+
+{{ form_end(form) }}
+
+    <script>
+
+        $(document).ready(function(){
+
+
+            $('#logoPlaceholder').on('click', function (){
+
+                $("#pp_base_logoFile_file").click();
+
+            });
+
+            // Thanks at https://stackoverflow.com/questions/5942821/how-to-fire-event-on-file-select
+       
+            /* when used asynchronously, resets the value to address navigating away from the page 
+            and choosing to upload the same file */ 
+
+            $('#pp_base_logoFile_file').on('click touchstart' , function(){
+                $(this).val('');
+            });
+
+
+            //Trigger now when you have selected any file 
+            $("#pp_base_logoFile_file").change(function(e) {
+
+                $("#submit-logo-form").click();
+                
+            });
+
+
+        });
+
+
+    </script>

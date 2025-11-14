@@ -1,0 +1,118 @@
+
+{# Case a logo is set, we display the logo and we cover it with a link to update it on click #}
+{% if not presentation.logo is empty %}
+
+    <img id="pp-logo" class="img-fluid" src="{{ vich_uploader_asset(presentation, 'logoFile') | imagine_filter('logo')}}" alt="Logo du Projet">
+
+    {# Edit Logo button #}
+
+    <a class="pp-edition-mode coverable-link" href="{{ path ('edit_pp_base', {'stringId': presentation.stringId}) }}"></a>
+
+{# Case no logo is set, we display a logo placeholder, when user click on it he can choose an image to set the logo #}
+{# This triggering (browse to select a file and submit the form) is implemented in add_logo_form.html.twig #}
+{% else %}
+
+    <a id="logoPlaceholder" class="pp-edition-mode text-decoration-none">
+
+        <img class="no-logo-image img-fluid" src="{{ asset('no_logo.svg', 'pp_wysiwyg') }}" height="90" width="90" alt="add a logo icon" >
+
+        <div class="no-logo-text">Logo</div>
+
+    </a>
+
+{% endif %}
+
+
+<style>
+
+    #pp-logo{
+        
+        margin-bottom: 0.5rem;
+        border-radius: 4px;
+    }
+
+    .pp-logo-container .edit-icon-position{
+
+        position: absolute; 
+
+        bottom:0; 
+        right:0; 
+        
+        width:30px; 
+        height:30px;
+
+        background-color: #fff;
+    
+    }
+
+
+    #logoPlaceholder{
+
+        position: relative;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        min-height: 140px;
+        width: 100%;
+
+        border: 1px solid rgb(221, 221, 177);
+        border-radius: 6px;
+
+    }
+
+    #logoPlaceholder:hover {
+        cursor: pointer;
+        background-color: lavender;
+    }
+
+    .no-logo-text{
+        position: absolute;
+        top: 34%;
+        font-weight: bold;
+        font-size: 28px;
+        background-color: white;
+        opacity: 89.4%;
+
+    }
+
+
+
+    @media screen and (max-width: 580px) {
+
+        #pp-logo{
+            border-radius: 4px;
+            max-width: 70px;
+            max-height: 70px;
+        }
+
+        .pp-logo-container .edit-icon-position{
+    
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        
+        }
+
+
+        #logoPlaceholder{
+            padding: 15px;
+            min-height: initial;
+            
+        }
+
+            
+        .no-logo-text{
+            
+            top: 31%;
+            font-size: 16px;
+
+        }
+
+
+    }
+
+</style>

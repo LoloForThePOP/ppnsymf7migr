@@ -96,10 +96,28 @@
 
     <div class="page-container container m-4 {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}}">
 
-    <script src="/js/template_manager.js"></script>
+
+    {# Logo #}
+     
+    {% include 'project_presentation/edit_show/_partials/__upper_box/___logo/___add_logo_form.html.twig' %}
+    {% include 'project_presentation/edit_show/_partials/__upper_box/___logo/___logo_display.html.twig' %}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 {# statuses catalog #}
+
+        <script src="/js/template_manager.js"></script>
 
         {% set statusesCatalog = constant('App\\\Enum\\\ProjectStatuses::CATALOG') %}
 
