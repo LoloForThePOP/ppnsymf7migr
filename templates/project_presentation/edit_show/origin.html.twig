@@ -87,6 +87,9 @@
 
     {% endif %}
 
+
+
+
 {% endblock %}
 
 
@@ -94,13 +97,113 @@
 
 {% block body %}
 
+
+    {% if userPresenter %}
+
+    {% endif %}
+
     <div class="page-container container m-4 {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}}">
 
 
-    {# Logo #}
-     
-    {% include 'project_presentation/edit_show/_partials/__upper_box/___logo/___add.html.twig' %}
-    {% include 'project_presentation/edit_show/_partials/__upper_box/___logo/___display.html.twig' %}
+
+
+
+
+
+
+<script>
+
+
+$(document).on('submit', '.ajax-form', function (e) {
+    e.preventDefault();
+
+    const $form = $(this);
+    const actionUrl = $form.data('action');
+    const fragment = $form.data('fragment'); // optional
+    const messageTarget = $form.data('message-target') || '#ajax-form-message';
+
+    $.ajax({
+        url: actionUrl,
+        method: 'POST',
+        data: new FormData(this),
+        processData: false,
+        contentType: false,
+
+        success: function (json) {
+
+            // Success message
+            $(messageTarget).html(
+                `<div class="alert alert-success">${json.message}</div>`
+            );
+
+            // Reload fragment if provided
+            if (fragment) {
+                $(fragment).load(location.href + " " + fragment + " > *");
+            }
+
+            // Optional: Reset form inputs (except hidden fields)
+            $form.find('input[type!="hidden"], textarea').val('');
+        },
+
+        error: function (xhr) {
+            let html = '<div class="alert alert-danger">';
+
+            if (xhr.responseJSON && xhr.responseJSON.errors) {
+                xhr.responseJSON.errors.forEach(err => {
+                    html += `<div>${err.message}</div>`;
+                });
+            } else {
+                html += 'Une erreur est survenue.';
+            }
+
+            html += '</div>';
+
+            $(messageTarget).html(html);
+        }
+    });
+});
+
+
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="mb-4">
+        
+            {% include 'project_presentation/edit_show/_partials/__upper_box/_title.html.twig' %}
+        
+        </div>
+
+
+        <div class="mb-4">
+
+            {# Logo #}
+            
+            {% include 'project_presentation/edit_show/_partials/__upper_box/___logo/___add.html.twig' %}
+            {% include 'project_presentation/edit_show/_partials/__upper_box/___logo/___display.html.twig' %}
+            
+        </div>
+
+
+
+
+       
 
 
 
@@ -170,5 +273,19 @@
 {% endblock %}
 
 {% block javascripts %}
+
+<script>
+
+    $(document).ready(function(){
+
+        // initialising inline edit capabilities
+        $("[data-edit]").attr('contenteditable','true');
+
+
+    });
+
+</script>
+
+      
 
 {% endblock %}

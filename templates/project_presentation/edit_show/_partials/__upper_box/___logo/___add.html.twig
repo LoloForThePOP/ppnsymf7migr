@@ -2,7 +2,10 @@
 {# This form is hidden #}
 {# This file contains javascript to handle click on logo placeholder (choose a file) and automaticaly submit the form when a logo is provided #}
 
-{{ form_start(addLogoForm) }}
+{{ form_start(addLogoForm, {
+    action: path('pp_add_logo', { stringId: presentation.stringId }),
+    method: 'POST'
+}) }}
 
     <div class="text-center">
 

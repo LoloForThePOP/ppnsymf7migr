@@ -31,32 +31,7 @@ class EditShowController extends AbstractController
         if($this->isGranted('edit', $presentation)){
 
             $addLogoForm = $this->createForm(LogoType::class, $presentation);
-            $addLogoForm->handleRequest($request);
-            
-            if ($addLogoForm->isSubmitted() && $addLogoForm->isValid()) {
-
-                $em->flush();
-
-                // to do: image resize
-                // to do: cache thumbnail
-
-                $this->addFlash(
-                    'success',
-                    "✅ Modification Effectuée"
-                );
-
-                return $this->redirectToRoute(
-                    'edit_show_project_presentation',
-                    [
-
-                        'stringId' => $presentation->getStringId(),
-
-                    ]
-                );
-
-            }
-
-
+           
             return $this->render('project_presentation/edit_show/origin.html.twig', [
                 'presentation' => $presentation,
                 'addLogoForm' => $addLogoForm->createView(),

@@ -7,24 +7,19 @@
 
 {% block headTag %}<meta name="robots" content="noindex, nofollow" />{% endblock %}
 
-{% block title %}Modifier une présentation{% endblock %}
+{% block title %}Modifier le logo{% endblock %}
 
-{% block mainContentTitle %}Modifier une présentation{% endblock %}
+{% block mainContentTitle %}🧩 Changer le logo{% endblock %}
+
+{% block collapsibleMoreInfo %}{% endblock %}
 
 {% block mainContent %}
         
     
         <!-- Project Logo Edition -->
   
-        <div class="">
+        <div class="d-flex justify-content-center">
   
-          <!-- Form Logo Label -->
-  
-          <div class="mb-2">
-  
-            <span class="textblack"> {{form_label(form.logoFile)}}</span>
-  
-          </div>
   
           <!-- Case a Logo already Exist -->
   
@@ -52,7 +47,7 @@
                   
                     <div class="h5 fw-bold my-4">
   
-                      Changer le logo
+                      Cliquez ci-dessous pour choisir votre fichier
   
                     </div>
   

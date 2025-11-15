@@ -792,6 +792,16 @@ class PPBase
         return $this;
     }
 
+    public function getOtherComponents(): OtherComponents
+    {
+        return $this->otherComponents;
+    }
+
+    public function setOtherComponents(OtherComponents $otherComponents): self
+    {
+        $this->otherComponents = $otherComponents;
+        return $this;
+    }
 
 
     public function getExtra(): Extra
