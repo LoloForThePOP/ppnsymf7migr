@@ -6,6 +6,7 @@ use App\Entity\PPBase;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\ProjectPresentation\LogoType;
 
+use App\Form\ProjectPresentation\WebsiteType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -31,10 +32,12 @@ class EditShowController extends AbstractController
         if($this->isGranted('edit', $presentation)){
 
             $addLogoForm = $this->createForm(LogoType::class, $presentation);
+            $addWebsiteForm = $this->createForm(WebsiteType::class);
            
             return $this->render('project_presentation/edit_show/origin.html.twig', [
                 'presentation' => $presentation,
                 'addLogoForm' => $addLogoForm->createView(),
+                'addWebsiteForm' => $addWebsiteForm->createView(),
             ]);
 
 

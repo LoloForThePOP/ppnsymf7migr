@@ -106,6 +106,30 @@
 
 
 
+        {% set countWebsites = presentation.getOtherComponents().getOC('websites') | length %}
+
+
+                
+        {# Websites #}
+        
+        {% include "project_presentation/edit_show/_partials/_websites/_add.html.twig" %}
+
+        <div class="col-lg-6 pp-struct-container-wrapper {% if countWebsites == 0 %} pp-edition-mode {% endif %}">
+    
+            <div id="websites-struct-container" class="pp-struct-container col-12">
+            
+                {% include 'project_presentation/edit_show/_partials/_websites/_content.html.twig' %}
+                    
+            </div>   
+        
+        </div>
+
+
+        
+
+
+
+
 
 
 
@@ -193,11 +217,11 @@ $(document).on('submit', '.ajax-form', function (e) {
 
         <div class="mb-4">
 
-            {# Logo #}
+            {# Logo
             
             {% include 'project_presentation/edit_show/_partials/__upper_box/___logo/___add.html.twig' %}
             {% include 'project_presentation/edit_show/_partials/__upper_box/___logo/___display.html.twig' %}
-            
+             #}
         </div>
 
 
