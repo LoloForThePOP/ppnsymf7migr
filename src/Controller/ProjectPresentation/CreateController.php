@@ -4,9 +4,7 @@ namespace App\Controller\ProjectPresentation;
 
 use App\Entity\Slide;
 use App\Entity\PPBase;
-use App\Service\SlugService;
 use App\Enum\ProjectStatuses;
-use App\Service\ImageResizerService;
 use App\Service\AssessPPScoreService;
 use App\Service\CacheThumbnailService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,10 +19,8 @@ class CreateController extends AbstractController
 
     public function __construct(
         private EntityManagerInterface $em,
-        private SlugService $slugger,
         private AssessPPScoreService $assessPPScore, 
         private CacheThumbnailService $cacheThumbnail,
-        private ImageResizerService $imageResizer,
         
     ) {}
 

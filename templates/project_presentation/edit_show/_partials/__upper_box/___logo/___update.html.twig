@@ -1,0 +1,114 @@
+
+
+{# Non-wysiwyg template to update presentation logo #}
+
+
+{% embed "project_presentation/edit_show/update_element_skeleton.html.twig" with {'form':form, 'colWidths': 'col-md-12'} %}
+
+{% block headTag %}<meta name="robots" content="noindex, nofollow" />{% endblock %}
+
+{% block title %}Modifier une présentation{% endblock %}
+
+{% block mainContentTitle %}Modifier une présentation{% endblock %}
+
+{% block mainContent %}
+        
+    
+        <!-- Project Logo Edition -->
+  
+        <div class="">
+  
+          <!-- Form Logo Label -->
+  
+          <div class="mb-2">
+  
+            <span class="textblack"> {{form_label(form.logoFile)}}</span>
+  
+          </div>
+  
+          <!-- Case a Logo already Exist -->
+  
+          {% if not presentation.logo is empty %}
+  
+            <div class="row mx-md-1 border rounded alert bg-white text-body">
+  
+              <div class="col-md-auto d-flex align-items-center justify-content-center align mb-sm-2 mb-md-0">
+  
+                  <div class="d-inline-block position-relative">
+  
+                    <div class="m-0 p-0 ">
+  
+                      <img class="d-block" src="{{vich_uploader_asset(presentation)  | imagine_filter('standard_thumbnail_sm') }}" style="max-width:150px; max-height:150px" alt="Presentation Logo">
+  
+                    </div>
+  
+                  </div>
+  
+              </div> 
+  
+              <div class="col pl-md-3">
+  
+                <div class="row d-inline-block">
+                  
+                    <div class="h5 fw-bold my-4">
+  
+                      Changer le logo
+  
+                    </div>
+  
+                    {{form_errors(form.logoFile)}}
+                    {{form_widget(form.logoFile)}}
+  
+                </div> 
+  
+              </div>
+  
+            </div>
+  
+          <!-- Case no logo yet -->
+  
+          {% else %}
+  
+            <div class="pt-3 px-2 pb-3 rounded cursor-pointer">
+              
+              {{form_widget(form.logoFile)}}
+  
+            </div>
+  
+          {% endif %}
+  
+        </div>
+  
+
+      {# We hide other fields #}
+
+      <div class="d-none">
+      
+        {{ form_rest(form) }}
+
+      </div>
+
+
+{% endblock %}
+
+{% endembed %}
+
+
+
+{% block javascripts %}
+
+
+<script>
+    
+    $(document).ready(function(){
+
+      // delete logo label : english to french translation
+
+      $(".form-check-label").html("Supprimer le logo");
+      $(".form-check").addClass("my-4");
+
+    });
+
+</script>
+
+{% endblock %}

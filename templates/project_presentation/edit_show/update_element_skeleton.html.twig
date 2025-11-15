@@ -1,0 +1,161 @@
+{# 
+    
+    Skeletton to update some project presentation elements (ex: update a presentation document)
+    
+#}
+
+{% extends 'base.html.twig' %}
+
+    {% block stylesheets %}{% endblock %}
+
+    {% block title %}Modifier{% endblock %}
+
+    {% block body %}
+
+        <div class="edit-structure-container container {{colWidths ?? 'col-md-10 col-lg-6' }} ">
+
+            {# ui page title with potential advice collapsible #}
+
+            <div class="main-title-container">
+
+                <!-- ui Page Title -->	
+                
+                <h4 class="main-title me-3">
+
+                    {% block mainContentTitle %}Modifier{% endblock %}
+
+                </h4>
+
+                {% block collapsibleMoreInfo %}
+
+                    <!-- Button with Collapsable Advice. Example :  How to Insert a Youtube Vidéo ? -->
+
+                    <a class="fw-bold d-inline-block" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTutorial"
+                    aria-expanded="false" aria-controls="collapseTutorial">
+
+                        <span class="btn btn-warning fw-bold btn-lg fs-15 h5 p-1 px-3" style="letter-spacing: 2px;">{% block moreInfoButtonLabel %}{% endblock %}</span>
+
+                    </a>
+
+                        <!-- Collapsible Info Container -->
+
+                    <div id="collapseTutorial" class="collapse no-transition px-4 py-3 mt-2 mb-4"
+                    style="background-color: #f3f3ff;">
+
+                        {% block moreInfoContent %}{% endblock %}    
+
+                    </div>
+                
+                {% endblock %}
+                
+            </div>
+            
+            {# Form Start #}
+
+            {{ form_start(form) }}
+            
+                <div class="main-content-container">
+
+                    {% block mainContent %}{% endblock %}
+
+                </div>
+
+            {# Action Buttons #}
+
+            {% block actionButtons %}
+
+                <div class="action-buttons-container text-center">
+
+                    {# Update Form Valitation Button #}
+
+                    <button class="btn btn-lg btn-validate mb-2 me-3">✔️ Valider</button>
+
+                    {# Back to Result Button #}
+        
+                    <a 
+                    
+                        class="text-decoration-none text-white" 
+                        href="{{path('edit_show_project_presentation', {'stringId': stringId })}}#{% block seeResultAnchor %}{% endblock %}">
+
+                        <button type="button" class="btn btn-lg btn-go-back mb-2 me-2">❌ Retour</button>
+
+                    </a>
+                    
+                </div>
+
+            {% endblock %}
+                
+            {{ form_end(form) }}
+
+        </div>
+    
+        {# styles for this skeleton #}
+    
+        <style>
+    
+            .edit-structure-container{
+    
+                padding-top: 60px !important;
+                padding-bottom: 60px;
+                padding-left: 35px;
+    
+            }
+    
+            .edit-structure-container .main-title-container {
+    
+                margin-bottom: 30px;
+                text-align: center;
+    
+            }
+    
+            .edit-structure-container .main-title {
+    
+                display: inline-block;
+                font-weight: bold;
+                
+    
+            }
+
+            .main-content-container{
+                margin-bottom: 46px;
+            }
+    
+            .info-box{
+                border-left: 7px solid purple;
+                padding-bottom: 2px;
+                font-size: 1.15em;
+                margin-top: 8px;
+            }
+    
+            .info-box ul{
+            
+                padding-left: 25px;
+                margin-bottom: 0;
+            }
+    
+            
+    
+            @media (max-width: 576px) {
+        
+                .edit-structure-container{
+    
+                    padding: 35px 5px !important;
+    
+                }
+                    
+                .edit-structure-container .main-title-container {
+
+                    margin-bottom: 20px;
+
+                }
+    
+            }
+    
+    
+        </style>
+
+        {# specific styles for childs of this skeleton #}
+        
+        {% block specificStyles %}{% endblock %}
+        
+        {% endblock %}
