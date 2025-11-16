@@ -63,8 +63,8 @@ class Slide
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Url(message: 'Veuillez saisir une adresse YouTube valide.')]
     #[Assert\Regex(
-        pattern: '/(youtube\.com|youtu\.be)/i',
-        message: 'Le lien doit provenir de YouTube.'
+        pattern: "/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/",
+        message: 'Le lien doit être un lien YouTube valide.'
     )]
     private ?string $youtubeUrl = null;
 

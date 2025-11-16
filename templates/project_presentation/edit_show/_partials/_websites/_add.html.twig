@@ -1,9 +1,14 @@
 
-{% embed "utilities/modal_skeleton.html.twig" with {'modal_id': "newWebsiteFormModal", 'modal_title': "Ajouter un site web ou réseau social"} %}
+{% embed "utilities/modal_skeleton.html.twig" with {'modal_id': "newWebsiteFormModal"} %}
+
+    {% block modalTitle %}Ajouter un site web ou réseau social{% endblock %}
     
     {% block modalBody %}
 
-        {{ form_start(addWebsiteForm) }}
+        {{ form_start(addWebsiteForm, {
+            action: path('pp_add_website', { stringId: presentation.stringId }),
+            method: 'POST'
+        }) }}
 
         {{ form_widget(addWebsiteForm) }}
 

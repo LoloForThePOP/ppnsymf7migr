@@ -1,0 +1,80 @@
+<div class="container pe-0">
+
+    <div class="row w-100 pe-0 me-0">
+        
+        {# First Column displays website Logo (exemple : Youtube; Facebook Logo... or a Default One letter Logo #}
+            
+        <div class="col-2 d-flex align-items-center justify-content-center">
+
+            <div class="">
+                                    
+                {% if website.icon is defined and website.icon is not null %}
+                    
+                    <img src="{{ asset(website.icon ~'.png', 'popular_website_logo')}}" alt="{{website.icon}}~ logo" width="40">
+
+                {% else %}
+
+                    <div id="" class="default-website-logo" >
+
+                        {# Twig URL parser, here to get domain first letter (thanks to https://gist.github.com/olets/a835d4f8df5028fb30649d6a8aa03de2) #}
+
+                        {% if website.url %}
+                            {% set url = website.url %}
+                            {% set noprotocol = url|split('//')[1] ?: url %}
+                            {% set domains = noprotocol|split('/')[0] ?: noprotocol %}
+                            {% if domains|split('.')[2] is defined %}
+                                {% set domain = domains|split('.')[1] %}
+                            {% else %}
+                                {% set domain = domains|split('.')[0] %}
+                            {% endif %}
+                            {{domain | first}}
+
+                        {% endif %}
+
+                    </div>
+
+                    <style>
+
+                        .default-website-logo{
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center; 
+                            background-color: rgb(241, 242, 255); 
+                            text-transform: uppercase; 
+                            width: 40px; height: 40px; 
+                            font-size: 18px; 
+                            font-weight: bold; 
+                            border-radius: 4px;
+                        }
+
+                    </style>
+
+                {% endif %}
+
+            </div>
+            
+        </div>
+
+        {# second Column displays website url and website description if it exists #}
+
+        <div class="col-10 mx-0 pe-0 d-flex align-items-center">
+
+            <div class="w-100">
+                    
+                {# website description #}
+
+                <h4 class="websiteDescription" data-text="Titre (Ex: Site web officiel, compte Twitter, etc)" data-edit='{"entity": "PPBase", "id": "{{presentation.id}}",  "property": "websites", "subid": "{{website.id}}", "subproperty":"description"}'>{{website.description is defined ? website.description | first | capitalize ~ website.description [1:] : ""}}</h4>
+
+                {# website url #}
+
+                <div class="websiteUrl" data-edit='{"entity": "PPBase", "id": "{{presentation.id}}",  "property": "websites", "subid": "{{website.id}}", "subproperty":"url"}' data-text="Adresse (ex: www.exemple.com)">{{website.url}}</div>
+
+                {# <span class="pp-consultation-mode websiteUrl mb-1">{{website.url | slice(0,50)}}{% if website.url | length > 50 %}(...){% endif %}</span> #}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

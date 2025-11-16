@@ -14,131 +14,81 @@ use Doctrine\ORM\Mapping as ORM;
 class OtherComponents
 {
 
-#[ORM\Column(type: 'json', nullable: true)]
-private ?array $otherComponents = [];
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $otherComponents = [];
 
-
-
-    public function getOtherComponents(): ?array
+    public function getOtherComponents(): array
     {
-        return $this->otherComponents;
+        return $this->otherComponents ?? [];
     }
 
     public function setOtherComponents(?array $otherComponents): self
     {
-        $this->otherComponents = $otherComponents;
+        $this->otherComponents = $otherComponents ?? [];
         return $this;
     }
 
-  
-
-    public function getOC($key)
+    public function getOC(string $type): array
     {
-        if ($this->otherComponents !== null && array_key_exists($key, $this->otherComponents)) {
-            return $this->otherComponents[$key];
-        }
-
-        return [];
+        return $this->otherComponents[$type] ?? [];
     }
 
-    
-    public function getOCItem($component_type, $item_id)
+    public function getOCItem(string $type, string $id): ?array
     {
-        if ($this->otherComponents !== null && array_key_exists($component_type, $this->otherComponents)) {
-
-            foreach ($this->otherComponents[$component_type] as &$item) {
-
-                if ($item['id']==$item_id) {
-                    return $item;
-                }
-
+        foreach ($this->getOC($type) as $item) {
+            if ($item['id'] === $id) {
+                return $item;
             }
-
-            return null;
-
         }
-
         return null;
     }
 
-    
-   
-    public function setOCItem($component_type, $item_id, $updatedItem)
+    public function setOCItem(string $type, string $id, array $updatedItem): bool
     {
-        if ($this->otherComponents !== null && array_key_exists($component_type, $this->otherComponents)) {
-
-            foreach ($this->otherComponents[$component_type] as &$item) {
-
-                if ($item['id']==$item_id) {
-                    
-                    $item = $updatedItem;
-                    $item['updatedAt'] = new \DateTimeImmutable();
-                    return true;
-                }
-
-
+        foreach ($this->otherComponents[$type] as &$item) {
+            if ($item['id'] === $id) {
+                $updatedItem['updatedAt'] = new \DateTimeImmutable();
+                $item = $updatedItem;
+                return true;
             }
-
-            return null;
-
         }
-
-        return null;
+        return false;
     }
 
-    public function addOtherComponentItem($component_type, $item)
+    public function addOtherComponentItem(string $type, array $item): self
     {
-        if ($component_type!==null) {
+        $item['id'] = bin2hex(random_bytes(16));
+        $item['createdAt'] = new \DateTimeImmutable();
+        $item['position'] = count($this->getOC($type));
 
-            $item['id'] = uniqid();
-            $item['createdAt'] = new \DateTimeImmutable();
-            $item['position'] = count($this->getOC($component_type));
-            $this->otherComponents[$component_type][] = $item;
+        $this->otherComponents[$type][] = $item;
 
-            return $this;
-        }
-    }
-
-    public function deleteOtherComponentItem($component_type, $id)
-    {
-
-        $i=0;
-        foreach($this->otherComponents[$component_type] as $element) {
-            //check the property of every element
-            if($element['id']==$id){
-                unset($this->otherComponents[$component_type][$i]);
-            }
-            $i++;
-        }
-
-        $this->otherComponents[$component_type] = array_values($this->otherComponents[$component_type]);
-        
         return $this;
     }
 
-
-
-    public function positionOtherComponentItem($component_type, $itemsPositions)
+    public function deleteOtherComponentItem(string $type, string $id): self
     {
-        if ($component_type!==null) {
+        $this->otherComponents[$type] = array_values(
+            array_filter(
+                $this->getOC($type),
+                fn($item) => $item['id'] !== $id
+            )
+        );
 
-            foreach ($this->otherComponents[$component_type] as &$item) {
-
-                $newPosition = array_search($item['id'], $itemsPositions, false);
-
-                $item['position']=$newPosition;
-
-            }
-
-            //reordering items by position
-
-            usort($this->otherComponents[$component_type], function ($item1, $item2) {
-                return $item1['position'] <=> $item2['position'];
-            });
-
-            return $this;
-        }
-
+        return $this;
     }
 
+    public function positionOtherComponentItem(string $type, array $order): self
+    {
+        foreach ($this->otherComponents[$type] as &$item) {
+            $item['position'] = array_search($item['id'], $order, true);
+        }
+
+        usort(
+            $this->otherComponents[$type],
+            fn($a, $b) => $a['position'] <=> $b['position']
+        );
+
+        return $this;
+    }
 }

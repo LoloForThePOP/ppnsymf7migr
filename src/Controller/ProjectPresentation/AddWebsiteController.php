@@ -3,48 +3,70 @@
 namespace App\Controller\ProjectPresentation;
 
 use App\Entity\PPBase;
+use App\Service\FormHandlerService;
+use App\Service\WebsiteProcessingService;
 use App\Form\ProjectPresentation\WebsiteType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use App\Service\FormHandlerService;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class AddWebsiteController extends AbstractController
 {
 
-
-#[Route('/projects/{stringId}/component/website', name: 'pp_add_website', methods: ['POST'])]
-public function addWebsite(
+#[Route(
+    '/projects/{stringId}/add-website',
+    name: 'pp_add_website',
+    methods: ['POST']
+)]
+public function addLogo(
     #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
     Request $request,
-    FormHandlerService $handler,
-    //to do TreatItem $specificTreatments
-): JsonResponse {
+    EntityManager $em,
+    WebsiteProcessingService $websiteProcessingService,
+): Response {
+
     $this->denyAccessUnlessGranted('edit', $presentation);
 
-    $form = $this->createForm(WebsiteType::class);
+    // IMPORTANT: bind the form to a WebsiteComponent object
+    $websiteComponent = WebsiteComponent::createNew('', '', 0);
+
+    $form = $this->createForm(WebsiteType::class, $websiteComponent, [
+        'validation_groups' => ['input'], // ensures only title/url are validated
+    ]);
     $form->handleRequest($request);
 
-    if (! $form->isSubmitted() || ! $form->isValid()) {
-        return new JsonResponse(['success' => false], 422);
+    if (!$form->isSubmitted() || !$form->isValid()) {
+
+        return $this->redirectToRoute('esit_show_project_presentation', [
+            'stringId' => $presentation->getStringId(),
+            '_fragment' => 'websites-struct-container'
+        ]);
     }
 
-    $handler->handle($form, function ($website) use ($presentation) {
-        $presentation->getOtherComponents()->addOtherComponentItem('websites', $website);
-    }); 
+    // Compute next position
+    $position = count($presentation->getOtherComponents()->getOC('websites'));
+    $websiteComponent->setPosition($position);
 
-    /*  $handler->handle($form, function ($website) use ($presentation, $specificTreatments) {
-        $data = $specificTreatments->specificTreatments('websites', $website);
-        $presentation->addOtherComponentItem('websites', $data);
-    }); */
+    // Normalize URL, assign icon, favicon, updatedAt
+    $websiteProcessingService->process($websiteComponent);
 
-    return new JsonResponse([
-        'success' => true,
-        'message' => 'Ajout effectué',
+    // Store in embeddable
+    $presentation->getOtherComponents()->addOtherComponentItem(
+        'websites',
+        $websiteComponent->toArray()
+    );
+    
+
+    $em->flush();
+
+    return $this->redirectToRoute('edit_show_project_presentation', [
+        'stringId' => $presentation->getStringId(),
     ]);
-
+    
 }
 
 

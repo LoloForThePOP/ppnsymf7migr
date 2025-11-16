@@ -7,27 +7,20 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Url;
-use Symfony\Component\Validator\Constraints\Length;
+use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
+
 
 class WebsiteType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('description', TextType::class, [
+            ->add('title', TextType::class, [
                 'label' => 'Titre (facultatif)',
                 'required' => false,
                 'attr' => [
-                    'placeholder' => 'Exemple : Site web officiel, Instagram, etc.',
-                    'maxlength' => 255, // HTML side
-                ],
-                'constraints' => [
-                    new Length([
-                        'max' => 255,
-                        'maxMessage' => 'La description ne peut pas dépasser {{ limit }} caractères.',
-                    ]),
+                    'placeholder' => 'Exemple : Site web officiel, Compte Instagram, etc.',
+                    'maxlength' => 255, // HTML limit only
                 ],
             ])
             ->add('url', UrlType::class, [
@@ -36,19 +29,14 @@ class WebsiteType extends AbstractType
                 'attr' => [
                     'placeholder' => 'www.exemple.com',
                 ],
-                'constraints' => [
-                    new NotBlank([
-                        'message' => 'Ce champ ne peut être vide',
-                    ]),
-                    new Url([
-                        'message' => 'Vous devez utiliser une adresse web valide',
-                    ]),
-                ],
             ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([]);
+        $resolver->setDefaults([
+            'data_class' => WebsiteComponent::class,
+            'validation_groups' => ['input'], // THIS IS IMPORTANT (form is binded to entity which have specific properties constraints)
+        ]);
     }
 }
