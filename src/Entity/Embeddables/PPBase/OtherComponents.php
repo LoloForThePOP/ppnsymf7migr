@@ -3,6 +3,8 @@
 namespace App\Entity\Embeddables\PPBase;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Embeddables\PPBase\OtherComponentsModels\ComponentRegistry;
+use App\Entity\Embeddables\PPBase\OtherComponentsModels\ComponentInterface;
 
 /**
  * This embeddable handles other components that can describe a Project Presentation.
@@ -14,81 +16,159 @@ use Doctrine\ORM\Mapping as ORM;
 class OtherComponents
 {
 
-    #[ORM\Column(type: 'json', nullable: true)]
-    private ?array $otherComponents = [];
+    /**
+     * Raw JSON storage. Keyed by component type: 'Website', 'QuestionAnswer', 'BusinessCard', etc.
+     *
+     * Example:
+     * {
+     *   "Website": [ {...}, {...} ],
+     *   "QuestionAnswer":      [ {...}, {...} ]
+     * }
+     */
+    #[ORM\Column(
+        name: 'other_components',  // ⚠ adapt if your real column name differs
+        type: 'json',
+        nullable: true
+    )]
+    private ?array $data = [];
 
-    public function getOtherComponents(): array
+    public function getRaw(): array
     {
-        return $this->otherComponents ?? [];
+        return $this->data ?? [];
     }
 
-    public function setOtherComponents(?array $otherComponents): self
+    public function setRaw(?array $data): self
     {
-        $this->otherComponents = $otherComponents ?? [];
+        $this->data = $data ?? [];
         return $this;
     }
 
-    public function getOC(string $type): array
-    {
-        return $this->otherComponents[$type] ?? [];
+    /**
+ * Return all items for component type as objects.
+ *
+ * @return ComponentInterface[]
+ */
+public function getComponents(string $type): array
+{
+
+    $class = ComponentRegistry::classFor($type);
+
+    if (!$class) {
+        throw new \InvalidArgumentException("Unknown component type '$type'.");
     }
 
-    public function getOCItem(string $type, string $id): ?array
+
+    $items = $this->data[$type] ?? [];
+    return array_map(fn($item) => $class::fromArray($item), $items);
+}
+
+
+
+public function addComponent(string $type, ComponentInterface $component): self
+{
+
+    $class = ComponentRegistry::classFor($type);
+
+    if (!$class) {
+        throw new \InvalidArgumentException("Unknown component type '$type'.");
+    }
+
+    if (!isset($this->data[$type])) {
+        $this->data[$type] = [];
+    }
+
+    // AUTO-ASSIGN POSITION
+    $nextPosition = count($this->data[$type]);
+    $component->setPosition($nextPosition);
+
+    $this->data[$type][] = $component->toArray();
+
+    return $this;
+}
+
+    public function updateComponent(string $type, ComponentInterface $updated): bool
     {
-        foreach ($this->getOC($type) as $item) {
-            if ($item['id'] === $id) {
-                return $item;
-            }
+
+        $class = ComponentRegistry::classFor($type);
+
+        if (!$class) {
+            throw new \InvalidArgumentException("Unknown component type '$type'.");
         }
-        return null;
-    }
 
-    public function setOCItem(string $type, string $id, array $updatedItem): bool
-    {
-        foreach ($this->otherComponents[$type] as &$item) {
-            if ($item['id'] === $id) {
-                $updatedItem['updatedAt'] = new \DateTimeImmutable();
-                $item = $updatedItem;
+        if (!isset($this->data[$type])) {
+            return false;
+        }
+
+        foreach ($this->data[$type] as &$item) {
+            if ($item['id'] === $updated->getId()) {
+                $updated->setUpdatedAt();
+                $item = $updated->toArray();
                 return true;
             }
         }
+
         return false;
     }
 
-    public function addOtherComponentItem(string $type, array $item): self
+    public function removeComponent(string $type, string $id): bool
     {
-        $item['id'] = bin2hex(random_bytes(16));
-        $item['createdAt'] = new \DateTimeImmutable();
-        $item['position'] = count($this->getOC($type));
+        $class = ComponentRegistry::classFor($type);
 
-        $this->otherComponents[$type][] = $item;
+        if (!$class) {
+            throw new \InvalidArgumentException("Unknown component type '$type'.");
+        }
 
-        return $this;
-    }
+        if (!isset($this->data[$type])) {
+            return false;
+        }
 
-    public function deleteOtherComponentItem(string $type, string $id): self
-    {
-        $this->otherComponents[$type] = array_values(
+        $before = count($this->data[$type]);
+
+        $this->data[$type] = array_values(
             array_filter(
-                $this->getOC($type),
+                $this->data[$type],
                 fn($item) => $item['id'] !== $id
             )
         );
 
-        return $this;
+        return count($this->data[$type]) !== $before;
     }
 
-    public function positionOtherComponentItem(string $type, array $order): self
+
+    /**
+     * Reorders items of a given type based on an array of ids.
+     *
+     * @param string   $type       e.g. 'websites'
+     * @param string[] $orderedIds ids in the desired order
+     */
+    public function reorderComponents(string $type, array $orderedIds): self
     {
-        foreach ($this->otherComponents[$type] as &$item) {
-            $item['position'] = array_search($item['id'], $order, true);
+        $class = ComponentRegistry::classFor($type);
+
+        if (!$class) {
+            throw new \InvalidArgumentException("Unknown component type '$type'.");
         }
 
-        usort(
-            $this->otherComponents[$type],
-            fn($a, $b) => $a['position'] <=> $b['position']
+        $components = $this->getComponents($type);
+        if (!$components) {
+            return $this;
+        }
+
+        foreach ($components as $component) {
+            $position = array_search($component->getId(), $orderedIds, true);
+            if ($position !== false) {
+                $component->setPosition($position);
+            }
+        }
+
+        usort($components, fn($a, $b) => $a->getPosition() <=> $b->getPosition());
+
+        $this->data[$type] = array_map(
+            fn($c) => $c->toArray(),
+            $components
         );
 
         return $this;
     }
+
 }

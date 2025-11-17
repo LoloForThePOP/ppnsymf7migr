@@ -4,7 +4,7 @@ namespace App\Entity\Embeddables\PPBase\OtherComponentsModels;
  
 use Symfony\Component\Validator\Constraints as Assert;
 
-class WebsiteComponent
+class WebsiteComponent implements ComponentInterface
 {
     // ============================
     // User-provided fields
@@ -15,7 +15,11 @@ class WebsiteComponent
     private string $title;
 
     #[Assert\NotBlank(groups: ['input'])]
-    #[Assert\Url(groups: ['input'])]
+    #[Assert\Url(
+        requireTld: true,
+        groups: ['input'],
+        message: 'Vous devez utiliser une adresse web valide'
+    )]
     private string $url;
 
 
@@ -57,18 +61,19 @@ class WebsiteComponent
     // Factory for new items
     // ============================
 
-    public static function createNew(string $title, string $url, int $position): self
+    public static function createNew(string $title, string $url): self
     {
         return new self(
             id: bin2hex(random_bytes(16)),
             title: $title,
             url: $url,
             icon: '',
-            position: $position,
+            position: 0, // This will be overridden automatically by addComponent method
             createdAt: new \DateTimeImmutable(),
             updatedAt: null
         );
     }
+
 
 
     // ============================
@@ -148,16 +153,38 @@ class WebsiteComponent
         ];
     }
 
-    public static function fromArray(array $data): self
-    {
-        return new self(
-            id: $data['id'],
-            title: $data['title'],
-            url: $data['url'],
-            icon: $data['icon'] ?? '',
-            position: $data['position'] ?? 0,
-            createdAt: $data['createdAt'] ?? new \DateTimeImmutable(),
-            updatedAt: $data['updatedAt'] ?? null
-        );
+
+
+public static function fromArray(array $data): self
+{
+    $createdAt = $data['createdAt'] ?? null;
+    if (!$createdAt instanceof \DateTimeImmutable) {
+        // Fallback to "now" or null
+        $createdAt = new \DateTimeImmutable();
     }
+
+    $updatedAt = $data['updatedAt'] ?? null;
+    if ($updatedAt !== null && !$updatedAt instanceof \DateTimeImmutable) {
+        $updatedAt = null;
+    }
+
+    return new self(
+        id: $data['id'],
+        title: $data['title'],
+        url: $data['url'],
+        icon: $data['icon'] ?? '',
+        position: $data['position'] ?? 0,
+        createdAt: $createdAt,
+        updatedAt: $updatedAt,
+    );
+}
+
+
+
+
+
+
+
+
+
 }

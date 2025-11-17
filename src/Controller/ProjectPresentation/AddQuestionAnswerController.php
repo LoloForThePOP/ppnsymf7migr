@@ -3,37 +3,36 @@
 namespace App\Controller\ProjectPresentation;
 
 use App\Entity\PPBase;
-use App\Service\WebsiteProcessingService;
-use App\Form\ProjectPresentation\WebsiteType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
-use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Form\ProjectPresentation\QuestionAnswerType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
+use App\Entity\Embeddables\PPBase\OtherComponentsModels\QuestionAnswerComponent;
 
 final class AddWebsiteController extends AbstractController
 {
 
 #[Route(
-    '/projects/{stringId}/add-website',
-    name: 'pp_add_website',
+    '/projects/{stringId}/add-question-answer',
+    name: 'pp_add_question_answer',
     methods: ['POST']
 )]
-public function addWebsite(
+public function addQuestionAnswer(
     #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
     Request $request,
     EntityManagerInterface $em,
-    WebsiteProcessingService $websiteProcessingService,
 ): Response {
 
     $this->denyAccessUnlessGranted('edit', $presentation);
 
     // IMPORTANT: bind the form to a WebsiteComponent object
-    $website = WebsiteComponent::createNew('', '');
+    $questionAnswer = QuestionAnswerComponent::createNew('', '');
 
-    $form = $this->createForm(WebsiteType::class, $website, [
+    $form = $this->createForm(QuestionAnswerType::class, $questionAnswer, [
         'validation_groups' => ['input'], // ensures only title/url are validated
     ]);
     
@@ -43,16 +42,14 @@ public function addWebsite(
     if ($form->isSubmitted() && !$form->isValid()) {
         return $this->render('project_presentation/edit_show/origin.html.twig', [
             'presentation' => $presentation,
-            'addWebsiteForm' => $form->createView(),
+            'addQuestionAnswerForm' => $form->createView(),
         ]);
     }
 
 
     if ($form->isSubmitted() && $form->isValid()) {
 
-        $websiteProcessingService->process($website);
-
-        $presentation->getOtherComponents()->addComponent('websites', $website);
+        $presentation->getOtherComponents()->addComponent('faq', $questionAnswer);
 
         $em->flush();
 

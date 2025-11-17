@@ -1,0 +1,40 @@
+{% embed "utilities/modal_skeleton.html.twig" with {'modal_id': "add_qa_form_modal", 'modal_title': "Ajouter une Question / Réponse"} %}
+    
+{% block modalBody %}
+
+        {{ form_start(addQuestionAnswerForm) }}
+
+        {{ form_widget(addQuestionAnswerForm) }}
+
+    {% endblock %}
+
+    {% block footerButtons %}
+
+        {% block footerCloseButton %}{% endblock %}
+
+        <button type="submit" class="btn btn-validate m-auto">✔️ Ajouter la question / réponse</button>
+
+        {{ form_end(addQuestionAnswerForm) }}
+
+    {% endblock %}
+
+
+    {% block formErrors %}
+        
+        {% if not addQuestionAnswerForm.vars.valid %}
+
+            <script>
+            
+                $(document).ready(function(){
+            
+                    $('#{{modal_id}}').modal('show');
+            
+                });
+            
+            </script>
+
+        {% endif %}
+    
+    {% endblock %}
+
+{% endembed %}

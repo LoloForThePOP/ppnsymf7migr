@@ -25,6 +25,7 @@ class WebsiteType extends AbstractType
             ])
             ->add('url', UrlType::class, [
                 'label' => 'Adresse du site',
+                'default_protocol' => 'https',
                 'required' => true,
                 'attr' => [
                     'placeholder' => 'www.exemple.com',
