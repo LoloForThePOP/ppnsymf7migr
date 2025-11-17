@@ -1,0 +1,55 @@
+
+{% embed "project_presentation/edit/update_element_skeleton.html.twig" %}
+
+    {% set title = "Modifier une Diapositive Vidéo Youtube" %}
+
+    {% block title %}{{title}}{% endblock %}
+
+    {% block mainContentTitle %}{{title}}{% endblock %}
+
+    {% block moreInfoButtonLabel %}Comment faire ?{% endblock %}
+
+    {% block moreInfoContent %}
+
+        <div class="text-start">
+            <p class="fw-bold">En 4 étapes rapides :</p>
+
+            <ol>
+                <li>Allez sur la page Youtube de la vidéo désirée;</li>
+                <li>Cliquez sur partager;</li>
+                <li>Copier directement le lien (exemple: https://youtu.be/wwl05u5U9vo)</li>
+                <li>Collez le lien ci-dessous.</li>
+            </ol>
+
+            <p class="fw-bold">Notez que Youtube peut désactiver l'affichage de vidéos avec copyright (par exemple certains clips musicaux).</p>
+        
+        </div>
+
+        
+
+    {% endblock %}
+
+    {% block mainContent %}
+
+        <!-- Youtube Video Code Input-->
+
+        <div class="mb-4">
+
+
+            {{form_row(form.youtubeUrl)}}
+
+        </div>
+
+        <!-- Youtube Video Caption Input-->
+
+        <div class="mb-5">
+
+            {{ form_row(form.caption) }}
+
+        </div>
+   
+    {% endblock %}
+
+    {% block seeResultAnchor %}slides{% endblock %}
+
+{% endembed %}

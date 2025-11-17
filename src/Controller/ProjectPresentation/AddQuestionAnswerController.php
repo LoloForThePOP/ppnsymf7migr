@@ -10,10 +10,9 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use App\Form\ProjectPresentation\QuestionAnswerType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
 use App\Entity\Embeddables\PPBase\OtherComponentsModels\QuestionAnswerComponent;
 
-final class AddWebsiteController extends AbstractController
+final class AddQuestionAnswerController extends AbstractController
 {
 
 #[Route(
@@ -29,7 +28,7 @@ public function addQuestionAnswer(
 
     $this->denyAccessUnlessGranted('edit', $presentation);
 
-    // IMPORTANT: bind the form to a WebsiteComponent object
+    // binding the form to a QuestionAnswerComponent object
     $questionAnswer = QuestionAnswerComponent::createNew('', '');
 
     $form = $this->createForm(QuestionAnswerType::class, $questionAnswer, [
@@ -40,16 +39,18 @@ public function addQuestionAnswer(
 
     // INVALID → re-render, do NOT redirect
     if ($form->isSubmitted() && !$form->isValid()) {
+
         return $this->render('project_presentation/edit_show/origin.html.twig', [
             'presentation' => $presentation,
             'addQuestionAnswerForm' => $form->createView(),
+
         ]);
     }
 
 
     if ($form->isSubmitted() && $form->isValid()) {
 
-        $presentation->getOtherComponents()->addComponent('faq', $questionAnswer);
+        $presentation->getOtherComponents()->addComponent('questions_answers', $questionAnswer);
 
         $em->flush();
 

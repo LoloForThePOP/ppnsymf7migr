@@ -104,23 +104,55 @@
 
     <div class="page-container container m-4 {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}}">
 
+        {% set countSlides = presentation.slides | length %}
 
-
-        {% set countFAQ = presentation.getOtherComponents().getComponents('faq') | length %}
-
-        {# Websites #}
         
-        {% include "project_presentation/edit_show/_partials/_websites/_add.html.twig" %}
+        {# Slideshow images & videos #}
 
-        <div class="col-lg-6 pp-struct-container-wrapper {% if countWebsites == 0 %} pp-edition-mode {% endif %}">
-    
-            <div id="websites-struct-container" class="pp-struct-container col-12">
-            
-                {% include 'project_presentation/edit_show/_partials/_websites/_content.html.twig' %}
+        <div class="col-lg-6 pp-struct-container-wrapper {% if countSlides == 0 %} pp-edition-mode {% endif %}">
+
+            <div id="slideshow-struct-container" class="pp-struct-container">
                     
-            </div>   
+                {% include 'project_presentation/edit_show/slides/slides.html.twig' %}
+
+            </div>
         
         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        {% set countQA = presentation.getOtherComponents().getComponents('questions_answers') | length %}
+
+        {# Questions & Answers #}
+        
+        {% include "project_presentation/edit_show/questions_answers/add_form.html.twig" %}
+
+
+
+        <div class="col-lg-6 pp-struct-container-wrapper">
+        
+            <div id="questionsAnswers-struct-container" class="pp-struct-container ">
+        
+                {% include "project_presentation/edit_show/questions_answers/display.html.twig" %}
+        
+            </div>
+
+        </div>
+
+
+                 
 
 
 
@@ -129,7 +161,7 @@
 
         {# Websites #}
         
-        {% include "project_presentation/edit_show/_partials/_websites/_add.html.twig" %}
+        {% include "project_presentation/edit_show/_partials/_websites/_add_form.html.twig" %}
 
         <div class="col-lg-6 pp-struct-container-wrapper {% if countWebsites == 0 %} pp-edition-mode {% endif %}">
     
@@ -236,7 +268,7 @@ $(document).on('submit', '.ajax-form', function (e) {
 
             {# Logo
             
-            {% include 'project_presentation/edit_show/_partials/__upper_box/___logo/___add.html.twig' %}
+            {% include 'project_presentation/edit_show/_partials/__upper_box/___logo/___add_form.html.twig' %}
             {% include 'project_presentation/edit_show/_partials/__upper_box/___logo/___display.html.twig' %}
              #}
         </div>

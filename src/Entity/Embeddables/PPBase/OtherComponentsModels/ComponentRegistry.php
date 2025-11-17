@@ -14,7 +14,7 @@ class ComponentRegistry
      */
     private const MAP = [
         'websites' => WebsiteComponent::class,
-        'faq' => QuestionAnswerComponent::class,
+        'questions_answers' => QuestionAnswerComponent::class,
         //'BusinessCard' => BusinessCardComponent::class,
     ];
 

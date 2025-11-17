@@ -1,0 +1,352 @@
+{% block stylesheet %}
+
+<link href="/css/slideshow.css" rel="stylesheet">
+
+{% endblock %}
+
+{% if userPresenter %}
+
+	{% embed "/project_presentation/edit_show/skeletons/structure_content.html.twig" with {'iconName': "slideshow", 'title': "Diaporama", 'additionalClasses': "pp-edition-mode", 'helpContext': "slides",} %}
+
+		{% block editButtons %}
+	
+			{# Add an image button (triggers a modal with a form) #}
+		
+			<button type="button" data-bs-toggle="modal" data-bs-target="#addImageSlideFormModal"
+			class="pp-edition-mode add-media-btn btn btn-sm me-3">+ Image</button>
+
+			{# Add a video button (triggers a modal with a form) #}
+
+			<a class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#addVideoSlideFormModal">
+
+				<button class="pp-edition-mode add-media-btn btn btn-sm me-3">+ Video</button>
+
+			</a>
+
+			<style>
+								
+				.add-media-btn {
+					border-radius: 100px;
+					border: 1px solid #99c39e;
+					background-color: #f7fff7;
+				}
+					
+			</style>
+
+			{% if countSlides > 1 %}
+
+				{# Link to reorder slides page #}
+
+				<a id="manage-slides" href="{{ path('order_slides', {'stringId': presentation.stringId}) }}" class="d-lg-none text-decoration-none me-3">
+                        
+					<button type="button" class="pp-edition-mode btn btn-light btn-sm" aria-label="Manage Order and Titles Button">Ordre</button>
+
+				</a>
+			
+			{% endif %}
+		
+		{% endblock %}
+
+		{% block deleteElementsButtons %}
+
+        {% if countSlides > 0 %}
+        
+            {{ parent() }}
+        
+        {% endif %}
+
+    {% endblock %}
+
+	{% endembed %}
+
+{% endif %}
+
+<!-- Project Presentation Slideshow Display -->
+<!-- Structure Container -->
+
+	<!-- Slideshow Container -->
+
+	<div id="slides" class="slideshow-container">
+
+		{% if countSlides == 0 %}
+
+			<div class="text-placeholder" data-bs-toggle="modal" data-bs-target="#addImageSlideFormModal">Ajoutez des images pour illustrer votre projet !</div>
+
+			<img id="" class="no-slide" data-bs-toggle="modal" data-bs-target="#addImageSlideFormModal" src="{{ asset('no_slide.png', 'pp_wysiwyg')}}"  alt="Two cute teddy bears from behing looking at a windows.">
+
+			<style>
+
+				.slideshow-container{
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					justify-content: center;
+				}
+
+				.slideshow-container .text-placeholder {
+					margin-bottom: 7px;
+					font-weight: bold;
+					cursor: pointer;
+					color: #2f3a5a;
+				}
+			
+				img.no-slide {
+					max-width: 100%;
+					max-height: 270px;
+					margin: auto;
+					border-radius: 12px;
+					cursor: pointer;
+				}
+
+
+
+				@media screen and (max-width: 580px) {
+
+					.slideshow-container .text-placeholder {
+						text-align: center;
+						font-size: 13px;
+					}
+			
+            	}
+			
+			</style>
+
+		{% else %}
+		
+			<!-- Caption Container -->
+						
+			<div class="caption-container {{userPresenter ? "col-lg-9" : "col-lg-12" }}" >
+
+				{% for slide in presentation.slides %}
+						
+					{# span is used because <br> is inserted into contenteditable html element if left empty #}
+
+					<span class="caption" data-text="Titre ou légende de l'image" data-edit='{"entity": "slide", "property": "caption", "id": {{slide.id}} }' data-slide-id="{{slide.id}}">{{ slide.caption[:1] | upper ~ slide.caption[1:] }}</span>
+					
+				{% endfor %}
+
+			</div>
+			
+			<div class="row m-0">
+					
+				{#  Slides Container #}
+
+				<div class="slides-container px-0 col edit-hoverable-item"> 
+
+					{% include "project_presentation/edit_show/slides/_slides_container.html.twig" %}
+
+				</div>
+
+				{#  Thumbnails Container #}
+				{% set showThumbnails = false %}
+
+				{% if countSlides > 1 and userPresenter %}
+					
+					{% set showThumbnails = true %}
+				
+				{% endif %}
+
+				{% if userPresenter %} {# Displaying Thumbnails only for user presenters so they can change orders #}
+					
+					<div class="pp-edition-mode thumbnails-container col-lg-2 px-0 d-none {{ showThumbnails ? 'd-lg-flex' }} flex-column align-items-center">
+					
+						{% include "project_presentation/edit_show/slides/_thumbnails_container.html.twig" %}
+						
+					</div>
+
+				{% endif %}
+
+			</div>			
+
+
+
+		{% endif %}
+
+
+	</div>
+
+<style>
+
+	#slideshow-struct-container .pp-struct-title-container{
+
+		display: inherit; /* in edition mode, default is display initial (which remove this element's margin-bottom) */
+	}
+
+</style>
+
+
+	<style>
+
+		.img-zoom-lens {
+			position: absolute;
+			border: 1px solid #d4d4d4;
+			/*set the size of the lens:*/
+			width: 80px;
+			height: 80px;
+			z-index: 2;
+			background-color: #6d6dff;
+			opacity: 0; /* Make lens invisible at initialisation */
+			border-radius: 8px;
+		}
+	
+		.img-zoom-result {
+			width: 300px;
+			height: 300px;
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: 0;
+			bottom: 0;
+			margin: auto;
+			border: 1px solid #d4d4d4;
+			border-radius: 4px;
+			z-index: 2;
+			margin-left: -10000px; /* display result only when cursor is moving (we set margin-left : auto when appropriate in js) */
+		}
+
+	</style>
+
+
+
+	{# Check if we have captions #}
+
+	<script>
+		
+		// reducing caption container height when no slide with caption (see caption flag in _thumbnail_container.html.twig)
+
+		function hasCaptions(){
+
+			var hasCaptionFlag = false;
+
+			$('.caption').each(function(){
+
+				if($.trim($(this).text()) !== ''){
+					hasCaptionFlag = true; 
+				}
+
+			});
+
+			if (!hasCaptionFlag) {
+
+				$('.caption-container').addClass('no-caption')
+
+			}else{
+
+				$('.caption-container').removeClass('no-caption');
+
+			}
+
+		}
+
+		
+		// remove thumbnails container when only one slide is displayed
+
+
+		if ($('.mySlides').length == 1) {
+
+			$('#slides').addClass('only-one-slide');
+
+		} 
+
+
+	</script>
+
+	{# displaying appropriate image or video slide when hovering its thumbnail (a mess if more than 4 slides ) #}
+
+	<script>
+
+		mouseoverThumbnail(); //if($( ".thumbnail" ).length < 5) {}
+
+		function mouseoverThumbnail() {
+		
+			$( ".thumbnail" ).mouseover(function() {
+
+				currentSlide($(this).data("loop-index"));
+				
+			});
+
+		}
+
+		hasCaptions();
+
+		
+
+	</script>
+
+
+	
+    <script>
+
+        var slideIndex = 1;
+
+        function plusSlides(n) {
+
+            showSlides(slideIndex += n);
+            
+        }
+
+        function currentSlide(n) {
+            showSlides(slideIndex = n);
+        }
+
+        function showSlides(n) {
+
+            var i;
+            var slides = document.getElementsByClassName("mySlides");
+            var dots = document.getElementsByClassName("SlideImageThumbnail");
+            var thumbnail = document.getElementsByClassName("thumbnail");
+            var captions = document.getElementsByClassName("caption");
+            
+            if (n > slides.length) {slideIndex = 1}
+            
+            if (n < 1) {slideIndex = slides.length}
+            
+            for (i = 0; i < slides.length; i++) {
+
+                slides[i].style.display = "none";
+
+                if(typeof(captions[i]) != 'undefined'){
+                    captions[i].style.display = "none";
+                }
+                
+            }
+            
+            for (i = 0; i < dots.length; i++) {
+                dots[i].className = dots[i].className.replace(" active", "");
+                thumbnail[i].className = thumbnail[i].className.replace(" active", "");
+            }
+            
+            slides[slideIndex-1].style.display = "flex";
+
+            if(!tinyScreen){
+
+                killImageZoom(); //deleting previous lens
+                imageZoom("image-slide-wrapper-"+slides[slideIndex-1].id, "image-zoom-result");
+            }
+
+            if(typeof(captions[slideIndex-1]) != 'undefined'){
+                captions[slideIndex-1].style.display = "block";
+            }
+            
+            dots[slideIndex-1].className += " active";
+            thumbnail[slideIndex-1].className += " active";
+
+            if(typeof(captionText) != 'undefined' && captionText != null){
+
+                captionText.innerHTML = dots[slideIndex-1].getAttribute('data-caption');
+                
+            }
+
+        }
+
+		$(document).ready(function(){ //otherwise first slide caption doesn't show in webpage load
+
+			showSlides(slideIndex);
+
+		});
+
+    </script>
+
+
+
+

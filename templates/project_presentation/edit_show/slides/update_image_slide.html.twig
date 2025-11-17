@@ -1,0 +1,81 @@
+
+{% embed "project_presentation/edit_show/skeletons/update_element.html.twig" %}
+
+    {% block title %}Remplacer une image ou modifier sa légende{% endblock %}
+
+    {% block mainContentTitle %}Remplacer une image ou modifier sa légende{% endblock %}
+
+    {% block collapsibleMoreInfo %}{% endblock %}
+
+    {% block mainContent %}
+        
+        <div class="">
+
+            <div class="mb-5">
+
+                <h5 class="fw-bold mb-3">Image actuelle</h5>
+
+                {% if slide.imageFile is not empty %}
+                
+                    <img class="SlideImageThumbnail" src="{{ vich_uploader_asset(slide) }}" alt="Current image" style="max-width:250px; height:100%;"/>
+
+                {% else %}
+                    
+                    <div>Cette diapositive ne contient pas d'image.</div>
+                
+                {% endif %}
+
+            </div>
+            
+            <span class="fw-bold h5"> 
+                Remplacer l'image ?
+            </span>
+
+            <div class="">
+
+                {{ form_errors(form.imageFile) }}
+
+            </div>
+            
+            <div class="mt-2">
+                
+                {{ form_widget(form.imageFile) }}
+
+            </div>
+            
+            <div class="mt-5">
+
+                {{ form_errors(form.imageFile) }}
+
+                <h5 class="fw-bold mb-3">
+                    Légende ou titre pour cette image
+                </h5>
+
+                {{ form_widget(form.caption) }}
+                
+            </div>
+            
+            <div class="mt-5">
+
+                <h5 class="lead" data-bs-toggle="collapse" href="#imageSlideMoreOptions" role="button" aria-expanded="false" aria-controls="imageSlideMoreOptions">
+                    Afficher plus d'options ▾
+                </h5>
+
+                <div id="imageSlideMoreOptions" class="collapse no-transition mt-4">
+                        
+                    {{ form_row(form.licence) }}
+
+                </div>
+
+                
+            </div>
+
+        </div>
+
+    {% endblock %}
+
+    {% block seeResultAnchor %}slides{% endblock %}
+
+{% endembed %}
+
+

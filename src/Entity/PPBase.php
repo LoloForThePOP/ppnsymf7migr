@@ -146,11 +146,16 @@ class PPBase
     /**
      * @var Collection<int, Slide>
      */
+    
     #[ORM\OneToMany(
         mappedBy: 'projectPresentation',
         targetEntity: Slide::class,
         cascade: ['persist', 'remove'], 
         orphanRemoval: true           
+    )]
+    #[Assert\Count(
+        max: 8,
+        maxMessage: 'Vous ne pouvez ajouter plus de {{ limit }} diapositives merci pour votre compréhension.'
     )]
     private Collection $slides;
 

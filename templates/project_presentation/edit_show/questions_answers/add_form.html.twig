@@ -1,8 +1,11 @@
 {% embed "utilities/modal_skeleton.html.twig" with {'modal_id': "add_qa_form_modal", 'modal_title': "Ajouter une Question / Réponse"} %}
     
-{% block modalBody %}
+    {% block modalBody %}
 
-        {{ form_start(addQuestionAnswerForm) }}
+        {{ form_start(addQuestionAnswerForm, {
+            action: path('pp_add_question_answer', { stringId: presentation.stringId }),
+            method: 'POST'
+        }) }}
 
         {{ form_widget(addQuestionAnswerForm) }}
 

@@ -1,0 +1,137 @@
+
+
+{# to do: review the whole file #}
+
+{% embed "project_presentation/edit_show/skeletons/update_element.html.twig" %}
+
+{% block title %}Images et Vidéos{% endblock %}
+
+
+{% block mainContentTitle %}Pour modifier l'ordre des images et vidéos, utilisez le glisser-déposer (= drag and drop){% endblock %}
+
+{% block collapsibleMoreInfo %} {% endblock %}
+
+
+
+{% block mainContent %}
+
+    <!-- Slides list displayed in a grid -->
+
+    <div class="container p-0 mb-3">
+
+        <div id="elements-list" data-elements-type="slides" class="row col-lg-8 m-0">
+
+            {% if presentation.slides | length > 0 %}
+
+                {% for slide in presentation.slides %}
+
+                <!-- Thumbnail Container -->
+
+                <div id="{{slide.id}}"
+
+                    class="js-sortable-element">
+
+                    {% if slide.type == 'image' %}
+
+                        {# edit link #}
+
+                        <a href="{{path('update_image_slide', {'stringId': presentation.stringId, 'presentation': presentation, 'id_slide' : slide.id })}}" class="text-body text-decoration-none">
+
+                            {# thumbnail #}
+
+                            <img src="{{ vich_uploader_asset(slide) }}" alt="{{slide.file}}" height="" width="100%">
+
+                        </a>
+
+                    {% elseif slide.type == 'youtube_video' %}
+
+                    {# edit link #}
+
+                        <a href="{{path('update_youtube_slide', {'stringId': presentation.stringId, 'presentation': presentation, 'id_slide' : slide.id })}}" class="text-body text-decoration-none">
+
+                            {# youtube thumbnail #}
+
+                            <img src="https://img.youtube.com/vi/{{slide.address}}/mqdefault.jpg" alt="image miniature d'une video" height="" width="100%">
+
+                            {# red circle (= video icon stamp) #}
+
+                            <span class="position-absolute rounded-circle bg-danger p-2" style="bottom:3px; left:3px;"> </span>
+
+                        </a>
+
+                    {% endif %}
+
+                    <!-- Remove Slide button (a red cross on each slide) -->
+
+                    <button type="button" class="js-delete-element position-absolute btn btn-sm btn-danger sharp"
+                        data-id="{{slide.id}}" style="top:0; right:0;"><span class="fw-bold">&times</span></button>
+
+                </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+{% endblock %}
+
+
+    {% block seeResultAnchor %}slideshow-struct-container{% endblock %}
+
+    {% block specificStyles %}
+
+        <style>
+
+            .js-sortable-element{
+
+                position: relative;
+
+                display:flex;
+                align-items: center;
+                justify-content: center;
+
+
+                width:130px;
+                height:123px;
+
+                overflow:hidden;
+
+                padding:12px;
+
+                margin: 8px 16px 8px 0;
+
+                border: 5px solid  #3f5cff;
+                border-radius: 4px;
+            }
+
+
+
+                 
+            @media (max-width: 576px) {
+
+                .js-sortable-element{
+                    margin-right: 13px;
+                }
+
+            }
+
+
+
+
+        </style>
+
+    {% endblock %}
+
+
+    {% block specificJavascripts %}
+
+
+    {% endblock %}
+
+
+
+    {% endembed %}

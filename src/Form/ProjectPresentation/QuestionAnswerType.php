@@ -15,7 +15,7 @@ class QuestionAnswerType extends AbstractType
     {
         $builder
             ->add('question', TextType::class, [
-                'label' => 'Question fréquente',
+                'label' => 'Question',
                 'attr' => [
                     'placeholder' => 'Composez votre question...',
                     'maxlength' => 2500,

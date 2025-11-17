@@ -1,10 +1,10 @@
-{% embed "/project_presentation/_show/structure_content_skeleton.html.twig" with {'iconName': "questionsAnswers", 'title': "Questions & Réponses",} %}
+{% embed "/project_presentation/edit_show/skeletons/structure_content.html.twig" with {'iconName': "questionsAnswers", 'title': "Questions & Réponses",} %}
 
     {% block editButtons %}
 
         {# Add question & answer button (triggers a modal) #}
 
-        <button data-bs-toggle="modal" data-bs-target="#add_qa_form_modal" class="pp-edition-mode plus-btn btn btn-light btn-sm me-2 me-md-3">+</button>
+        <button data-bs-toggle="modal" data-bs-target="#add_qa_form_modal" class="pp-edition-mode plus-btn btn btn-light btn-sm me-2 me-md-3"><span class="plus-sign">+</span></button>
 
     {% endblock %}
 
@@ -23,7 +23,7 @@
 
     {% block mainContent %}
 
-        {% set qas = presentation.getOC('questionsAnswers') %}
+        {% set qas = presentation.getOtherComponents.getComponents('questions_answers') %}
 
         <div id="questionsAnswers" class="js-elements-list pp-struct-content">
 
@@ -96,7 +96,7 @@
                         </div> #}
                      
                         
-                        <div data-edit='{"entity": "PPBase", "id": {{presentation.id}}, "property": "questionsAnswers", "subid": "{{qa.id}}", "subproperty":"answer" }' class="answer">{{ qa.answer is not empty ? qa.answer  | sanitize_html ('newlines') : '' }}</div>
+                        <div data-edit='{"entity": "PPBase", "id": {{presentation.id}}, "property": "questionsAnswers", "subid": "{{qa.id}}", "subproperty":"answer" }' class="answer">{{ qa.answer is not empty ? qa.answer : '' }}</div> {# to do: check if old way is still relevant: qa.answer is not empty ? qa.answer  | sanitize_html ('newlines') : '' #}
 
                         {% if qa.createdAt is defined or qa.updatedAt is defined %}
                             
