@@ -3,9 +3,11 @@
 namespace App\Controller\ProjectPresentation;
 
 use App\Entity\PPBase;
+use App\Form\ProjectPresentation\ImageSlideType;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\ProjectPresentation\LogoType;
 use App\Form\ProjectPresentation\QuestionAnswerType;
+use App\Form\ProjectPresentation\VideoSlideType;
 use App\Form\ProjectPresentation\WebsiteType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,12 +36,16 @@ class EditShowController extends AbstractController
             $addLogoForm = $this->createForm(LogoType::class, $presentation);
             $addWebsiteForm = $this->createForm(WebsiteType::class);
             $addQuestionAnswerForm = $this->createForm(QuestionAnswerType::class);
+            $addImageSlideForm = $this->createForm(ImageSlideType::class);
+            $addVideoSlideForm = $this->createForm(VideoSlideType::class);
            
             return $this->render('project_presentation/edit_show/origin.html.twig', [
                 'presentation' => $presentation,
                 'addLogoForm' => $addLogoForm->createView(),
                 'addWebsiteForm' => $addWebsiteForm->createView(),
                 'addQuestionAnswerForm' => $addQuestionAnswerForm->createView(),
+                'addImageSlideForm' => $addImageSlideForm->createView(),
+                'addVideoSlideForm' => $addVideoSlideForm->createView(),
             ]);
 
 

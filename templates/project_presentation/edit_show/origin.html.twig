@@ -105,9 +105,12 @@
     <div class="page-container container m-4 {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}}">
 
         {% set countSlides = presentation.slides | length %}
-
         
         {# Slideshow images & videos #}
+
+        {% include "project_presentation/edit_show/slides/add_image_form.html.twig" %}
+
+        {% include "project_presentation/edit_show/slides/add_video_form.html.twig" %}
 
         <div class="col-lg-6 pp-struct-container-wrapper {% if countSlides == 0 %} pp-edition-mode {% endif %}">
 

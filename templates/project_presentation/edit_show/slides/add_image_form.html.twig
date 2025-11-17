@@ -1,0 +1,90 @@
+{% embed "utilities/modal_skeleton.html.twig" with {'modal_id': "addImageSlideFormModal", 'modal_size': "modal-dialog-centered"} %}
+
+    {% block modalTitle %}Ajouter une image ou un schéma{% endblock %}
+
+    {% block modalBody %}
+
+        {{form_start(addImageSlideForm)}}
+
+        <div class="form-group mt-3 mb-3 pl-md-2">
+
+            <div class="font-weight-bold">
+
+                <!--Browse Image File -->
+            
+                <span class=""> 
+                    {{ form_label(addImageSlideForm.imageFile) }}
+                </span>
+
+                <div class="p-0 m-0 alert text-body h5 fw-bold">
+
+                    {{ form_errors(addImageSlideForm.imageFile) }}
+
+                </div>
+                
+                <div class="mt-1 p-1 disabled rounded">
+                    
+                    {{ form_widget(addImageSlideForm.imageFile) }}
+
+                </div>
+                
+                <!-- Add a Caption? -->
+                
+                <div class="mt-3">
+
+                    {{ form_label(addImageSlideForm.caption) }}
+
+                    {{ form_widget(addImageSlideForm.caption) }}
+                    
+                </div>
+                
+                <!-- Add an image licence or credit (ex: Wikipedia CC BY-SA 4.0) -->
+                
+                <div class="mt-4">
+
+                    <h5 class="" data-bs-toggle="collapse" href="#imageSlideMoreOptions" role="button" aria-expanded="false" aria-controls="imageSlideMoreOptions">
+                        Afficher plus d'options ▾
+                    </h5>
+    
+                    <div id="imageSlideMoreOptions" class="collapse no-transition mt-4">
+                            
+                        {{ form_row(addImageSlideForm.licence) }}
+    
+                    </div>
+                    
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endblock %}
+
+    {% block footerButtons %}
+
+        <button type="submit" class="btn btn-validate">✔️ Valider</button>
+
+        {{ form_end(addImageSlideForm) }}
+
+    {% endblock %}
+
+
+    {% block formErrors %}
+        
+        {% if not addImageSlideForm.vars.valid %}
+
+            <script>
+            
+                $(document).ready(function(){
+            
+                    $('#{{modal_id}}').modal('show');
+            
+                });
+            
+            </script>
+
+        {% endif %}
+    
+    {% endblock %}
+
+{% endembed %}
