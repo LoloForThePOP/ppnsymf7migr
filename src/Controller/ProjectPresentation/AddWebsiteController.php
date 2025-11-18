@@ -30,7 +30,7 @@ public function addWebsite(
 
     $this->denyAccessUnlessGranted('edit', $presentation);
 
-    // IMPORTANT: bind the form to a WebsiteComponent object
+    // binding the form to a WebsiteComponent object
     $website = WebsiteComponent::createNew('', '');
 
     $form = $this->createForm(WebsiteType::class, $website, [
@@ -39,7 +39,7 @@ public function addWebsite(
     
     $form->handleRequest($request);
 
-    // INVALID → re-render, do NOT redirect
+    // invalid form resend it
     if ($form->isSubmitted() && !$form->isValid()) {
         return $this->render('project_presentation/edit_show/origin.html.twig', [
             'presentation' => $presentation,

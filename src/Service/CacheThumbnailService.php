@@ -2,8 +2,9 @@
 
 namespace App\Service;
 
-use App\Entity\Slide;
 use App\Entity\PPBase;
+use App\Entity\Slide;
+use App\Enum\SlideType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
@@ -83,12 +84,13 @@ class CacheThumbnailService
             /** @var Slide $slide */
             $slide = $slides->first();
 
-            if ($slide->getType() === 'image') {
+            if ($slide->getType() === SlideType::IMAGE) {
                 return $this->uploaderHelper->asset($slide, 'imageFile');
             }
 
-            if ($slide->getType() === 'youtube_video') {
-                return sprintf('https://img.youtube.com/vi/%s/mqdefault.jpg', $slide->getAddress());
+            $videoId = $slide->getYoutubeVideoId();
+            if ($slide->getType() === SlideType::YOUTUBE_VIDEO && $videoId) {
+                return sprintf('https://img.youtube.com/vi/%s/mqdefault.jpg', $videoId);
             }
         }
 

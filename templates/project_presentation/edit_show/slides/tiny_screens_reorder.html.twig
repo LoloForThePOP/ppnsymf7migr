@@ -31,7 +31,7 @@
 
                     class="js-sortable-element">
 
-                    {% if slide.type == 'image' %}
+                    {% if slide.isImage() %}
 
                         {# edit link #}
 
@@ -43,7 +43,7 @@
 
                         </a>
 
-                    {% elseif slide.type == 'youtube_video' %}
+                    {% elseif slide.isVideo() and slide.youtubeVideoId %}
 
                     {# edit link #}
 
@@ -51,7 +51,7 @@
 
                             {# youtube thumbnail #}
 
-                            <img src="https://img.youtube.com/vi/{{slide.address}}/mqdefault.jpg" alt="image miniature d'une video" height="" width="100%">
+                            <img src="https://img.youtube.com/vi/{{slide.youtubeVideoId}}/mqdefault.jpg" alt="image miniature d'une video" height="" width="100%">
 
                             {# red circle (= video icon stamp) #}
 

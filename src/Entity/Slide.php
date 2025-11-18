@@ -2,18 +2,20 @@
 
 namespace App\Entity;
 
+use App\Enum\SlideType;
+use Doctrine\ORM\Mapping as ORM;
 use App\Repository\SlideRepository;
 use App\Entity\Traits\TimestampableTrait;
-use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SlideRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[Vich\Uploadable]
 class Slide
 {
+    private const YOUTUBE_URL_PATTERN = "/^(?:http(?:s)?:\\/\\/)?(?:www\\.)?(?:m\\.)?(?:youtu\\.be\\/|youtube\\.com\\/(?:(?:watch)?\\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\\/))([^\\?&\"'>]+)/";
     use TimestampableTrait;
 
     // ────────────────────────────────────────
@@ -27,9 +29,8 @@ class Slide
     // ────────────────────────────────────────
     // Type
     // ────────────────────────────────────────
-    #[ORM\Column(length: 30)]
-    #[Assert\Choice(choices: ['image', 'youtube_video'], message: 'Type de diapositive invalide.')]
-    private ?string $type = null;
+    #[ORM\Column(length: 30, enumType: SlideType::class)]
+    private ?SlideType $type = null;
 
     // ────────────────────────────────────────
     // Image-specific fields
@@ -63,7 +64,7 @@ class Slide
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Url(message: 'Veuillez saisir une adresse YouTube valide.')]
     #[Assert\Regex(
-        pattern: "/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/",
+        pattern: self::YOUTUBE_URL_PATTERN,
         message: 'Le lien doit être un lien YouTube valide.'
     )]
     private ?string $youtubeUrl = null;
@@ -103,12 +104,12 @@ class Slide
     // ────────────────────────────────────────
     public function isImage(): bool
     {
-        return $this->type === 'image';
+        return $this->type === SlideType::IMAGE;
     }
 
     public function isVideo(): bool
     {
-        return $this->type === 'youtube_video';
+        return $this->type === SlideType::YOUTUBE_VIDEO;
     }
 
     // ────────────────────────────────────────
@@ -119,12 +120,12 @@ class Slide
         return $this->id;
     }
 
-    public function getType(): ?string
+    public function getType(): ?SlideType
     {
         return $this->type;
     }
 
-    public function setType(string $type): self
+    public function setType(?SlideType $type): self
     {
         $this->type = $type;
         return $this;
@@ -174,6 +175,27 @@ class Slide
     {
         $this->youtubeUrl = $youtubeUrl;
         return $this;
+    }
+
+    public function getYoutubeVideoId(): ?string
+    {
+        if ($this->youtubeUrl === null) {
+            return null;
+        }
+
+        if (preg_match(self::YOUTUBE_URL_PATTERN, $this->youtubeUrl, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
+    }
+
+    /**
+     * Legacy helper for templates still using slide.address
+     */
+    public function getAddress(): ?string
+    {
+        return $this->getYoutubeVideoId();
     }
 
     public function getCaption(): ?string

@@ -4,7 +4,10 @@
 
     {% block modalBody %}
 
-        {{form_start(addImageSlideForm)}}
+        {{ form_start(addImageSlideForm, {
+            action: path('pp_add_image_slide', { stringId: presentation.stringId }),
+            method: 'POST'
+        }) }}
 
         <div class="form-group mt-3 mb-3 pl-md-2">
 

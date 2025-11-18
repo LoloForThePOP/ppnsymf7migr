@@ -5,7 +5,10 @@
 
     {% block modalBody %}
 
-        {{form_start(addVideoSlideForm)}}
+        {{ form_start(addVideoSlideForm, {
+            action: path('pp_add_video_slide', { stringId: presentation.stringId }),
+            method: 'POST'
+        }) }}
 
 
         <!-- Advice : How to Insert a Youtube Vidéo ? -->

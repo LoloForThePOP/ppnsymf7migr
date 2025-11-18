@@ -3,7 +3,7 @@
 
 		<div style="position: relative;">
 
-			<img class="SlideImageThumbnail" src="https://img.youtube.com/vi/{{slide.address}}/mqdefault.jpg" width="80px" height="50px"
+			<img class="SlideImageThumbnail" src="https://img.youtube.com/vi/{{slide.youtubeVideoId}}/mqdefault.jpg" width="80px" height="50px"
 			
 				data-caption = "{{ slide.caption[:1] | upper ~ slide.caption[1:] }}" 
 
@@ -36,7 +36,7 @@
 
 		<div id="{{slide.id}}" class="flex-child thumbnail js-sortable-element position-relative" data-slide-thumbnail-id="{{slide.id}}" data-loop-index="{{loop.index}}">
 
-			{% if slide.type == 'youtube_video' %}	
+			{% if slide.isVideo() %}	
 
 				{{ _self.youtubeVideoThumbnail(slide) }}
 

@@ -2,15 +2,16 @@
 
 namespace App\Controller\ProjectPresentation;
 
-use App\Entity\PPBase;
 use App\Entity\Slide;
-use App\Form\ProjectPresentation\ImageSlideType;
-use App\Form\ProjectPresentation\VideoSlideType;
-use App\Repository\SlideRepository;
+use App\Entity\PPBase;
+use App\Enum\SlideType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Form\ProjectPresentation\ImageSlideType;
+use App\Form\ProjectPresentation\VideoSlideType;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class UpdateSlideController extends AbstractController
@@ -34,26 +35,19 @@ class UpdateSlideController extends AbstractController
         name: 'pp_update_slide'
     )]
     public function updateSlide(
-        PPBase $pp,
-        int $id_slide,
-        SlideRepository $repo
+        #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $pp,
+        #[MapEntity(mapping: ['id_slide' => 'id'])] Slide $slide,
     ): Response {
         $this->denyAccessUnlessGranted('edit', $pp);
 
-        $slide = $repo->find($id_slide);
-
-        if (!$slide instanceof Slide) {
-            throw $this->createNotFoundException('Slide not found.');
-        }
-
         return match ($slide->getType()) {
-            'image'         => $this->redirectToRoute('pp_update_image_slide', [
+            SlideType::IMAGE         => $this->redirectToRoute('pp_update_image_slide', [
                 'stringId' => $pp->getStringId(),
-                'id_slide' => $id_slide,
+                'id_slide' => $slide->getId(),
             ]),
-            'youtube_video' => $this->redirectToRoute('pp_update_youtube_slide', [
+            SlideType::YOUTUBE_VIDEO => $this->redirectToRoute('pp_update_youtube_slide', [
                 'stringId' => $pp->getStringId(),
-                'id_slide' => $id_slide,
+                'id_slide' => $slide->getId(),
             ]),
             default => throw $this->createNotFoundException('Unknown slide type.'),
         };
@@ -65,18 +59,12 @@ class UpdateSlideController extends AbstractController
         name: 'pp_update_image_slide'
     )]
     public function updateImageSlide(
-        PPBase $presentation,
-        int $id_slide,
-        SlideRepository $repo,
+        #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
+        #[MapEntity(mapping: ['id_slide' => 'id'])] Slide $slide,
         Request $request,
         EntityManagerInterface $manager
     ): Response {
         $this->denyAccessUnlessGranted('edit', $presentation);
-
-        $slide = $repo->find($id_slide);
-        if (!$slide instanceof Slide) {
-            throw $this->createNotFoundException('Slide not found.');
-        }
 
         $form = $this->createForm(ImageSlideType::class, $slide);
         $form->handleRequest($request);
@@ -109,18 +97,12 @@ class UpdateSlideController extends AbstractController
         name: 'pp_update_youtube_slide'
     )]
     public function updateVideoSlide(
-        PPBase $pp,
-        int $id_slide,
-        SlideRepository $repo,
+        #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $pp,
+        #[MapEntity(mapping: ['id_slide' => 'id'])] Slide $slide,
         Request $request,
         EntityManagerInterface $manager
     ): Response {
         $this->denyAccessUnlessGranted('edit', $pp);
-
-        $slide = $repo->find($id_slide);
-        if (!$slide instanceof Slide) {
-            throw $this->createNotFoundException('Slide not found.');
-        }
 
         // reset image file field as we are dealing with an video slide
 
@@ -146,6 +128,8 @@ class UpdateSlideController extends AbstractController
 
         return $this->render('project_presentation/edit_show/slides/update_youtube_video_slide.html.twig', [
             'form' => $form->createView(),
+            'stringId' => $pp->getStringId(),
+
         ]);
     }
 }

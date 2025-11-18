@@ -4,6 +4,7 @@ namespace App\Controller\ProjectPresentation;
 
 use App\Entity\Slide;
 use App\Entity\PPBase;
+use App\Enum\SlideType;
 use App\Enum\ProjectStatuses;
 use App\Service\AssessPPScoreService;
 use App\Service\CacheThumbnailService;
@@ -141,7 +142,7 @@ class CreateController extends AbstractController
                     break;
                 }
 
-                $slide->setType('image');
+                $slide->setType(SlideType::IMAGE);
                 $presentation->addSlide($slide);
 
                 // VichUploader handles moving the file
