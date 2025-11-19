@@ -9,6 +9,7 @@ use App\Form\ProjectPresentation\LogoType;
 use App\Form\ProjectPresentation\QuestionAnswerType;
 use App\Form\ProjectPresentation\VideoSlideType;
 use App\Form\ProjectPresentation\WebsiteType;
+use App\Form\ProjectPresentation\TextDescriptionType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -38,6 +39,7 @@ class EditShowController extends AbstractController
             $addQuestionAnswerForm = $this->createForm(QuestionAnswerType::class);
             $addImageSlideForm = $this->createForm(ImageSlideType::class);
             $addVideoSlideForm = $this->createForm(VideoSlideType::class);
+            $textDescriptionForm = $this->createForm(TextDescriptionType::class, $presentation);
            
             return $this->render('project_presentation/edit_show/origin.html.twig', [
                 'presentation' => $presentation,
@@ -46,6 +48,7 @@ class EditShowController extends AbstractController
                 'addQuestionAnswerForm' => $addQuestionAnswerForm->createView(),
                 'addImageSlideForm' => $addImageSlideForm->createView(),
                 'addVideoSlideForm' => $addVideoSlideForm->createView(),
+                'textDescriptionForm' => $textDescriptionForm->createView(),
             ]);
 
 

@@ -1,0 +1,268 @@
+{% embed "/project_presentation/edit_show/skeletons/structure_content.html.twig" with {'iconName': "text_description", 'title': "Description du Projet", 'additionalClasses': "pp-edition-mode" } %}
+
+
+    {% block deleteElementsButtons %}{% endblock %}
+
+    {% block mainContent %}
+
+        <!-- Project Text Description Display -->
+
+        <div id="text_description" class="pp-struct-content">
+
+            {# Image Zoom Box #}
+            <div id="image-zoom-result" class="img-zoom-result"></div>
+
+            {% set textDescription = presentation.textDescription %}
+            
+            {% set longTextSmallScreens = false %}
+            {% set longTextLargeScreens = false %}
+
+            {% if textDescription | length > 780 %}
+            
+                {% set longTextLargeScreens = true %}
+
+            {% endif %}
+
+
+            {% if textDescription | length > 300 %}
+            
+                {% set longTextSmallScreens = true %}
+
+            {% endif %}
+
+            {# Text Description Display (2 cases:
+            
+                - short text description; 
+                - long text description we use a collapsible
+            #}
+            
+            <div id="read-text-description" class="{{ longTextLargeScreens or longTextSmallScreens ? 'long-text' }}  pp-consultation-mode container">
+
+                <!-- Text Description (Display & trigger edit for user presenter) -->
+
+                <div id="collapseTextDescription" class="pp-text-descriptionposition-relative {{ longTextSmallScreens ? 'collapse no-transition'}} {{ longTextLargeScreens ? 'collapse-lg'}} ">
+
+                    {% if not presentation.textDescription is empty %} 
+
+                        {{ textDescription | sanitize_html ('default') }}
+
+                    {% endif %}
+
+                    {# Maybe to do : when userPresenter see its pages, it might be useful if he sees that no text description of its project is available, even in consultation mode {% if textDescription | length == 0 %}
+                    
+                        <div class="text-center mx-0">Décrivez ici votre projet en quelques lignes.</div>
+
+                    {% endif %} #}
+                   
+                </div>
+
+                {% if longTextLargeScreens %}
+                    
+                    <!-- Toggle Collapse Button -->
+
+                    <div class="d-none d-lg-block mt-4">
+
+                        <button style="z-index: index 5;" class="collapsed btn btn-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#collapseTextDescription"></button>
+                        
+                    </div>
+                
+                {% endif %}
+
+                {% if longTextSmallScreens %}
+                    
+                    <!-- Toggle Collapse Button -->
+
+                    <div class="d-lg-none mt-3">
+
+                        <button style="z-index: index 5;" class="collapsed btn btn-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#collapseTextDescription"></button>
+                        
+                    </div>
+                
+                {% endif %}
+
+                
+            </div>
+
+            <div id="text-descr-live-edition-container" class="pp-edition-mode">
+                
+                {% if userPresenter %}
+                        
+                    {% include 'project_presentation/edit_show/text_description/ajax.html.twig' with {"idPP": presentation.id } %}
+                        
+                {% endif %}
+            
+            </div>
+
+        </div>
+
+        {# Text Description Live Edition Container #}
+
+
+
+        <script>
+
+             $(document).ready(function(){
+
+                //Format text description output
+
+                //removing empty paragraphs
+
+                $('#read-text-description p').each(function(){
+                    if($.trim($(this).text()) == '' && $(this).children().length == 0){
+                        $(this).hide(); 
+                    }
+                });
+
+                //removing last visible paragraph or ul margin bottom
+                // to do : here we remove each last of type (ul + p) margin, we should remove only p OR ul margin.
+
+                $('#read-text-description p:visible:last, #read-text-description ul:visible:last').addClass('remove-margin-bottom');
+
+             })
+
+        </script>
+
+        
+
+        <style>
+
+            #text_description{
+
+                position: relative;
+            }
+
+            #read-text-description{
+
+                margin: 20px 0;
+
+            }
+
+            #text_description .remove-margin-bottom{
+
+                margin-bottom: 0;
+
+            }
+
+
+            #read-text-description{
+                padding: 0 30px;
+            }
+
+            .edit-text-highlight{
+                background-color: blue;
+            }
+                    
+            .long-text button.collapsed:after {
+                content: 'Afficher +';
+            }
+            
+            .long-text button:not(.collapsed):after {
+                content: 'Réduire';
+            }
+            
+            .long-text button:not(.collapsed) {
+                margin-top: 13px;
+            }
+
+            .long-text #collapseTextDescription.collapse-lg:not(.show) {
+                
+                display: block;
+                max-height: 4.3em; /* height = lineheight * no of lines to display */
+                overflow: hidden;
+
+            }
+
+            #collapseTextDescription:not(.collapse-lg) {
+
+                display: block;
+                overflow: auto;
+                height: 100%;
+
+            }
+            
+            #read-text-description .collapse:not(.collapse-lg){ /* when text is entirely displayed on large screens but not on small screens */
+
+                display: block;
+
+            }            
+
+            .pp-text-description{
+                
+                font-size: 1.08em;
+            }
+
+            #text-descr-live-edition-container.live-edit-session {
+
+                width: 100%;
+                height: 100%;
+
+            }
+
+            @media screen and (min-width: 600px) {
+
+                #collapseTextDescription { /* When text is too long, we use a scrollbar on large screen because we don't want to perturb display stability when user click on show more button. */
+
+                    max-height: 380px;
+                    overflow: auto;
+
+                }
+
+            }
+
+
+
+            @media screen and (max-width: 1200px) {
+
+                #read-text-description {
+                    padding: 0px 5px;
+                }
+
+            }
+
+
+
+            @media screen and (max-width: 580px) {
+
+                    
+                #text-descr-live-edition-container.live-edit-session {
+
+                    width: 100%;
+                    height: 360px;
+
+                }
+
+                .in-consultation-mode #text-description-struct-container{
+                    padding-bottom: 20px;
+                }
+
+
+                #text_description {
+                    padding: 0;
+                }
+                    
+                #read-text-description{
+                    margin: 0;
+                    padding: 0;
+                }
+
+
+                .long-text #collapseTextDescription.collapse:not(.show), .long-text #collapseTextDescription.collapse-sm:not(.show) {
+
+                    display: block;
+                    overflow: hidden;
+                    height: 4.4em;
+
+                }
+
+                .pp-text-description{
+
+                    font-size: 1.03em;
+                }
+
+            }
+            
+        </style>    
+
+    {% endblock %}
+
+{% endembed %}
