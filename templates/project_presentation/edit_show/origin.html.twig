@@ -104,6 +104,34 @@
 
     <div class="page-container container m-4 {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}}">
 
+        {% set countPlaces = presentation.places | length %}
+
+        <div class="col-lg-6 pp-struct-container-wrapper {% if countPlaces == 0 %} pp-edition-mode {% endif %}">
+            
+            <div id="places-struct-container" class="pp-struct-container">
+                
+                {% include 'project_presentation/edit_show/places/display.html.twig' %}
+            
+            </div>
+        
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         {% set countSlides = presentation.slides | length %}
         
         {# Slideshow images & videos #}

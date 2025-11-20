@@ -250,6 +250,11 @@ class PPBase
         $this->places = new ArrayCollection();
     }
 
+    public function getProjectPresentation(): self
+    {
+        return $this;
+    }
+
 
 
 
@@ -806,6 +811,18 @@ class PPBase
     {
         $this->otherComponents = $otherComponents;
         return $this;
+    }
+
+    public function getOCItem(string $type, string $id): ?array
+    {
+        return $this->otherComponents->getItem($type, $id);
+    }
+
+    public function setOCItem(string $type, string $id, array $data): void
+    {
+        if (!$this->otherComponents->replaceItem($type, $id, $data)) {
+            throw new \InvalidArgumentException(sprintf('Impossible de mettre à jour l’élément "%s".', $id));
+        }
     }
 
 

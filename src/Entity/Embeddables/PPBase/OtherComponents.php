@@ -171,4 +171,32 @@ public function addComponent(string $type, ComponentInterface $component): self
         return $this;
     }
 
+    public function getItem(string $type, string $id): ?array
+    {
+        foreach ($this->data[$type] ?? [] as $item) {
+            if (($item['id'] ?? null) === $id) {
+                return $item;
+            }
+        }
+
+        return null;
+    }
+
+    public function replaceItem(string $type, string $id, array $payload): bool
+    {
+        if (!isset($this->data[$type])) {
+            return false;
+        }
+
+        foreach ($this->data[$type] as $index => $item) {
+            if (($item['id'] ?? null) === $id) {
+                $payload['id'] = $id;
+                $this->data[$type][$index] = array_merge($item, $payload);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

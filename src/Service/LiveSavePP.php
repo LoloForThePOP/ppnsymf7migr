@@ -2,16 +2,61 @@
 
 namespace App\Service;
 
+use App\Entity\Need;
 use App\Entity\PPBase;
+use App\Entity\Slide;
+use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
+use App\Entity\Embeddables\PPBase\OtherComponentsModels\QuestionAnswerComponent;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Validator\Constraints\Url;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
 class LiveSavePP {
+
+    /**
+     * Limit the list of entities that can be targeted to avoid arbitrary class resolution.
+     */
+    private const ENTITY_CLASS_MAP = [
+        'ppbase' => PPBase::class,
+        'slide' => Slide::class,
+        'need' => Need::class,
+    ];
+
+    private const DIRECT_PROPERTIES = [
+        'goal',
+        'title',
+        'textDescription',
+        'caption',
+        'description',
+    ];
+
+    private const COMPONENT_PROPERTIES = [
+        'websites',
+        'questionsAnswers',
+    ];
+
+    private const COMPONENT_STORAGE_KEYS = [
+        'websites' => 'websites',
+        'questionsAnswers' => 'questions_answers',
+    ];
+
+    /**
+     * Map OtherComponents (websites, questionsAnswers, …) sub-properties
+     * to the PHP class/property that already declares constraints.
+     *
+     * @var array<string, array<string, array{string, string, array|null}>>
+     */
+    private const COMPONENT_VALIDATION_MAP = [
+        'websites' => [
+            'title' => [WebsiteComponent::class, 'title', ['input']],
+            'url' => [WebsiteComponent::class, 'url', ['input']],
+        ],
+        'questionsAnswers' => [
+            'question' => [QuestionAnswerComponent::class, 'question', ['input']],
+            'answer' => [QuestionAnswerComponent::class, 'answer', ['input']],
+        ],
+    ];
 
 
     protected $entityName;
@@ -23,6 +68,7 @@ class LiveSavePP {
 
     protected $entity;
     protected $pp;
+    protected $entityClass;
 
     protected $em;
     protected $validator;
@@ -41,13 +87,28 @@ class LiveSavePP {
     }
 
 
-    public function hydrate($entityName, $entityId, $property, $subId, $subProperty, $content){
+    /**
+     * Normalize incoming metadata so the rest of the service can trust its state.
+     */
+    public function hydrate(
+        string $entityName,
+        int $entityId,
+        string $property,
+        ?string $subId,
+        ?string $subProperty,
+        string $content
+    ): void {
+        $normalizedEntity = strtolower($entityName);
+        if (!isset(self::ENTITY_CLASS_MAP[$normalizedEntity])) {
+            throw new \InvalidArgumentException(sprintf('Type d’entité "%s" non supporté.', $entityName));
+        }
 
-        $this->entityName = $entityName;
+        $this->entityName = $normalizedEntity;
+        $this->entityClass = self::ENTITY_CLASS_MAP[$normalizedEntity];
         $this->entityId = $entityId;
-        $this->property = $property;
-        $this->subProperty = $subProperty;
-        $this->subId = $subId;
+        $this->property = trim($property);
+        $this->subProperty = $subProperty !== null ? trim($subProperty) : null;
+        $this->subId = $subId !== null ? trim($subId) : null;
         $this->content = $content;
 
         $this->setEntityToUpdate();
@@ -61,15 +122,17 @@ class LiveSavePP {
 
 
     /**
-     * Allow to get the entity we will update (ex: PPBase; Slide; etc)
-     * @return void
+     * Resolve the concrete Doctrine entity or bail with a consistent error.
      */
-    public function setEntityToUpdate(){
+    public function setEntityToUpdate(): void
+    {
+        $entity = $this->em->getRepository($this->entityClass)->find($this->entityId);
 
-        $entityFullName = 'App\\Entity\\'.ucfirst($this->entityName);
+        if ($entity === null) {
+            throw new \RuntimeException('Élément introuvable.');
+        }
 
-        return $this->entity = $this->em->getRepository($entityFullName)->findOneById($this->entityId);
-        
+        $this->entity = $entity;
     }
 
     /**
@@ -78,15 +141,14 @@ class LiveSavePP {
      */
     public function setPPToUpdate(){
 
-        $pp = null;
+        if (!method_exists($this->entity, 'getProjectPresentation')) {
+            throw new \LogicException(sprintf(
+                'Entity "%s" must expose getProjectPresentation() to support live save.',
+                $this->entity::class
+            ));
+        }
 
-        if ($this->entity instanceof PPBase) {
-            $pp = $this->entity;
-        }else{ // we manage a PPBase child entity (ex: a slide) and we get its parent PPBase
-            $pp = $this->entity->getPresentation();
-        } 
-
-        return $this->pp = $pp;
+        return $this->pp = $this->entity->getProjectPresentation();
 
     }
 
@@ -101,77 +163,67 @@ class LiveSavePP {
 
     
     /**
-    * Check if the entity, property, or subproperty can be ajax updated.
-    */
-    public function allowItemAccess(){
-      
-        $allowAccess = false;
-
-        switch ($this->entityName) {
-            case 'PPBase':
-            case 'Slide':
-            case 'Need':
-    
-                $allowAccess = true;
-                break;
-            
-            default:
-                throw new \Exception("Unsupported entity type to edit");
-                break;
-        }
-        
-        switch ($this->property) {
-    
-            case 'goal':
-            case 'title':
-            case 'textDescription':
-            case 'caption':
-            case 'description':
-            case 'websites':
-            case 'questionsAnswers':
-            case 'dataList':
-            case 'status':
-    
-                $allowAccess = true;
-                break;
-            
-            default:
-                throw new \Exception("Unsupported property to edit");
-                break;
-    
+     * Check if the entity, property, or subproperty can be ajax updated.
+     * The goal is to fail fast before hitting Doctrine setters or array mutations.
+     */
+    public function allowItemAccess(): bool
+    {
+        if (!isset(self::ENTITY_CLASS_MAP[$this->entityName])) {
+            throw new \InvalidArgumentException('Type d’entité non supporté.');
         }
 
-        if (isset($this->subProperty)) {
+        if (!in_array($this->property, $this->allowedProperties(), true)) {
+            throw new \InvalidArgumentException('Propriété non autorisée.');
+        }
 
-            switch ($this->subProperty) {
-    
-                case 'url':
-                case 'description':
-                case 'question':
-                case 'answer':
-                case 'name':
-                case 'value':
-                case 'userRemarks':
-                case 'general':
-                case 'like':
+        if ($this->requiresSubProperty() && $this->subProperty === null) {
+            throw new \InvalidArgumentException('Sous-propriété manquante.');
+        }
 
-                case 'modelisation': //project status categories
-                case 'sales':
-                case 'administrative':
-                case 'submission':
-        
-                    $allowAccess = true;
-                    break;
-                
-                default:
-                    throw new \Exception("Unsupported subproperty to edit");
-                    break;
-        
+        if ($this->isComponentProperty() && $this->subId === null) {
+            throw new \InvalidArgumentException('Identifiant d’élément manquant.');
+        }
+
+        if ($this->isDirectPropertyMutation()) {
+            $setter = 'set' . ucfirst($this->property);
+            if (!method_exists($this->entity, $setter)) {
+                throw new \LogicException(sprintf(
+                    'Impossible de modifier "%s" sur %s.',
+                    $this->property,
+                    $this->entity::class
+                ));
             }
         }
 
-        return $allowAccess;
+        return true;
+    }
 
+    private function isComponentProperty(): bool
+    {
+        return in_array($this->property, self::COMPONENT_PROPERTIES, true);
+    }
+
+    private function isDirectPropertyMutation(): bool
+    {
+        return in_array($this->property, self::DIRECT_PROPERTIES, true);
+    }
+
+    private function requiresSubProperty(): bool
+    {
+        return $this->isComponentProperty();
+    }
+
+    private function resolveComponentStorageKey(): string
+    {
+        return self::COMPONENT_STORAGE_KEYS[$this->property] ?? $this->property;
+    }
+
+    /**
+     * Aggregate all properties that can be edited through the inline workflow.
+     */
+    private function allowedProperties(): array
+    {
+        return array_merge(self::DIRECT_PROPERTIES, self::COMPONENT_PROPERTIES);
     }
 
     
@@ -181,78 +233,73 @@ class LiveSavePP {
     */
     public function validateContent(){
 
-        $constraints = null;
-        $errors = null;
+        // Special handling for OtherComponents (websites, questionsAnswers…)
+        if (
+            $this->subProperty !== null
+            && isset(self::COMPONENT_VALIDATION_MAP[$this->property][$this->subProperty])
+        ) {
+            [$class, $field, $groups] = self::COMPONENT_VALIDATION_MAP[$this->property][$this->subProperty];
 
-        switch ($this->property) {
+            $errors = $this->validator->validatePropertyValue(
+                $class,
+                $field,
+                $this->content,
+                $groups
+            );
 
-            case 'websites':
-
-                switch ($this->subProperty) {
-
-                    case 'url':
-
-                        $constraints = [
-                            new Assert\Url(['message' => 'Vous devez utiliser une adresse web valide']),
-                            new Assert\NotBlank(['message' => 'Veuillez remplir ce champ'])
-                        ];
-
-                        break;
-                    
-                    default:
-
-                        return true;                        
-                        break;
-                }
-
-                break;
-            
-            default:
-
-                return true;
-
+            return $errors->count() > 0 ? $errors[0]->getMessage() : true;
         }
 
-        // use the validator to validate the value
-        $errors = $this->validator->validate(
-            $this->content,
-            $constraints
-        ); 
-            
-        if ($errors->count() > 0) {
+        // Fall back to the entity metadata if the property exists on the entity
+        if (is_object($this->entity) && property_exists($this->entity, $this->property)) {
+            $errors = $this->validator->validatePropertyValue(
+                $this->entity::class,
+                $this->property,
+                $this->content
+            );
 
-            return  $errors[0]->getMessage();
-                    
-        } else {
-
-            return true;
-
+            return $errors->count() > 0 ? $errors[0]->getMessage() : true;
         }
 
+        return true;
+
+    }
+
+    public function getPresentation(): PPBase
+    {
+        return $this->pp;
     }
 
     public function save(){
 
         switch ($this->property) {
 
-            case 'status':
-
-                $this->pp->editProjectStatus($this->subProperty, $this->content);
-                break;
-
-            case 'websites': //these special cases : we update the following proporty in PPBase entity : $otherComponents
+            case 'websites': //these special cases : we update the following property in PPBase entity : $otherComponents
             case 'questionsAnswers':
-            case 'dataList':
 
-                $item = $this->pp->getOCItem($this->property, $this->subId); //ex: a website
+                $storageKey = $this->resolveComponentStorageKey();
+                $item = $this->pp->getOCItem($storageKey, (string) $this->subId); //ex: a website
+
+                if ($item === null) {
+                    throw new \RuntimeException('Élément introuvable.');
+                }
+
+                if (!array_key_exists($this->subProperty, $item)) {
+                    throw new \InvalidArgumentException(sprintf(
+                        'Champ "%s" introuvable sur le composant.',
+                        $this->subProperty
+                    ));
+                }
+
                 $item[$this->subProperty] = $this->content; // updating item subproperty (ex: website url)
-                $this->pp->setOCItem($this->property, $this->subId, $item);
+                $this->pp->setOCItem($storageKey, (string) $this->subId, $item);
 
                 break;
-            
+
             default: //updating an entity property (ex: a Slide $caption)
 
                 $propertySetterName =  'set'.ucfirst($this->property); 
+                // Setters on the aggregate are trusted at this point thanks to allowItemAccess().
                 $this->entity->$propertySetterName($this->content);
 
                 break;

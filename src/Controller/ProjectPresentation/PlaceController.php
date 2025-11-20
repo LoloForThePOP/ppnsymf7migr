@@ -1,0 +1,106 @@
+<?php
+
+namespace App\Controller\ProjectPresentation;
+
+use App\Entity\Embeddables\GeoPoint;
+use App\Entity\PPBase;
+use App\Entity\Place;
+use App\Repository\PlaceRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+class PlaceController extends AbstractController
+{
+    #[Route('/projects/{stringId}/places', name: 'manage_places', methods: ['GET'])]
+    public function index(
+        #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation
+    ): Response {
+        $this->denyAccessUnlessGranted('edit', $presentation);
+
+        return $this->render('project_presentation/edit_show/places/manage.html.twig', [
+            'presentation' => $presentation,
+            'stringId' => $presentation->getStringId(),
+        ]);
+    }
+
+    #[Route('/projects/{stringId}/places/ajax-new-place', name: 'ajax_add_place', methods: ['POST'])]
+    public function ajaxNewPlace(
+        Request $request,
+        #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        $this->denyAccessUnlessGranted('edit', $presentation);
+
+        if (!$request->isXmlHttpRequest()) {
+            return $this->json(['error' => 'Requête invalide.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $payload = $request->request;
+        $latitude = filter_var($payload->get('latitude'), FILTER_VALIDATE_FLOAT);
+        $longitude = filter_var($payload->get('longitude'), FILTER_VALIDATE_FLOAT);
+        $type = trim((string) $payload->get('type', ''));
+        $name = trim((string) $payload->get('name', ''));
+
+        if ($type === '' || $name === '' || $latitude === false || $longitude === false) {
+            return $this->json(['error' => 'Données incomplètes.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $newPlace = (new Place())
+            ->setType($type)
+            ->setName($name)
+            ->setGeoloc(new GeoPoint($latitude, $longitude))
+            ->setCountry((string) $payload->get('country'))
+            ->setAdministrativeAreaLevel1((string) $payload->get('administrativeAreaLevel1'))
+            ->setAdministrativeAreaLevel2((string) $payload->get('administrativeAreaLevel2'))
+            ->setLocality((string) $payload->get('locality'))
+            ->setSublocalityLevel1((string) $payload->get('sublocalityLevel1'))
+            ->setPostalCode((string) $payload->get('postalCode'));
+
+        $presentation->addPlace($newPlace);
+        $entityManager->persist($newPlace);
+        $entityManager->flush();
+
+        return $this->json([
+            'placeId' => $newPlace->getId(),
+            'feedbackCode' => true,
+        ]);
+    }
+
+    #[Route('/projects/{stringId}/places/ajax-remove-place', name: 'ajax_remove_place', methods: ['POST'])]
+    public function delete(
+        Request $request,
+        #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
+        EntityManagerInterface $entityManager,
+        PlaceRepository $placeRepository
+    ): JsonResponse {
+        $this->denyAccessUnlessGranted('edit', $presentation);
+
+        if (!$request->isXmlHttpRequest()) {
+            return $this->json(['error' => 'Requête invalide.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $placeId = filter_var($request->request->get('placeId'), FILTER_VALIDATE_INT);
+        if ($placeId === false) {
+            return $this->json(['error' => 'Identifiant de lieu invalide.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $place = $placeRepository->find($placeId);
+        if ($place === null || !$presentation->getPlaces()->contains($place)) {
+            return $this->json(['error' => 'Lieu introuvable.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $presentation->removePlace($place);
+        $entityManager->remove($place);
+        $entityManager->flush();
+
+        return $this->json([
+            'deletedPlaceId' => $placeId,
+            'feedbackCode' => true,
+        ]);
+    }
+}

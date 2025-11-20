@@ -272,6 +272,11 @@ class News implements \Stringable
         return $this->project;
     }
 
+    public function getProjectPresentation(): ?PPBase
+    {
+        return $this->project;
+    }
+
     public function setProject(?PPBase $project): static
     {
         $this->project = $project;
