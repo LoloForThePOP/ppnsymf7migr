@@ -20,11 +20,14 @@ class UpdateSlideController extends AbstractController
         '/projects/{stringId}/slides/reorder',
         name: 'pp_reorder_slides'
     )]
-    public function reorder(PPBase $presentation): Response
+    
+    public function reorder(
+        #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
+    ): Response
     {
         $this->denyAccessUnlessGranted('edit', $presentation);
 
-        return $this->render('project_presentation/show_edit/slides/tiny_screens_reorder.html.twig', [
+        return $this->render('project_presentation/edit_show/slides/tiny_screens_reorder.html.twig', [
             'presentation' => $presentation,
         ]);
     }

@@ -7,6 +7,7 @@ use App\Entity\PPBase;
 use App\Enum\SlideType;
 use App\Enum\ProjectStatuses;
 use App\Service\AssessPPScoreService;
+use App\Service\AI\ProjectTaggingService;
 use App\Service\CacheThumbnailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,11 +18,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class CreateController extends AbstractController
 {
+    private const HELPER_ORDER = ['goal', 'textDescription', 'initialStatus', 'imageSlide', 'title', 'categoriesKeywords'];
 
     public function __construct(
         private EntityManagerInterface $em,
         private AssessPPScoreService $assessPPScore, 
         private CacheThumbnailService $cacheThumbnail,
+        private ProjectTaggingService $taggingService,
         
     ) {}
 
@@ -49,6 +52,17 @@ class CreateController extends AbstractController
             $this->denyAccessUnlessGranted('edit', $presentation);
         }
 
+        $currentHelperType = self::HELPER_ORDER[$position] ?? null;
+
+        // Pre-fill AI suggestions when landing on the categories step and nothing set yet (before form creation so the form reflects the data).
+        if ($currentHelperType === 'categoriesKeywords'
+            && $presentation->getCategories()->count() === 0
+            && empty($presentation->getKeywords())
+        ) {
+            $this->taggingService->suggestAndApply($presentation);
+            $this->em->flush();
+        }
+
         // Create / update a Project Presentation, Form presented step by step in front-end
         $form = $this->createForm(ProjectPresentationCreationType::class, $presentation);
         $form->handleRequest($request);
@@ -58,6 +72,7 @@ class CreateController extends AbstractController
                 'form' => $form->createView(),
                 'stringId' => $stringId,
                 'position' => $position,
+                'helperItems' => array_map(static fn ($type) => ['type' => $type], self::HELPER_ORDER),
             ]);
         }
 
@@ -83,10 +98,13 @@ class CreateController extends AbstractController
 
         // Case Final step: whole process done
         if ($nextPosition === null) {
+            //applying presentation categories and keywords with AI service
+            $this->taggingService->suggestAndApply($presentation);
             $this->assessPPScore->scoreUpdate($presentation);
 
             // mark presentation as completed for later cleanup
             $presentation->isCreationFormCompleted(true);
+            $this->em->flush();
 
             $this->addFlash('success fs-4', <<<HTML
                 ✅ Votre page de présentation est prête.<br>
@@ -99,7 +117,7 @@ class CreateController extends AbstractController
             ]);
         }
 
-        $allowedSteps = ['title', 'initialStatus', 'imageSlide', 'textDescription'];
+        $allowedSteps = self::HELPER_ORDER;
 
         if (!in_array($helperType, $allowedSteps, true)) {
             throw $this->createAccessDeniedException('Invalid helper operation.');
@@ -163,6 +181,22 @@ class CreateController extends AbstractController
             case 'textDescription':
                 $text = nl2br($form->get('textDescription')->getData() ?? '');
                 $presentation->setTextDescription($text);
+                $this->em->flush();
+                break;
+
+            case 'categoriesKeywords':
+                $categories = $form->get('categories')->getData();
+                $keywords = $form->get('keywords')->getData();
+
+                foreach ($presentation->getCategories() as $existing) {
+                    $presentation->removeCategory($existing);
+                }
+
+                foreach ($categories as $category) {
+                    $presentation->addCategory($category);
+                }
+
+                $presentation->setKeywords($keywords ?: null);
                 $this->em->flush();
                 break;
         }

@@ -1,0 +1,22 @@
+<div class="text-center mb-3">
+    <h4>Catégories & mots-clés</h4>
+    <p class="text-muted mb-1">L'IA a prérempli ces suggestions. Vous pouvez ajouter ou retirer avant de finaliser.</p>
+</div>
+
+<div class="mb-3">
+    <div class="fw-bold mb-2">Catégories (choisissez jusqu'à 3)</div>
+    <div class="d-flex flex-wrap gap-2">
+        {{ form_widget(form.categories) }}
+    </div>
+</div>
+
+<div class="mb-3">
+    <div class="fw-bold mb-2">Mots-clés</div>
+    {{ form_widget(form.keywords, {
+        attr: {
+            class: 'form-control',
+            placeholder: 'Ex: mobilité durable, solaire, inclusion'
+        }
+    }) }}
+    <small class="text-muted">Séparez par des virgules.</small>
+</div>

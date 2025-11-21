@@ -76,6 +76,7 @@
 
     <link href="/css/project_presentation_page.css" rel="stylesheet">
     <link href="/css/comments.css" rel="stylesheet">
+    <link href="/css/show_more_less_button.css" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
 
     {# WYSIWYG editor styles only if the user can edit the presentation #}
@@ -84,6 +85,7 @@
 
         <link href="/css/wysiwyg.css" rel="stylesheet">
         <link href="/css/create_news.css" rel="stylesheet">
+        <link href="/css/places_autocomplete.css" rel="stylesheet">
 
     {% endif %}
 
@@ -101,8 +103,45 @@
     {% if userPresenter %}
 
     {% endif %}
+    
 
     <div class="page-container container m-4 {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}}">
+
+
+
+    {# Setting some variables #}
+
+    {% set hasKeywords = presentation.keywords is not empty %}
+
+      
+
+    {% set presentationCategories = presentation.categories %}
+    {% set countCategories = presentationCategories | length %}
+
+
+
+
+
+        <div class="d-none d-md-flex align-items-center">
+
+            {# Keywords Display only >= Medium Screens #}
+
+            {% include 'project_presentation/edit_show/_partials/__upper_box/_categories_keywords.html.twig' %}
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         {% set countPlaces = presentation.places | length %}
 
@@ -110,7 +149,7 @@
             
             <div id="places-struct-container" class="pp-struct-container">
                 
-                {% include 'project_presentation/edit_show/places/display.html.twig' %}
+               {% include 'project_presentation/edit_show/places/display.html.twig' %}
             
             </div>
         
@@ -321,6 +360,19 @@ $(document).on('submit', '.ajax-form', function (e) {
 
 
 
+        {# Switch Between Edition Mode and Consultation Mode Button #}
+
+        <button id="pp-switch-edit-consult-mode" title="Switch between edition mode and consultation mode">
+
+            <img id="pp-consult-icon" class="pp-edition-mode" src="{{ asset('eye.svg', 'pp_wysiwyg')}}" height="30" width="30"  alt="eye icon">
+
+            <img id="pp-edit-icon" class="pp-consultation-mode" src="{{ asset('pen.svg', 'pp_wysiwyg')}}" height="30" width="30"  alt="pen icon">
+
+        </button>
+
+
+
+
        
 
 
@@ -386,6 +438,12 @@ $(document).on('submit', '.ajax-form', function (e) {
         {% include 'project_presentation/edit_show/_partials/_follow_button.html.twig' %}
         {% include 'project_presentation/edit_show/_partials/_like_button.html.twig' %}
 
+        {% if userPresenter %}
+            {% include 'project_presentation/edit_show/places/manage_modal.html.twig' %}
+            {% include 'project_presentation/edit_show/reorder_delete_elements.html.twig' %}
+            {% include 'project_presentation/edit_show/wysiwyg.html.twig' %}
+        {% endif %}
+
     </div>
     
 {% endblock %}
@@ -404,6 +462,8 @@ $(document).on('submit', '.ajax-form', function (e) {
 
 </script>
 
-      
+{% if userPresenter %}
+    {% include 'project_presentation/edit_show/places/_js.html.twig' with { presentation: presentation } %}
+{% endif %}
 
 {% endblock %}

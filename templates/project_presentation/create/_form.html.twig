@@ -39,6 +39,10 @@
 
         {% include "project_presentation/create/__form_steps/__text_description.html.twig" %}
 
+    {% elseif currentItem.type == "categoriesKeywords" %}
+
+        {% include "project_presentation/create/__form_steps/__categories_keywords.html.twig" %}
+
     {% endif %}
 
     <!-- Hidden Fields -->

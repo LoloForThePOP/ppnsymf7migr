@@ -14,7 +14,7 @@
 
 
 .pac-container{
-    z-index: 2 !important;
+    z-index: 2000 !important;
 }
 
 .pac-item-query {

@@ -18,19 +18,30 @@
 	{% endmacro %}
 
 	{% macro imageThumbnail(slide) %}
-		
-		<img class="SlideImageThumbnail" src="{{ vich_uploader_asset(slide) | imagine_filter('slide_thumbnail') }}"
-
-			data-caption = "{{ slide.caption[:1] | upper ~ slide.caption[1:] }}" 
-
-			alt="Slideshow image"/>
+		{% set assetPath = vich_uploader_asset(slide) %}
+		{% if assetPath %}
+			<img
+				class="SlideImageThumbnail"
+				src="{{ assetPath | imagine_filter('slide_thumbnail') }}"
+				data-caption="{{ slide.caption[:1] | upper ~ slide.caption[1:] }}"
+				alt="Slideshow image"
+			/>
+		{% else %}
+			<div class="SlideImageThumbnail placeholder d-flex justify-content-center align-items-center text-muted">
+				Aucune image
+			</div>
+		{% endif %}
 
 	{% endmacro %}
 
 
 
 
-<div id="slide-thumbnails" class="flex-container js-elements-list ">
+<div
+	id="slide-thumbnails"
+	class="flex-container js-elements-list"
+	data-structure="slides"
+>
 
 	{% for slide in presentation.slides %}
 
@@ -55,7 +66,12 @@
 
 				{# Delete slide button #}
 
-				<button type="button" data-elements-type="slide-thumbnail" class="js-delete-element pp-edition-mode btn delete-button" data-id="{{slide.id}}">&times</button>
+				<button
+					type="button"
+					data-structure="slides"
+					class="js-delete-element pp-edition-mode btn delete-button"
+					data-id="{{slide.id}}"
+				>&times;</button>
 
 			{% endif %}
 

@@ -1,0 +1,78 @@
+{% embed "utilities/modal_skeleton.html.twig" with { modal_id: "managePlacesModal", modal_size: "modal-lg" } %}
+
+    {% block modalTitle %}Gérer les lieux du projet{% endblock %}
+
+    {% block modalBody %}
+
+        <p class="text-muted small">
+            Ajoutez des villes, régions ou pays associés à votre projet. Utilisez la recherche Google Maps puis validez.
+        </p>
+
+        <div class="mb-3">
+            <input
+                id="autocomplete"
+                class="form-control"
+                placeholder="Ajouter une ville, une région ou un pays"
+                autocomplete="off"
+            />
+        </div>
+
+        <div id="feedbackBox" class="alert alert-info d-none"></div>
+
+        <table
+            id="projectPlacesTable"
+            class="table table-bordered table-hover rounded"
+        >
+            <thead>
+                <tr>
+                    <th>Type du lieu</th>
+                    <th>Nom du lieu</th>
+                    <th class="text-center">Retirer ?</th>
+                </tr>
+            </thead>
+            <tbody id="elements-list" data-elements-type="places">
+                {% for place in presentation.places %}
+                    {% set readablePlaceType = '' %}
+                    {% if place.type in ['postal_code', 'locality'] %}
+                        {% set readablePlaceType = 'Ville' %}
+                    {% elseif place.type in ['route', 'street_number'] %}
+                        {% set readablePlaceType = 'Adresse' %}
+                    {% elseif place.type == 'sublocality_level_1' %}
+                        {% set readablePlaceType = 'Section de ville' %}
+                    {% elseif place.type == 'administrative_area_level_1' %}
+                        {% set readablePlaceType = 'Région' %}
+                    {% elseif place.type == 'administrative_area_level_2' %}
+                        {% set readablePlaceType = 'Département' %}
+                    {% elseif place.type == 'country' %}
+                        {% set readablePlaceType = 'Pays' %}
+                    {% else %}
+                        {% set readablePlaceType = 'Autres' %}
+                    {% endif %}
+                    <tr id="place-row-{{ place.id }}" data-id="{{ place.id }}">
+                        <td>{{ readablePlaceType|upper }}</td>
+                        <td>{{ place.name|upper }}</td>
+                        <td class="py-2 text-center">
+                            <button
+                                data-id="{{ place.id }}"
+                                type="button"
+                                class="js-remove-place btn btn-danger btn-sm rounded fw-bold"
+                            >&times;</button>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr id="noResult">
+                        <td class="fs-6 text-center" colspan="3">Aucun lieu n'est encore associé au projet.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    {% endblock %}
+
+    {% block footerButtons %}
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Fermer
+        </button>
+    {% endblock %}
+
+{% endembed %}

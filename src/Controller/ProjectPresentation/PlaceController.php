@@ -11,23 +11,10 @@ use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class PlaceController extends AbstractController
 {
-    #[Route('/projects/{stringId}/places', name: 'manage_places', methods: ['GET'])]
-    public function index(
-        #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation
-    ): Response {
-        $this->denyAccessUnlessGranted('edit', $presentation);
-
-        return $this->render('project_presentation/edit_show/places/manage.html.twig', [
-            'presentation' => $presentation,
-            'stringId' => $presentation->getStringId(),
-        ]);
-    }
-
     #[Route('/projects/{stringId}/places/ajax-new-place', name: 'ajax_add_place', methods: ['POST'])]
     public function ajaxNewPlace(
         Request $request,

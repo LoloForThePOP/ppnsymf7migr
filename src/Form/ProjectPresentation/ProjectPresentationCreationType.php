@@ -3,7 +3,9 @@
 namespace App\Form\ProjectPresentation;
 
 use App\Entity\PPBase;
+use App\Entity\Category;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use App\Form\ProjectPresentation\ImageSlideWithoutVichHelperType;
@@ -57,6 +59,23 @@ class ProjectPresentationCreationType extends AbstractType
             ->add('imageSlide', ImageSlideWithoutVichHelperType::class, [
                 'mapped' => false,
                 'label' => false,
+            ])
+
+            // Categories & keywords (user may override AI suggestions)
+            ->add('categories', EntityType::class, [
+                'class' => Category::class,
+                'choice_label' => fn (Category $category) => $category->getLabel() ?? $category->getUniqueName(),
+                'multiple' => true,
+                'expanded' => true,
+                'required' => false,
+                'by_reference' => false,
+            ])
+            ->add('keywords', TextType::class, [
+                'label' => 'Mots-clés',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex: mobilité, solaire, inclusion',
+                ],
             ])
 
             // Helper hidden fields for step-by-step workflow

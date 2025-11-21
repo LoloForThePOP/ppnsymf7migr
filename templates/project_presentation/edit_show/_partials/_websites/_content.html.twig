@@ -27,7 +27,11 @@
 
     {% block mainContent %}
 
-        <div id="websites" class="js-elements-list pp-struct-content row m-0">
+        <div
+            id="websites"
+            class="js-elements-list pp-struct-content row m-0"
+            data-structure="websites"
+        >
 
             {% if countWebsites == 0 %}
 
@@ -161,7 +165,12 @@
                                 
                                 {# Delete website (Red Cross) button #}
 
-                                <button type="button" data-elements-type="websites" class="js-delete-element delete-button pp-edition-mode btn" data-id="{{website.id}}">&times</button>                  
+                                <button
+                                    type="button"
+                                    data-structure="websites"
+                                    class="js-delete-element delete-button pp-edition-mode btn"
+                                    data-id="{{website.id}}"
+                                >&times;</button>                  
                             
                             {% endif %}
 

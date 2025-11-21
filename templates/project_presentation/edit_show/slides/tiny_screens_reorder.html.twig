@@ -1,8 +1,7 @@
 
+{# to do: review the whole file 
 
-{# to do: review the whole file #}
-
-{% embed "project_presentation/edit_show/skeletons/update_element.html.twig" %}
+Not good: was before manage_component_skeleton (handeled reordering): {% embed "project_presentation/edit_show/skeletons/update_element.html.twig" %}#}
 
 {% block title %}Images et Vidéos{% endblock %}
 
@@ -19,7 +18,11 @@
 
     <div class="container p-0 mb-3">
 
-        <div id="elements-list" data-elements-type="slides" class="row col-lg-8 m-0">
+        <div
+            id="elements-list"
+            data-structure="slides"
+            class="js-elements-list row col-lg-8 m-0"
+        >
 
             {% if presentation.slides | length > 0 %}
 
@@ -63,8 +66,13 @@
 
                     <!-- Remove Slide button (a red cross on each slide) -->
 
-                    <button type="button" class="js-delete-element position-absolute btn btn-sm btn-danger sharp"
-                        data-id="{{slide.id}}" style="top:0; right:0;"><span class="fw-bold">&times</span></button>
+                    <button
+                        type="button"
+                        class="js-delete-element position-absolute btn btn-sm btn-danger sharp"
+                        data-structure="slides"
+                        data-id="{{slide.id}}"
+                        style="top:0; right:0;"
+                    ><span class="fw-bold">&times;</span></button>
 
                 </div>
 

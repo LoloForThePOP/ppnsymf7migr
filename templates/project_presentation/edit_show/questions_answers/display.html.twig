@@ -25,7 +25,11 @@
 
         {% set qas = presentation.getOtherComponents.getComponents('questions_answers') %}
 
-        <div id="questionsAnswers" class="js-elements-list pp-struct-content">
+        <div
+            id="questionsAnswers"
+            class="js-elements-list pp-struct-content"
+            data-structure="questionsAnswers"
+        >
 
             {% for qa in qas %}
 
@@ -82,7 +86,13 @@
                             {# delete q&a button (Red Cross) #}
                             {# overriding width and height due to css bs row behaviour #}
 
-                            <button type="button" data-elements-type="questionsAnswers" data-id="{{qa.id}}" class="js-delete-element delete-button pp-edition-mode btn" style="width:30px; height:30px;">&times</button>
+                            <button
+                                type="button"
+                                data-structure="questionsAnswers"
+                                data-id="{{qa.id}}"
+                                class="js-delete-element delete-button pp-edition-mode btn"
+                                style="width:30px; height:30px;"
+                            >&times;</button>
 
                         {% endif %}
 

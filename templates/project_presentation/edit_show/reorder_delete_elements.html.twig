@@ -1,0 +1,171 @@
+
+ <!-- sortable plugin to reorder elements (exemple : reorder presentation slides; reorder presentation websites; etc) -->
+
+ <script src="/js/sortable/sortable.min.js"></script>
+
+ <!-- jQuerySupport for above sortable plugin -->
+ 
+ <script src="/js/sortable/jquery-sortable.js"></script>
+
+ <script>
+    $(document).ready(function () {
+        var reorderEndpoint = "{{ path('pp_structure_reorder', {'stringId': presentation.stringId}) }}";
+        var deleteEndpoint = "{{ path('pp_structure_delete', {'stringId': presentation.stringId}) }}";
+        var csrfToken = "{{ csrf_token('pp_structure_mutation') }}";
+
+        function displayFeedback(message, type) {
+            var htmlClass = "fixed-flash alert alert-" + type;
+            $('#flash-messages').addClass(htmlClass).html(message).fadeIn(1000).delay(3000).fadeOut(1000);
+        }
+
+        function ajaxMutation(url, payload) {
+            return $.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'json',
+                data: $.extend({ _token: csrfToken }, payload),
+                async: true,
+            });
+        }
+
+        function ajaxErrorHandler(xhr) {
+            var message = "Une erreur est survenue";
+            if (xhr && xhr.responseJSON && xhr.responseJSON.error) {
+                message = xhr.responseJSON.error;
+            }
+            displayFeedback(message, "danger");
+        }
+
+        function collectOrderedIds($list) {
+            var ids = [];
+            $list.find('.js-sortable-element').each(function () {
+                ids.push($(this).attr('id'));
+            });
+            return ids;
+        }
+
+        function removeElementsById(id, scope) {
+            if (scope === 'slides') {
+                $('#slides [id="' + id + '"], #slide-thumbnails [id="' + id + '"], .caption[data-slide-id="' + id + '"], [data-slide-thumbnail-id="' + id + '"]').remove();
+                return;
+            }
+
+            // Limit removals to the targeted structure to avoid wiping elements from other sections that share numeric ids.
+            $('[data-structure="' + scope + '"] [id="' + id + '"], [data-structure="' + scope + '"][id="' + id + '"]').remove();
+        }
+
+        $('.js-elements-list[data-structure]').each(function () {
+            var $list = $(this);
+            var scope = $list.data('structure');
+
+            $list.sortable({
+                animation: 150,
+                ghostClass: 'blue-background-class',
+                filter: '.disabled',
+                onMove: function (evt) {
+                    if (!evt.related) {
+                        return true;
+                    }
+                    return evt.related.className.indexOf('disabled') === -1;
+                },
+                onEnd: function (evt) {
+                    var orderedIds = collectOrderedIds($list);
+
+                    ajaxMutation(reorderEndpoint, {
+                        scope: scope,
+                        orderedIds: orderedIds
+                    }).done(function () {
+                        if (scope === 'slides') {
+                            reindexSlidesAndThumbnails();
+                            $('#slide-thumbnails #' + evt.item.id).trigger('click');
+                        }
+                    }).fail(ajaxErrorHandler);
+                }
+            });
+        });
+
+        $(document).on('click', '.js-delete-element', function (event) {
+            event.preventDefault();
+
+            var $trigger = $(this);
+            var scope = $trigger.data('structure');
+            var idElement = $trigger.data('id');
+
+            if (typeof idElement === 'undefined') {
+                return;
+            }
+
+            idElement = idElement.toString();
+
+            if (!scope || idElement === '') {
+                return;
+            }
+
+            if (!confirm("Confimez-vous enlever cet élément ?")) {
+                return;
+            }
+
+            var originalHtml = $trigger.html();
+            $trigger.html('<div class="loader"></div>');
+
+            ajaxMutation(deleteEndpoint, {
+                scope: scope,
+                id: idElement
+            }).done(function () {
+                removeElementsById(idElement, scope);
+
+                if (scope === 'news') {
+                    $("#news-" + idElement).remove();
+                    $(".nextNewsSlide").trigger("click");
+                }
+
+                if (scope === 'slides') {
+                    $('[data-slide-thumbnail-id="' + idElement + '"]').remove();
+                    $('.caption[data-slide-id="' + idElement + '"]').remove();
+
+                    if ($(".mySlides").length === 0) {
+                        $("#slides").parent().find(".show-delete-items-buttons, #manage-slides").remove();
+                        $("#slides").empty();
+                    } else {
+                        reindexSlidesAndThumbnails();
+                        $("#slide-next").trigger("click");
+                    }
+                }
+            }).fail(ajaxErrorHandler).always(function () {
+                $trigger.html(originalHtml);
+            });
+        });
+
+        function reindexSlidesAndThumbnails() {
+            $(".thumbnail").each(function (index) {
+                index = index + 1;
+
+                // removing thumbnail's original events
+                $(this).off('click');
+                $(this).off('mouseover');
+
+                $(this).attr("data-loop-index", index);
+
+                // binding a new click event with correct index
+                $(this).on("click", {
+                    newIndex: index
+                }, function (event) {
+                    currentSlide(event.data.newIndex);
+                });
+
+                // binding mouseover event with correct index
+                $(this).on("mouseover", {
+                    newIndex: index
+                }, function (event) {
+                    currentSlide(event.data.newIndex);
+                });
+
+                // reordering thumbnail's matching slide in the slideshow
+                $(".slides-container").append($("#" + $(this).attr("id")));
+
+                // reordering thumbnail's matching caption in the slideshow
+                $(".caption-container").append($(".caption[data-slide-id=" + $(this).attr("id") + "]"));
+            });
+        }
+    });
+ </script>

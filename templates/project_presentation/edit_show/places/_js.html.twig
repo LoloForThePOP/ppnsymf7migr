@@ -3,7 +3,7 @@
 
 <script>
 
-    $(document).ready(function(){
+    function initializePlacesModal() {
 
         $('#feedbackBox').hide();
 
@@ -80,10 +80,10 @@
             
         $('#feedbackBox').html('<div class="loader me-2"></div><span class="h5">Demande en Cours...</span>');
 
-        $('#feedbackBox').show();
+        $('#feedbackBox').removeClass('d-none').show();
 
         $.ajax({
-            url: "{{path('ajax_add_place', {'stringId': stringId}) }}",
+            url: "{{ path('ajax_add_place', {'stringId': presentation.stringId}) }}",
             type:       'POST',   
             dataType:   'json',
             data: {
@@ -103,56 +103,9 @@
 
             async: true,  
             
-            success: function(data, status) {                
+            success: function() {                
 
-                $('#projectPlacesTable').show();
-
-                var placeName = place_name;
-                var placeType_fr='';
-
-                switch(place_type) {
-                    case 'locality':
-                        placeType_fr='Ville';
-                        break;
-                    case 'sublocality_level_1':
-                        placeType_fr='Section de Ville';
-                        break;
-                    case 'administrative_area_level_2':
-                        placeType_fr='Département'
-                            break;
-                    case 'administrative_area_level_1':
-                        placeType_fr='Région'
-                            break;
-                    case 'country':
-                        placeType_fr='Pays'
-                            break;
-                    case 'route':
-                        placeType_fr='Adresse'
-                        break;
-                    case 'street_number':
-                        placeType_fr='Adresse'
-                        break;
-                    case 'postal_code':
-                        placeType_fr='Ville'
-                        break;
-                    default:
-                        // code block
-                    } 
-
-
-                $('#autocomplete').val("");
-
-                $('#feedbackBox').html("✅ Le lieu "+placeName+" a été ajouté </br>↪ Vous pouvez ajouter d'autres lieux si vous voulez");
-                
-                $('#projectPlacesTable > tbody:last-child').append(
-                    '<tr>'
-                        +'<td>'+placeType_fr.toUpperCase()+'</td>'
-                        +'<td>'+place_name.toUpperCase()+'</td>'
-                        +'<td class="py-2"><button data-id="'+ data.placeId+'" data-cityname="'+ place_name+'" type="button" class="js-remove-place btn btn-danger btn-sm rounded fw-bold" data-dismiss="alert">&times;</button></td></tr>');
-
-                $('#autocomplete').focus();
-                
-                $('#noResult').hide();
+                window.location.reload();
             
             },  
 
@@ -180,7 +133,7 @@
                     
                     $.ajax({  
 
-                        url: "{{path('ajax_remove_place', {'stringId': stringId}) }}",
+                        url: "{{ path('ajax_remove_place', {'stringId': presentation.stringId}) }}",
                         type:       'POST',   
                         dataType:   'json',
                         data: {
@@ -189,11 +142,9 @@
 
                         async: true,  
                         
-                        success: function(data, status) {
+                        success: function() {
 
-                            $('#feedbackBox').html("✅ Le lieu sélectionné a été retiré de la présentation");
-
-                            $("#projectPlacesTable").find("[data-id="+placeId+"]").closest('tr').remove();
+                            window.location.reload();
                         
                         },  
 
@@ -214,6 +165,16 @@
                 }
             }, '.pac-container');
             
-    });  
+    }
+
+    function waitForGooglePlaces() {
+        if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+            initializePlacesModal();
+        } else {
+            setTimeout(waitForGooglePlaces, 200);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', waitForGooglePlaces);
 
 </script>
