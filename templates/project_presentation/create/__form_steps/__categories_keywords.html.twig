@@ -1,22 +1,183 @@
 <div class="text-center mb-3">
     <h4>Catégories & mots-clés</h4>
-    <p class="text-muted mb-1">L'IA a prérempli ces suggestions. Vous pouvez ajouter ou retirer avant de finaliser.</p>
+    <p class="text-muted mb-1">L'IA a prérempli ces suggestions. Ajustez avant de finaliser.</p>
 </div>
 
-<div class="mb-3">
-    <div class="fw-bold mb-2">Catégories (choisissez jusqu'à 3)</div>
-    <div class="d-flex flex-wrap gap-2">
-        {{ form_widget(form.categories) }}
+{# Selected categories as pills #}
+<div class="mb-2">
+    <div class="fw-bold mb-2 d-flex align-items-center justify-content-between">
+        <span>Catégories sélectionnées</span>
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#all-categories" aria-expanded="false" aria-controls="all-categories">
+            Modifier les catégories
+        </button>
+    </div>
+
+{% set categoriesMeta = form.categories.vars.choices
+    |map(choice => {
+        'value': choice.value,
+        'unique': choice.data.uniqueName ?? choice.value,
+        'label': choice.label
+    })
+%}
+
+{% set selectedCategories = form.categories.vars.data ?? [] %}
+    <div class="d-flex flex-wrap gap-2" id="selected-categories">
+        {% if selectedCategories is not empty %}
+            {% for category in selectedCategories %}
+                {% set meta = categoriesMeta|filter(m => m.value == (category.id ?? category))|first %}
+                {% set catUnique = meta.unique ?? category.uniqueName ?? '' %}
+                {% set catLabel = meta.label ?? category.label ?? category.uniqueName ?? 'Catégorie' %}
+                <div class="btn btn-light border d-flex align-items-center gap-2 py-1 px-2 selected-category" data-category-id="{{ category.id }}">
+                    <img class="category-icon" src="{{ asset('project_categories/' ~ catUnique ~ '.svg', 'icons') }}" alt="Icône {{ catUnique }}" loading="lazy" width="20" height="20">
+                    <span>{{ catLabel }}</span>
+                </div>
+            {% endfor %}
+        {% else %}
+            <span class="text-muted">Aucune catégorie sélectionnée.</span>
+        {% endif %}
+    </div>
+
+    <div class="collapse mt-3" id="all-categories">
+        <div class="fw-bold mb-2">Toutes les catégories</div>
+        <div class="d-flex flex-wrap gap-2" id="categories-checkboxes">
+            {% for choice in form.categories %}
+                {% set catUnique = choice.vars.value %}
+                {% set catLabel = choice.vars.label %}
+                {% set iconPath = asset('project_categories/'~ catUnique ~'.svg', 'icons') %}
+                <label class="btn btn-outline-secondary d-flex align-items-center gap-2 py-1 px-2">
+                    {{ form_widget(choice, {'label': false, 'attr': {
+                        'data-unique-name': catUnique,
+                        'data-label': catLabel,
+                        'data-asset': iconPath
+                    }}) }}
+                    <img class="category-icon" src="{{ iconPath }}" alt="Icône {{ catUnique }}" loading="lazy" width="20" height="20">
+                    <span>{{ catLabel|e }}</span>
+                </label>
+            {% endfor %}
+        </div>
+        <small class="text-muted">Cochez/décochez pour mettre à jour la sélection.</small>
     </div>
 </div>
 
-<div class="mb-3">
+{# Keywords as removable chips #}
+<div class="mt-4">
     <div class="fw-bold mb-2">Mots-clés</div>
-    {{ form_widget(form.keywords, {
-        attr: {
-            class: 'form-control',
-            placeholder: 'Ex: mobilité durable, solaire, inclusion'
-        }
-    }) }}
-    <small class="text-muted">Séparez par des virgules.</small>
+    {% set keywordsValue = form.keywords.vars.value ?? form.keywords.vars.data %}
+    {% set keywordsList = keywordsValue ? keywordsValue|split(',') : [] %}
+
+    <div class="d-flex flex-wrap gap-2 mb-2" id="keyword-chips">
+        {% for keyword in keywordsList %}
+            {% set cleanKeyword = keyword|trim %}
+            {% if cleanKeyword != '' %}
+                <button type="button" class="btn btn-outline-primary btn-sm keyword-chip" data-keyword="{{ cleanKeyword }}">
+                    {{ cleanKeyword }}
+                    <span class="text-danger ms-1">×</span>
+                </button>
+            {% endif %}
+        {% else %}
+            <span class="text-muted">Aucun mot-clé pour l'instant.</span>
+        {% endfor %}
+    </div>
+
+    <div class="input-group mb-2">
+        <input type="text" class="form-control" id="keyword-input" placeholder="Ajouter un mot-clé puis Entrée">
+        <button class="btn btn-outline-success" type="button" id="keyword-add">Ajouter</button>
+    </div>
+    <small class="text-muted">Gardez-les courts (1-3 mots). Vous pouvez supprimer en cliquant sur la croix.</small>
+
+    <input type="hidden" id="keywords-hidden" name="{{ form.keywords.vars.full_name }}" value="{{ keywordsValue }}">
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Sync selected categories pills from checkboxes
+        const checkboxes = Array.from(document.querySelectorAll('#categories-checkboxes input[type="checkbox"]'));
+        const selectedContainer = document.getElementById('selected-categories');
+
+        function refreshSelectedCategories() {
+            selectedContainer.innerHTML = '';
+            const checked = checkboxes.filter(cb => cb.checked);
+            if (checked.length === 0) {
+                selectedContainer.innerHTML = '<span class="text-muted">Aucune catégorie sélectionnée.</span>';
+                return;
+            }
+            checked.slice(0, 3).forEach(cb => {
+                const labelEl = cb.closest('label');
+                const text = labelEl ? labelEl.querySelector('span')?.textContent?.trim() || cb.value : cb.value;
+                const icon = cb.dataset.asset || '';
+                const iconName = cb.dataset.uniqueName || cb.getAttribute('data-unique-name') || 'default';
+                const pill = document.createElement('div');
+                pill.className = 'btn btn-light border d-flex align-items-center gap-2 py-1 px-2 selected-category';
+                pill.dataset.categoryId = cb.value;
+                const imgTag = icon ? `<img class="category-icon" src="${icon}" alt="${iconName}" width="20" height="20">` : '';
+                pill.innerHTML = `${imgTag}<span>${text}</span>`;
+                selectedContainer.appendChild(pill);
+            });
+        }
+
+        checkboxes.forEach(cb => cb.addEventListener('change', refreshSelectedCategories));
+        refreshSelectedCategories();
+
+        // Keywords chips
+        const chipsContainer = document.getElementById('keyword-chips');
+        const keywordInput = document.getElementById('keyword-input');
+        const keywordAddBtn = document.getElementById('keyword-add');
+        const keywordsHidden = document.getElementById('keywords-hidden') || document.querySelector('input[name$="[keywords]"]');
+
+        function getKeywords() {
+            return (keywordsHidden?.value || '')
+                .split(',')
+                .map(k => k.trim())
+                .filter(k => k.length > 0);
+        }
+
+        function setKeywords(list) {
+            const unique = Array.from(new Set(list)).slice(0, 10);
+            if (keywordsHidden) {
+                keywordsHidden.value = unique.join(', ');
+            }
+            renderChips(unique);
+        }
+
+        function renderChips(list) {
+            chipsContainer.innerHTML = '';
+            if (list.length === 0) {
+                chipsContainer.innerHTML = '<span class="text-muted">Aucun mot-clé pour l\'instant.</span>';
+                return;
+            }
+            list.forEach(keyword => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-outline-primary btn-sm keyword-chip';
+                btn.dataset.keyword = keyword;
+                btn.innerHTML = `${keyword} <span class="text-danger ms-1">×</span>`;
+                btn.addEventListener('click', () => {
+                    const updated = getKeywords().filter(k => k !== keyword);
+                    setKeywords(updated);
+                });
+                chipsContainer.appendChild(btn);
+            });
+        }
+
+        function addKeywordFromInput() {
+            const value = keywordInput.value.trim();
+            if (!value) return;
+            const list = getKeywords();
+            list.push(value);
+            setKeywords(list);
+            keywordInput.value = '';
+            keywordInput.focus();
+        }
+
+        keywordAddBtn.addEventListener('click', addKeywordFromInput);
+        keywordInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addKeywordFromInput();
+            }
+        });
+
+        // Initialize chips from current value
+        setKeywords(getKeywords());
+    });
+</script>

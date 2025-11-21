@@ -65,6 +65,7 @@ class ProjectPresentationCreationType extends AbstractType
             ->add('categories', EntityType::class, [
                 'class' => Category::class,
                 'choice_label' => fn (Category $category) => $category->getLabel() ?? $category->getUniqueName(),
+                'choice_value' => 'uniqueName',
                 'multiple' => true,
                 'expanded' => true,
                 'required' => false,
