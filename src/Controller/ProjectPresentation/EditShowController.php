@@ -4,6 +4,7 @@ namespace App\Controller\ProjectPresentation;
 
 use App\Entity\PPBase;
 use App\Form\ProjectPresentation\ImageSlideType;
+use App\Form\ProjectPresentation\CategoriesKeywordsType;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\ProjectPresentation\LogoType;
 use App\Form\ProjectPresentation\QuestionAnswerType;
@@ -40,6 +41,7 @@ class EditShowController extends AbstractController
             $addImageSlideForm = $this->createForm(ImageSlideType::class);
             $addVideoSlideForm = $this->createForm(VideoSlideType::class);
             $textDescriptionForm = $this->createForm(TextDescriptionType::class, $presentation);
+            $categoriesKeywordsForm = $this->createForm(CategoriesKeywordsType::class, $presentation);
            
             return $this->render('project_presentation/edit_show/origin.html.twig', [
                 'presentation' => $presentation,
@@ -49,6 +51,7 @@ class EditShowController extends AbstractController
                 'addImageSlideForm' => $addImageSlideForm->createView(),
                 'addVideoSlideForm' => $addVideoSlideForm->createView(),
                 'textDescriptionForm' => $textDescriptionForm->createView(),
+                'categoriesKeywordsForm' => $categoriesKeywordsForm->createView(),
             ]);
 
 

@@ -153,6 +153,7 @@ class PPBase
         cascade: ['persist', 'remove'], 
         orphanRemoval: true           
     )]
+    #[ORM\OrderBy(['position' => 'ASC', 'id' => 'ASC'])]
     #[Assert\Count(
         max: 8,
         maxMessage: 'Vous ne pouvez ajouter plus de {{ limit }} diapositives merci pour votre compréhension.'
@@ -164,24 +165,28 @@ class PPBase
      * @var Collection<int, News>
      */
     #[ORM\OneToMany(targetEntity: News::class, mappedBy: 'project')]
+    #[ORM\OrderBy(['id' => 'DESC'])]
     private Collection $news;
 
     /**
      * @var Collection<int, Document>
      */
     #[ORM\OneToMany(targetEntity: Document::class, mappedBy: 'projectPresentation')]
+    #[ORM\OrderBy(['position' => 'ASC', 'id' => 'ASC'])]
     private Collection $documents;
 
     /**
      * @var Collection<int, Need>
      */
     #[ORM\OneToMany(targetEntity: Need::class, mappedBy: 'project')]
+    #[ORM\OrderBy(['position' => 'ASC', 'id' => 'ASC'])]
     private Collection $needs;
 
     /**
      * @var Collection<int, Place>
      */
     #[ORM\OneToMany(targetEntity: Place::class, mappedBy: 'project')]
+    #[ORM\OrderBy(['position' => 'ASC', 'id' => 'ASC'])]
     private Collection $places;
 
 

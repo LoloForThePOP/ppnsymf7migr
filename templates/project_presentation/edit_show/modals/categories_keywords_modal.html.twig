@@ -1,0 +1,54 @@
+{% embed "utilities/modal_skeleton.html.twig" with {
+    modal_id: 'categoriesKeywordsModal',
+    modal_title: 'Modifier catégories & mots-clés',
+    modal_size: 'modal-lg'
+} %}
+
+    {% block modalBody %}
+        {% if categoriesKeywordsForm is defined %}
+            {{ form_start(categoriesKeywordsForm, {
+                action: path('pp_update_categories_keywords', {stringId: presentation.stringId})
+            }) }}
+
+            <div class="fw-bold mb-2">Catégories</div>
+            <div class="d-flex flex-wrap gap-2">
+                {% for choice in categoriesKeywordsForm.categories %}
+                    {% set catUnique = choice.vars.value %}
+                    {% set iconPath = asset('project_categories/' ~ catUnique ~ '.svg', 'icons') %}
+                    <label class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2 py-1 px-2">
+                        {{ form_widget(choice, {'label': false, attr: {'data-unique-name': catUnique}}) }}
+                        <img class="category-icon" src="{{ iconPath }}" alt="Icône {{ catUnique }}" loading="lazy" width="18" height="18">
+                        <span>{{ choice.vars.label }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+
+            <div class="fw-bold mt-3 mb-2">Mots-clés (séparés par des virgules)</div>
+            {{ form_widget(categoriesKeywordsForm.keywords, {attr: {class: 'form-control', placeholder: 'mobilité, inclusion, énergie'}}) }}
+        {% else %}
+            <p class="text-muted">Formulaire indisponible.</p>
+        {% endif %}
+    {% endblock %}
+
+    {% block footerButtons %}
+        {% if categoriesKeywordsForm is defined %}
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            {{ form_end(categoriesKeywordsForm, {render_rest: false}) }}
+        {% endif %}
+    {% endblock %}
+
+    {% block formErrors %}
+        {% if categoriesKeywordsForm is defined and not categoriesKeywordsForm.vars.valid %}
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    var modal = document.getElementById('categoriesKeywordsModal');
+                    if (modal) {
+                        var modalInstance = new bootstrap.Modal(modal);
+                        modalInstance.show();
+                    }
+                });
+            </script>
+        {% endif %}
+    {% endblock %}
+
+{% endembed %}

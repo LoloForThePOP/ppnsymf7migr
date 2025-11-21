@@ -115,19 +115,19 @@
 
       
 
-    {% set presentationCategories = presentation.categories %}
-    {% set countCategories = presentationCategories | length %}
+        {% set presentationCategories = presentation.categories %}
+        {% set countCategories = presentationCategories | length %}
+        {% set categoriesKeywordsForm = categoriesKeywordsForm is defined ? categoriesKeywordsForm : null %}
 
 
 
 
 
-        <div class="d-none d-md-flex align-items-center">
-
-            {# Keywords Display only >= Medium Screens #}
-
+        <div class="align-items-center">
             {% include 'project_presentation/edit_show/_partials/__upper_box/_categories_keywords.html.twig' %}
-
+            {% if userPresenter and categoriesKeywordsForm %}
+                {% include 'project_presentation/edit_show/modals/categories_keywords_modal.html.twig' %}
+            {% endif %}
         </div>
 
 
