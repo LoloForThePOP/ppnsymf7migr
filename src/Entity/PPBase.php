@@ -9,6 +9,7 @@ use App\Repository\PPBaseRepository;
 
 
 use App\Entity\Embeddables\PPBase\Extra;
+use App\Entity\Embeddables\PPBase\IngestionMetadata;
 use App\Entity\Traits\TimestampableTrait;
 
 use Doctrine\Common\Collections\Collection;
@@ -28,6 +29,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 
 #[ORM\Entity(repositoryClass: PPBaseRepository::class)]
+#[ORM\Table(
+    uniqueConstraints: [
+        new ORM\UniqueConstraint(name: 'uniq_pp_ing_source_url', columns: ['ing_source_url'])
+    ]
+)]
 #[ORM\HasLifecycleCallbacks]
 #[Vich\Uploadable]
 class PPBase
@@ -101,8 +107,13 @@ class PPBase
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $title = null;
 
+    // Free-text keywords, separated with commas, often filled from tags or user input
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $keywords = null;
+
+    // Language of the source presentation (e.g. 'fr')
+    #[ORM\Column(length: 8, nullable: true)]
+    private ?string $originLanguage = null;
 
     #[Assert\Length(max: 5000)]
     #[ORM\Column(type: 'text', nullable: true)]
@@ -136,6 +147,10 @@ class PPBase
     // Some other info about the project presentation,, like views count, stored in an embeddable for clarity.  
     #[ORM\Embedded(class: Extra::class)]
     private Extra $extra;
+
+    // Scraper-only metadata kept separate from core fields (project presentations scrapped from web info, if null then project was human-submitted)
+    #[ORM\Embedded(class: IngestionMetadata::class, columnPrefix: 'ing_')]
+    private ?IngestionMetadata $ingestion = null;
 
 
 
@@ -244,6 +259,7 @@ class PPBase
 
     public function __construct()
     {   $this->extra = new Extra();
+        $this->ingestion = new IngestionMetadata();
         $this->comments = new ArrayCollection();
         $this->slides = new ArrayCollection();
         $this->needs = new ArrayCollection();
@@ -357,6 +373,17 @@ class PPBase
     public function setKeywords(?string $keywords): self
     {
         $this->keywords = $keywords;
+        return $this;
+    }
+
+    public function getOriginLanguage(): ?string
+    {
+        return $this->originLanguage;
+    }
+
+    public function setOriginLanguage(?string $originLanguage): self
+    {
+        $this->originLanguage = $originLanguage;
         return $this;
     }
 
@@ -839,6 +866,21 @@ class PPBase
     public function setExtra(Extra $extra): self
     {
         $this->extra = $extra;
+        return $this;
+    }
+
+    public function getIngestion(): IngestionMetadata
+    {
+        if ($this->ingestion === null) {
+            $this->ingestion = new IngestionMetadata();
+        }
+
+        return $this->ingestion;
+    }
+
+    public function setIngestion(?IngestionMetadata $ingestion): self
+    {
+        $this->ingestion = $ingestion;
         return $this;
     }
 
