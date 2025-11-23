@@ -1,0 +1,44 @@
+{% if not candidates %}
+    <div class="alert alert-warning">
+        {% if fromPastedHtml %}
+            Aucune image extraite du code collé.
+        {% else %}
+            Aucune image trouvée (métadonnées og:image / balises &lt;img&gt;).
+        {% endif %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        {{ candidates|length }} image{{ candidates|length > 1 ? 's' : '' }} trouvée{{ candidates|length > 1 ? 's' : '' }}.
+    </div>
+    <div class="row g-3">
+        {% for img in candidates %}
+            <div class="col-6 col-md-3">
+                <div class="card h-100">
+                    <div class="ratio ratio-1x1">
+                        <img src="{{ img.url }}" alt="Image candidate" class="card-img-top" loading="lazy">
+                    </div>
+                    <div class="card-body p-2">
+                        <small class="text-muted d-block">{{ img.source }}</small>
+                        <div class="small text-break">
+                            <a href="{{ img.url }}" target="_blank" rel="noopener noreferrer">{{ img.url }}</a>
+                        </div>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <div class="d-flex flex-column gap-1 mt-2">
+                                <form method="post" action="{{ path('project_image_use_as_logo', {'stringId': project.stringId}) }}" class="ajaxable">
+                                    <input type="hidden" name="image_url" value="{{ img.url }}">
+                                    <input type="hidden" name="page_html" value="{{ pageHtml|default('') }}">
+                                    <button type="submit" class="btn btn-outline-primary btn-sm w-100">Utiliser comme logo</button>
+                                </form>
+                                <form method="post" action="{{ path('project_image_add_slide', {'stringId': project.stringId}) }}" class="ajaxable">
+                                    <input type="hidden" name="image_url" value="{{ img.url }}">
+                                    <input type="hidden" name="page_html" value="{{ pageHtml|default('') }}">
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm w-100">Ajouter en slide</button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}

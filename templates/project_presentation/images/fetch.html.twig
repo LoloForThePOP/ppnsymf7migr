@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Images pour {{ project.title ?? project.goal }}{% endblock %}
+
+{% block body %}
+    <div class="container my-4" id="image-fetch-root">
+        <h1 class="h4 mb-3">Images candidates</h1>
+
+        <p class="text-muted">
+            Source : <a href="{{ sourceUrl ?: 'Aucune source renseignée (ing_source_url)' }}" target="_blank" rel="noopener noreferrer nofollow">{{ sourceUrl ?: 'Aucune source renseignée (ing_source_url)' }}</a> 
+        </p>
+
+        {% if is_granted('ROLE_ADMIN') %}
+            <div class="d-flex gap-2 mb-3">
+                <form method="post" action="{{ path('project_delete_from_images', {'stringId': project.stringId}) }}" onsubmit="return confirm('Supprimer définitivement ce projet ?');">
+                    <button type="submit" class="btn btn-danger btn-sm">Supprimer ce projet</button>
+                </form>
+                <a class="btn btn-outline-secondary btn-sm" href="{{ path('project_fetch_images', {'stringId': project.stringId}) }}">Rafraîchir</a>
+                <a class="btn btn-outline-primary btn-sm" href="{{ path('edit_show_project_presentation', {'stringId': project.stringId}) }}">Voir le projet</a>
+            </div>
+        {% endif %}
+
+        <div id="candidates-wrapper">
+            {% include 'project_presentation/images/_candidates.html.twig' %}
+        </div>
+
+        <div class="card my-3">
+            <div class="card-body">
+                <form method="post" action="{{ path('project_fetch_images', {'stringId': project.stringId}) }}" class="ajaxable">
+                    <div class="mb-2">
+                        <label for="page_html" class="form-label">Coller le code source de la page pour extraire les images</label>
+                        <textarea class="form-control" id="page_html" name="page_html" rows="6" placeholder="&lt;html&gt;..." spellcheck="false">{{ pageHtml|default('') }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Extraire les images</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const wrapper = document.getElementById('candidates-wrapper');
+            const flashContainer = document.createElement('div');
+            flashContainer.className = 'position-fixed top-0 end-0 p-3';
+            flashContainer.style.zIndex = 2000;
+            document.body.appendChild(flashContainer);
+
+            const showFlash = (message, type = 'info') => {
+                const el = document.createElement('div');
+                el.className = `alert alert-${type} alert-dismissible fade show`;
+                el.textContent = message;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn-close';
+                btn.setAttribute('data-bs-dismiss', 'alert');
+                el.appendChild(btn);
+                flashContainer.appendChild(el);
+                setTimeout(() => {
+                    el.classList.remove('show');
+                    el.remove();
+                }, 3000);
+            };
+
+            const bindAjaxForms = () => {
+                document.querySelectorAll('form.ajaxable').forEach((form) => {
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const fd = new FormData(form);
+                        try {
+                            const res = await fetch(form.action, {
+                                method: form.method || 'POST',
+                                body: fd,
+                                headers: {'X-Requested-With': 'XMLHttpRequest'},
+                            });
+                            if (!res.ok) {
+                                showFlash('Action échouée', 'danger');
+                                return;
+                            }
+                            const html = await res.text();
+                            wrapper.innerHTML = html;
+                            bindAjaxForms();
+                            showFlash('Mise à jour effectuée', 'success');
+                        } catch (err) {
+                            console.error(err);
+                            showFlash('Erreur réseau', 'danger');
+                        }
+                    });
+                });
+            };
+
+            bindAjaxForms();
+        });
+    </script>
+{% endblock %}

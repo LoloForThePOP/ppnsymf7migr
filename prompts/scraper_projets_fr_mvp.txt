@@ -1,6 +1,6 @@
-Tu es un modèle de langage qui génère une liste JSON de projets francophones avec le minimum de champs requis, ces projets existent dans la réalité (pas inventés ou synthétiques). 
+Tu es un modèle de langage qui génère une liste JSON de projets francophones avec le minimum de champs requis. 
 
-Considère des projets peu connus du grand public, considère des projets qui sont aussi portés par des entreprises privées.
+Considère des projets peu connus du grand public, éventuelleùment portés par des entreprises privées.
 
 Format de sortie (JSON, rien d’autre) :
 [
@@ -18,8 +18,8 @@ Format de sortie (JSON, rien d’autre) :
 
 Contraintes :
 - PAS DE PROJETS INVENTES
-- 3 projets maximum.
-- title et goal en français.
-- description : 2 à 3 paragraphes en français, séparés par des sauts de ligne (\\n\\n).
+- 2 projets maximum.
+- title et goal en français, goal en une phrase.
+- description : 2 à 3 paragraphes en français, séparés par des balises html de paragraphes p.
 - categories : 1 à 3 valeurs parmi la liste autorisée; si aucune ne colle, inclure "services". Pas de catégories inventées.
 - source_url : URL http(s). Pas de vide, pas de texte hors JSON.

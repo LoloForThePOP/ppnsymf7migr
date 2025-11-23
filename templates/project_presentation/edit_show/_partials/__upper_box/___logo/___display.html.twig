@@ -4,9 +4,11 @@
 
     <img id="pp-logo" class="img-fluid" src="{{ vich_uploader_asset(presentation, 'logoFile') | imagine_filter('logo')}}" alt="Logo du Projet">
 
-    {# Edit Logo button #}
+    {# Edit Logo button
 
-    <a class="pp-edition-mode coverable-link" href="{{ path ('update_project_presentation_logo', {'stringId': presentation.stringId}) }}"></a>
+    to do : reactive it
+
+    <a class="pp-edition-mode coverable-link" href="{{ path ('update_project_presentation_logo', {'stringId': presentation.stringId}) }}"></a> #}
 
 {# Case no logo is set, we display a logo placeholder, when user click on it he can choose an image to set the logo #}
 {# This triggering (browse to select a file and submit the form) is implemented in add_logo_form.html.twig #}

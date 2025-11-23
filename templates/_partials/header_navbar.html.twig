@@ -267,8 +267,10 @@
 
         <ul class="navbar-nav ms-md-auto gap-2">
 
-          {# Access admin panel icon (admins only) #}
+          {# Access admin panel icon (admins only)
 
+          to do: update when relevant
+          
           {% if is_granted("ROLE_ADMIN") or is_granted("ROLE_ARTICLE_EDIT") %}
           
             <li class="nav-item d-none d-md-inline">
@@ -281,7 +283,7 @@
 
             </li>
         
-          {% endif %}
+          {% endif %} #}
 
           {% if not app.user %}
 

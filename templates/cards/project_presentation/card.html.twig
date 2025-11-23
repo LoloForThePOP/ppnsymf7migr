@@ -11,6 +11,7 @@
         link: presentation is defined and presentation.stringId is defined ? path('edit_show_project_presentation', {'stringId': presentation.stringId}) : null,
         linkTarget: null,
         image: presentation.extra.cacheThumbnailUrl ?? null,
+        fetchImagesLink: null,
         showKeywords: true,
         showMeta: true,
         showViews: true,
@@ -24,7 +25,7 @@
     <article class="project-card position-relative text-reset">
         {% if options.link %}
             <a
-                class="stretched-link"
+                class="stretched-link" style="z-index: 40;"
                 href="{{ options.link }}"
                 {% if options.linkTarget %}target="{{ options.linkTarget }}"{% endif %}
                 aria-label="{{ ariaLabel }}"
@@ -32,17 +33,30 @@
         {% endif %}
 
         <div class="image-container">
-            {% if imageUrl %}
-                <img src="{{ imageUrl }}" alt="{{ ariaLabel }}" loading="lazy">
-            {% else %}
-                <div class="h-100 w-100 d-flex align-items-center justify-content-center bg-light text-muted rounded">
-                    <small>{{ options.fallbackImageText }}</small>
-                </div>
-            {% endif %}
+        {% if imageUrl %}
+            <img src="{{ imageUrl }}" alt="{{ ariaLabel }}" loading="lazy">
+        {% else %}
+            <div class="h-100 w-100 d-flex align-items-center justify-content-center bg-light text-muted rounded">
+                <small>{{ options.fallbackImageText }}</small>
+            </div>
+        {% endif %}
         </div>
 
+        {% if options.fetchImagesLink or (options.deleteLink is defined and options.deleteLink) %}
+            <div class="admin-actions position-absolute top-0 end-0 p-2 d-flex gap-1" style="z-index: 50;">
+                {% if options.fetchImagesLink %}
+                    <a class="btn btn-outline-primary btn-sm" href="{{ options.fetchImagesLink }}">Images</a>
+                {% endif %}
+                {% if options.deleteLink is defined and options.deleteLink %}
+                    <form method="post" action="{{ options.deleteLink }}" onsubmit="return confirm('Supprimer définitivement ce projet ?');">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Supprimer</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% endif %}
+
         <div class="goal-container">
-            <div class="goal">{{ presentation.goal }}</div>
+            {# <div class="goal">{{ presentation.goal }}</div> #}
             {% if presentation.title %}
                 <div class="title">{{ presentation.title }}</div>
             {% endif %}
