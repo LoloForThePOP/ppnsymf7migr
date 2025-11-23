@@ -33,7 +33,7 @@ class EditShowController extends AbstractController
     ): Response
     {
 
-        if($this->isGranted('edit', $presentation)){
+        if($this->isGranted('edit', $presentation)){}
 
             $addLogoForm = $this->createForm(LogoType::class, $presentation);
             $addWebsiteForm = $this->createForm(WebsiteType::class);
@@ -55,7 +55,7 @@ class EditShowController extends AbstractController
             ]);
 
 
-        }
+        
 
 
 

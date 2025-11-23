@@ -51,6 +51,7 @@ class Place implements NormalizableInterface, \Stringable
     private GeoPoint $geoloc;
 
     #[ORM\ManyToOne(inversedBy: 'places')]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?PPBase $project = null;
 
     public function __construct()

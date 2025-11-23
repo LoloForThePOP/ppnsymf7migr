@@ -89,6 +89,7 @@ class Slide
     // Relations
     // ────────────────────────────────────────
     #[ORM\ManyToOne(inversedBy: 'slides')]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?PPBase $projectPresentation = null;
 
     // ────────────────────────────────────────

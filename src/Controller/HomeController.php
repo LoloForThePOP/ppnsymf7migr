@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\PPBaseRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -10,10 +11,12 @@ use Symfony\Component\Routing\Attribute\Route;
 final class HomeController extends AbstractController
 {
     #[Route('/', name: 'homepage')]
-    public function index(): Response
+    public function index(PPBaseRepository $ppBaseRepository): Response
     {
+        $presentations = $ppBaseRepository->findLatestPublished(50);
+
         return $this->render('home/homepage.html.twig', [
-            'controller_name' => 'HomeController',
+            'presentations' => $presentations,
         ]);
     }
 }

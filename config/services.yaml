@@ -15,7 +15,9 @@ parameters:
     # not implemented yet: app.email.support: "support@propon.org"
     # not implemented yet: app.email.newsletter: newsletter@propon.org
     app.scraper.prompt_path: '%kernel.project_dir%/prompts/scraper_projets_fr_mvp.txt'
-    app.scraper.model: 'gpt-4.1-mini'
+    app.scraper.model: 'gpt-5-mini' # use a stronger model to reduce hallucinations
+    app.scraper.creator_id: 91         # ID du compte "bot" (définir ici)
+    app.scraper.creator_username: ProjectPresenter   # ou username du compte "bot" (optionnel)
 
     
 services:
@@ -23,6 +25,9 @@ services:
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        bind:
+            $defaultCreatorId: '%app.scraper.creator_id%'
+            $defaultCreatorUsername: '%app.scraper.creator_username%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

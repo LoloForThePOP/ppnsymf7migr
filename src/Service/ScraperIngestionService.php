@@ -82,7 +82,7 @@ class ScraperIngestionService
 
         $response = $this->client->chat()->create([
             'model' => $this->model,
-            'temperature' => 0.3,
+            'temperature' => 1,
             'messages' => [
                 ['role' => 'system', 'content' => 'Tu es un agent autonome de collecte de projets francophones.'],
                 ['role' => 'user', 'content' => $prompt],
@@ -122,7 +122,6 @@ class ScraperIngestionService
         }
 
         return [
-            'id' => $payload['id'] ?? null,
             'title' => trim($payload['title']),
             'goal' => trim($payload['goal']),
             'description' => isset($payload['description']) && is_string($payload['description']) ? trim($payload['description']) : null,
@@ -136,9 +135,7 @@ class ScraperIngestionService
             'tags' => $this->normalizeTags($payload['tags'] ?? []),
             'source_published_at' => $this->normalizeDate($payload['source_published_at'] ?? null),
             'language' => isset($payload['language']) && is_string($payload['language']) ? strtolower(trim($payload['language'])) : null,
-            'image' => isset($payload['image']) && is_string($payload['image']) ? trim($payload['image']) : null,
             'source_url' => trim($payload['source_url']),
-            'created_at' => $this->normalizeDateTime($payload['created_at'] ?? null),
             'status' => isset($payload['status']) && is_string($payload['status']) ? trim($payload['status']) : null,
             'status_reason' => isset($payload['status_reason']) && is_string($payload['status_reason']) ? trim($payload['status_reason']) : null,
             'websites' => $this->normalizeWebsites($payload['websites'] ?? []),

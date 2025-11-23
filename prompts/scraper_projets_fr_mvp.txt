@@ -1,4 +1,6 @@
-Tu es GPT-5. Génère une liste JSON de projets francophones avec le minimum de champs requis.
+Tu es un modèle de langage qui génère une liste JSON de projets francophones avec le minimum de champs requis, ces projets existent dans la réalité (pas inventés ou synthétiques). 
+
+Considère des projets peu connus du grand public, considère des projets qui sont aussi portés par des entreprises privées.
 
 Format de sortie (JSON, rien d’autre) :
 [
@@ -9,15 +11,15 @@ Format de sortie (JSON, rien d’autre) :
     "categories": [
       "software|science|inform|humane|animals|material|restore|transport|environment|history|money|food|services|arts|entertainment|data|health|idea|space|crisis"
     ],
-    "image": "string|null",
-    "source_url": "string"
+    "source_url": "string",
+
   }
 ]
 
 Contraintes :
-- 5 projets maximum.
-- Titre et goal en français.
-- description : 2 à 3 paragraphes en français.
+- PAS DE PROJETS INVENTES
+- 3 projets maximum.
+- title et goal en français.
+- description : 2 à 3 paragraphes en français, séparés par des sauts de ligne (\\n\\n).
 - categories : 1 à 3 valeurs parmi la liste autorisée; si aucune ne colle, inclure "services". Pas de catégories inventées.
-- image : URL http(s) vers une image pertinente si disponible, sinon null. Pas de data URI.
 - source_url : URL http(s). Pas de vide, pas de texte hors JSON.

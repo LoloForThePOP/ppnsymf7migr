@@ -1,0 +1,42 @@
+
+
+
+{% macro collection ( title="", items, class="", hideThreshold = "hide-335", icon = "" ) %}
+    {% from 'cards/project_presentation/card.html.twig' import project_card %}
+
+    <div class="titled-projects-container {{class}}">
+
+        <h3 class="collection-title">
+
+            {% if icon %}
+            
+                <img class="collection-icon" src="{{asset ("collection_categories/"~ icon ~".svg", 'icons')}}" alt="An icon representing the project category" width = "30">
+
+            {% endif %}
+            
+            {{title}}
+        
+        </h3>
+
+        <div class="hide-too-long {{ hideThreshold }} show-tiny-screens collection-container">
+                
+            {% for item in items %}
+
+                {# Project presentation card #}
+
+                {{ project_card(item, {
+                    image: item.extra.cacheThumbnailUrl is defined ? item.extra.cacheThumbnailUrl : null,
+                    fallbackImageText: item.goal|default('Aucune image'),
+                    showCreator: true,
+                    showViews: true,
+                    showMeta: true,
+                }) }}   
+
+     
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+{% endmacro %}

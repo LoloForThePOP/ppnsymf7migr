@@ -16,6 +16,22 @@ class PPBaseRepository extends ServiceEntityRepository
         parent::__construct($registry, PPBase::class);
     }
 
+    /**
+     * @return PPBase[]
+     */
+    public function findLatestPublished(int $limit = 50): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.isPublished = :published')
+            ->andWhere('p.isDeleted IS NULL OR p.isDeleted = :notDeleted')
+            ->setParameter('published', true)
+            ->setParameter('notDeleted', false)
+            ->orderBy('p.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return PPBase[] Returns an array of PPBase objects
     //     */

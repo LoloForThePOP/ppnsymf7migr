@@ -259,6 +259,7 @@ class PPBase
 
     public function __construct()
     {   $this->extra = new Extra();
+        $this->otherComponents = new OtherComponents();
         $this->ingestion = new IngestionMetadata();
         $this->comments = new ArrayCollection();
         $this->slides = new ArrayCollection();
