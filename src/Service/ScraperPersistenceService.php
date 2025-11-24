@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Entity\PPBase;
 use App\Entity\User;
 use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
+use App\Service\WebsiteProcessingService;
 use App\Repository\CategoryRepository;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,6 +21,7 @@ class ScraperPersistenceService
         private readonly EntityManagerInterface $em,
         private readonly CategoryRepository $categoryRepository,
         private readonly LoggerInterface $logger,
+        private readonly WebsiteProcessingService $websiteProcessingService,
     ) {
     }
 
@@ -148,6 +150,7 @@ class ScraperPersistenceService
 
         foreach ($normalized as $site) {
             $component = WebsiteComponent::createNew($site['title'], $site['url']);
+            $this->websiteProcessingService->process($component);
             $oc->addComponent('websites', $component);
         }
 

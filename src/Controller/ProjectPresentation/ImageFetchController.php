@@ -6,6 +6,7 @@ use App\Repository\PPBaseRepository;
 use App\Service\ImageCandidateFetcher;
 use App\Service\ImageDownloader;
 use App\Service\WebpageContentExtractor;
+use App\Service\WebsiteProcessingService;
 use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -164,7 +165,8 @@ class ImageFetchController extends AbstractController
         string $stringId,
         Request $request,
         PPBaseRepository $repository,
-        ImageCandidateFetcher $imageCandidateFetcher
+        ImageCandidateFetcher $imageCandidateFetcher,
+        WebsiteProcessingService $websiteProcessingService
     ): Response {
         $project = $repository->findOneBy(['stringId' => $stringId]);
         if (!$project) {
@@ -179,6 +181,7 @@ class ImageFetchController extends AbstractController
             $host = parse_url($link, PHP_URL_HOST) ?? $link;
             $title = $host ? strtolower(preg_replace('#^www\.#', '', $host)) : $link;
             $component = \App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent::createNew($title, $link);
+            $websiteProcessingService->process($component);
             $oc->addComponent('websites', $component);
         }
 
