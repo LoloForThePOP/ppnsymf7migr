@@ -38,7 +38,7 @@
                 <ul>
                     {% for project in persistResult.entities %}
                         <li>
-                            {{ project.title ?? project.goal }}
+                            <a href="{{ path('edit_show_project_presentation', {'stringId': project.stringId}) }}">{{ project.title ?? project.goal }}</a>
                             <a class="btn btn-sm btn-outline-danger" href="{{ path('project_delete_from_images', {'stringId': project.stringId}) }}" onclick="return confirm('Supprimer ce projet ?');">Supprimer</a>
                             <a class="btn btn-sm btn-outline-primary" href="{{ path('project_fetch_images', {'stringId': project.stringId}) }}">Images</a>
                         </li>

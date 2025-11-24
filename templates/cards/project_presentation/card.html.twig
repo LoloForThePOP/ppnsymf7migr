@@ -45,7 +45,7 @@
         {% if options.fetchImagesLink or (options.deleteLink is defined and options.deleteLink) %}
             <div class="admin-actions position-absolute top-0 end-0 p-2 d-flex gap-1" style="z-index: 50;">
                 {% if options.fetchImagesLink %}
-                    <a class="btn btn-outline-primary btn-sm" href="{{ options.fetchImagesLink }}">Images</a>
+                    <a class="btn btn-outline-primary btn-sm" href="{{ options.fetchImagesLink }}">Enrichir</a>
                 {% endif %}
                 {% if options.deleteLink is defined and options.deleteLink %}
                     <form method="post" action="{{ options.deleteLink }}" onsubmit="return confirm('Supprimer définitivement ce projet ?');">

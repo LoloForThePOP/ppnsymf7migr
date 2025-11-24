@@ -5,6 +5,8 @@ namespace App\Controller\ProjectPresentation;
 use App\Repository\PPBaseRepository;
 use App\Service\ImageCandidateFetcher;
 use App\Service\ImageDownloader;
+use App\Service\WebpageContentExtractor;
+use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -21,6 +23,7 @@ class ImageFetchController extends AbstractController
         string $stringId,
         PPBaseRepository $repository,
         ImageCandidateFetcher $imageCandidateFetcher,
+        WebpageContentExtractor $extractor,
         Request $request
     ): Response {
         $project = $repository->findOneBy(['stringId' => $stringId]);
@@ -41,12 +44,21 @@ class ImageFetchController extends AbstractController
             $candidates = $sourceUrl ? $imageCandidateFetcher->fetch($sourceUrl) : [];
         }
 
+        // Extract links for selection
+        $links = [];
+        $sourceHtml = $postedHtml !== '' ? $postedHtml : ($sourceUrl ? $imageCandidateFetcher->fetchPage($sourceUrl) : null);
+        if ($sourceHtml) {
+            $extracted = $extractor->extract($sourceHtml, $sourceUrl);
+            $links = $extracted['links'] ?? [];
+        }
+
         $viewData = [
             'project' => $project,
             'sourceUrl' => $sourceUrl,
             'candidates' => $candidates,
             'pageHtml' => $postedHtml,
             'fromPastedHtml' => $fromPastedHtml,
+            'links' => $links,
         ];
 
         if ($request->isXmlHttpRequest()) {
@@ -138,6 +150,42 @@ class ImageFetchController extends AbstractController
         } else {
             $this->addFlash('warning', 'Impossible de télécharger cette image.');
         }
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->renderCandidatesPartial($request, $project, $imageCandidateFetcher);
+        }
+
+        return $this->redirectToRoute('project_fetch_images', ['stringId' => $stringId]);
+    }
+
+    #[Route('/project/{stringId}/images/add-links', name: 'project_image_add_links', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function addLinks(
+        string $stringId,
+        Request $request,
+        PPBaseRepository $repository,
+        ImageCandidateFetcher $imageCandidateFetcher
+    ): Response {
+        $project = $repository->findOneBy(['stringId' => $stringId]);
+        if (!$project) {
+            throw $this->createNotFoundException();
+        }
+
+        $links = $request->request->all('links');
+        $links = array_filter($links, fn($l) => is_string($l) && $l !== '');
+
+        $oc = $project->getOtherComponents();
+        foreach ($links as $link) {
+            $host = parse_url($link, PHP_URL_HOST) ?? $link;
+            $title = $host ? strtolower(preg_replace('#^www\.#', '', $host)) : $link;
+            $component = \App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent::createNew($title, $link);
+            $oc->addComponent('websites', $component);
+        }
+
+        $project->setOtherComponents($oc);
+        $repository->getEntityManager()->flush();
+
+        $this->addFlash('success', 'Liens ajoutés.');
 
         if ($request->isXmlHttpRequest()) {
             return $this->renderCandidatesPartial($request, $project, $imageCandidateFetcher);

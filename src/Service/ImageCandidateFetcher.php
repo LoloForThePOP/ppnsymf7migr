@@ -7,12 +7,12 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * Extracts image candidates (og:image, twitter:image, same-domain <img>) from a source page.
+ * Extracts image candidates (og:image, twitter:image, <img>) from a source page.
  * Images are not downloaded here; callers can present the list for manual selection.
  */
 class ImageCandidateFetcher
 {
-    private const MAX_CANDIDATES = 20;
+    private const MAX_CANDIDATES = 40;
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
@@ -29,7 +29,12 @@ class ImageCandidateFetcher
             return [];
         }
 
-        return $this->extractCandidates($html, $sourceUrl, true);
+        return $this->extractCandidates($html, $sourceUrl, false);
+    }
+
+    public function fetchPage(string $sourceUrl): ?string
+    {
+        return $this->fetchHtml($sourceUrl);
     }
 
     /**

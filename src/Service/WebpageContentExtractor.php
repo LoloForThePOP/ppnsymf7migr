@@ -31,7 +31,7 @@ class WebpageContentExtractor
 
         $crawler->filter('a[href]')->each(function (Crawler $node) use (&$links) {
             $href = trim($node->attr('href') ?? '');
-            if ($href !== '') {
+            if ($href !== '' && preg_match('#^https?://#i', $href)) {
                 $links[] = $href;
             }
         });
@@ -44,8 +44,8 @@ class WebpageContentExtractor
             }
         });
 
-        $links = array_values(array_unique(array_slice($links, 0, 10)));
-        $images = array_values(array_unique(array_slice($images, 0, 10)));
+        $links = array_values(array_unique(array_slice($links, 0, 30)));
+        $images = array_values(array_unique(array_slice($images, 0, 25)));
 
         return [
             'text' => implode("\n", array_slice($textParts, 0, 80)),
