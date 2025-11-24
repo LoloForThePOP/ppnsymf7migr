@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Normaliser une présentation{% endblock %}
+
+{% block body %}
+    <div class="container my-4">
+        <h1 class="h4 mb-3">Normaliser une présentation de projet</h1>
+
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="{{ path('admin_project_normalize') }}">
+            <div class="mb-3">
+                <label for="raw_text" class="form-label">Coller le contenu brut (FR/EN)</label>
+                <textarea id="raw_text" name="raw_text" class="form-control" rows="12" placeholder="Coller ici le texte non normalisé">{{ raw }}</textarea>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="1" id="persist" name="persist">
+                <label class="form-check-label" for="persist">
+                    Persister immédiatement dans l’app (slides téléchargées si image_urls)
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary">Normaliser</button>
+        </form>
+
+        {% if result %}
+            <div class="mt-4">
+                <h2 class="h5">Résultat (JSON)</h2>
+                <pre class="bg-light p-3 rounded" style="white-space: pre-wrap;">{{ result }}</pre>
+            </div>
+        {% endif %}
+
+        {% if created %}
+            <div class="alert alert-success mt-3">
+                Projet créé : <a href="{{ path('edit_show_project_presentation', {'stringId': created.stringId}) }}">{{ created.title ?? created.goal }}</a>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
