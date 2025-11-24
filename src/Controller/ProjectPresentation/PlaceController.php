@@ -2,16 +2,17 @@
 
 namespace App\Controller\ProjectPresentation;
 
-use App\Entity\Embeddables\GeoPoint;
-use App\Entity\PPBase;
 use App\Entity\Place;
+use App\Entity\PPBase;
 use App\Repository\PlaceRepository;
+use App\Entity\Embeddables\GeoPoint;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Doctrine\Attribute\MapEntity;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class PlaceController extends AbstractController
 {

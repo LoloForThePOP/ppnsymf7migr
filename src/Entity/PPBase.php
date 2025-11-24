@@ -87,7 +87,7 @@ class PPBase
 
     #[Vich\UploadableField(mapping: 'project_custom_thumbnail_image', fileNameProperty: 'customThumbnail')]
     #[Assert\Image(
-        maxSize: '10',
+        maxSize: '10M',
         mimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/avif'],
         maxSizeMessage: 'La vignette ne doit pas dépasser 5,5 Mo.'
     )]

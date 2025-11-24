@@ -5,6 +5,7 @@ namespace App\Controller\ProjectPresentation;
 use App\Entity\Slide;
 use App\Entity\PPBase;
 use App\Enum\SlideType;
+use App\Service\CacheThumbnailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,6 +26,7 @@ final class AddVideoSlideController extends AbstractController
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         Request $request,
         EntityManagerInterface $manager,
+        CacheThumbnailService $cacheThumbnailService,
     ): Response {
         $this->denyAccessUnlessGranted('edit', $presentation);
 
@@ -47,7 +49,9 @@ final class AddVideoSlideController extends AbstractController
         $manager->persist($videoSlide);
         $manager->flush();
 
-        // TODO integrate AssessQuality/CacheThumbnail services once ready.
+        $cacheThumbnailService->updateThumbnail($presentation, true);
+
+        // TODO integrate AssessQuality services once ready.
 
         $this->addFlash('success', "✅ Image ajoutée");
 

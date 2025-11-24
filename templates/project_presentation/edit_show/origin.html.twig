@@ -106,6 +106,22 @@
     
 
     <div class="page-container container m-4 {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}}">
+    
+        {% include 'project_presentation/edit_show/_partials/_upper_box.html.twig' %}
+
+
+                
+        {# Edit project presentation thumbnail link #}
+
+        {% macro editPresentationThumbnail(stringId) %}
+            
+            <span class="pp-edition-mode ms-2 ms-md-3"><a class="" style="color: rgb(33, 37, 41);" href="{{ path ('pp_edit_thumbnail', {'stringId': stringId}) }}">🖼️ Vignette</a></span>
+            
+        {% endmacro %}
+
+        {{ _self.editPresentationThumbnail(presentation.stringId) }}
+
+    
 
 
 
@@ -431,7 +447,7 @@ $(document).on('submit', '.ajax-form', function (e) {
 
 
 
-        {% include 'project_presentation/edit_show/_partials/_upper_box.html.twig' %}
+        
 
 
 

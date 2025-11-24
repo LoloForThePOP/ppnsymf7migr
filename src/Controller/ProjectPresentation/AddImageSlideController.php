@@ -7,6 +7,7 @@ use App\Entity\PPBase;
 use App\Enum\SlideType;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\ProjectPresentation\ImageSlideType;
+use App\Service\CacheThumbnailService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -24,6 +25,7 @@ final class AddImageSlideController extends AbstractController
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         Request $request,
         EntityManagerInterface $manager,
+        CacheThumbnailService $cacheThumbnailService,
     ): Response {
         $this->denyAccessUnlessGranted('edit', $presentation);
 
@@ -46,7 +48,7 @@ final class AddImageSlideController extends AbstractController
         $manager->persist($imageSlide);
         $manager->flush();
 
-        // TODO integrate AssessQuality/ImageResizer/CacheThumbnail services once ready.
+        $cacheThumbnailService->updateThumbnail($presentation, true);
 
         $this->addFlash('success', "✅ Image ajoutée");
 

@@ -56,7 +56,12 @@ class CacheThumbnailService
         }
 
         // Case 2 — generate (or fetch) a new cached URL
-        $newUrl = $this->cacheManager->resolve($sourcePath, self::FILTER);
+        if (str_starts_with($sourcePath, 'http://') || str_starts_with($sourcePath, 'https://')) {
+            // Remote source (e.g. YouTube thumb) → use directly
+            $newUrl = $sourcePath;
+        } else {
+            $newUrl = $this->cacheManager->getBrowserPath($sourcePath, self::FILTER);
+        }
 
         // If changed or forced refresh → remove old cache and update
         if ($forceRefresh || $newUrl !== $currentUrl) {
@@ -81,8 +86,12 @@ class CacheThumbnailService
 
         $slides = $project->getSlides();
         if (!$slides->isEmpty()) {
+            $sorted = $slides->toArray();
+            usort($sorted, function (Slide $a, Slide $b) {
+                return (int) $a->getPosition() <=> (int) $b->getPosition();
+            });
             /** @var Slide $slide */
-            $slide = $slides->first();
+            $slide = $sorted[0];
 
             if ($slide->getType() === SlideType::IMAGE) {
                 return $this->uploaderHelper->asset($slide, 'imageFile');
