@@ -32,6 +32,7 @@ class ScraperPersistenceService
         $created = 0;
         $skipped = 0;
         $errors = [];
+        $createdEntities = [];
 
         foreach ($items as $index => $item) {
             try {
@@ -76,6 +77,7 @@ class ScraperPersistenceService
 
                 $this->em->persist($pp);
                 $created++;
+                $createdEntities[] = $pp;
             } catch (UniqueConstraintViolationException $e) {
                 $errors[] = sprintf('Item %d: doublon sur source_url (%s)', $index, $item['source_url'] ?? 'n/a');
                 $this->logger->info('Scraper duplicate skipped on unique index', ['source_url' => $item['source_url'] ?? null]);
@@ -90,7 +92,7 @@ class ScraperPersistenceService
 
         $this->em->flush();
 
-        return ['created' => $created, 'skipped' => $skipped, 'errors' => $errors];
+        return ['created' => $created, 'skipped' => $skipped, 'errors' => $errors, 'entities' => $createdEntities];
     }
 
     private function attachCategories(PPBase $pp, array $categories): void

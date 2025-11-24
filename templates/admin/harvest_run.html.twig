@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Résultat collecte{% endblock %}
+
+{% block body %}
+    <div class="container my-4">
+        <h1 class="h4 mb-3">Résultat de la collecte</h1>
+
+        <div class="alert alert-info">
+            Persistés: {{ persistResult.created }} | Ignorés: {{ persistResult.skipped }} | Erreurs: {{ persistResult.errors|length }} | Ingestion erreurs: {{ ingestionErrors|length }}
+        </div>
+
+        {% if ingestionErrors %}
+            <div class="alert alert-warning">
+                <strong>Ingestion</strong>
+                <ul class="mb-0">
+                    {% for err in ingestionErrors %}
+                        <li>{{ err }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% if persistResult.errors %}
+            <div class="alert alert-warning">
+                <strong>Persistance</strong>
+                <ul class="mb-0">
+                    {% for err in persistResult.errors %}
+                        <li>{{ err }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% if persistResult.entities is defined and persistResult.entities %}
+            <div class="mt-3">
+                <h2 class="h6">Projets créés</h2>
+                <ul>
+                    {% for project in persistResult.entities %}
+                        <li>
+                            {{ project.title ?? project.goal }}
+                            <a class="btn btn-sm btn-outline-danger" href="{{ path('project_delete_from_images', {'stringId': project.stringId}) }}" onclick="return confirm('Supprimer ce projet ?');">Supprimer</a>
+                            <a class="btn btn-sm btn-outline-primary" href="{{ path('project_fetch_images', {'stringId': project.stringId}) }}">Images</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <a class="btn btn-secondary mt-3" href="{{ path('admin_harvest') }}">Retour</a>
+    </div>
+{% endblock %}

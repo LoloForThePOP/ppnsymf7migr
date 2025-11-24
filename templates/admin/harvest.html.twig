@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Outils de collecte{% endblock %}
+
+{% block body %}
+    <div class="container my-4">
+        <h1 class="h4 mb-3">Outils de collecte / normalisation</h1>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h2 class="h6">📝 Normaliser un texte brut</h2>
+                        <p class="text-muted small">Collez un texte FR/EN, générez le JSON normalisé, option de persistance.</p>
+                        <a class="btn btn-outline-primary mt-auto" href="{{ path('admin_project_normalize') }}">Ouvrir</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h2 class="h6">🌐 Normaliser depuis HTML</h2>
+                        <p class="text-muted small">Collez le code source d’une page, extraction lien/image et normalisation.</p>
+                        <a class="btn btn-outline-primary mt-auto" href="{{ path('admin_project_normalize_html') }}">Ouvrir</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h2 class="h6">🤖 Collecte scraper</h2>
+                        <p class="text-muted small">Lancer la collecte automatique</p>
+                        <form method="post" action="{{ path('admin_harvest_run') }}">
+                            <button type="submit" class="btn btn-outline-primary mt-auto">Lancer depuis l’admin</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
