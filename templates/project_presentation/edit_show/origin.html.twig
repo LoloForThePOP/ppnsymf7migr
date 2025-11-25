@@ -103,26 +103,29 @@
     {% if userPresenter %}
 
     {% endif %}
-    
-
-    <div class="page-container container m-4 {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}}">
-    
-        {% include 'project_presentation/edit_show/macros.html.twig' %}
 
 
-                
-        {# Edit project presentation thumbnail link #}
+    {# Setting some variables #}
 
-        {% macro editPresentationThumbnail(stringId) %}
-            
-            <span class="pp-edition-mode ms-2 ms-md-3"><a class="" style="color: rgb(33, 37, 41);" href="{{ path ('pp_edit_thumbnail', {'stringId': stringId}) }}">🖼️ Vignette</a></span>
-            
-        {% endmacro %}
-
-        {{ _self.editPresentationThumbnail(presentation.stringId) }}
+    {% set hasKeywords = presentation.keywords is not empty %}
 
     
 
+    {% set presentationCategories = presentation.categories %}
+    {% set countCategories = presentationCategories | length %}
+    {% set categoriesKeywordsForm = categoriesKeywordsForm is defined ? categoriesKeywordsForm : null %}
+
+
+    {% set countComments = presentation.comments | length %}
+
+
+    {% set likesCount = presentation.likes | length %}
+    
+
+    <div class="pp-container {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}} container">
+
+
+        {% include 'project_presentation/edit_show/upper_box_structure.html.twig' %}
 
 
         <div class="mb-4">
@@ -136,24 +139,14 @@
 
 
 
-    {# Setting some variables #}
-
-    {% set hasKeywords = presentation.keywords is not empty %}
-
-      
-
-        {% set presentationCategories = presentation.categories %}
-        {% set countCategories = presentationCategories | length %}
-        {% set categoriesKeywordsForm = categoriesKeywordsForm is defined ? categoriesKeywordsForm : null %}
-
 
 
 
 
         <div class="align-items-center">
-            {% include 'project_presentation/edit_show/categories_keywords.html.twig' %}
+            {% include 'project_presentation/edit_show/categories_keywords/display.html.twig' %}
             {% if userPresenter and categoriesKeywordsForm %}
-                {% include 'project_presentation/edit_show/modals/categories_keywords_modal.html.twig' %}
+                {% include 'project_presentation/edit_show/categories_keywords/edition_modal.html.twig' %}
             {% endif %}
         </div>
 
@@ -405,13 +398,6 @@ $(document).on('submit', '.ajax-form', function (e) {
 
 
 
-{# statuses catalog #}
-
-        <script src="/js/template_manager.js"></script>
-
-        {% set statusesCatalog = constant('App\\\Enum\\\ProjectStatuses::CATALOG') %}
-
-        {% set thisProjectActiveStatuses = presentation.getStatuses() %}
 
         {% include 'project_presentation/edit_show/statuses/edit_button.html.twig' %}
 
@@ -420,14 +406,6 @@ $(document).on('submit', '.ajax-form', function (e) {
 
 
         {% include 'project_presentation/edit_show/statuses/javascripts.html.twig' %}
-
-
-        {% include 'project_presentation/edit_show/statuses/view.html.twig' %}
-
-
-
-
-
 
 
 

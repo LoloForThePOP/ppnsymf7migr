@@ -1,0 +1,38 @@
+
+<h2 class="pp-goal {% if presentation.title is empty %} untitledProject {% endif %}"
+
+data-edit='{"entity": "PPBase", "property": "goal", "id": {{presentation.id}} }' data-text="Objectif du Projet">{{ presentation.goal[:1] | upper ~ presentation.goal[1:] }}</h2>
+
+
+
+<style>
+
+    .pp-goal{
+        display: block;
+        position: relative;
+        font-size: 1.45em;
+    }
+
+    .pp-goal.untitledProject{
+
+        font-size: 1.7em !important;
+
+    } 
+
+    @media screen and (max-width: 580px) {
+
+        .pp-goal{
+
+            font-size: 1.02em;
+            font-weight: normal;
+        }
+            
+        .pp-goal.untitledProject{
+
+            font-size: 1.18em !important;
+
+        }
+
+    }
+
+</style>

@@ -15,9 +15,6 @@
     
 {% endmacro %}
 
-{% set likesCount = presentation.likes | length %}
-
-
 {% if not app.user %} {# User can't like if not logged in, targetting to login page instead #}
 
     <a class="d-flex align-items-center" href="{{path('app_login')}}">

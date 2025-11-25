@@ -63,10 +63,10 @@ class ImageFetchController extends AbstractController
         ];
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('project_presentation/images/_candidates.html.twig', $viewData);
+            return $this->render('project_presentation/automation/images/_candidates.html.twig', $viewData);
         }
 
-        return $this->render('project_presentation/images/fetch.html.twig', $viewData);
+        return $this->render('project_presentation/automation/images/fetch.html.twig', $viewData);
     }
 
     #[Route('/project/{stringId}/images/delete', name: 'project_delete_from_images', methods: ['POST'])]
@@ -209,7 +209,7 @@ class ImageFetchController extends AbstractController
             $candidates = $sourceUrl ? $imageCandidateFetcher->fetch($sourceUrl) : [];
         }
 
-        return $this->render('project_presentation/images/_candidates.html.twig', [
+        return $this->render('project_presentation/automation/images/_candidates.html.twig', [
             'project' => $project,
             'sourceUrl' => $sourceUrl,
             'candidates' => $candidates,

@@ -1,0 +1,417 @@
+
+{# statuses catalog #}
+
+<script src="/js/template_manager.js"></script>
+
+{% set statusesCatalog = constant('App\\\Enum\\\ProjectStatuses::CATALOG') %}
+
+{% set thisProjectActiveStatuses = presentation.getStatuses() %}
+
+
+
+{# Tiny "comment icon + count" display anchored to comment section (shortcut to access comments section while seeing comments count) #}
+
+{% macro commentsIcon(countComments) %}
+    
+    <a class="text-body" href="#comments-struct-container">
+
+        <div class="d-flex align-items-center lh-1">
+            
+            <img class="commentIcon me-2" src="{{ asset('dialog.svg', 'misc')}}" alt="an icon representing a dialog">
+
+            <span class="">{{countComments}}</span> 
+        
+        </div>
+    
+    </a>
+    
+{% endmacro %}
+
+
+
+
+{# Dropdown containing more info about the project #}
+
+{% macro threeDotsMoreInfo(pageInfo) %}
+    
+    <img id="" class="upper-box-page-info-icon cursor-pointer" src="{{ asset('three_dots.svg', 'misc')}}" alt="three dots icon" width="25" height="25" data-bs-toggle="dropdown" aria-expanded="false" type="button">
+
+    {# Dropdown Content #}
+
+    <ul id="page-info-dropdown-content" class="dropdown-menu px-3" aria-labelledby="page-info-dropdown" style="max-width: 360px;">
+
+        {{pageInfo}}
+
+    </ul>
+    
+{% endmacro %}
+
+
+{% set shareIcon %}
+    
+    <a href="#" class="d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#pp-share" >
+
+        <img class="shareIcon" src="{{ asset('share_light.svg', 'misc')}}" alt="share icon" width="22" height="22">
+    
+    </a>
+    
+{% endset %}
+
+        
+{# Edit project presentation thumbnail link #}
+
+{% macro editPresentationThumbnail(stringId) %}
+    
+    <span class="pp-edition-mode ms-2 ms-md-3"><a class="" style="color: rgb(33, 37, 41);" href="{{ path ('pp_edit_thumbnail', {'stringId': stringId}) }}">🖼️ Vignette</a></span>
+    
+{% endmacro %}
+
+
+
+
+
+
+
+
+<div class="pp-upper-box pp-struct-container row"> 
+
+    <div class="left-col-md container col-lg-9 d-md-flex align-items-center">
+
+        {# Status & Title Displayed at the top (only for small screens) #}
+
+        <div class="d-flex d-md-none">
+        
+            {% include 'project_presentation/edit_show/statuses/display.html.twig' %}
+
+            {% include 'project_presentation/edit_show/title.html.twig' %}
+
+        </div>
+
+        {# Logo Column & {Title + Goal + keywords} Column #}
+
+        <div class="row">
+
+            {# a logo is displayed in two case : it already exists; or we display a fake logo placeholder for user presenters only #}
+
+            {% if presentation.logo or userPresenter %}
+                
+                {# Logo Column #} {# when fake logo placeholder, it is only displayed for userPresenter (so we add pp-edition-mode class) #}
+
+                <div class="pp-logo-container edit-hoverable-item {% if not presentation.logo and userPresenter %} pp-edition-mode {% endif %}">
+
+                    {% include 'project_presentation/edit_show/logo/display.html.twig' %}
+
+                </div>
+
+            {% endif %}
+
+            {# Goal Column (+ Title & Keywords only for >= Medium screens) #}
+
+            <div class="col d-flex align-items-center">
+
+                <div class="container px-0 ps-md-2">
+
+                    {# Title & Status Display only >= Medium Screens #}
+
+                    <div class="d-none d-md-flex align-items-center mb-2">
+
+                        {# Project Title Display #}
+
+                        {% include 'project_presentation/edit_show/title.html.twig' %}
+
+                        {# Project Status Display #}
+        
+                        {% include 'project_presentation/edit_show/statuses/display.html.twig' %}
+        
+                    </div>
+
+                    {# Goal Display #}
+        
+                    <div class="">
+
+                        {% include 'project_presentation/edit_show/goal.html.twig' %}
+                        
+                    </div>
+
+                    
+
+                    <div class="d-none d-md-flex align-items-center">
+
+                        {# Keywords Display only >= Medium Screens #}
+        
+                        {% include 'project_presentation/edit_show/categories_keywords/display.html.twig' %}
+
+                        <div class="" style="min-width:110px;">{{ _self.editPresentationThumbnail(presentation.stringId) }}</div>
+
+                    </div>
+
+
+                </div>
+                
+            </div>
+
+        </div>
+
+        {# Categories & Keywords Display & Thumbnail Access Display - only Small Screens #}
+
+        <div class="upper-edition-box-container d-md-none">
+
+            {% include 'project_presentation/edit_show/categories_keywords/display.html.twig' %}
+            
+            {# Project status or progression Edition Icon - only Small Screens #}
+            <div class="mt-3">
+            
+                {% include 'project_presentation/edit_show/statuses/edit_button.html.twig' %}
+
+                {{ _self.EditPresentationThumbnail(presentation.stringId) }}
+                
+            </div>
+
+            
+        </div>
+
+
+
+        {# Project comments, likes, share - only Small Screens #}
+
+        <div class="d-flex justify-content-center mt-0 mt-lg-2 d-lg-none">
+        
+            <div class="d-flex justify-content-center align-items-center">
+            
+                <div class="me-3">{{ _self.commentsIcon(countComments) }}</div>
+
+                <div class="me-3">{% include 'project_presentation/edit_show/like_button.html.twig' %}</div>
+            
+                {{ shareIcon }}
+            
+            </div>
+
+            <div class="pp-consultation-mode ms-4">
+            
+                {{followStructure}}
+
+            </div>
+
+            
+        
+        </div>
+
+    </div>
+
+
+    {# Middle column (only >= lg screens) #}
+
+    {% if userPresenter %}
+
+        <div class="middle-col-md pp-edition-mode container col-lg-3 d-none d-lg-flex">
+        
+            {{newsFormProxy}}
+        
+        </div>
+
+    {% endif %}
+
+ 
+
+    {# Right column (only >= lg screens) #}
+
+    <div class="right-col-md container col-lg-3 d-none d-lg-flex flex-column">
+        
+        {# Project status or progression icon in edition mode #}
+
+        {% if userPresenter %}
+
+            {% include 'project_presentation/edit_show/statuses/edit_button.html.twig' %}
+
+       {% endif %} 
+
+        {# Project Likes & Share button #}
+
+        <div class="d-flex align-items-center px-2 pt-2 pb-0 pt-lg-0 pb-lg-3 mb-lg-3" style="border: none; border-bottom: 1px solid #ddddb1;">
+        
+            <span class="me-3">{% include 'project_presentation/edit_show/like_button.html.twig' %}</span>
+
+            <div class="">{{ shareIcon }}</div>
+
+            <span class="pp-consultation-mode ms-3">{{ followStructure }}</span>
+            
+        </div>
+
+        {# Project Comments Count and Access #}
+
+        <div class="edit-third-row px-2 pt-2 pb-0 pt-lg-0 pb-lg-3">
+        
+            {{ _self.commentsIcon(countComments) }}
+
+        </div>
+
+        <style>
+
+
+            .in-edition-mode .right-col-md .edit-third-row{
+
+                margin-bottom: 0;
+
+            }
+
+            .in-consultation-mode .right-col-md .edit-third-row{
+
+                margin-bottom: 1rem;
+                border: none; 
+                border-bottom: 1px solid #ddddb1;
+
+            }
+        
+        </style>
+
+        {# Presentation More Info (creation date, etc.) #}
+
+        <div class="pp-consultation-mode px-2 pt-2 pb-0 pt-lg-0">
+
+            {{ _self.threeDotsMoreInfo(pageInfo) }}
+            
+
+        </div>
+
+ 
+    </div>
+
+
+</div>
+
+
+<style>
+
+    {# In Edition Mode we reduce left col width because their is a news form proxy in the upper box #}
+
+    .in-edition-mode .left-col-md {
+
+        width: 50%;
+    }
+
+    .middle-col-md{
+        justify-content: center;
+        align-items: center;
+        border-left: 1px solid rgb(204, 204, 161);
+    }
+
+    .right-col-md{
+        display: flex;
+        justify-content: space-evenly;
+        padding-left: 10px;
+        border-left: 1px solid rgb(204, 204, 161);
+    }
+
+    .pp-placeholder-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .pp-upper-box {
+        margin-bottom: 40px;
+    }
+
+    .pp-logo-container{
+
+        position: relative;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        flex: 0 0 auto;
+        
+        width: 19%;
+
+        padding-right: 0;
+
+    }
+
+
+    .commentIcon{
+
+        width: 22px;
+
+    }
+
+    .pp-upper-box .followed-display .text{
+        margin-right: 4px;
+        margin-bottom: 1px;
+        margin-left: 1px;
+    }
+
+        
+    @media screen and (min-width: 520px) {
+            
+        .pp-upper-box {
+
+            margin-left: auto;
+            margin-right: auto;
+
+            padding: 20px 12px 20px 12px; /* Overriding some pp-struct-container defaults */
+
+        }
+
+    }
+        
+    @media screen and (max-width: 990px) {
+            
+        .pp-logo-container{
+
+            width: 21%;
+
+        }
+    }
+        
+    @media screen and (max-width: 580px) {
+
+        .pp-upper-box { /* Overriding some pp-struct-container defaults */
+            margin-bottom: 10px;
+            padding: 0;
+            padding-bottom: 20px;
+            border-top: 0;
+            border-left: 0;
+            border-right: 0;
+            border-radius: 0;
+        }
+   
+        .upper-edition-box-container{
+
+            text-align: center;
+            margin-top: 11px;
+            margin-bottom: 15px;
+            
+        }
+
+        .in-edition-mode .left-col-md {
+
+            width: 100%;
+        }
+
+        .pp-logo-container{
+
+            display: flex;
+            align-items: center;
+
+            width: 25%;
+
+        }
+
+        .commentIcon{
+            width: 20px;
+        }
+
+        .likeIcon{
+            width: 18px;
+        }
+
+        .shareIcon {
+            width: 17px;
+            height: 17px;
+        }
+
+    }
+
+</style>
