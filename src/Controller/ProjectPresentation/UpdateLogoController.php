@@ -46,7 +46,7 @@ final class UpdateLogoController extends AbstractController
         }
 
 
-        return $this->render('project_presentation/edit_show/_partials/__upper_box/___logo/___update.html.twig', [
+        return $this->render('project_presentation/edit_show/logo/update.html.twig', [
             'presentation' => $presentation,
             'stringId' => $presentation->getStringId(),
             'form' => $form->createView(),

@@ -107,7 +107,7 @@
 
     <div class="page-container container m-4 {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}}">
     
-        {% include 'project_presentation/edit_show/_partials/_upper_box.html.twig' %}
+        {% include 'project_presentation/edit_show/macros.html.twig' %}
 
 
                 
@@ -129,8 +129,8 @@
 
             {# Logo #}
             
-            {% include 'project_presentation/edit_show/_partials/__upper_box/___logo/___add_form.html.twig' %}
-            {% include 'project_presentation/edit_show/_partials/__upper_box/___logo/___display.html.twig' %}
+            {% include 'project_presentation/edit_show/logo/add_form.html.twig' %}
+            {% include 'project_presentation/edit_show/logo/display.html.twig' %}
              
         </div>
 
@@ -151,7 +151,7 @@
 
 
         <div class="align-items-center">
-            {% include 'project_presentation/edit_show/_partials/__upper_box/_categories_keywords.html.twig' %}
+            {% include 'project_presentation/edit_show/categories_keywords.html.twig' %}
             {% if userPresenter and categoriesKeywordsForm %}
                 {% include 'project_presentation/edit_show/modals/categories_keywords_modal.html.twig' %}
             {% endif %}
@@ -272,13 +272,13 @@
 
         {# Websites #}
         
-        {% include "project_presentation/edit_show/_partials/_websites/_add_form.html.twig" %}
+        {% include "project_presentation/edit_show/websites/_add_form.html.twig" %}
 
         <div class="col-lg-6 pp-struct-container-wrapper {% if countWebsites == 0 %} pp-edition-mode {% endif %}">
     
             <div id="websites-struct-container" class="pp-struct-container col-12">
             
-                {% include 'project_presentation/edit_show/_partials/_websites/_content.html.twig' %}
+                {% include 'project_presentation/edit_show/websites/_content.html.twig' %}
                     
             </div>   
         
@@ -370,7 +370,7 @@ $(document).on('submit', '.ajax-form', function (e) {
 
         <div class="mb-4">
         
-            {% include 'project_presentation/edit_show/_partials/__upper_box/_title.html.twig' %}
+            {% include 'project_presentation/edit_show/title.html.twig' %}
         
         </div>
 
@@ -413,19 +413,16 @@ $(document).on('submit', '.ajax-form', function (e) {
 
         {% set thisProjectActiveStatuses = presentation.getStatuses() %}
 
-        {% include 'project_presentation/edit_show/_partials/_statuses/_edit_button.html.twig' %}
+        {% include 'project_presentation/edit_show/statuses/edit_button.html.twig' %}
 
 
-        {% include 'project_presentation/edit_show/_partials/_statuses/_edit_box.html.twig' %}
+        {% include 'project_presentation/edit_show/statuses/edit_box.html.twig' %}
 
 
-        {% include 'project_presentation/edit_show/_partials/_statuses/_javascripts.html.twig' %}
+        {% include 'project_presentation/edit_show/statuses/javascripts.html.twig' %}
 
 
-        {% include 'project_presentation/edit_show/_partials/_statuses/_view.html.twig' %}
-
-
-
+        {% include 'project_presentation/edit_show/statuses/view.html.twig' %}
 
 
 
@@ -435,11 +432,6 @@ $(document).on('submit', '.ajax-form', function (e) {
 
 
 
-
-
-
-
-        
 
 
 
@@ -452,8 +444,16 @@ $(document).on('submit', '.ajax-form', function (e) {
 
 
 
-        {% include 'project_presentation/edit_show/_partials/_follow_button.html.twig' %}
-        {% include 'project_presentation/edit_show/_partials/_like_button.html.twig' %}
+
+
+
+        
+
+
+
+
+        {% include 'project_presentation/edit_show/follow_button.html.twig' %}
+        {% include 'project_presentation/edit_show/like_button.html.twig' %}
 
         {% if userPresenter %}
             {% include 'project_presentation/edit_show/places/manage_modal.html.twig' %}
