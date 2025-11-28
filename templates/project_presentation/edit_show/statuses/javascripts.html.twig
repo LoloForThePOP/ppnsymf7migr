@@ -1,6 +1,3 @@
-
-<script src="/js/template_manager.js"></script>
-
 <script>
 
 /*
@@ -144,7 +141,36 @@ function renderStatuses(newStatuses, newRemarks) {
     if ($remarkBox.length) {
         $remarkBox.text(newRemarks || '');
     }
+
+    // Refresh popover content if present
+    initStatusPopovers();
 }
+
+// Init or refresh popovers on all buttons
+function initStatusPopovers() {
+    $('.status-popover-btn').each(function () {
+        const btn = this;
+        if (!(window.bootstrap && bootstrap.Popover)) return;
+
+        const contentHtml = document.querySelector('.project-statuses-view')?.outerHTML || '';
+        const existing = bootstrap.Popover.getInstance(btn);
+        if (existing) {
+            existing.dispose();
+        }
+        new bootstrap.Popover(btn, {
+            html: true,
+            content: contentHtml,
+            customClass: 'wide-popover',
+            trigger: 'focus',
+            sanitize: false,
+        });
+    });
+}
+
+// Initial wiring on page load
+$(document).ready(function () {
+    initStatusPopovers();
+});
 
 
 

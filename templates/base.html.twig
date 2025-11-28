@@ -67,13 +67,9 @@
 
         {% block priorJavascipts %}{% endblock %}
 
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-
-        
-
-
-        {# Some Bootstrap components use a specific javascript #}
-        <script src="/js/bootstrap.js"></script>
+        {# Popper + Bootstrap JS (local build) #}
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" defer></script>
+        <script src="/js/bootstrap.js" defer></script>
 
         {# I know it's outdated but so easy to use #}
         <script src="/js/jquery-3.6.0.js"></script>
@@ -81,7 +77,6 @@
         {# Misc js functions like detect if user device is tiny, detect if user is offline... #}
         {# Defines tinyScreen boolean js variable #}
         <script src="/js/misc.js"></script>
-
 
 
         {# Cookies and tracking #}

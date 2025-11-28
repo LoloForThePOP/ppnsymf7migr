@@ -153,259 +153,108 @@
 
         {# statuses catalog #}
 
-        
-
         {% set thisProjectActiveStatuses = presentation.getStatuses() %}
 
         {% include 'project_presentation/edit_show/statuses/edit_box.html.twig' %}
 
+
+
+
+
         {% include 'project_presentation/edit_show/upper_box_structure.html.twig' %}
 
 
-        <div class="mb-4">
 
-            {# Logo #}
-            
-            {% include 'project_presentation/edit_show/logo/add_form.html.twig' %}
-            {% include 'project_presentation/edit_show/logo/display.html.twig' %}
-             
-        </div>
+        <div class="container px-0">
 
+            <div class="row">
 
-
-
-
-
-
-        <div class="align-items-center">
-
-            {% include 'project_presentation/edit_show/categories_keywords/display.html.twig' %}
-
-            {% if userPresenter and categoriesKeywordsForm %}
-
-                {% include 'project_presentation/edit_show/categories_keywords/edition_modal.html.twig' %}
-
-            {% endif %}
-
-        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        {% set countPlaces = presentation.places | length %}
-
-        <div class="col-lg-6 pp-struct-container-wrapper {% if countPlaces == 0 %} pp-edition-mode {% endif %}">
-            
-            <div id="places-struct-container" class="pp-struct-container">
+                {% set countSlides = presentation.slides | length %}
                 
-               {% include 'project_presentation/edit_show/places/display.html.twig' %}
-            
-            </div>
-        
-        </div>
+                {# Slideshow images & videos #}
 
+                {% include "project_presentation/edit_show/slides/add_image_form.html.twig" %}
 
+                {% include "project_presentation/edit_show/slides/add_video_form.html.twig" %}
 
+                <div class="col-lg-6 pp-struct-container-wrapper {% if countSlides == 0 %} pp-edition-mode {% endif %}">
 
+                    <div id="slideshow-struct-container" class="pp-struct-container">
+                            
+                        {% include 'project_presentation/edit_show/slides/slides.html.twig' %}
 
-
-
-
-
-
-
-
-
-
-
-
-
-        {% set countSlides = presentation.slides | length %}
-        
-        {# Slideshow images & videos #}
-
-        {% include "project_presentation/edit_show/slides/add_image_form.html.twig" %}
-
-        {% include "project_presentation/edit_show/slides/add_video_form.html.twig" %}
-
-        <div class="col-lg-6 pp-struct-container-wrapper {% if countSlides == 0 %} pp-edition-mode {% endif %}">
-
-            <div id="slideshow-struct-container" class="pp-struct-container">
-                    
-                {% include 'project_presentation/edit_show/slides/slides.html.twig' %}
-
-            </div>
-        
-        </div>
-
-
-        {# Text Description #}
-
-        <div class="col-lg-6 pp-struct-container-wrapper">
-
-            <div id="text-description-struct-container" class="pp-struct-container">
+                    </div>
                 
-                {% include 'project_presentation/edit_show/text_description/main.html.twig' %}
-
-            </div>
-        
-        </div>
+                </div>
 
 
+                {# Text Description #}
+
+                <div class="col-lg-6 pp-struct-container-wrapper">
+
+                    <div id="text-description-struct-container" class="pp-struct-container">
+                        
+                        {% include 'project_presentation/edit_show/text_description/main.html.twig' %}
+
+                    </div>
+                
+                </div>
+
+                {# Places #}
 
 
+                {% set countPlaces = presentation.places | length %}
 
-
-
-
-
-
-
-
-
-
-
-
-        {% set countQA = presentation.getOtherComponents().getComponents('questions_answers') | length %}
-
-        {# Questions & Answers #}
-        
-        {% include "project_presentation/edit_show/questions_answers/add_form.html.twig" %}
-
-
-
-        <div class="col-lg-6 pp-struct-container-wrapper">
-        
-            <div id="questionsAnswers-struct-container" class="pp-struct-container ">
-        
-                {% include "project_presentation/edit_show/questions_answers/display.html.twig" %}
-        
-            </div>
-
-        </div>
-
-
-                 
-
-
-
-
-        {% set countWebsites = presentation.getOtherComponents().getComponents('websites') | length %}
-
-        {# Websites #}
-        
-        {% include "project_presentation/edit_show/websites/_add_form.html.twig" %}
-
-        <div class="col-lg-6 pp-struct-container-wrapper {% if countWebsites == 0 %} pp-edition-mode {% endif %}">
-    
-            <div id="websites-struct-container" class="pp-struct-container col-12">
-            
-                {% include 'project_presentation/edit_show/websites/_content.html.twig' %}
+                <div class="col-lg-6 pp-struct-container-wrapper {% if countPlaces == 0 %} pp-edition-mode {% endif %}">
                     
-            </div>   
-        
+                    <div id="places-struct-container" class="pp-struct-container">
+                        
+                    {% include 'project_presentation/edit_show/places/display.html.twig' %}
+                    
+                    </div>
+                
+                </div>
+
+
+
+                {# Questions & Answers #}
+
+                {% set countQA = presentation.getOtherComponents().getComponents('questions_answers') | length %}
+                
+                {% include "project_presentation/edit_show/questions_answers/add_form.html.twig" %}
+
+                <div class="col-lg-6 pp-struct-container-wrapper">
+                
+                    <div id="questionsAnswers-struct-container" class="pp-struct-container ">
+                
+                        {% include "project_presentation/edit_show/questions_answers/display.html.twig" %}
+                
+                    </div>
+
+                </div>
+
+
+
+
+                {# Websites #}
+
+                {% set countWebsites = presentation.getOtherComponents().getComponents('websites') | length %}
+
+                {% include "project_presentation/edit_show/websites/_add_form.html.twig" %}
+
+                <div class="col-lg-6 pp-struct-container-wrapper {% if countWebsites == 0 %} pp-edition-mode {% endif %}">
+            
+                    <div id="websites-struct-container" class="pp-struct-container col-12">
+                    
+                        {% include 'project_presentation/edit_show/websites/_content.html.twig' %}
+                            
+                    </div>   
+                
+                </div>
+
+            </div>
+
         </div>
-
-
-        
-
-
-
-
-
-
-
-
-
-<script>
-
-
-$(document).on('submit', '.ajax-form', function (e) {
-    e.preventDefault();
-
-    const $form = $(this);
-    const actionUrl = $form.data('action');
-    const fragment = $form.data('fragment'); // optional
-    const messageTarget = $form.data('message-target') || '#ajax-form-message';
-
-    $.ajax({
-        url: actionUrl,
-        method: 'POST',
-        data: new FormData(this),
-        processData: false,
-        contentType: false,
-
-        success: function (json) {
-
-            // Success message
-            $(messageTarget).html(
-                `<div class="alert alert-success">${json.message}</div>`
-            );
-
-            // Reload fragment if provided
-            if (fragment) {
-                $(fragment).load(location.href + " " + fragment + " > *");
-            }
-
-            // Optional: Reset form inputs (except hidden fields)
-            $form.find('input[type!="hidden"], textarea').val('');
-        },
-
-        error: function (xhr) {
-            let html = '<div class="alert alert-danger">';
-
-            if (xhr.responseJSON && xhr.responseJSON.errors) {
-                xhr.responseJSON.errors.forEach(err => {
-                    html += `<div>${err.message}</div>`;
-                });
-            } else {
-                html += 'Une erreur est survenue.';
-            }
-
-            html += '</div>';
-
-            $(messageTarget).html(html);
-        }
-    });
-});
-
-
-
-
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <div class="mb-4">
-        
-            {% include 'project_presentation/edit_show/title.html.twig' %}
-        
-        </div>
-
 
 
 
@@ -425,9 +274,6 @@ $(document).on('submit', '.ajax-form', function (e) {
         {% include 'project_presentation/edit_show/statuses/javascripts.html.twig' %}
 
 
-
-        {% include 'project_presentation/edit_show/follow_button.html.twig' %}
-        {% include 'project_presentation/edit_show/like_button.html.twig' %}
 
         {% if userPresenter %}
             {% include 'project_presentation/edit_show/places/manage_modal.html.twig' %}

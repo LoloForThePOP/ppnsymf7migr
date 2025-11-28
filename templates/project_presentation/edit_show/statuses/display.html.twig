@@ -1,69 +1,37 @@
-
-{# Status pills are rendered via a macro (and then via a template) so that its structure stays the same while handled via twig or via jQuery #}
+{# Status pills macro #}
 {% macro pill(item) %}
-
     <span class="status-pill-view px-3 py-2 rounded-pill text-dark fw-semibold"
-        data-status="{{ item.uniqueName }}"
-        data-text="{{ item.short_description_fr }}"
-        style="background-color: {{ item.bg_color }};"
-        title="{{ item.description_fr }}">
-
+          data-status="{{ item.uniqueName }}"
+          data-text="{{ item.short_description_fr }}"
+          style="background-color: {{ item.bg_color }};"
+          title="{{ item.description_fr }}">
         {{ item.short_description_fr }}
-
-
     </span>
-
 {% endmacro %}
 
-{# Creating an actual reusable html status pill template #}
 {% import _self as pills %}
 
-<template id="status-pill-template">
-
-    {{ pills.pill({ uniqueName: '', bg_color: '#ddd', description_fr: '', short_description_fr: '' }) }}
-    
-</template>
-
-
-{# Project statuses view (a collection of enumerated status pills + string remarks from project team) #}
-
+{# Project statuses view (a collection of enumerated status pills + remarks) #}
 <div class="project-statuses-view">
-
-    {# enumerated status pills #}
-
-    <div id="project-enumerated-statuses-view"
-
-        class="project-enumerated-statuses-view d-flex flex-wrap gap-2"
-        data-current-statuses='{{ presentation.statuses | json_encode }}'
-        data-catalog="{{ statusesCatalog | json_encode }}"
-
-    >
-
+    <div class="project-enumerated-statuses-view d-flex flex-wrap gap-2"
+         data-current-statuses='{{ presentation.statuses | json_encode }}'
+         data-catalog="{{ statusesCatalog | json_encode }}">
         {% for item in presentation.getEnumStatusItems() %}
             {{ pills.pill(item) }}
         {% endfor %}
-
     </div>
-
-    {# Project status free string remarks #}
 
     <div class="project-status-remarks-view mt-3 w-100">
-
         <div class="content">{{ presentation.statusRemarks }}</div>
-
     </div>
-
 </div>
 
-
-
-
-{# Status pills style #}
+{# Optional popover trigger to preview statuses #}
+<button type="button" class="btn btn-outline-primary btn-sm mt-2 status-popover-btn">
+    Voir les statuts
+</button>
 
 <style>
-
-
-
     .project-status-remarks-view .content {
         white-space: pre-wrap;
         max-width: 390px;
@@ -83,9 +51,6 @@
         border-radius: 7px;
     }
 
-
-
-
     .project-statuses {
         margin-top: 1rem;
     }
@@ -104,10 +69,12 @@
         box-shadow: 0 2px 6px rgba(0,0,0,0.12);
     }
 
-
     .status-pill.active {
         outline: 2px solid #4b9c3f;
         font-weight: 600;
     }
 
+    .wide-popover {
+        max-width: 400px !important;
+    }
 </style>
