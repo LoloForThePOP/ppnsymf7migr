@@ -1,14 +1,4 @@
 
-{# statuses catalog #}
-
-<script src="/js/template_manager.js"></script>
-
-{% set statusesCatalog = constant('App\\\Enum\\\ProjectStatuses::CATALOG') %}
-
-{% set thisProjectActiveStatuses = presentation.getStatuses() %}
-
-
-
 {# Tiny "comment icon + count" display anchored to comment section (shortcut to access comments section while seeing comments count) #}
 
 {% macro commentsIcon(countComments) %}
@@ -132,12 +122,10 @@
                         {% include 'project_presentation/edit_show/goal.html.twig' %}
                         
                     </div>
-
                     
+                    {# Keywords Display only >= Medium Screens #}
 
                     <div class="d-none d-md-flex align-items-center">
-
-                        {# Keywords Display only >= Medium Screens #}
         
                         {% include 'project_presentation/edit_show/categories_keywords/display.html.twig' %}
 
@@ -166,10 +154,8 @@
                 {{ _self.EditPresentationThumbnail(presentation.stringId) }}
                 
             </div>
-
             
         </div>
-
 
 
         {# Project comments, likes, share - only Small Screens #}
@@ -188,30 +174,29 @@
 
             <div class="pp-consultation-mode ms-4">
             
-                {{followStructure}}
+                {% include 'project_presentation/edit_show/follow_button.html.twig' %}
 
             </div>
 
-            
-        
         </div>
 
     </div>
 
 
-    {# Middle column (only >= lg screens) #}
+    {# Middle column (only >= lg screens)
+
+        To do : keep or not this column  #}
 
     {% if userPresenter %}
 
         <div class="middle-col-md pp-edition-mode container col-lg-3 d-none d-lg-flex">
         
-            {{newsFormProxy}}
+          {#  {{newsFormProxy}} #}
         
         </div>
 
     {% endif %}
 
- 
 
     {# Right column (only >= lg screens) #}
 
@@ -233,7 +218,7 @@
 
             <div class="">{{ shareIcon }}</div>
 
-            <span class="pp-consultation-mode ms-3">{{ followStructure }}</span>
+            <span class="pp-consultation-mode ms-3">{% include 'project_presentation/edit_show/follow_button.html.twig' %}</span>
             
         </div>
 

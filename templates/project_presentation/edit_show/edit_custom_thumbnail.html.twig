@@ -96,27 +96,27 @@
 
      {% block actionButtons %}
 
-                <div class="action-buttons-container text-center">
+        <div class="action-buttons-container text-center">
 
 
-                    {# Back to Result Button #}
-        
-                    <a 
-                    
-                        class="text-decoration-none text-white" 
-                        href="{{path('edit_show_project_presentation', {'stringId': presentation.stringId })}}#{% block seeResultAnchor %}{% endblock %}">
+            {# Back to Result Button #}
 
-                        <button type="button" class="btn btn-lg btn-go-back mb-2  me-3">❌ Retour</button>
+            <a 
+            
+                class="text-decoration-none text-white" 
+                href="{{path('edit_show_project_presentation', {'stringId': presentation.stringId })}}#{% block seeResultAnchor %}{% endblock %}">
 
-                    </a>
-                    
-                    {# Update Form Valitation Button #}
+                <button type="button" class="btn btn-lg btn-go-back mb-2  me-3">❌ Retour</button>
 
-                    <button class="btn btn-lg btn-validate mb-2">✔️ Valider</button>
+            </a>
+            
+            {# Update Form Valitation Button #}
 
-                </div>
+            <button class="btn btn-lg btn-validate mb-2">✔️ Valider</button>
 
-            {% endblock %}
+        </div>
+
+    {% endblock %}
 
 {% endembed %}
 
