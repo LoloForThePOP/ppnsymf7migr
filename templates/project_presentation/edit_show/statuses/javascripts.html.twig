@@ -1,4 +1,6 @@
 
+<script src="/js/template_manager.js"></script>
+
 <script>
 
 /*
@@ -88,8 +90,17 @@ function saveEnumStatusesAndRemarks() {
   Statuses:updated Event listener to refresh UI
 */
 $(document).on('statuses:updated', function (event, newStatuses, newRemarks) {
-    const $container = $('#project-enumerated-statuses-view');
-    const catalog = $container.data('catalog') || [];
+    renderStatuses(newStatuses, newRemarks);
+});
+
+// Re-render pills and remarks without external dependencies
+function renderStatuses(newStatuses, newRemarks) {
+    const $containers = $('.project-enumerated-statuses-view');
+    if (!$containers.length) {
+        return;
+    }
+
+    const catalog = $containers.first().data('catalog') || [];
 
     const activeItems = [];
     catalog.forEach(cat => {
@@ -107,20 +118,34 @@ $(document).on('statuses:updated', function (event, newStatuses, newRemarks) {
 
     console.log(activeItems);
     
-    TemplateManager.renderList('#project-enumerated-statuses-view', '#status-pill-template', activeItems); //given an html template we clone it with new data
+    // Re-render the pills inline across all containers (mobile + desktop)
+    $containers.each(function () {
+        const $container = $(this);
+        $container.empty();
+        if (!activeItems.length) {
+            $container.append('<span class="text-muted">Aucun statut</span>');
+        } else {
+            activeItems.forEach(item => {
+                const pill = $('<span>', {
+                    class: 'status-pill-view px-3 py-2 rounded-pill text-dark fw-semibold',
+                    'data-status': item.status,
+                    title: item.title,
+                    text: item.text,
+                    css: { backgroundColor: item.color },
+                });
+                $container.append(pill);
+            });
+        }
+    });
 
     const $remarkBox = $('.project-status-remarks-view .content');
-
 
     // Update remark text
     if ($remarkBox.length) {
         $remarkBox.text(newRemarks || '');
     }
-
-});
+}
 
 
 
 </script>
-
-
