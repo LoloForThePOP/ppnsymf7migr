@@ -5,13 +5,6 @@
     <div id="pp-categories-keywords" class="edit-hoverable-item text-left d-inline" >
 
         {% if userPresenter %}
-            <form method="post" action="{{ path('pp_ai_tags_refresh', {stringId: presentation.stringId}) }}" class="d-inline">
-                <input type="hidden" name="_token" value="{{ csrf_token('ai_tags_refresh_' ~ presentation.stringId) }}">
-                <button type="submit" class="btn btn-sm btn-outline-primary align-middle me-2 pp-edition-mode">
-                    ↻ Suggestions IA
-                </button>
-            </form>
-
             <button class="btn btn-sm btn-outline-secondary align-middle pp-edition-mode" type="button" data-bs-toggle="modal" data-bs-target="#categoriesKeywordsModal">
                 Modifier les catégories/mots-clés
             </button>
@@ -21,7 +14,7 @@
 
             <!-- Project Keywords Display -->
 
-            <span id="pp-keywords" class="">
+            <span id="pp-keywords" class="pp-consultation-mode">
 
                 {% if hasKeywords %}
                     
@@ -52,11 +45,11 @@
 
         {% if countCategories > 0 %}
 
-            <div id="pp-categories" class="">
+            <div id="pp-categories" class="pp-consultation-mode">
 
                 <div id="categories-dropdown" data-bs-toggle="dropdown" aria-expanded="false" class="" type="button">
 
-                    <img id="categories-unroll-icon" src="{{ asset('categories.svg', 'misc')}}" alt="categories icon">Catégories<span class="pp-consultation-mode">▾</span>
+                    <img id="categories-unroll-icon" src="{{ asset('categories.svg', 'misc')}}" alt="categories icon">Catégories<span class=""> ▾</span>
 
                 </div>
 
@@ -182,12 +175,6 @@
                 <span class="">Catégories<span class="d-none d-md-inline"> & Mots-clés</span></span>
             </div>
         </a>
-        <form method="post" action="{{ path('pp_ai_tags_refresh', {stringId: presentation.stringId}) }}" class="d-inline">
-            <input type="hidden" name="_token" value="{{ csrf_token('ai_tags_refresh_' ~ presentation.stringId) }}">
-            <button type="submit" class="btn btn-sm btn-outline-primary">
-                ↻ Suggestions IA
-            </button>
-        </form>
     </div>
 
     <style>

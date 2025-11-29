@@ -32,6 +32,7 @@
 
     {% block footerButtons %}
         {% if categoriesKeywordsForm is defined %}
+            {{ form_rest(categoriesKeywordsForm) }}
             <button type="submit" class="btn btn-primary">Enregistrer</button>
             {{ form_end(categoriesKeywordsForm, {render_rest: false}) }}
         {% endif %}

@@ -1,0 +1,47 @@
+{% embed "utilities/modal_skeleton.html.twig" with {'modal_id': "addDocumentFormModal"} %}
+
+
+    {% block modalTitle %}
+    
+        Ajouter un document
+    
+    {% endblock %}
+    
+    {% block modalBody %}
+
+        {{ form_start(addDocumentForm, {
+            action: path('pp_add_document', { stringId: presentation.stringId })
+        }) }}
+
+        {{ form_widget(addDocumentForm) }}
+
+    {% endblock %}
+
+    {% block footerButtons %}
+
+        <button type="submit" class="btn btn-validate">✔️ Valider</button>
+
+        {{ form_end(addDocumentForm) }}
+
+    {% endblock %}
+
+
+    {% block formErrors %}
+        
+        {% if not addDocumentForm.vars.valid %}
+
+            <script>
+            
+                $(document).ready(function(){
+            
+                    $('#{{modal_id}}').modal('show');
+            
+                });
+            
+            </script>
+
+        {% endif %}
+    
+    {% endblock %}
+
+{% endembed %}

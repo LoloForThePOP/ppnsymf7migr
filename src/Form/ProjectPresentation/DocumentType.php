@@ -16,7 +16,7 @@ class DocumentType extends AbstractType
         $builder
             ->add('file', VichFileType::class, [
                 'label' => 'Choisir un fichier à importer',
-                'required' => true,
+                'required' => $options['file_required'],
                 'allow_delete' => false,
                 'download_label' => false,
                 'download_uri' => false,
@@ -42,6 +42,7 @@ class DocumentType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Document::class,
+            'file_required' => true,
         ]);
     }
 }

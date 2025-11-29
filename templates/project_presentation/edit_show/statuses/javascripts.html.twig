@@ -5,6 +5,12 @@
 */
 $(document).on('click', '.status-pill', function() {
 
+    // ensure only one per category
+    const category = $(this).data('category');
+    if (category) {
+        $(this).closest('ul').find('.status-pill[data-category="'+category+'"]').not(this).removeClass('active');
+    }
+
     $(this).toggleClass('active');
     
     saveEnumStatusesAndRemarks();

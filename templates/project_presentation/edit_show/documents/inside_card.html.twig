@@ -1,0 +1,27 @@
+<!-- Documents Icon Display -->
+
+    <div class="row h-100"> 
+        
+        {% set fileExtension = document.fileName | split('.') | last %}
+
+        <!--Document representation with title and file extension (vertical text) -->
+
+        <div class="pp-document-file-extension-container {{ "file-" ~ fileExtension }} col-3">
+
+            <!-- displaying file extension -->
+            
+            <div class="pp-document-file-extension">
+                {{ fileExtension | upper }}
+            </div>
+
+        </div> 
+
+        <!--Document Title (as provided by user) -->
+
+        <div class="pp-document-title col-9">
+
+            {{ document.title | striptags | length > 60 ? document.title | striptags | slice(0, 57) ~ '...' : document.title | striptags }}
+
+        </div>
+
+</div> 

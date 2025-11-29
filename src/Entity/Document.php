@@ -66,7 +66,6 @@ class Document
     // ────────────────────────────────────────
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Le nom du fichier ne peut pas être vide.')]
     #[Assert\Length(
         max: 255,
         maxMessage: 'Le nom du fichier ne peut pas dépasser {{ limit }} caractères.'
@@ -236,4 +235,3 @@ class Document
     }
 
 }
-

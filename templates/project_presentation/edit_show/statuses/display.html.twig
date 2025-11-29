@@ -24,12 +24,14 @@
     <div class="project-status-remarks-view mt-3 w-100">
         <div class="content">{{ presentation.statusRemarks }}</div>
     </div>
+
+    {# Optional popover trigger to preview statuses #}
+    <button type="button" class="btn btn-outline-primary btn-sm mt-2 status-popover-btn">
+        Afficher +
+    </button>
+
 </div>
 
-{# Optional popover trigger to preview statuses #}
-<button type="button" class="btn btn-outline-primary btn-sm mt-2 status-popover-btn">
-    Voir les statuts
-</button>
 
 <style>
     .project-status-remarks-view .content {

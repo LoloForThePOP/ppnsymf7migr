@@ -71,7 +71,7 @@
 
         <div class="d-flex d-md-none">
         
-            {% include 'project_presentation/edit_show/statuses/display.html.twig' %} to do reactive if tooltip appears
+            {% include 'project_presentation/edit_show/statuses/display.html.twig' %}
 
             {% include 'project_presentation/edit_show/title.html.twig' %}
 
@@ -134,9 +134,17 @@
                     </div>
 
 
-                </div>
-                
-            </div>
+</div>
+
+</div>
+
+{# Categories & Keywords modal (needed for the trigger button) #}
+{% if userPresenter and categoriesKeywordsForm is defined %}
+    {% include 'project_presentation/edit_show/categories_keywords/edition_modal.html.twig' with {
+        presentation: presentation,
+        categoriesKeywordsForm: categoriesKeywordsForm
+    } %}
+{% endif %}
 
         </div>
 
