@@ -296,6 +296,7 @@
             var dots = document.getElementsByClassName("SlideImageThumbnail");
             var thumbnail = document.getElementsByClassName("thumbnail");
             var captions = document.getElementsByClassName("caption");
+            var captionText = document.getElementById("captionText");
             
             if (n > slides.length) {slideIndex = 1}
             
@@ -318,7 +319,7 @@
             
             slides[slideIndex-1].style.display = "flex";
 
-            if(!tinyScreen){
+            if(!tinyScreen && typeof killImageZoom === 'function' && typeof imageZoom === 'function'){
 
                 killImageZoom(); //deleting previous lens
                 imageZoom("image-slide-wrapper-"+slides[slideIndex-1].id, "image-zoom-result");
@@ -331,10 +332,14 @@
             dots[slideIndex-1].className += " active";
             thumbnail[slideIndex-1].className += " active";
 
-            if(typeof(captionText) != 'undefined' && captionText != null){
-
-                captionText.innerHTML = dots[slideIndex-1].getAttribute('data-caption');
-                
+            if(typeof(captionText) != 'undefined' && captionText !== null){
+                var text = '';
+                if (captions[slideIndex-1] && captions[slideIndex-1].textContent) {
+                    text = captions[slideIndex-1].textContent;
+                } else if (dots[slideIndex-1]) {
+                    text = dots[slideIndex-1].getAttribute('data-caption') || '';
+                }
+                captionText.innerHTML = text;
             }
 
         }
@@ -346,7 +351,6 @@
 		});
 
     </script>
-
 
 
 

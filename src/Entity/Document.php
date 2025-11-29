@@ -70,7 +70,7 @@ class Document
         max: 255,
         maxMessage: 'Le nom du fichier ne peut pas dépasser {{ limit }} caractères.'
     )]
-    private string $fileName;
+    private ?string $fileName = null;
 
     // ────────────────────────────────────────
     // Virtual Upload Field (VichUploader)
@@ -175,12 +175,12 @@ class Document
         return $this;
     }
 
-    public function getFileName(): string
+    public function getFileName(): ?string
     {
         return $this->fileName;
     }
 
-    public function setFileName(string $fileName): self
+    public function setFileName(?string $fileName): self
     {
         $this->fileName = $fileName;
         return $this;

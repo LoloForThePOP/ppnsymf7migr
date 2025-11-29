@@ -319,6 +319,20 @@
 
 
 
+	{# Image Zoom Only On Large Screens #}
+
+	<script>
+
+		if (!tinyScreen)
+		{		
+			var head = document.getElementsByTagName('head')[0];
+			var js = document.createElement("script");
+			js.type = "text/javascript";
+			js.src = "/js/image_zoom.js";
+			head.appendChild(js);
+		}
+	
+	</script>
 
 
 

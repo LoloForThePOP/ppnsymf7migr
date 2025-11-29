@@ -79,7 +79,7 @@
     text-align: center;
     background-color: rgba(160, 160, 160, 0.3);
 
-    z-index: 5;
+    z-index: 30; /* keep above coverable links */
 }
 
 /* Position the "previous button" to the left */
@@ -117,6 +117,15 @@
     background-color: rgba(0, 0, 0, 0.8);
 }
 
+.nav-buttons {
+    pointer-events: none;
+}
+
+.nav-buttons .prev,
+.nav-buttons .next {
+    pointer-events: auto;
+}
+
 
 /* Container for Captions */
 
@@ -137,18 +146,10 @@
 
 
 .caption-container span {
-
     width: 100%;
-
-    text-align: center  ;
+    text-align: center;
     margin-bottom: 0;
     padding: 0 8%;
-}
-
-.caption {
-
-    display: none; /* Avoid loading visual glitch */
-
 }
 
 
