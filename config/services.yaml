@@ -18,7 +18,7 @@ parameters:
     app.scraper.model: 'gpt-4o-mini' # use a stronger model to reduce hallucinations
     app.scraper.creator_id: 91         # ID du compte "bot" (définir ici)
     app.scraper.creator_username: ProjectPresenter   # ou username du compte "bot" (optionnel)
-    app.normalize.prompt_path: '%kernel.project_dir%/prompts/normalize_project_fr.txt'
+    app.normalize_text.prompt_path: '%kernel.project_dir%/prompts/normalize_project_from_text.txt'
     app.normalize_html.prompt_path: '%kernel.project_dir%/prompts/normalize_project_from_html.txt'
 
     
@@ -30,7 +30,7 @@ services:
         bind:
             $defaultCreatorId: '%app.scraper.creator_id%'
             $defaultCreatorUsername: '%app.scraper.creator_username%'
-            $appNormalizePromptPath: '%app.normalize.prompt_path%'
+            $appNormalizeTextPromptPath: '%app.normalize_text.prompt_path%'
             $appNormalizeHtmlPromptPath: '%app.normalize_html.prompt_path%'
             $appScraperModel: '%app.scraper.model%'
 

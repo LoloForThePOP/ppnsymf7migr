@@ -130,7 +130,7 @@ function renderStatuses(newStatuses, newRemarks) {
         } else {
             activeItems.forEach(item => {
                 const pill = $('<span>', {
-                    class: 'status-pill-view px-3 py-2 rounded-pill text-dark fw-semibold',
+                    class: 'status-pill-view',
                     'data-status': item.status,
                     title: item.title,
                     text: item.text,
@@ -148,6 +148,24 @@ function renderStatuses(newStatuses, newRemarks) {
         $remarkBox.text(newRemarks || '');
     }
 
+    // Update summary + toggle button
+    const showMore = activeItems.length > 1 || ((newRemarks || '').trim().length > 10);
+    const $summaryMain = $('.status-summary-main');
+    if ($summaryMain.length) {
+        if (activeItems.length > 0) {
+            const first = activeItems[0];
+            $summaryMain.html(
+                `<span class="status-pill-view" data-status="${first.status}" title="${first.title}" style="background-color:${first.color};">${first.text}</span>`
+            );
+        } else if ((newRemarks || '').trim().length > 0) {
+            const snippet = (newRemarks || '').slice(0, 30) + ((newRemarks || '').length > 30 ? '…' : '');
+            $summaryMain.html(`<span class="text-muted small">${snippet}</span>`);
+        } else {
+            $summaryMain.html('<span class="text-muted small">Aucun statut</span>');
+        }
+    }
+    $('.status-popover-btn').toggle(showMore);
+
     // Refresh popover content if present
     initStatusPopovers();
 }
@@ -158,23 +176,65 @@ function initStatusPopovers() {
         const btn = this;
         if (!(window.bootstrap && bootstrap.Popover)) return;
 
-        const contentHtml = document.querySelector('.project-statuses-view')?.outerHTML || '';
+        const view = document.querySelector('.status-full-view');
+        let contentHtml = '';
+        if (view) {
+            const clone = view.cloneNode(true);
+            clone.classList.remove('d-none');
+            $(clone).find('.status-popover-btn').remove();
+            contentHtml = clone.outerHTML;
+        }
         const existing = bootstrap.Popover.getInstance(btn);
         if (existing) {
             existing.dispose();
         }
-        new bootstrap.Popover(btn, {
+        const pop = new bootstrap.Popover(btn, {
             html: true,
             content: contentHtml,
             customClass: 'wide-popover',
-            trigger: 'focus',
+            trigger: 'manual',
             sanitize: false,
+        });
+
+        $(btn).off('click.statusPopover').on('click.statusPopover', function (e) {
+            e.preventDefault();
+            // hide other popovers
+            $('.status-popover-btn').not(btn).each(function () {
+                const inst = bootstrap.Popover.getInstance(this);
+                if (inst) inst.hide();
+            });
+
+            const instance = bootstrap.Popover.getInstance(btn);
+            if (!instance) return;
+            const tip = instance.getTipElement ? instance.getTipElement() : null;
+            const isShown = tip && tip.classList.contains('show');
+            if (isShown) {
+                instance.hide();
+            } else {
+                instance.show();
+            }
         });
     });
 }
 
+// Close popover when clicking outside
+$(document).on('click', function (e) {
+    const $trigger = $(e.target).closest('.status-popover-btn, .popover');
+    if (!$trigger.length) {
+        $('.status-popover-btn').each(function () {
+            const inst = bootstrap.Popover.getInstance(this);
+            if (inst) inst.hide();
+        });
+    }
+});
+
 // Initial wiring on page load
 $(document).ready(function () {
+    // Initialize summary from existing DOM data
+    const $first = $('.project-enumerated-statuses-view').first();
+    const initialStatuses = $first.length ? ($first.data('current-statuses') || []) : [];
+    const initialRemarks = $('.project-status-remarks-view .content').first().text() || '';
+    renderStatuses(initialStatuses, initialRemarks);
     initStatusPopovers();
 });
 

@@ -44,9 +44,13 @@
 
 .in-edition-mode #text_description {
 
+    display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
     padding-left: 0;
-
 }
+
 
 
 
@@ -322,6 +326,10 @@ textarea:focus, input:focus{
         padding: 0;
         border: none;
 
+    }
+
+    .tox-tinymce{
+        height: 300px !important;
     }
 
 }

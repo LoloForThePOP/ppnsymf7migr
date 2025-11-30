@@ -16,7 +16,7 @@ class ProjectNormalizeController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function __invoke(
         Request $request,
-        string $appNormalizePromptPath,
+        string $appNormalizeTextPromptPath,
         string $appScraperModel,
         NormalizedProjectPersister $persister,
         int $defaultCreatorId
@@ -29,7 +29,7 @@ class ProjectNormalizeController extends AbstractController
 
         if ($raw !== '' && $request->isMethod('POST')) {
             try {
-                $prompt = file_get_contents($appNormalizePromptPath);
+                $prompt = file_get_contents($appNormalizeTextPromptPath);
                 if ($prompt === false) {
                     throw new \RuntimeException('Prompt introuvable.');
                 }

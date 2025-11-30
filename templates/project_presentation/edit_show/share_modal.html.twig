@@ -1,0 +1,278 @@
+{% embed "utilities/modal_skeleton.html.twig" with {'modal_id': "pp-share", 'modal_size': "modal-lg modal-dialog-centered"} %}
+
+    {% block modalTitle %}
+
+        Partager cette présentation
+
+    {% endblock %}
+
+    {% block modalBody %}
+
+        <div class="share-whole-content">
+
+            <div class="row">
+
+                <div class="col-12 col-lg-7 px-0">
+
+                    <div class="text-container">
+
+                        <div>
+
+                            <h4 class="content-header">Pour faire connaître ce projet <br>utilisez un lien de partage direct</h4>
+
+                            <!-- AddToAny BEGIN -->
+
+                            <div class="a2a_kit a2a_kit_size_32 a2a_default_style d-flex justify-content-evenly mb-4">
+
+                                <a class="a2a_button_mastodon"></a>
+                                <a class="a2a_button_bluesky"></a>
+                                <a class="a2a_button_linkedin"></a>
+                                <a class="a2a_button_facebook"></a>
+                                <a class="a2a_button_whatsapp"></a>
+                                <a class="a2a_button_snapchat"></a>
+                                <a class="a2a_button_x"></a>
+                                <a class="a2a_button_email"></a>
+                                <a class="a2a_dd" href="https://www.addtoany.com/share"></a>
+
+                                <script>
+                                    var a2a_config = a2a_config || {};
+                                    a2a_config.locale = "fr";
+                                </script>
+
+                                <script async src="https://static.addtoany.com/menu/page.js"></script>
+
+                                
+                            </div>
+                            
+                            <!-- AddToAny END -->
+
+                            <p class="pt-2"><span class="text-success">Ou copiez son adresse et partagez-là 👇</span></p>
+
+                            {# "Copy link" do not work on mobile so we hide copyable textarea on mobile and we use a simple div instead
+
+                            to do: check on mobile if still relevant
+
+                            <div class="mb-3">{{ absolute_url(path('edit_show_project_presentation', {"stringId": presentation.stringId})) }}</div> #}
+
+                            {# Filled copyable textarea #}
+                            {# to do: remove if not usefull: "displayed for > medium screens" #}
+
+                            <textarea id="presentationAbsoluteURL"
+                                      class=""
+                                      rows="1"
+                                      readonly
+                                      autocomplete="off"
+                                      aria-label="Adresse de la présentation">{{ absolute_url(path('edit_show_project_presentation', {"stringId": presentation.stringId})) }}</textarea>
+
+                            <div class="">
+                                    
+                                <button type="button" onclick="copyToClipboard('presentationAbsoluteURL', 'copyURLFeedbackBox', 'Adresse copiée ✅')" class="copyUrlButton btn fw-bold mt-2 mt-md-3 mb-2">👉 Copier cette adresse</button>
+
+                                <span id="copyURLFeedbackBox" class="d-block d-md-inline fw-bold"></span>
+
+                            </div>
+
+                        </div>
+
+
+                        {# Edit StringId Button
+
+                            to do: re-enable if relevant
+
+                        {% if userPresenter and overallQualityAssessment > 1 %}
+
+                            <div class="pp-edition-mode mt-4">
+
+                                <a href="{{ path('edit_pp_string_id', {'stringId': presentation.stringId}) }}">
+
+                                    <button type="button" class="btn btn-light">
+
+                                        Modifier cette adresse
+
+                                    </button>
+
+                                </a>
+
+                            </div>
+                        
+                        {% endif %} #}
+
+                    </div>
+ 
+                </div>
+
+                <div class="col-12 col-lg-5 px-0">
+
+                    <div class="image-container">
+
+                        <img src="{{asset('share_object.svg', 'pp_consult')}}" alt="Un cercle de personnes en interactions" width="200">
+
+                    </div>
+
+                </div>
+
+            </div>
+            
+        </div>
+
+    {% endblock %}
+
+    {% block modalFooter %}{% endblock %}
+
+
+{% endembed %}
+
+
+<script>
+
+    function copyToClipboard(elementId, feedbackId, feedbackMessage) {
+
+        /* Get the text field */
+        var copyText = document.getElementById(elementId);
+    
+        /* Select the text field */
+        copyText.focus();
+        copyText.select();
+        copyText.setSelectionRange(0, copyText.value.length); /*For mobile devices*/
+
+        /* Copy the text inside the text field */
+        navigator.clipboard.writeText(copyText.value).catch(() => {
+            document.execCommand("copy");
+        });
+    
+        var feedback = document.getElementById(feedbackId);
+        feedback.innerHTML = feedbackMessage;   
+
+    } 
+
+</script>
+
+<style>
+
+    .share-whole-content .content-header{
+        font-size: 1.25rem;
+	    color: #0d6efd !important;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .share-whole-content .text-container{
+
+        text-align: center;
+    }
+
+    #pp-share .modal-title{
+        text-align: center;
+        color: green;
+    }
+    
+    #pp-share textarea {
+
+        width: 100%;
+        resize: none;
+        margin-bottom: 10px;
+        border: none;
+        background-color: inherit;
+        font-weight: bold;
+        
+
+        
+    }
+
+
+    .share-whole-content{
+        padding:  0 8px;
+    }
+
+
+    .share-whole-content .image-container{
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        height:100%;
+
+        padding: 15px;
+
+        background-color: #f8f9fa;
+        border: 1px solid #eee;
+        border-radius: 240px;
+        
+    }
+
+    .share-whole-content .image-container img{
+
+        max-width: 100%; 
+        height: auto;
+    }
+
+    .share-whole-content .text-container{
+
+        height: 100%;
+        
+        padding: 15px 8px;
+
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 1.1;
+
+        background-color: rgb(255, 255, 255);
+
+    }
+
+    #presentationAbsoluteURL{ /* Center Text in Textarea */
+            
+        white-space: normal;
+        text-align: justify;
+        -moz-text-align-last: center; /* Firefox 12+ */
+        text-align-last: center;
+
+    }
+
+    .copyUrlButton{
+
+        background-color: #f9fffb;
+        border: 2px solid orange !important;
+        border-radius: 50px;
+
+    }
+
+
+
+    @media screen and (max-width: 768px) {
+
+        .share-whole-content .text-container{
+
+            font-size: 18px;
+
+        }
+
+    }
+
+
+    @media screen and (max-width: 580px) {
+
+            
+        .share-whole-content .content-header{
+            font-size: 1.15rem;
+        }
+
+        .share-whole-content .text-container{
+
+            text-align: center;
+            font-size: 15px;
+
+        }
+
+            
+        .share-whole-content .image-container img{
+
+            width: 148px;
+
+        }
+
+    }
+
+
+</style>

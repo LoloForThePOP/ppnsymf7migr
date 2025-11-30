@@ -118,34 +118,13 @@
     {% set statusesCatalog = constant('App\\\Enum\\\ProjectStatuses::CATALOG') %}
 
 
-    {% set pageInfo %}
-
-         <li class="mb-1" >
-                                    
-            Page créée le {{createdAt}}.
-        
-        </li>
-
-        <li class="mb-1" >
-            
-            Par {{creator}}.
-        
-        </li>
-
-        <li class="" >
-            
-            <p class="text-muted mb-1">Propon souhaite vous fournir une information fiable, mais ne peut garantir l'exactitude ainsi que la complétude des informations présentées par ses utilisateurs.</p>
-        
-        </li>
-                            
-        
-    {% endset %}
-
-
     {% set countComments = presentation.comments | length %}
 
 
     {% set likesCount = presentation.likes | length %}
+
+
+    {% include 'project_presentation/edit_show/share_modal.html.twig' %}
     
 
     <div class="pp-container {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}} container">

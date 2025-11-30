@@ -1,6 +1,6 @@
 {# Status pills macro #}
 {% macro pill(item) %}
-    <span class="status-pill-view px-3 py-2 rounded-pill text-dark fw-semibold"
+    <span class="status-pill-view"
           data-status="{{ item.uniqueName }}"
           data-text="{{ item.short_description_fr }}"
           style="background-color: {{ item.bg_color }};"
@@ -11,12 +11,32 @@
 
 {% import _self as pills %}
 
-{# Project statuses view (a collection of enumerated status pills + remarks) #}
-<div class="project-statuses-view">
+{% set items = presentation.getEnumStatusItems() %}
+{% set remarks = presentation.statusRemarks|default('') %}
+{% set showMore = (items|length > 1) or (remarks|length > 10) %}
+
+<div class="status-summary d-flex align-items-center gap-2 flex-wrap">
+    <span class="status-summary-main">
+        {% if items|length > 0 %}
+            {{ pills.pill(items|first) }}
+        {% elseif remarks %}
+            <span class="text-muted small">{{ remarks|slice(0, 30) ~ (remarks|length > 30 ? '…' : '') }}</span>
+        {% else %}
+            <span class="text-muted small">Aucun statut</span>
+        {% endif %}
+    </span>
+
+    <button type="button" class="status-popover-btn" {% if not showMore %}style="display:none"{% endif %}>
+        Afficher +
+    </button>
+</div>
+
+{# Hidden full view used by popover #}
+<div class="project-statuses-view status-full-view d-none">
     <div class="project-enumerated-statuses-view d-flex flex-wrap gap-2"
          data-current-statuses='{{ presentation.statuses | json_encode }}'
          data-catalog="{{ statusesCatalog | json_encode }}">
-        {% for item in presentation.getEnumStatusItems() %}
+        {% for item in items %}
             {{ pills.pill(item) }}
         {% endfor %}
     </div>
@@ -24,16 +44,12 @@
     <div class="project-status-remarks-view mt-3 w-100">
         <div class="content">{{ presentation.statusRemarks }}</div>
     </div>
-
-    {# Optional popover trigger to preview statuses #}
-    <button type="button" class="btn btn-outline-primary btn-sm mt-2 status-popover-btn">
-        Afficher +
-    </button>
-
 </div>
 
 
 <style>
+
+
     .project-status-remarks-view .content {
         white-space: pre-wrap;
         max-width: 390px;
@@ -66,6 +82,13 @@
         transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
+    .status-pill-view {
+        padding: 5px 10px;
+        border-radius: 10px;
+    }
+
+
+
     .status-pill:hover {
         transform: translateY(-2px);
         box-shadow: 0 2px 6px rgba(0,0,0,0.12);
@@ -74,6 +97,16 @@
     .status-pill.active {
         outline: 2px solid #4b9c3f;
         font-weight: 600;
+    }
+
+    .status-popover-btn {
+        background: none;
+        border: 1px solid #c1c1c1;
+        color: #848484;
+        border-radius: 8px;
+        cursor: pointer;
+        padding: 0px 7px;
+        font-size: 0.85rem;
     }
 
     .wide-popover {
