@@ -125,20 +125,16 @@ function renderStatuses(newStatuses, newRemarks) {
     $containers.each(function () {
         const $container = $(this);
         $container.empty();
-        if (!activeItems.length) {
-            $container.append('<span class="text-muted">Aucun statut</span>');
-        } else {
-            activeItems.forEach(item => {
-                const pill = $('<span>', {
-                    class: 'status-pill-view',
-                    'data-status': item.status,
-                    title: item.title,
-                    text: item.text,
-                    css: { backgroundColor: item.color },
-                });
-                $container.append(pill);
+        activeItems.forEach(item => {
+            const pill = $('<span>', {
+                class: 'status-pill-view',
+                'data-status': item.status,
+                title: item.title,
+                text: item.text,
+                css: { backgroundColor: item.color },
             });
-        }
+            $container.append(pill);
+        });
     });
 
     const $remarkBox = $('.project-status-remarks-view .content');
@@ -161,7 +157,7 @@ function renderStatuses(newStatuses, newRemarks) {
             const snippet = (newRemarks || '').slice(0, 30) + ((newRemarks || '').length > 30 ? '…' : '');
             $summaryMain.html(`<span class="text-muted small">${snippet}</span>`);
         } else {
-            $summaryMain.html('<span class="text-muted small">Aucun statut</span>');
+            $summaryMain.empty();
         }
     }
     $('.status-popover-btn').toggle(showMore);

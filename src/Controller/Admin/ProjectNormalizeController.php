@@ -12,6 +12,9 @@ use App\Service\NormalizedProjectPersister;
 
 class ProjectNormalizeController extends AbstractController
 {
+    /**
+     * Admin controller to normalize project data from raw text using AI.
+     */
     #[Route('/admin/project/normalize', name: 'admin_project_normalize', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function __invoke(

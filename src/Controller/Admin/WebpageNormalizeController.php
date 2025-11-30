@@ -11,6 +11,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+
+/**
+ * Admin controller to normalize project data from raw HTML content using AI.
+ */
 #[Route('/admin/project/normalize-html', name: 'admin_project_normalize_html', methods: ['GET', 'POST'])]
 #[IsGranted('ROLE_ADMIN')]
 class WebpageNormalizeController extends AbstractController

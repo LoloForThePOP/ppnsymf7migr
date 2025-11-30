@@ -23,7 +23,7 @@ class ScraperIngestionService
     ];
 
     public function __construct(
-        #[Autowire('%app.scraper.prompt_path%')]
+        #[Autowire('%app.scraping_from_llm_api.prompt_path%')]
         private readonly string $promptPath,
         #[Autowire('%app.scraper.model%')]
         private readonly string $model,

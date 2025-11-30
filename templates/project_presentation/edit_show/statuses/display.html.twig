@@ -21,8 +21,6 @@
             {{ pills.pill(items|first) }}
         {% elseif remarks %}
             <span class="text-muted small">{{ remarks|slice(0, 30) ~ (remarks|length > 30 ? '…' : '') }}</span>
-        {% else %}
-            <span class="text-muted small">Aucun statut</span>
         {% endif %}
     </span>
 

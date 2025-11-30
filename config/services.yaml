@@ -14,7 +14,7 @@ parameters:
     app.email.contact: "contact@propon.org"
     # not implemented yet: app.email.support: "support@propon.org"
     # not implemented yet: app.email.newsletter: newsletter@propon.org
-    app.scraper.prompt_path: '%kernel.project_dir%/prompts/scraper_projets_fr_mvp.txt'
+    app.scraping_from_llm_api.prompt_path: '%kernel.project_dir%/prompts/scraping_from_llm_api_query.txt'
     app.scraper.model: 'gpt-4o-mini' # use a stronger model to reduce hallucinations
     app.scraper.creator_id: 91         # ID du compte "bot" (définir ici)
     app.scraper.creator_username: ProjectPresenter   # ou username du compte "bot" (optionnel)
