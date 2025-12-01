@@ -1,0 +1,360 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Propon Manifesto{% endblock %}
+
+{% block headTag %}
+
+    <meta name="description" content="Nous sommes engagés vers un monde meilleur. En présentant les projets, on espère souhaite favoriser leur réalisation. Découvrez comment !">
+
+{% endblock %}
+
+
+{% block body %}
+
+    <div class="page-container static-content container px-0 col-md-11 col-lg-7">
+ 
+        <div class="title-container">
+
+            <h1 class="page-title fw-bold"><span class="d-lg-none me-2">🧭</span><span class="d-none d-md-inline">-</span> Rejoignez-Nous <span class="d-none d-md-inline">-</span></h1>
+
+        </div>
+
+        <style>
+
+            .title-container {
+                display: none;
+                text-align: center;
+                max-width: 760px;
+                width: 100%;
+                box-sizing: border-box;
+                padding: 30px 20px ;
+                z-index: 1;
+                margin-bottom: 50px;
+            }
+                
+            .page-title{
+
+                font-size: 45px;
+                color: rgb(61, 72, 138);
+                display:inline-block;
+                position: relative;
+
+            }
+
+            .page-title::before {
+                content: '';
+                position: absolute;
+                background-color: #40814d;
+                width: 100%;
+                height: 6px;
+                bottom: 70px;
+                left: 0;
+                right: 0;
+                border-radius: 50px;
+            }
+
+            .page-title::after {
+                content: '';
+                position: absolute;
+                background-color: #40814d;
+                width: 100%;
+                height: 6px;
+                bottom: -25px;
+                left: 0;
+                right: 0;
+                border-radius: 50px;
+            }
+
+            @media (max-width: 768px) {
+
+                .title-container {
+
+                    display: inline-block;
+                    padding: 14px 0px;
+                    margin-bottom: 0px;
+                }
+
+
+                .page-title{
+
+                    font-size: 24px;
+                    margin-bottom: 0;
+
+                        
+                }
+                    
+                .page-title::before, .page-title::after {
+                    display: none;
+                }
+    
+            }
+
+        </style>
+        
+        <section class="dl-blurbs">
+
+            <dl>
+
+                <dt>🤚 Engagés</dt>
+
+                    <dd>Propon est une <b>initiative ouverte et gratuite</b>. Son objectif est d'avoir un <b>impact positif</b> sur la société et notre environnement.</dd>
+
+                <dt>👉 Agir</dt>
+
+                    <dd>Les projets sont déterminants pour <b>lutter contre les défis majeurs qui nous concernent tous</b>.</dd>
+
+
+                <dt>⚡️ Accélérer</dt>
+
+                    <dd>En présentant vos projets et vos besoins, <b>on améliore leur découverte et vos chances de trouver des participants</b>.</dd>
+                
+                <dt>💪 Ensemble</dt>
+
+                    <dd>Les projets de toutes tailles sont <b>les briques des plus grands projets</b>. Chaque projet réussi, c’est potentiellement <b>des centaines d’autres qui progressent</b>.</dd>
+
+            </dl>
+
+
+        </section>
+
+        <section>
+
+            <h2 class="text-center fw-bold mb-5">⏱️ Et Maintenant ?</h2>
+
+            <ul class="horizontal-list">
+
+                {# Use search engine to find a project #}
+
+                 <a href="#" class="js-enter-search-experience">
+                     
+                    <li class="now-action-item">
+
+                        <img id="search_icon_small_screens" class="cta-item-img" src="{{ asset('search.svg', 'misc')}}" alt="search icon" style="height:40px; filter: invert(78%) sepia(3%) saturate(6150%) hue-rotate(163deg) brightness(85%) contrast(92%);">
+
+                        <div class="cta-item-text">Trouver un Projet</div>
+                    
+                    </li>
+                
+                </a>
+
+                <script>
+
+                    $('.js-enter-search-experience')
+                        .click(function() {
+
+                            $(".search-experience-container").show();
+                        
+                        });
+
+                </script>
+            
+                <a href="{{ path ('create_project_presentation') }}">
+                    
+                    <li class="now-action-item">
+
+                        <img class="cta-item-img" src="{{ asset('add_presentation.svg', 'misc')}}" height="34"  alt="bucket with a plus icon">
+
+                        <div class="cta-item-text">Présenter votre projet gratuitement</div>
+
+                    </li>
+                
+                </a>
+
+                <a href="{{ asset('pdf/project-of-projects-manifesto-fr.pdf', 'static')}}" target="_blank" rel="noopener noreferrer">
+
+                    <li class="now-action-item">
+
+                        <img id="search_icon_small_screens" class="cta-item-img" src="{{ asset('pdf-file.png', 'misc')}}" alt="pdf file icon" style="height:50px;">
+
+                        <div class="cta-item-text">Le Manifeste du<br>Projet des Projets</br>(version longue)</div>
+                    
+                    </li>
+
+                </a>
+
+                
+            </ul>
+
+            <style>
+
+                .now-action-item {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px 28px;
+                    border: 1px solid #c2c4e3;
+                    height: 167px;
+                    border-radius: 5px;
+                }
+
+                .now-action-item:hover {
+                    background-color: #ecf2f9;
+                }
+
+
+                .cta-item-img{
+                    margin-bottom: 20px;
+                }
+
+                .cta-item-text{
+                    text-align: center;
+                    font-size: 1.15em;
+                    font-weight: bold;
+                }
+
+                
+        /* Footer Horizontal List */
+
+
+
+            .horizontal-list {
+                display: flex;
+                -moz-box-pack: justify;
+                justify-content: space-between;
+                flex-direction: column;
+                -moz-box-align: center;
+                align-items: center;
+                list-style: none;
+                margin: 0px;
+                padding: 0px;
+            }
+
+            
+            .horizontal-list a {
+                
+                color: #364e6c;
+            }
+
+                
+            @media (min-width: 780px) {
+
+                .horizontal-list a {
+
+                    width: 29%;
+                    margin-bottom: 24px;  
+
+                }
+
+                .horizontal-list {
+                    flex-direction: row;
+                }
+                
+            }
+                
+            @media (max-width: 768px) {
+
+                section h1{
+                    text-align: center;
+                }
+
+
+                .horizontal-list a {
+
+                    width: 90%;
+                    margin-bottom: 24px;  
+
+                }
+                
+            }
+
+            </style>
+
+        </section>
+
+    </div>
+
+
+    <style>
+
+        /* Thanks to Dianna Chang : https://codepen.io/girlgeek/pen/dyOjrJE */
+
+
+        body {
+            font-size: 0.875em;
+            color: #444444;
+            line-height: 1.5;
+        }
+
+
+        .dl-blurbs {
+            display: grid;
+        }
+
+        @media (min-width: 768px) {
+
+            .dl-blurbs {
+                grid-template-columns: repeat(1, 1fr);
+                gap: 2vw;
+            }
+
+        }
+
+        /* LIST */
+        dl {
+            counter-reset: count;
+            background: linear-gradient(90deg, rgba(80, 82, 87, 0.04) 20%, rgba(255, 255, 255, 0) 0%);
+            padding-left: 4vw;
+            padding-right: 4vw;
+            margin: 0;
+            margin-bottom: 10vh;
+            border-radius: 15px;
+        }
+
+        @media (min-width: 1024px) {
+            dl {
+                padding-top: 3vw;
+                padding-bottom: 3vw;
+            }
+        }
+
+        @media (min-width: 768px) {
+
+            dl {
+                padding-left: 2vw;
+            }
+
+        }
+
+        @media (max-width: 1000px) {
+            
+            dl {
+                padding-top: 27px;
+                margin-bottom: 37px;
+            }
+
+           
+            dt {
+
+                font-size: 1.5em !important;
+            }
+
+        }
+        
+
+        dt {
+
+            counter-increment: count;
+            color: #40814d;
+            font-family: "Montserrat", sans-serif;
+            font-size: 37px;
+            text-transform: uppercase;
+        }
+
+        dt::before {
+            content: counter(count, decimal-leading-zero) ".";
+            color: #898e00;
+            margin-left: -1vw;
+            padding-right: 12px;
+        }
+
+        dd {
+            margin-left: 5vw;
+            margin-bottom: 6vh;
+            font-size: 1.15rem;
+        }
+
+
+    </style>
+
+{% endblock %}

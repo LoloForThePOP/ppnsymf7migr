@@ -8,7 +8,7 @@ parameters:
     app.image_upload_directory: 'public/media/uploads/articles/images/'
 
     # website contact phone 
-    app.contact_phone: "07 76 64 87 58"
+    app.phone.contact: "07 76 64 87 58"
 
     app.email.noreply: "noreply@propon.org"
     app.email.contact: "contact@propon.org"

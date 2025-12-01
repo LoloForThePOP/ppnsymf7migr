@@ -11,17 +11,13 @@
 
 {% block body %}
     <div class="container my-5">
-    {% if is_granted('ROLE_ADMIN') %}
-        <div class="mb-3">
-            <a class="btn btn-outline-primary btn-sm" href="{{ path('admin_project_normalize') }}">Normaliser un projet (admin)</a>
-            <a class="btn btn-outline-primary btn-sm" href="{{ path('admin_project_normalize_html') }}">Normaliser depuis HTML (admin)</a>
-        </div>
-    {% endif %}
+    
+        {{ project_collection('Derniers projets présentés', presentations, 'tab-result') }}
 
-    {{ project_collection('Derniers projets présentés', presentations, 'tab-result') }}
+        {% if presentations is empty %}
+            <p class="text-center text-muted mt-4">Aucun projet présenté pour le moment.</p>
+        {% endif %}
+        
+    </div>
 
-    {% if presentations is empty %}
-        <p class="text-center text-muted mt-4">Aucun projet présenté pour le moment.</p>
-    {% endif %}
-</div>
 {% endblock %}

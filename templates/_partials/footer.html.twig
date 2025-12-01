@@ -1,0 +1,139 @@
+<footer class="text-center text-lg-start">
+
+  <div class="container pb-2">
+
+    <div class="row">
+
+      {# First column (on large screens, these columns are stacked on tiny screens) #}
+
+      <div class="section col-md-4">
+
+        <h3 class="">Démarrer</h3>
+
+        <ul class="">
+
+          <li class=""><a href="{{path ('homepage')}}">Accueil</a></li>
+
+          <li><a href="{{path ('create_project_presentation')}}">Présenter un Projet</a></li>
+
+         {#  <li><a href="{{path ('edit_article')}}">Écrire un article</a></li> #}
+
+        </ul>
+
+      </div>
+
+      {# Second column
+
+      <div class="section col-md-3">
+
+        <h3 class="">Outils gratuits</h3>
+
+        <ul class="">
+
+          <li><a href="{{path ('ai_presentation_helper_origin')}}">Coach de présentation IA</a></li>
+
+          <li><a href="{{path ('ai_interview_helper_origin', {"context" : "coach"})}}">Coach entretien Projet IA</a></li>
+
+        </ul>
+
+      </div> #}
+
+      {# Second column #}
+
+      <div class="section col-md-4">
+
+        <h3>Le Projet des Projets</h3>
+
+        <ul>
+          <li><a href="{{ path('static_page', {'slug': 'join_us'}) }}">Rejoignez-nous</a></li>
+          <li><a href="{{ path('contact_us') }}">Contactez-nous</a></li>
+          <li><a href="{{ path('static_page', {'slug': 'short_manifesto'}) }}">Manifeste du Projet des Projets</a></li>
+          <li><a href="{{ path('static_page', {'slug': 'credits'}) }}">Crédits & Remerciements</a></li>
+
+        </ul>
+
+      </div>
+
+      {# Third column #}
+
+      <div class="section col-md-4">
+
+        <h3>Mentions légales</h3>
+
+        <ul>
+
+          <li><a href="{{ path('static_page', {'slug': 'terms'}) }}">Conditions d'utilisation</a></li>
+          <li><a href="{{ path('static_page', {'slug': 'privacy'}) }}">Politique de confidentialité</a></li>
+
+        </ul>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Copyright -->
+
+  <div class="text-center p-4" style="background-color: rgba(111, 166, 251, 0.07);">
+
+    © 2026 Copyright :
+
+    <span class="text-reset fw-bold">propon.org</span>
+
+  </div>
+
+</footer>
+
+{# Styles for website footer #}
+
+<style>
+    
+  footer {
+    background-color: white;
+    padding-top: 25px;
+    border-top: 2px solid rgb(230, 239, 244);
+  }
+
+  footer .section {
+
+    text-align: center;
+
+  }
+
+  footer h3 {
+
+    margin-bottom: 10px;
+    font-size: 20px;
+    font-weight: bold;
+
+  }
+
+  footer ul {
+
+    list-style-type: none;
+    padding-left: 0;
+    line-height: 1.7;
+
+  }
+
+  footer a {
+
+    text-decoration: none;
+    font-weight: bold;
+
+  }
+      
+  @media screen and (max-width: 768px) {
+
+    footer h3 {
+      font-size: 1.1em;
+    } 
+
+    footer .section {
+      font-size: 1em;
+    }
+
+  }
+
+</style>
