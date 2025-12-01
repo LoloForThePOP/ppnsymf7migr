@@ -17,6 +17,7 @@ class NormalizedProjectPersister
         private readonly EntityManagerInterface $em,
         private readonly CategoryRepository $categoryRepository,
         private readonly ImageDownloader $downloader,
+        private readonly CacheThumbnailService $thumbnailService,
     ) {
     }
 
@@ -67,6 +68,9 @@ class NormalizedProjectPersister
         // Q&A as other components
         $this->attachQuestions($pp, $payload['qa'] ?? []);
 
+        // Keywords
+        $this->attachKeywords($pp, $payload['keywords'] ?? []);
+
         // Slug/stringId if title present
         if ($pp->getTitle()) {
             $slugger = new AsciiSlugger();
@@ -75,6 +79,9 @@ class NormalizedProjectPersister
 
         $this->em->persist($pp);
         $this->em->flush();
+
+        // Generate/update thumbnail (uses slide, custom thumb, or logo fallback)
+        $this->thumbnailService->updateThumbnail($pp, true);
 
         return $pp;
     }
@@ -196,6 +203,16 @@ class NormalizedProjectPersister
             $oc->addComponent('questions_answers', $component);
         }
         $pp->setOtherComponents($oc);
+    }
+
+    private function attachKeywords(PPBase $pp, array $keywords): void
+    {
+        $keywords = array_slice(array_filter($keywords, fn($k) => is_string($k) && $k !== ''), 0, 5);
+        if (!$keywords) {
+            return;
+        }
+        // store as comma-separated string
+        $pp->setKeywords(implode(', ', $keywords));
     }
 
 }
