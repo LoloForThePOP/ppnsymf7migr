@@ -5,7 +5,10 @@
 
     {% block collapsibleMoreInfo %}{% endblock %}
 
-    {% block mainContent %}{% include "project_presentation/edit_show/business_cards/form.html.twig" %}{% endblock %}
+    {% block mainContent %}
+        {% set businessCardForm = form %}
+        {% include "project_presentation/edit_show/business_cards/form.html.twig" %}
+    {% endblock %}
 
     {% block seeResultAnchor %}businessCards{% endblock %}
 

@@ -13,103 +13,10 @@
             method: 'POST'
         }) }}
 
-        <div class="form-row">
-
-            <img class="contact-icon" src="{{ asset('title.svg', 'business_card')}}" alt="title icon">
-
-            {{ form_label(addBusinessCardForm.title) }}
-            {{ form_errors(addBusinessCardForm.title) }}
-            {{ form_widget(addBusinessCardForm.title) }}
-
-        </div>
-
-        <div class="form-row">
-
-            <img class="contact-icon" src="{{ asset('email.svg', 'business_card')}}" alt="email icon">
-
-            {{ form_label(addBusinessCardForm.email1) }}
-            {{ form_errors(addBusinessCardForm.email1) }}
-            {{ form_widget(addBusinessCardForm.email1) }}
-
-        </div>
-
-        <div class="form-row">
-
-            <img class="contact-icon" src="{{ asset('telephone.svg', 'business_card') }}">
-
-            {{ form_label(addBusinessCardForm.tel1) }}
-            {{ form_errors(addBusinessCardForm.tel1) }}
-            {{ form_widget(addBusinessCardForm.tel1) }}
-
-        </div>
-
-        <div class="form-row">
-
-            <img class="contact-icon" src="{{ asset('website.svg', 'business_card')}}" alt="website icon">
-
-            {{ form_label(addBusinessCardForm.website1) }}
-            {{ form_errors(addBusinessCardForm.website1) }}
-            {{ form_widget(addBusinessCardForm.website1) }}
-
-        </div>
-
-        <div class="form-row">
-
-            <img class="contact-icon" src="{{ asset('website.svg', 'business_card')}}" alt="website icon">
-
-            {{ form_label(addBusinessCardForm.website2) }}
-            {{ form_errors(addBusinessCardForm.website2) }}
-            {{ form_widget(addBusinessCardForm.website2) }}
-
-        </div>
-
-        <div class="form-row">
-
-            <img class="contact-icon" src="{{ asset('address.svg', 'business_card')}}" alt="address icon">
-
-            {{ form_label(addBusinessCardForm.postalMail) }}
-            {{ form_errors(addBusinessCardForm.postalMail) }}
-            {{ form_widget(addBusinessCardForm.postalMail) }}
-
-        </div>
-
-
-        <div class="form-row">
-
-            <img class="contact-icon" src="{{ asset('more_infos.svg', 'business_card')}}" alt="more informations icon">
-
-            {{ form_label(addBusinessCardForm.remarks) }}
-            {{ form_errors(addBusinessCardForm.remarks) }}
-            {{ form_widget(addBusinessCardForm.remarks) }}
-
-        </div>
-
+        {% set businessCardForm = addBusinessCardForm %}
+        {% include "project_presentation/edit_show/business_cards/form.html.twig" %}
 
         <style>
-
-
-
-            .form-row{
-                margin-bottom: 30px;
-            }
-
-            .contact-icon {
-
-                width: 20px;
-                height: 20px;
-
-                margin-right: 7px;
-                margin-bottom: 8px;
-            }
-            
-
-            .contact-icon-title {
-                width: 30px;
-                height: 32px;
-                margin-right: 12px;
-                margin-left: 3px;
-                margin-top: 1px;
-            }
 
             @media screen and (max-width: 580px) {
 
@@ -133,7 +40,6 @@
                 }
     
             }
-    
 
         </style>
 

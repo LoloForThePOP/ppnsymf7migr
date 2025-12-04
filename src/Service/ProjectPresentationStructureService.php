@@ -51,6 +51,7 @@ class ProjectPresentationStructureService
     private const OTHER_COMPONENT_SCOPES = [
         'websites' => 'websites',
         'questionsAnswers' => 'questions_answers',
+        'businessCards' => 'business_cards',
     ];
 
     public function __construct(

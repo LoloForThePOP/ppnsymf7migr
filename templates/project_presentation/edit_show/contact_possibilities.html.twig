@@ -38,7 +38,7 @@
         {% set bcs = presentation.getOtherComponents().getComponents('business_cards') %}
 
 
-        <div id="businessCards" class="js-elements-list pp-struct-content row m-0">
+        <div id="businessCards" class="js-elements-list pp-struct-content row m-0" data-structure="businessCards">
 
             {# Business Cards Display #}
 
@@ -52,15 +52,12 @@
 
                     {% if userPresenter %}
 
-                        {# Access card edition page on click
+                        {# Access card edition page on click #}
+                        <a href="{{ path('pp_update_business_card', {'stringId': presentation.stringId, 'id': bc.id}) }}" class="pp-edition-mode coverable-link"></a>
 
-                            to do: manage update bc
+                        {# Delete business card (Red Cross) button #}
 
-                        <a href="{{path("update_other_components_item", {'stringId': presentation.stringId, 'component_type': 'businessCards', 'item_id':bc.id})}}" class="pp-edition-mode coverable-link"></a> #}
-
-                        {# delete business card (Red Cross) button #}
-
-                        <button type="button" data-elements-type="businessCards" class="js-delete-element delete-button pp-edition-mode btn" data-id="{{bc.id}}">&times</button>
+                        <button type="button" data-structure="businessCards" class="js-delete-element delete-button pp-edition-mode btn" data-id="{{bc.id}}">&times</button>
                     
                     {% endif %}
 

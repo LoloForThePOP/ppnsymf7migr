@@ -1,0 +1,99 @@
+<div class="form-row">
+
+    <img class="contact-icon" src="{{ asset('title.svg', 'business_card')}}" alt="title icon">
+
+    {{ form_label(businessCardForm.title) }}
+    {{ form_errors(businessCardForm.title) }}
+    {{ form_widget(businessCardForm.title) }}
+
+</div>
+
+<div class="form-row">
+
+    <img class="contact-icon" src="{{ asset('email.svg', 'business_card')}}" alt="email icon">
+
+    {{ form_label(businessCardForm.email1) }}
+    {{ form_errors(businessCardForm.email1) }}
+    {{ form_widget(businessCardForm.email1) }}
+
+</div>
+
+<div class="form-row">
+
+    <img class="contact-icon" src="{{ asset('telephone.svg', 'business_card') }}">
+
+    {{ form_label(businessCardForm.tel1) }}
+    {{ form_errors(businessCardForm.tel1) }}
+    {{ form_widget(businessCardForm.tel1) }}
+
+</div>
+
+<div class="form-row">
+
+    <img class="contact-icon" src="{{ asset('website.svg', 'business_card')}}" alt="website icon">
+
+    {{ form_label(businessCardForm.website1) }}
+    {{ form_errors(businessCardForm.website1) }}
+    {{ form_widget(businessCardForm.website1) }}
+
+</div>
+
+<div class="form-row">
+
+    <img class="contact-icon" src="{{ asset('website.svg', 'business_card')}}" alt="website icon">
+
+    {{ form_label(businessCardForm.website2) }}
+    {{ form_errors(businessCardForm.website2) }}
+    {{ form_widget(businessCardForm.website2) }}
+
+</div>
+
+<div class="form-row">
+
+    <img class="contact-icon" src="{{ asset('address.svg', 'business_card')}}" alt="address icon">
+
+    {{ form_label(businessCardForm.postalMail) }}
+    {{ form_errors(businessCardForm.postalMail) }}
+    {{ form_widget(businessCardForm.postalMail) }}
+
+</div>
+
+
+<div class="form-row">
+
+    <img class="contact-icon" src="{{ asset('more_infos.svg', 'business_card')}}" alt="more informations icon">
+
+    {{ form_label(businessCardForm.remarks) }}
+    {{ form_errors(businessCardForm.remarks) }}
+    {{ form_widget(businessCardForm.remarks) }}
+
+</div>
+
+
+
+
+<style>
+
+    .form-row{
+        margin-bottom: 30px;
+    }
+
+    .contact-icon {
+
+        width: 20px;
+        height: 20px;
+
+        margin-right: 7px;
+        margin-bottom: 8px;
+    }
+    
+
+    .contact-icon-title {
+        width: 30px;
+        height: 32px;
+        margin-right: 12px;
+        margin-left: 3px;
+        margin-top: 1px;
+    }
+
+</style>
