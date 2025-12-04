@@ -3,6 +3,7 @@
 namespace App\Controller\ProjectPresentation;
 
 use App\Entity\PPBase;
+use App\Form\ProjectPresentation\BusinessCardType;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\ProjectPresentation\LogoType;
 use App\Form\ProjectPresentation\WebsiteType;
@@ -48,6 +49,7 @@ class EditShowController extends AbstractController
                 ['validation_groups' => ['CategoriesKeywords']]
             );
             $addDocumentForm = $this->createForm(DocumentType::class);
+            $addBusinessCardForm = $this->createForm(BusinessCardType::class);
            
             return $this->render('project_presentation/edit_show/origin.html.twig', [
                 'presentation' => $presentation,
@@ -59,6 +61,7 @@ class EditShowController extends AbstractController
                 'textDescriptionForm' => $textDescriptionForm->createView(),
                 'categoriesKeywordsForm' => $categoriesKeywordsForm->createView(),
                 'addDocumentForm' => $addDocumentForm->createView(),
+                'addBusinessCardForm' => $addBusinessCardForm->createView(),
 
             ]);
 

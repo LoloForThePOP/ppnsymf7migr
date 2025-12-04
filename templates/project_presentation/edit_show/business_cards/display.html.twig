@@ -1,0 +1,235 @@
+{# When in edition mode context, links are removed #}
+
+{% set editionMode = false %}
+
+{% if context is defined and context == "editionMode" %}
+
+    {% set editionMode = true %}
+
+{% endif %}
+
+
+<!-- Contact Name or Title -->
+
+{% if bc.title is not empty %}
+    
+    <h5 class="contactCardTitle">{{bc.title}}</h5>
+
+{% endif %}
+
+<div class="bc-content-wrapper">
+
+    <!-- Contact Email -->
+
+    {% if ( bc.email1 is not null ) or ( bc.email2 is defined and bc.email2 is not null ) %}
+
+        <div class="d-flex mb-2">
+
+            {# Email #}
+
+            <div class="d-inline-block">
+                <img class="contact-card-icon" src="{{ asset('email.svg', 'business_card')}}" height="32" width="32" alt="email icon">
+            </div>
+
+            <div class="d-inline-block ps-1">
+
+                <style>
+                                        
+                    .cryptedmail:after {
+
+                        content: attr(data-name) "@" attr(data-domaintld); 
+                    }
+
+                </style>
+
+
+                {% if bc.email1 is not null %}
+
+                    {% if not editionMode %}
+                    
+                        <a href="#" class="cryptedmail text-decoration-none text-body" 
+                        data-name="{{ bc.email1|split('@')[0] }}"
+                        data-domaintld="{{ bc.email1|split('@')[1] }}"
+                        onclick="window.location.href = 'mailto:' + this.dataset.name + '@' + this.dataset.domaintld; return false;">
+                        </a>
+
+                    {% else %}
+                        
+                        {{bc.email1}}
+
+                    {% endif %}
+
+                {% endif %}
+
+                
+                {% if bc.email2 is defined and bc.email2 is not null %}
+
+                    {% if not editionMode %}
+
+                        <a href="#" class="cryptedmail text-decoration-none text-body" 
+                            data-name="{{ bc.email2|split('@')[0] }}"
+                            data-domaintld="{{ conbctact.email2|split('@')[1] }}"
+                            onclick="window.location.href = 'mailto:' + this.dataset.name + '@' + this.dataset.domaintld; return false;">
+                        </a>
+
+                    {% else %}
+                        
+                        {{bc.email2}}
+
+                    {% endif %}
+
+                {% endif %}
+
+
+            </div>
+
+
+        </div>
+
+
+    {% endif %}
+
+    <!-- Contact Telephone(s) -->
+
+    {% if ( bc.tel1 is defined and bc.tel1 is not null ) or ( bc.tel2 is defined and bc.tel2 is not null ) %}
+
+        <div class="d-flex mb-2"> 
+
+            <div class="d-inline-block">
+                <img class="contact-card-icon" src="{{ asset('telephone.svg', 'business_card') }}" height="27" width="27" alt="telephone icon">
+            </div>
+
+            <div class="d-inline-block ps-1">
+
+                {% if bc.tel1 is defined and bc.tel1 is not null %}
+
+                    {% if not editionMode %}
+                
+                        <a class="text-decoration-none text-body" href="tel:{{bc.tel1}}">
+                            
+                            {{bc.tel1}}
+                        
+                        </a>
+                        
+                    {% else %}
+
+                        {{bc.tel1}}
+                    
+                    {% endif %}
+                    
+                    <br>
+
+                {% endif %}
+                
+                {% if bc.tel2 is defined and bc.tel2 is not null %}
+
+                    {% if not editionMode %}
+            
+                        <a class="text-decoration-none text-body" href="tel:{{bc.tel2}}">
+                            
+                            {{bc.tel2}}
+
+                        </a>
+
+                    {% else %}
+                        
+                        {{bc.tel2}}
+
+                    {% endif %}
+
+                {% endif %}
+            
+            </div>
+        
+        </div>
+
+    {% endif %}
+
+
+    <!-- Contact Websites -->
+
+    {% if bc.website1 is not null %}
+
+        <div class="d-flex mb-2">
+
+            <div class="d-inline-block">
+                <img class="contact-card-icon" src="{{ asset('website.svg', 'business_card')}}" height="27" width="27" alt="website icon">
+            </div>
+
+            <div class="d-inline-block ps-1">
+
+                {# Websites with potential troncature #}
+
+                {% if not editionMode %}
+                
+                    <a class="text-decoration-none text-body"
+                    href="{{bc.website1}}" target="_blank">
+
+                {% endif %}
+                
+                    {{bc.website1 | slice (0,55)}}
+
+                    {% if bc.website1 | length > 55 %}
+                        ...
+                    {% endif %}
+
+                {% if not editionMode %}
+
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+    <!-- Contact Postal Mail -->
+
+    {% if bc.postalMail is not null %}
+
+        <div class="d-flex mb-2">
+        
+            <div class="d-inline-block">
+
+                <img class="contact-card-icon" src="{{ asset('address.svg', 'business_card')}}" height="27" width="27" alt="address icon">
+            
+            </div> 
+        
+            <div class="d-inline-block ps-1">
+            
+                {{ bc.postalMail | nl2br }}
+                
+            </div>
+            
+        </div>
+
+    {% endif %}
+
+
+    <!-- More Informations & Remarks -->
+
+    {% if bc.remarks is not null %}
+
+        <div class="mb-2"> 
+                
+            <div class="fw-bold mb-2">
+            
+            Info +
+                
+            </div>
+
+            <div class="ps-4 fw-bold">
+
+                {{bc.remarks | nl2br}}
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+</div>
+

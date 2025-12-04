@@ -1,0 +1,169 @@
+{% embed "utilities/modal_skeleton.html.twig" with {'modal_id': "add_business_card_form_modal", 'modal_size' : "modal-lg"} %}
+
+    {% block modalTitle %}
+    
+        🖐️ Comment vous contacter ?
+    
+    {% endblock %}
+        
+    {% block modalBody %}
+
+        {{ form_start(addBusinessCardForm, {
+            action: path('pp_add_business_card', { stringId: presentation.stringId }),
+            method: 'POST'
+        }) }}
+
+        <div class="form-row">
+
+            <img class="contact-icon" src="{{ asset('title.svg', 'business_card')}}" alt="title icon">
+
+            {{ form_label(addBusinessCardForm.title) }}
+            {{ form_errors(addBusinessCardForm.title) }}
+            {{ form_widget(addBusinessCardForm.title) }}
+
+        </div>
+
+        <div class="form-row">
+
+            <img class="contact-icon" src="{{ asset('email.svg', 'business_card')}}" alt="email icon">
+
+            {{ form_label(addBusinessCardForm.email1) }}
+            {{ form_errors(addBusinessCardForm.email1) }}
+            {{ form_widget(addBusinessCardForm.email1) }}
+
+        </div>
+
+        <div class="form-row">
+
+            <img class="contact-icon" src="{{ asset('telephone.svg', 'business_card') }}">
+
+            {{ form_label(addBusinessCardForm.tel1) }}
+            {{ form_errors(addBusinessCardForm.tel1) }}
+            {{ form_widget(addBusinessCardForm.tel1) }}
+
+        </div>
+
+        <div class="form-row">
+
+            <img class="contact-icon" src="{{ asset('website.svg', 'business_card')}}" alt="website icon">
+
+            {{ form_label(addBusinessCardForm.website1) }}
+            {{ form_errors(addBusinessCardForm.website1) }}
+            {{ form_widget(addBusinessCardForm.website1) }}
+
+        </div>
+
+        <div class="form-row">
+
+            <img class="contact-icon" src="{{ asset('website.svg', 'business_card')}}" alt="website icon">
+
+            {{ form_label(addBusinessCardForm.website2) }}
+            {{ form_errors(addBusinessCardForm.website2) }}
+            {{ form_widget(addBusinessCardForm.website2) }}
+
+        </div>
+
+        <div class="form-row">
+
+            <img class="contact-icon" src="{{ asset('address.svg', 'business_card')}}" alt="address icon">
+
+            {{ form_label(addBusinessCardForm.postalMail) }}
+            {{ form_errors(addBusinessCardForm.postalMail) }}
+            {{ form_widget(addBusinessCardForm.postalMail) }}
+
+        </div>
+
+
+        <div class="form-row">
+
+            <img class="contact-icon" src="{{ asset('more_infos.svg', 'business_card')}}" alt="more informations icon">
+
+            {{ form_label(addBusinessCardForm.remarks) }}
+            {{ form_errors(addBusinessCardForm.remarks) }}
+            {{ form_widget(addBusinessCardForm.remarks) }}
+
+        </div>
+
+
+        <style>
+
+
+
+            .form-row{
+                margin-bottom: 30px;
+            }
+
+            .contact-icon {
+
+                width: 20px;
+                height: 20px;
+
+                margin-right: 7px;
+                margin-bottom: 8px;
+            }
+            
+
+            .contact-icon-title {
+                width: 30px;
+                height: 32px;
+                margin-right: 12px;
+                margin-left: 3px;
+                margin-top: 1px;
+            }
+
+            @media screen and (max-width: 580px) {
+
+                .modal-body{
+                    padding: 10px 9px;
+                }
+
+                form[name="business_card"] .contact-icon {
+    
+                    margin-right: 5px;
+                    margin-bottom: 6px;
+    
+                }
+
+                form[name="business_card"] label {
+    
+                    display: inline;
+                    font-size: 17px !important;
+                    font-weight: normal !important;
+    
+                }
+    
+            }
+    
+
+        </style>
+
+    {% endblock %}
+
+    {% block footerButtons %}
+
+        <button type="submit" class="btn btn-validate">✔️Valider</button>
+
+        {{ form_end(addBusinessCardForm) }}
+
+    {% endblock %}
+
+
+    {% block formErrors %}
+        
+        {% if not addBusinessCardForm.vars.valid %}
+
+            <script>
+            
+                $(document).ready(function(){
+            
+                    $('#{{modal_id}}').modal('show');
+            
+                });
+            
+            </script>
+
+        {% endif %}
+    
+    {% endblock %}
+
+{% endembed %}

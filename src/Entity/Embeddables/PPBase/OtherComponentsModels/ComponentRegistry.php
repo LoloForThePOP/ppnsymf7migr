@@ -15,7 +15,7 @@ class ComponentRegistry
     private const MAP = [
         'websites' => WebsiteComponent::class,
         'questions_answers' => QuestionAnswerComponent::class,
-        //'BusinessCard' => BusinessCardComponent::class,
+        'business_cards' => BusinessCardComponent::class,
     ];
 
     public static function classFor(string $type): ?string

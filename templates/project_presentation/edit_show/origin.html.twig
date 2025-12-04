@@ -235,17 +235,75 @@
 
                 {% set countWebsites = presentation.getOtherComponents().getComponents('websites') | length %}
 
-                {% include "project_presentation/edit_show/websites/_add_form.html.twig" %}
+                {% include "project_presentation/edit_show/websites/add.html.twig" %}
 
                 <div class="col-lg-6 pp-struct-container-wrapper {% if countWebsites == 0 %} pp-edition-mode {% endif %}">
             
                     <div id="websites-struct-container" class="pp-struct-container col-12">
                     
-                        {% include 'project_presentation/edit_show/websites/_content.html.twig' %}
+                        {% include 'project_presentation/edit_show/websites/content.html.twig' %}
                             
                     </div>   
                 
                 </div>
+
+
+
+                
+
+
+                {# to do: drop or not: Old way reminder:
+                
+                    Contact Project Members : Business Cards & Private Message Button
+                    !!! Also contains "Send Private Message Button" & "Allow - Disallow PM Switcher"
+                
+                    {% if not presentation.isDeleted and (countBC > 0 or privateMessagesActive or userPresenter) %}
+                
+                 #}
+
+
+
+                {% include "project_presentation/edit_show/business_cards/add.html.twig" %}
+
+
+                
+
+                {% set countBC = presentation.getOtherComponents().getComponents('business_cards') | length %}
+
+
+                {% if countBC > 0 %}{% endif %}
+
+                    <div class="col-lg-6 pp-struct-container-wrapper">
+
+                    {# to do: drop or not: Old way reminder: in tag attribute
+                
+                       <div id="businessCards-struct-container" data-display="{{countBC > 0 or privateMessagesActive ? "true" : "false"}}" class="pp-struct-container col-12">
+                
+                    #}
+
+                        <div id="businessCards-struct-container" class="pp-struct-container col-12">
+
+                            {% include 'project_presentation/edit_show/contact_possibilities.html.twig' %}
+
+                        </div>    
+                    
+                    </div>
+
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             </div>
 

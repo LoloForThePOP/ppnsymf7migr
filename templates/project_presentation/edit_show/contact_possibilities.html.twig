@@ -1,0 +1,184 @@
+{% block stylesheet %}
+
+    <link href="/css/business_card.css" rel="stylesheet">
+
+{% endblock %}
+
+{% embed "/project_presentation/edit_show/skeletons/structure_content.html.twig" with {'iconName': "businessCard", 'title': "Contact",} %}
+
+    {% block editButtons %}
+
+        {# Add business card button (triggers a modal) #}
+
+        <button type="button" data-bs-toggle="modal" data-bs-target="#add_business_card_form_modal" class="pp-edition-mode btn-add-bc btn btn-validate btn-sm me-3">+ Ajouter</button>
+
+        <style>
+
+            .btn-add-bc{
+
+                border-radius: 57px;
+                border: 1px solid #79be81;
+
+            }
+        
+        </style>
+
+    {% endblock %}
+    
+    {% block deleteElementsButtons %}
+
+    {# Delete BS button is shown only if there is at least one BC #}
+
+        {% if countBC > 0 %} {{ parent() }} {% endif %}
+
+    {% endblock %}
+
+    {% block mainContent %}
+            
+        {% set bcs = presentation.getOtherComponents().getComponents('business_cards') %}
+
+
+        <div id="businessCards" class="js-elements-list pp-struct-content row m-0">
+
+            {# Business Cards Display #}
+
+            {% for bc in bcs %}
+
+                <div id="{{bc.id}}" class="business-card bc-outer js-sortable-element  edit-hoverable-item">
+
+                    <!-- Contact Card Content -->
+
+                    {% include 'project_presentation/edit_show/business_cards/display.html.twig'%}
+
+                    {% if userPresenter %}
+
+                        {# Access card edition page on click
+
+                            to do: manage update bc
+
+                        <a href="{{path("update_other_components_item", {'stringId': presentation.stringId, 'component_type': 'businessCards', 'item_id':bc.id})}}" class="pp-edition-mode coverable-link"></a> #}
+
+                        {# delete business card (Red Cross) button #}
+
+                        <button type="button" data-elements-type="businessCards" class="js-delete-element delete-button pp-edition-mode btn" data-id="{{bc.id}}">&times</button>
+                    
+                    {% endif %}
+
+                </div>
+                
+            {% endfor %}
+
+            {# To do: implement when relevant: Private Messages Button Display
+
+
+
+            {% if privateMessagesActive or userPresenter %}
+
+                <div id="createPrivateMessageCard" data-display="{{privateMessagesActive ? "true" : "false"}}" class="privateMessagesCard pp-consultation-mode disabled bc-outer d-flex align-items-center">
+
+                    <a href="{{path ('new_pp_conversation', {'stringId': stringId, 'context': presentation.goal})}}" class="text-decoration-none">
+
+                        Envoyer un message privé 
+                    
+                    </a>
+
+                </div>
+
+                {% if userPresenter %}
+
+                    <div id="managePrivateMessagesCard" class="privateMessagesCard pm-activation-box bc-outer pp-edition-mode disabled">
+
+                        <h6 class="" style="font-weight: bold; font-size: 19px; text-align:center; color: #263c7d">Activer les messages privés</h6>
+    
+                        <div class="d-flex justify-content-center">
+    
+                            <div>
+    
+                                <span class="">Non</span>
+                        
+                                <input id="pm-activation-switch" type="checkbox" class="toggle-switch"{{ privateMessagesActive ? ' checked ' }} /><label class="toggle-switch-label" for="pm-activation-switch">Activer les messages privés</label>
+                            
+                                <span class="ps-2">Oui</span>
+    
+                            </div>
+    
+    
+                        </div> 
+
+                    </div>
+                
+                {% endif %}
+
+
+            {% endif %}
+ #}
+        </div>
+
+                <style>
+
+                    #businessCards{
+
+                        display: flex;
+                        justify-content: center;
+                        padding-left: 0px; 
+
+                    }
+
+                    /* Private Messages Card "herites" from business_card.css */
+
+                    #createPrivateMessageCard a{
+                        display: flex;
+                        align-items:center; 
+                        justify-content:center; 
+                        text-align: center;
+                        height: 125px;
+                        font-weight: bold;
+                        font-size: 18px;
+                        width: 100%;
+                        background-color: rgb(245, 245, 252);
+                        color: rgb(25, 24, 16);
+                        border-radius: 4px;
+                        border: 1px solid #c3bff8;
+                        
+                    }
+
+
+                    #createPrivateMessageCard:hover{
+                        background-color: #f3f3fd;
+                    }
+
+                    .pm-1{
+                        background-color: rgb(227, 255, 227);
+                    }
+
+                    .pm-{
+                        background-color: rgb(251, 198, 198);
+                    }
+
+                    #managePrivateMessagesCard {
+                        height: 151px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: space-evenly;
+                        font-weight: bold;
+                        text-align: center;
+                        font-size: 18px;
+                    }
+
+
+                    @media screen and (max-width: 580px) {
+
+                        #createPrivateMessageCard a{
+                        
+                            border: none;
+                            
+                        }
+
+                    }
+
+                </style>
+            
+    {% endblock %}
+        
+{% endembed %}
