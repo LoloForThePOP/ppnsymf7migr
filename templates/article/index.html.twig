@@ -1,20 +1,91 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello ArticleController!{% endblock %}
+{% import "article/card.html.twig" as artCards %}
+
+{% block title %}Articles{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <div class="page-container">
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/home/laurent/ppnsymf7migr/src/Controller/ArticleController.php</code></li>
-        <li>Your template at <code>/home/laurent/ppnsymf7migr/templates/article/index.html.twig</code></li>
-    </ul>
-</div>
+        <h1 class="page-title text-center fw-bold">ARTICLES</h1>
+    
+        <div class="article-cards-container row row-cols-1 row-cols-md-4 g-4 px-md-4">
+        
+            {% for article in articles %}
+
+                {{ artCards.articleCards (article) }}
+  
+            {% endfor %}
+            
+        </div>
+
+        {% if is_granted('ROLE_ADMIN') %}
+            <div class="call-to-action-container">
+            
+                <a class="cta-btn" href="{{ path ('edit_article') }}"><div class="flip-horiz me-2 mb-2">✍️</div><div class=""> Écrire un article sur Propon</div></a>
+            
+            </div>
+        {% endif %}
+
+    </div>
+
+    
+      <style>
+
+        .page-title{
+            margin-bottom: 35px;
+        }
+        
+        .article-card{ /* Overides some macro styles */
+            margin-bottom: 20px;
+        }
+
+    
+        .call-to-action-container{
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .cta-btn{
+
+            display: inline-flex;
+            align-items: center;
+            padding: 0.2rem 1.15rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50px;
+            border: 1px solid black;
+            margin: auto;
+
+        }
+
+        @media screen and (max-width: 580px) {
+
+            .page-title{
+                margin-bottom: 25px;
+            }
+            
+            .article-cards-container {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+
+            .article-card{
+                margin-bottom: 0px;
+            }
+
+            
+            .cta-btn{
+
+                font-size: 1.2rem;
+
+            }
+
+        }
+
+      </style>
+
 {% endblock %}

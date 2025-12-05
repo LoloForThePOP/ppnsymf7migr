@@ -31,3 +31,33 @@ framework:
                 allowed_link_schemes: ['http', 'https', 'mailto']
                 allow_relative_links: true
                 drop_elements: ['script', 'style']
+
+            article_content:
+                allow_safe_elements: true
+                allow_elements:
+                    p: '*'
+                    br: '*'
+                    ul: '*'
+                    ol: '*'
+                    li: '*'
+                    blockquote: '*'
+                    strong: '*'
+                    em: '*'
+                    u: '*'
+                    img:
+                        - src
+                        - alt
+                        - title
+                allow_attributes:
+                    class:
+                        - p
+                        - span
+                        - ul
+                        - ol
+                        - li
+                force_attributes:
+                    a:
+                        rel: 'noreferrer noopener'
+                allowed_link_schemes: ['http', 'https', 'mailto']
+                allow_relative_links: true
+                drop_elements: ['script', 'style']

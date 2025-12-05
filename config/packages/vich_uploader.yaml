@@ -77,6 +77,7 @@ vich_uploader:
                     
             uri_prefix: /media/uploads/articles/thumbnails
             upload_destination: '%kernel.project_dir%/public/media/uploads/articles/thumbnails'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
             
             inject_on_load: true
             delete_on_update: true
