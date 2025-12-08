@@ -1,23 +1,108 @@
 {% extends 'base.html.twig' %}
 {% from 'project_presentation/cards/list.html.twig' import collection as project_collection %}
 
-{% block title %}Découvrir les projets{% endblock %}
+{% block title %}Présenter nos Projets{% endblock %}
 
 {% block stylesheets %}
+
     {{ parent() }}
     <link href="/css/project_card.css" rel="stylesheet">
     <link href="/css/titled_project_collection.css" rel="stylesheet">
+
+{% endblock %}
+
+
+{% block headTag %}
+
+  <meta name="description" content="Plateforme de présentation de projets prévus ou en cours. Présentez gratuitement votre projet ou explorez des projets qui vous intéresseraient.">
+
+  <meta name="keywords" content="présentation de projets, entraide">
+
+  {{ _self.openGraph('Ici on Présente nos Projets', 'Propon', app.request.uri, 'Présentez votre projet simplement et rendez-le plus visible; trouvez des contributeurs.', 'website', app.request.uri ~'public/media/static/images/propon_logo.svg') }}
+  
+  <link rel="canonical" href="https://www.propon.org/" />
+
+{% endblock %}
+
+
+{% block javascripts %}
+
+  <script src="/js/show_more_less_button.js"></script>
+
 {% endblock %}
 
 {% block body %}
-    <div class="container my-5">
-    
-        {{ project_collection('Derniers projets présentés', presentations, 'tab-result') }}
 
-        {% if presentations is empty %}
-            <p class="text-center text-muted mt-4">Aucun projet présenté pour le moment.</p>
-        {% endif %}
+
+    <div class="homepage-container page-container container-lg px-0 col-xxl-12">
+
+        <style>
         
+            .homepage-container{
+            padding-top: 38px;
+            }
+
+            @media screen and (max-width: 580px) {
+
+            .homepage-container{
+            padding-top: 24px;
+            }
+
+            }
+        
+        </style>
+
+        {# Case user logged in : displaying personalized content #}
+
+        {% if app.user %}
+
+        {# to do {% include "home/_connected_user_upper_display.html.twig" %} #}
+
+        {% endif %}
+
+
+        {# Case user not logged in : displaying homepage jumbotron #}
+
+        {% if not app.user %}
+
+        {# Explore Propon - Display some projects by categories (tabs navigation)
+
+        to do: implement if relevant but I think so :)
+
+        <div>{% include "home/_projects_by_categories_tabs.html.twig" %}</div>  #}
+
+        <div id="homepage-jumbotron-struct-container" class="container col-xxl-11 px-0 px-md-4 px-lg-4">
+
+            {% include "home/_jumbotron.html.twig" %}
+
+            <style>
+
+            @media screen and (min-width: 820px) {
+
+                #homepage-jumbotron-struct-container{
+                margin-top: 3rem;
+                margin-bottom: 6rem;
+                
+                }
+                
+            }
+
+            </style>
+
+        </div>
+
+        {% endif %}
+
+
+        <div class="container my-5">
+        
+            {{ project_collection('Derniers projets présentés', presentations, 'tab-result') }}
+            
+        </div>
+
+
+
+
     </div>
 
 {% endblock %}
