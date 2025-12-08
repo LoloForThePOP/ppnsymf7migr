@@ -1,0 +1,43 @@
+{# One-time hint to show the edit/consult toggle after onboarding #}
+{% if app.session.get('show_edit_toggle_hint') %}
+    {% do app.session.remove('show_edit_toggle_hint') %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('pp-switch-edit-consult-mode');
+            if (!btn || typeof bootstrap === 'undefined') return;
+            const pop = new bootstrap.Popover(btn, {
+                html: true,
+                trigger: 'manual',
+                placement: 'bottom',
+                customClass: 'pp-toggle-hint-popover',
+                content: '<div class="pp-toggle-hint-content">Important : cliquez ici pour basculer entre le mode consultation et le mode modification.</div>',
+            });
+            pop.show();
+
+            const dismiss = () => {
+                pop.hide();
+                btn.removeEventListener('click', dismiss);
+                document.removeEventListener('click', outsideHandler);
+            };
+
+            const outsideHandler = (e) => {
+                if (!btn.contains(e.target)) dismiss();
+            };
+
+            btn.addEventListener('click', dismiss);
+            document.addEventListener('click', outsideHandler);
+        });
+    </script>
+    <style>
+        .pp-toggle-hint-popover .popover-body {
+            padding: 10px 14px;
+            background: #0d6efd;
+            color: #fff;
+            font-weight: 700;
+            border-radius: 12px;
+        }
+        .pp-toggle-hint-content {
+            max-width: 240px;
+        }
+    </style>
+{% endif %}

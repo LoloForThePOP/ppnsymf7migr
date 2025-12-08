@@ -318,7 +318,7 @@
 
             {# Switch Between Edition Mode and Consultation Mode Button #}
 
-            <button id="pp-switch-edit-consult-mode" title="Switch between edition mode and consultation mode">
+            <button id="pp-switch-edit-consult-mode">
 
                 <img id="pp-consult-icon" class="pp-edition-mode" src="{{ asset('eye.svg', 'pp_wysiwyg')}}" height="30" width="30"  alt="eye icon">
 
@@ -340,6 +340,8 @@
             {% include 'project_presentation/edit_show/reorder_delete_elements.html.twig' %}
             {% include 'project_presentation/edit_show/wysiwyg.html.twig' %}
         {% endif %}
+
+        {% include 'project_presentation/edit_show/_partials/first_time_edit_toggle_hint.html.twig' %}
 
     </div>
     

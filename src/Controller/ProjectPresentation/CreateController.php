@@ -108,9 +108,12 @@ class CreateController extends AbstractController
 
             $this->addFlash('success fs-4', <<<HTML
                 ✅ Votre page de présentation est prête.<br>
-                Apportez-lui toutes les modifications que vous désirez.<br>
+                Explorez les possibilités et apportez des modifications qui vous intéressent.<br>
                 🙋 Si vous avez besoin d'aide, utilisez le bouton d'aide rapide en bas de page.
             HTML);
+
+            // show one-time hint on edit / consult toggle (first time after project presentation creation)
+            $request->getSession()->set('show_edit_toggle_hint', true);
 
             return $this->redirectToRoute('edit_show_project_presentation', [
                 'stringId' => $presentation->getStringId(),
@@ -142,6 +145,15 @@ class CreateController extends AbstractController
                 // Security: validate against allowed enumerated statuses
                 $allowed = ProjectStatuses::allKeys();
 
+                if (!$chosen) {
+                    $this->addFlash('warning', 'Merci de sélectionner un statut pour continuer.');
+
+                    return $this->redirectToRoute('create_project_presentation', [
+                        'stringId' => $presentation->getStringId(),
+                        'position' => $position,
+                    ]);
+                }
+
                 if (!in_array($chosen, $allowed, true)) {
                     throw $this->createAccessDeniedException('Invalid status submitted.');
                 }
@@ -152,11 +164,11 @@ class CreateController extends AbstractController
                 }
                 break;
 
-           case 'imageSlide':
+            case 'imageSlide':
                 /** @var Slide|null $slide */
                 $slide = $form->get('imageSlide')->getData();
 
-                if (!$slide) {
+                if (!$slide || !$slide->getImageFile()) {
                     break;
                 }
 

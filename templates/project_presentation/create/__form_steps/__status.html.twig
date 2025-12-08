@@ -59,6 +59,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const buttons = document.querySelectorAll('.status-choice-btn');
     const input = document.querySelector('#project_presentation_creation_initialStatus');// hidden field updated when user chooses a status
+    const form = document.querySelector('form[name="project_presentation_creation"]');
+    let warningEl = null;
 
     buttons.forEach(btn => {
 
@@ -74,6 +76,26 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
     });
+
+    // Prevent submit if no status selected
+    if (form && input) {
+        form.addEventListener('submit', function (e) {
+            if (!input.value) {
+                e.preventDefault();
+                // lazy create warning message
+                if (!warningEl) {
+                    warningEl = document.createElement('div');
+                    warningEl.className = 'alert alert-warning mt-3';
+                    warningEl.textContent = 'Merci de sélectionner un statut pour continuer.';
+                    form.querySelector('.action-buttons-container')?.insertAdjacentElement('beforebegin', warningEl);
+                }
+                warningEl.hidden = false;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (warningEl) {
+                warningEl.hidden = true;
+            }
+        });
+    }
 
 });
 </script>
