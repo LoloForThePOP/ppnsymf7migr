@@ -194,12 +194,14 @@
                 
                 </div>
 
+                {% set countDocuments = presentation.documents | length %}
+
 
                 {# Documents #}
 
                 {% include "project_presentation/edit_show/documents/add.html.twig" %}
                
-                <div class="col-lg-6 pp-struct-container-wrapper">
+                <div class="col-lg-6 pp-struct-container-wrapper {% if countDocuments == 0 %} pp-edition-mode {% endif %}">
 
                     <div id="documents-struct-container" class="pp-struct-container">
 
@@ -281,7 +283,7 @@
                 
                     #}
 
-                        <div id="businessCards-struct-container" class="pp-struct-container col-12">
+                        <div id="businessCards-struct-container" class="pp-struct-container col-12{% if countBC == 0 %} pp-edition-mode {% endif %}">
 
                             {% include 'project_presentation/edit_show/contact_possibilities.html.twig' %}
 
@@ -311,15 +313,20 @@
 
 
 
-        {# Switch Between Edition Mode and Consultation Mode Button #}
 
-        <button id="pp-switch-edit-consult-mode" title="Switch between edition mode and consultation mode">
+        {% if userPresenter %}
 
-            <img id="pp-consult-icon" class="pp-edition-mode" src="{{ asset('eye.svg', 'pp_wysiwyg')}}" height="30" width="30"  alt="eye icon">
+            {# Switch Between Edition Mode and Consultation Mode Button #}
 
-            <img id="pp-edit-icon" class="pp-consultation-mode" src="{{ asset('pen.svg', 'pp_wysiwyg')}}" height="30" width="30"  alt="pen icon">
+            <button id="pp-switch-edit-consult-mode" title="Switch between edition mode and consultation mode">
 
-        </button>
+                <img id="pp-consult-icon" class="pp-edition-mode" src="{{ asset('eye.svg', 'pp_wysiwyg')}}" height="30" width="30"  alt="eye icon">
+
+                <img id="pp-edit-icon" class="pp-consultation-mode" src="{{ asset('pen.svg', 'pp_wysiwyg')}}" height="30" width="30"  alt="pen icon">
+
+            </button>
+
+        {% endif %}
 
 
 

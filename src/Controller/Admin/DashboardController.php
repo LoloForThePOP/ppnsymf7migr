@@ -18,11 +18,7 @@ class DashboardController extends AbstractDashboardController
     #[Route('/admin', name: 'admin')]
     public function index(): Response
     {
-        $url = $this->container->get(AdminUrlGenerator::class)
-            ->setController(PPBaseCrudController::class)
-            ->generateUrl();
-
-        return $this->redirect($url);
+        return $this->redirectToRoute('admin_harvest');
     }
 
     public function configureDashboard(): Dashboard

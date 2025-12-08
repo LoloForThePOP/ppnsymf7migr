@@ -63,7 +63,10 @@ class NormalizedProjectPersister
         if ($logoUrl) {
             $this->attachLogo($pp, $logoUrl);
         }
+        
+        $this->attachVideos($pp, $payload['videos'] ?? []);
         $this->attachImages($pp, $imagesPayload, $logoUrl);
+        
 
         // Q&A as other components
         $this->attachQuestions($pp, $payload['qa'] ?? []);
@@ -96,6 +99,47 @@ class NormalizedProjectPersister
             $category = $this->categoryRepository->findOneBy(['uniqueName' => $cat]);
             if ($category instanceof Category) {
                 $pp->addCategory($category);
+            }
+        }
+    }
+
+    private function attachVideos(PPBase $pp, array $videos): void
+    {
+        $maxVideos = 3;
+        $count = 0;
+        foreach ($videos as $entry) {
+            $url = null;
+            $caption = null;
+
+            if (is_array($entry)) {
+                $url = $entry['url'] ?? null;
+                $caption = $entry['caption'] ?? null;
+            } else {
+                $url = $entry;
+            }
+
+            if (!is_string($url) || $url === '') {
+                continue;
+            }
+
+            if ($pp->getSlides()->count() >= 8) {
+                break;
+            }
+
+            $slide = new Slide();
+            $slide->setType(SlideType::YOUTUBE_VIDEO);
+            $slide->setYoutubeUrl($url);
+            $slide->setPosition($pp->getSlides()->count());
+            if (is_string($caption)) {
+                $caption = trim($caption);
+                $slide->setCaption($caption === '' ? null : $caption);
+            }
+            $slide->setProjectPresentation($pp);
+            $pp->addSlide($slide);
+
+            $count++;
+            if ($count >= $maxVideos) {
+                break;
             }
         }
     }
