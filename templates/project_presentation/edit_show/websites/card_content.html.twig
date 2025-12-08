@@ -61,9 +61,8 @@
 
             <div class="w-100">
                     
-                {# website description #}
-
-                <h4 class="websiteDescription" data-text="Titre (Ex: Site web officiel, compte Twitter, etc)" data-edit='{"entity": "PPBase", "id": "{{presentation.id}}",  "property": "websites", "subid": "{{website.id}}", "subproperty":"description"}'>{{website.description is defined ? website.description | first | capitalize ~ website.description [1:] : ""}}</h4>
+                {# website title #}
+                <h4 class="websiteDescription" data-text="Titre (Ex: Site web officiel, compte Twitter, etc)" data-edit='{"entity": "PPBase", "id": "{{presentation.id}}",  "property": "websites", "subid": "{{website.id}}", "subproperty":"title"}'>{{ website.title ?? '' }}</h4>
 
                 {# website url #}
 

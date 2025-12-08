@@ -7,6 +7,7 @@ use App\Entity\PPBase;
 use App\Entity\Slide;
 use App\Enum\SlideType;
 use App\Entity\Embeddables\PPBase\OtherComponentsModels\QuestionAnswerComponent;
+use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\String\Slugger\AsciiSlugger;
@@ -18,6 +19,7 @@ class NormalizedProjectPersister
         private readonly CategoryRepository $categoryRepository,
         private readonly ImageDownloader $downloader,
         private readonly CacheThumbnailService $thumbnailService,
+        private readonly WebsiteProcessingService $websiteProcessor,
     ) {
     }
 
@@ -66,6 +68,7 @@ class NormalizedProjectPersister
         
         $this->attachVideos($pp, $payload['videos'] ?? []);
         $this->attachImages($pp, $imagesPayload, $logoUrl);
+        $this->attachWebsites($pp, $payload['websites'] ?? []);
         
 
         // Q&A as other components
@@ -257,6 +260,29 @@ class NormalizedProjectPersister
         }
         // store as comma-separated string
         $pp->setKeywords(implode(', ', $keywords));
+    }
+
+    private function attachWebsites(PPBase $pp, array $websites): void
+    {
+        $oc = $pp->getOtherComponents();
+        foreach ($websites as $entry) {
+            if (!is_array($entry)) {
+                continue;
+            }
+            $url = $entry['url'] ?? null;
+            $title = $entry['title'] ?? null;
+            if (!is_string($url) || $url === '' || !is_string($title) || $title === '') {
+                continue;
+            }
+            $component = WebsiteComponent::createNew($title, $url);
+            try {
+                $component = $this->websiteProcessor->process($component);
+                $oc->addComponent('websites', $component);
+            } catch (\Throwable) {
+                continue;
+            }
+        }
+        $pp->setOtherComponents($oc);
     }
 
 }
