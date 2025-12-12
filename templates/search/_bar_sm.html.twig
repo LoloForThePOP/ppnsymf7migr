@@ -1,0 +1,124 @@
+{# Mobile search bar (tiny screens) + filters placeholder #}
+
+<div class="search-container-bar-sm unseen">
+
+  <div class="sm-search-back-icon-container">
+    <img class="back_from_search_sm_icon" src="{{ asset('back.svg', 'misc')}}" alt="Retour" style="width: 26px;">
+  </div>
+
+  <form id="search_sm" class="flex-grow-1 d-flex align-items-center">
+    <input id="navbar_sm_search_input" class="searchbox-input flex-grow-1" name="search" placeholder="Rechercher un Projet" autocomplete="off" autocorrect="off" spellcheck="false" type="text" dir="ltr" style="outline: currentcolor none medium;">
+    <button class="d-none" type="submit">ok</button>
+  </form>
+
+  <div class="js-reset-search-icon-container unseen">
+    <img class="js-reset-search-icon" src="{{ asset('close.svg', 'misc')}}" alt="clear search input" style="height:19px;">
+  </div>
+
+  <div class="search-filters-icon-container">
+    <img class="js-filter-search-panel panel-hidden" src="{{ asset('filters.svg', 'misc')}}" alt="open filters" style="height:21px; padding-right: 9px;">
+  </div>
+
+</div>
+
+<div id="navbar_sm_search_results" class="list-group position-fixed shadow-sm d-none" style="top:60px; left:0; right:0; z-index:2100; max-height: 70vh; overflow:auto;"></div>
+
+{# Filters panel (empty placeholder for now) #}
+<div id="navbar_sm_filters_panel" class="position-fixed bg-white shadow d-none" style="top:60px; left:0; right:0; z-index:2099; min-height: 180px; padding: 16px;">
+  {% include 'search/_filters_panel.html.twig' %}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const bar = document.querySelector('.search-container-bar-sm');
+    const input = document.getElementById('navbar_sm_search_input');
+    const back = document.querySelector('.back_from_search_sm_icon');
+    const icon = document.getElementById('search_icon_small_screens');
+    const results = document.getElementById('navbar_sm_search_results');
+    const resetIcon = document.querySelector('.js-reset-search-icon');
+    const resetContainer = document.querySelector('.js-reset-search-icon-container');
+    const filterIcon = document.querySelector('.js-filter-search-panel');
+    const filterPanel = document.getElementById('navbar_sm_filters_panel');
+
+    const showBar = () => {
+      bar?.classList.remove('unseen');
+      input?.focus();
+    };
+    const hideBar = () => {
+      bar?.classList.add('unseen');
+      results?.classList.add('d-none');
+      filterPanel?.classList.add('d-none');
+      if (input) input.value = '';
+      resetContainer?.classList.add('unseen');
+      window.scrollTo(0, 0);
+    };
+
+    const clearInput = () => {
+      if (input) input.value = '';
+      results?.classList.add('d-none');
+      resetContainer?.classList.add('unseen');
+    };
+
+    icon?.addEventListener('click', showBar);
+    back?.addEventListener('click', hideBar);
+    resetIcon?.addEventListener('click', clearInput);
+
+    filterIcon?.addEventListener('click', () => {
+      if (!filterPanel) return;
+      if (filterPanel.classList.contains('d-none')) {
+        filterPanel.classList.remove('d-none');
+        filterIcon.classList.remove('panel-hidden');
+      } else {
+        filterPanel.classList.add('d-none');
+        filterIcon.classList.add('panel-hidden');
+      }
+    });
+
+    if (window.ProjectSearch && typeof ProjectSearch.init === 'function') {
+      ProjectSearch.init({
+        inputSelector: '#navbar_sm_search_input',
+        resultsSelector: '#navbar_sm_search_results',
+        minLength: 2
+      });
+    }
+  });
+</script>
+
+<style>
+  .search-container-bar-sm{
+    position: fixed;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 59px;
+    z-index:100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: black;
+  }
+
+  .unseen{
+    display: none;
+  }
+
+  .sm-search-back-icon-container{
+    padding-left: 12px;
+  }
+
+  #navbar_sm_search_input {
+    background-color: transparent;
+    padding-bottom: 4px;
+    outline: none;
+    box-sizing: border-box;
+    border: none;
+    border-radius: 0;
+    color: #e9e2e2;
+    border-bottom: 2px solid #e9e2e2;
+    text-overflow: ellipsis;
+  }
+
+  #navbar_sm_search_results a {
+    font-size: 14px;
+  }
+</style>

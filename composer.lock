@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d25be458841461797bd402e1263b29a7",
+    "content-hash": "9e8684f545bdfda196f9290aec9cf97a",
     "packages": [
         {
             "name": "composer/semver",
@@ -9578,6 +9578,71 @@
                 }
             ],
             "time": "2025-09-27T09:00:46+00:00"
+        },
+        {
+            "name": "twig/cache-extra",
+            "version": "v3.22.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/twigphp/cache-extra.git",
+                "reference": "043bd496ada6bf2f73ed3186434fd9e6479a1b8d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/twigphp/cache-extra/zipball/043bd496ada6bf2f73ed3186434fd9e6479a1b8d",
+                "reference": "043bd496ada6bf2f73ed3186434fd9e6479a1b8d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1.0",
+                "symfony/cache": "^5.4|^6.4|^7.0|^8.0",
+                "twig/twig": "^3.21|^4.0"
+            },
+            "require-dev": {
+                "symfony/phpunit-bridge": "^6.4|^7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Twig\\Extra\\Cache\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "A Twig extension for Symfony Cache",
+            "homepage": "https://twig.symfony.com",
+            "keywords": [
+                "cache",
+                "html",
+                "twig"
+            ],
+            "support": {
+                "source": "https://github.com/twigphp/cache-extra/tree/v3.22.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/twig/twig",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2025-11-02T11:00:49+00:00"
         },
         {
             "name": "twig/extra-bundle",

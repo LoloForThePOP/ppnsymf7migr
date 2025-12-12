@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recherche projets (démo){% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <h1 class="h4 mb-3">Recherche projets (démo)</h1>
+    <p class="text-muted">Testez le live search via l’endpoint <code>/search/projects</code>.</p>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <input type="search" id="demo-search-input" class="form-control" placeholder="Tapez un titre, objectif, mot-clé..." autofocus>
+        </div>
+    </div>
+
+    <div id="demo-results" class="list-group mt-3"></div>
+
+    <div id="demo-status" class="text-muted mt-2 small"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.ProjectSearch && typeof ProjectSearch.init === 'function') {
+        ProjectSearch.init({
+            inputSelector: '#demo-search-input',
+            resultsSelector: '#demo-results',
+            statusSelector: '#demo-status',
+            minLength: 2
+        });
+    }
+});
+</script>
+{% endblock %}

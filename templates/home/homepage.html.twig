@@ -14,7 +14,7 @@
 
 {% block headTag %}
 
-  <meta name="description" content="Plateforme de présentation de projets prévus ou en cours. Présentez gratuitement votre projet ou explorez des projets qui vous intéresseraient.">
+  <meta name="description" content="Plateforme de présentation de projets prévus ou en cours. Présentez gratuitement votre projet et explorez les projets déjà présentés.">
 
   <meta name="keywords" content="présentation de projets, entraide">
 
@@ -56,7 +56,7 @@
 
         {% if app.user %}
 
-        {# to do {% include "home/_connected_user_upper_display.html.twig" %} #}
+            {# to do {% include "home/_connected_user_upper_display.html.twig" %} #}
 
         {% endif %}
 
@@ -65,11 +65,12 @@
 
         {% if not app.user %}
 
-        {# Explore Propon - Display some projects by categories (tabs navigation)
+        {# Explore Propon - Display some projects by categories (tabs navigation) 
+        
+            <div class="mt-4">
+            to do {% include "home/_projects_by_categories_tabs.html.twig" %}
+            </div>#}
 
-        to do: implement if relevant but I think so :)
-
-        <div>{% include "home/_projects_by_categories_tabs.html.twig" %}</div>  #}
 
         <div id="homepage-jumbotron-struct-container" class="container col-xxl-11 px-0 px-md-4 px-lg-4">
 
@@ -94,11 +95,147 @@
         {% endif %}
 
 
+        {# Last Presented Projects #}
+
+
         <div class="container my-5">
         
             {{ project_collection('Derniers projets présentés', presentations, 'tab-result') }}
             
         </div>
+
+
+
+
+        {# Propon Articles #}
+
+        <div class="articles-container container my-5">
+
+        <h2 class="article-container-title fw-bold">
+        
+            <img class="homepage-icon" src="{{ asset('article.svg', 'misc')}}" alt="Article Icon">
+            
+            <span class="me-md-4">Articles</span>
+
+        </h2>
+
+        <style>
+
+        @media (max-width: 580px) {
+
+            .articles-container{
+
+            padding-left: 10px;
+
+
+            }
+
+        }
+
+        </style>
+
+        <div class="article-cards-container row row-cols-1 row-cols-md-3 g-4">
+
+            {% import "article/card.html.twig" as artCards %}
+
+            {% for article in articles %}
+                {{ artCards.articleCards (article) }}
+            {% endfor %}
+        
+        </div>
+
+        <style>
+
+            .article-container-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 36px;
+            font-weight: bold;
+                color: #212e3e;
+            }
+
+            .article-container-title .btn{
+            display: flex;
+            align-items: center;
+            padding: 0.2rem 1.15rem;
+            margin-top: 5px;
+            font-size: 0.875rem;
+            border-radius: 50px;
+            }
+
+            .homepage-icon{
+
+            height: 33px;
+
+            filter: invert(68%) sepia(19%) saturate(539%) hue-rotate(120deg) brightness(90%) contrast(91%);
+            margin-right: 0.25rem;
+            
+            }
+
+            @media screen and (max-width: 580px) {
+
+            .article-container-title {
+
+                margin-left: -10px;
+                margin-right: -10px;
+
+            }
+
+            .article-container-title .btn{
+
+                display: none;
+
+            }
+            
+            .article-cards-container {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+
+            }
+
+        </style>
+
+
+        {# Last Moto #}
+
+        <div class="last-moto row fs-5 mt-md-2 fw-bold">
+
+            <div class="text-center mb-md-1">Propon est une initiative gratuite dédiée à la promotion des Projets pour la réussite de tous.</div>
+
+            <div class="text-center mb-md-3">Présentez votre Projet sur Propon.</div>
+
+        </div>
+
+        <style>
+
+            @media screen and (max-width: 580px) {
+
+                .last-moto {
+                color: #168016;
+                font-size: 15px !important;
+                padding: 15px 0;
+                background-color: #46af461f;
+                border-radius: 5px;
+                width: 99%;
+                margin: auto;
+                margin-bottom: -16px;
+                margin-top: -11px;
+                }
+
+                .last-moto div {
+
+                padding: 5px  8px;
+
+                }
+            
+            }
+
+        </style>
+
+    </div>
 
 
 

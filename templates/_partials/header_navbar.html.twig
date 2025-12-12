@@ -130,34 +130,33 @@
 
           {# search bar html structure + js + styles handling on tiny screens #}
 
-          {% include "_partials/search_bar_sm.html.twig" %}
+          {% include "search/_bar_sm.html.twig" %}
 
         </li>
 
         {# search bar for large screens #}
 
-        <form class="d-none d-md-block">
-
-          <input id="navbar_md_search_input" class="form-control d-inline me-2" type="search" placeholder="Rechercher un Projet" aria-label="Search">
-
-        </form>
+        <div class="d-none d-md-block position-relative">
+          <input id="navbar_md_search_input" class="form-control d-inline me-2" type="search" placeholder="Rechercher un Projet" aria-label="Search" autocomplete="off">
+          <div id="navbar_md_search_results" class="list-group position-absolute shadow-sm mt-1 d-none" style="min-width:260px; z-index: 2000;"></div>
+        </div>
 
         {# styles for search bar for large screens #}
 
         <style>
 
           #navbar_md_search_input{
-
             width: unset;
-
           }
 
           @media screen and (max-width: 860px) {
-
             #navbar_md_search_input{
               width: 169px;
             }
+          }
 
+          #navbar_md_search_results a {
+            font-size: 14px;
           }
 
         </style>
@@ -397,6 +396,19 @@
   </nav>
 
 </header>
+
+<script src="/js/project_search.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.ProjectSearch && typeof ProjectSearch.init === 'function') {
+    ProjectSearch.init({
+      inputSelector: '#navbar_md_search_input',
+      resultsSelector: '#navbar_md_search_results',
+      minLength: 2
+    });
+  }
+});
+</script>
 
 <style>
 
