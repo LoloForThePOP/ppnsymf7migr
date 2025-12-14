@@ -23,30 +23,19 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class EditShowController extends AbstractController
 {
     #[Route(
-        '/{stringId}/',
+        '/{stringId}',
         name: 'edit_show_project_presentation',
         priority: -1
     )]
     #[IsGranted('view', subject: 'presentation')]
-    public function EditShow(
+    public function editShow(
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         Request $request,
         EntityManagerInterface $em,
     ): Response
     {
 
-        if($this->isGranted('edit', $presentation)){}
-
-            // Count a view once per session
-            $session = $request->getSession();
-            $viewed = $session->get('pp_viewed_ids', []);
-            $id = $presentation->getId();
-            if ($id !== null && !in_array($id, $viewed, true)) {
-                $presentation->getExtra()->incrementViews();
-                $em->flush();
-                $viewed[] = $id;
-                $session->set('pp_viewed_ids', $viewed);
-            }
+        if($this->isGranted('edit', $presentation)){
 
             $addLogoForm = $this->createForm(LogoType::class, $presentation);
             $addWebsiteForm = $this->createForm(WebsiteType::class);
@@ -61,9 +50,12 @@ class EditShowController extends AbstractController
             );
             $addDocumentForm = $this->createForm(DocumentType::class);
             $addBusinessCardForm = $this->createForm(BusinessCardType::class);
-           
+            
+
             return $this->render('project_presentation/edit_show/origin.html.twig', [
                 'presentation' => $presentation,
+                'userPresenter' => true, //flaging whether user can edit presentation
+                'userAdmin' => $this->isGranted('ROLE_ADMIN'), //flagging whether user is an admin
                 'addLogoForm' => $addLogoForm->createView(),
                 'addWebsiteForm' => $addWebsiteForm->createView(),
                 'addQuestionAnswerForm' => $addQuestionAnswerForm->createView(),
@@ -76,17 +68,24 @@ class EditShowController extends AbstractController
 
             ]);
 
+        }
 
-        
-
-
+        // Count a view once per session
+        $session = $request->getSession();
+        $viewed = $session->get('pp_viewed_ids', []);
+        $id = $presentation->getId();
+        if ($id !== null && !in_array($id, $viewed, true)) {
+            $presentation->getExtra()->incrementViews();
+            $em->flush();
+            $viewed[] = $id;
+            $session->set('pp_viewed_ids', $viewed);
+        }
 
         return $this->render('project_presentation/edit_show/origin.html.twig', [
             'presentation' => $presentation,
+            'userPresenter' => false, //flaging whether user can edit presentation
+            'userAdmin' => $this->isGranted('ROLE_ADMIN'), //flagging whether user is an admin
         ]);
-
-
-
 
     }
 

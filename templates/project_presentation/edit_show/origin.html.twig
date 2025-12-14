@@ -1,30 +1,6 @@
 {% extends 'base.html.twig' %}
 
 
- {# Security Global TWIG variable flagging whether user can present this project #} 
-
-    {% set userPresenter = false %}
-
-    {% if is_granted('edit', presentation) %}
-    
-        {% set userPresenter = true %}
-
-    {% endif %}
-
-
-
- {# Security Global TWIG variable flagging whether user is an admin #} 
-
-    {% set userAdmin = false %}
-
-    {% if is_granted('ROLE_ADMIN') %}
-
-        {% set userAdmin = true %}
-
-    {% endif %}
-
-
-
 {# Setting some presentation metadata for SEO, Open Graph #}
 
 {% set createdAt = presentation.createdAt | date("Y - m - d") %}
@@ -35,7 +11,7 @@
 {% set OGTitle %}{{ presentation.title ? presentation.title ~ " - " : '' }}{{ presentation.goal[:1] | upper ~ presentation.goal[1:] }}{% endset %}
 
 {# SEO & Open Graph: Providing a page description #}
-{% set OGDescription %}{{ presentation.textDescription | slice (0, 220) | striptags }}{% endset %}
+{% set OGDescription %}{{presentation.textDescription|default('')|striptags|slice(0,220)}}{% endset %}
 
 {# Open Graph: Providing a page image #}
 {# We provide thumbnail url #}
@@ -43,7 +19,7 @@
 {% set OGImageUrl %}{{ presentation.extra.cacheThumbnailUrl ?: null }}{% endset %}
 
 {# Open Graph asks for a page url #}
-{% set OGPageUrl = app.request.uri %}
+{% set OGPageUrl = absolute_url (app.request.uri) %}
 
 
 {% block headTag %}
@@ -59,7 +35,7 @@
 
     {# Propon Project Presentation Page might be accessed with different urls, so we use a canonical tag to provide a central one for SEO #}
 
-    <link rel= "canonical" href= "{{ url ( 'edit_show_project_presentation' , {'stringId' : presentation.stringId }) }}" />
+    <link rel= "canonical" href= "{{ absolute_url ( 'edit_show_project_presentation' , {'stringId' : presentation.stringId }) }}" />
 
     {# TinyMCE Script only if the user can edit the presentation (add a news, update project description #}
 
@@ -104,7 +80,26 @@
 
         {% set categoriesKeywordsForm = categoriesKeywordsForm is defined ? categoriesKeywordsForm : null %}
 
+        {% include 'project_presentation/edit_show/statuses/edit_box.html.twig' %}  
+
+        {% include "project_presentation/edit_show/slides/add_image.html.twig" %}
+
+        {% include "project_presentation/edit_show/slides/add_video.html.twig" %}  
+    
+        {% include 'project_presentation/edit_show/places/manage.html.twig' %}
+
+        {% include "project_presentation/edit_show/documents/add.html.twig" %}
+
+        {% include "project_presentation/edit_show/questions_answers/add.html.twig" %}
+
+        {% include "project_presentation/edit_show/websites/add.html.twig" %}
+
+        {% include "project_presentation/edit_show/business_cards/add.html.twig" %}
+        
+
     {% endif %}
+
+
 
 
     {# Setting some variables #}
@@ -114,8 +109,6 @@
     {% set presentationCategories = presentation.categories %}
 
     {% set countCategories = presentationCategories | length %}
-
-
 
     {% set countComments = presentation.comments | length %}
 
@@ -148,24 +141,10 @@
 
         {% set statusesCatalog = constant('App\\\Enum\\\ProjectStatuses::CATALOG') %}
 
-
         {% set thisProjectActiveStatuses = presentation.getStatuses() %}
-
-        {% if userPresenter %}
         
-            {% include 'project_presentation/edit_show/statuses/edit_box.html.twig' %}    
-        
-        {% endif %}
-        
-
-
-
-
-
 
         {% include 'project_presentation/edit_show/upper_box_structure.html.twig' %}
-
-
 
         <div class="container px-0">
 
@@ -174,10 +153,6 @@
                 {% set countSlides = presentation.slides | length %}
                 
                 {# Slideshow images & videos #}
-
-                {% include "project_presentation/edit_show/slides/add_image_form.html.twig" %}
-
-                {% include "project_presentation/edit_show/slides/add_video_form.html.twig" %}
 
                 <div class="col-lg-6 pp-struct-container-wrapper {% if countSlides == 0 %} pp-edition-mode {% endif %}">
 
@@ -202,8 +177,8 @@
                 
                 </div>
 
-                {# Places #}
 
+                {# Places #}
 
                 {% set countPlaces = presentation.places | length %}
 
@@ -217,12 +192,10 @@
                 
                 </div>
 
-                {% set countDocuments = presentation.documents | length %}
-
 
                 {# Documents #}
 
-                {% include "project_presentation/edit_show/documents/add.html.twig" %}
+                {% set countDocuments = presentation.documents | length %}
                
                 <div class="col-lg-6 pp-struct-container-wrapper {% if countDocuments == 0 %} pp-edition-mode {% endif %}">
 
@@ -241,7 +214,6 @@
 
                 {% set countQA = presentation.getOtherComponents().getComponents('questions_answers') | length %}
                 
-                {% include "project_presentation/edit_show/questions_answers/add_form.html.twig" %}
 
                 <div class="col-lg-6 pp-struct-container-wrapper {% if countQA == 0 %} pp-edition-mode {% endif %}">
                 
@@ -254,13 +226,10 @@
                 </div>
 
 
-
-
                 {# Websites #}
 
                 {% set countWebsites = presentation.getOtherComponents().getComponents('websites') | length %}
 
-                {% include "project_presentation/edit_show/websites/add.html.twig" %}
 
                 <div class="col-lg-6 pp-struct-container-wrapper {% if countWebsites == 0 %} pp-edition-mode {% endif %}">
             
@@ -273,10 +242,6 @@
                 </div>
 
 
-
-                
-
-
                 {# to do: drop or not: Old way reminder:
                 
                     Contact Project Members : Business Cards & Private Message Button
@@ -287,21 +252,17 @@
                  #}
 
 
-
-                {% include "project_presentation/edit_show/business_cards/add.html.twig" %}
-
-
-                
+                {# Business cards #}
 
                 {% set countBC = presentation.getOtherComponents().getComponents('business_cards') | length %}
 
-                <div class="col-lg-6 pp-struct-container-wrapper">
+                <div class="col-lg-6 pp-struct-container-wrapper {% if countBC == 0 %} pp-edition-mode {% endif %}">
 
-                {# to do: drop or not: Old way reminder: in tag attribute
-            
-                    <div id="businessCards-struct-container" data-display="{{countBC > 0 or privateMessagesActive ? "true" : "false"}}" class="pp-struct-container col-12">
-            
-                #}
+                    {# to do: drop or not: Old way reminder: in tag attribute
+                
+                        <div id="businessCards-struct-container" data-display="{{countBC > 0 or privateMessagesActive ? "true" : "false"}}" class="pp-struct-container col-12">
+                
+                    #}
 
                     <div id="businessCards-struct-container" class="pp-struct-container col-12{% if countBC == 0 %} pp-edition-mode {% endif %}">
 
@@ -313,21 +274,6 @@
 
 
                 {% include 'project_presentation/edit_show/misc_structure_container.html.twig' %}
-
-                
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
             </div>
@@ -349,22 +295,16 @@
 
             </button>
 
-        {% endif %}
-
-
-
-
-        {% include 'project_presentation/edit_show/statuses/javascripts.html.twig' %}
-
-
-
-        {% if userPresenter %}
-            {% include 'project_presentation/edit_show/places/manage_modal.html.twig' %}
+            {% include 'project_presentation/edit_show/statuses/javascripts.html.twig' %}
+            
             {% include 'project_presentation/edit_show/reorder_delete_elements.html.twig' %}
+
             {% include 'project_presentation/edit_show/wysiwyg.html.twig' %}
+
+            {% include 'project_presentation/edit_show/_partials/first_time_edit_toggle_hint.html.twig' %}
+
         {% endif %}
 
-        {% include 'project_presentation/edit_show/_partials/first_time_edit_toggle_hint.html.twig' %}
 
     </div>
     
@@ -372,22 +312,26 @@
 
 {% block javascripts %}
 
+    {% if userPresenter %}
+    
+            
+        <script>
+
+            $(document).ready(function(){
+
+                // initialising inline edit capabilities
+                $("[data-edit]").attr('contenteditable','true');
 
 
-<script>
+            });
 
-    $(document).ready(function(){
-
-        // initialising inline edit capabilities
-        $("[data-edit]").attr('contenteditable','true');
-
-
-    });
-
-</script>
-
-
-
+        </script>
+    
+        {% include 'project_presentation/edit_show/places/_js.html.twig' with { presentation: presentation } %}
+        
+    
+    {% endif %}
+    
 	{# Image Zoom Only On Large Screens #}
 
 	<script>
@@ -405,10 +349,5 @@
 
 
 
-
-
-{% if userPresenter %}
-    {% include 'project_presentation/edit_show/places/_js.html.twig' with { presentation: presentation } %}
-{% endif %}
 
 {% endblock %}
