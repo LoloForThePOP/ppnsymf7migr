@@ -37,6 +37,17 @@ class EditShowController extends AbstractController
 
         if($this->isGranted('edit', $presentation)){}
 
+            // Count a view once per session
+            $session = $request->getSession();
+            $viewed = $session->get('pp_viewed_ids', []);
+            $id = $presentation->getId();
+            if ($id !== null && !in_array($id, $viewed, true)) {
+                $presentation->getExtra()->incrementViews();
+                $em->flush();
+                $viewed[] = $id;
+                $session->set('pp_viewed_ids', $viewed);
+            }
+
             $addLogoForm = $this->createForm(LogoType::class, $presentation);
             $addWebsiteForm = $this->createForm(WebsiteType::class);
             $addQuestionAnswerForm = $this->createForm(QuestionAnswerType::class);

@@ -1,0 +1,7 @@
+{% from 'project_presentation/cards/list.html.twig' import collection as project_collection %}
+
+{{ project_collection('', items, 'tab-result') }}
+
+{% if items is empty %}
+    <div class="alert alert-info">Aucun projet trouvé pour cette catégorie.</div>
+{% endif %}

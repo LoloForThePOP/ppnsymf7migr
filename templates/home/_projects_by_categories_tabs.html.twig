@@ -44,21 +44,53 @@
 
     <div class="tab-content" id="v-tabContent">
 
-        <div class="tab-pane fade" id="v-all" role="tabpanel" aria-labelledby="" tabindex="0">{% cache "catAllPP" ttl(86400) %}{{ render(url('backend_search', {label: '', class: 'tab-result', filters: 'none', iconName: 'amphora', label: 'Tous les Projets'})) }}{% endcache %}</div>
+        <div class="tab-pane fade" id="v-all" role="tabpanel" aria-labelledby="" tabindex="0">
+            {% cache "catAllPP" ttl(86400) %}
+                {{ render(path('category_tab', {category: 'all'})) }}
+            {% endcache %}
+        </div>
 
-        <div class="tab-pane fade" id="v-history" role="tabpanel" aria-labelledby="" tabindex="0">{% cache "cat0" ttl(86400) %}{{ render(url('backend_search', {label: 'Histoire et Patrimoine', class: 'tab-result', filters: '(categories.uniqueName:history)', iconName: 'amphora'})) }}{% endcache %}</div>
+        <div class="tab-pane fade" id="v-history" role="tabpanel" aria-labelledby="" tabindex="0">
+            {% cache "cat0" ttl(86400) %}
+                {{ render(path('category_tab', {category: 'history'})) }}
+            {% endcache %}
+        </div>
 
-        <div class="tab-pane fade" id="v-numeric" role="tabpanel" aria-labelledby="" tabindex="1">{% cache "cat1" ttl(86400) %}{{ render(url('backend_search', {label: 'Numérique', class: 'tab-result', filters: '(categories.uniqueName:software)', iconName: 'computer' })) }}{% endcache %}</div>
+        <div class="tab-pane fade" id="v-numeric" role="tabpanel" aria-labelledby="" tabindex="1">
+            {% cache "cat1" ttl(86400) %}
+                {{ render(path('category_tab', {category: 'software'})) }}
+            {% endcache %}
+        </div>
 
-        <div class="tab-pane fade" id="v-inform" role="tabpanel" aria-labelledby="" tabindex="2">{% cache "cat2" ttl(86400) %}{{ render(url('backend_search', {label: 'Informer, Éduquer, Apprendre', class: 'tab-result', filters: '(categories.uniqueName:inform)', iconName: 'book'})) }}{% endcache %}</div>
+        <div class="tab-pane fade" id="v-inform" role="tabpanel" aria-labelledby="" tabindex="2">
+            {% cache "cat2" ttl(86400) %}
+                {{ render(path('category_tab', {category: 'inform'})) }}
+            {% endcache %}
+        </div>
 
-        <div class="tab-pane fade" id="v-space" role="tabpanel" aria-labelledby="" tabindex="3">{% cache "cat3" ttl(86400) %}{{ render(url('backend_search', {label: 'Préserver l\'Environnement', class: 'tab-result', filters: '(categories.uniqueName:space)', iconName: 'plane'})) }}{% endcache %}</div>
+        <div class="tab-pane fade" id="v-space" role="tabpanel" aria-labelledby="" tabindex="3">
+            {% cache "cat3" ttl(86400) %}
+                {{ render(path('category_tab', {category: 'space'})) }}
+            {% endcache %}
+        </div>
 
-        <div class="tab-pane fade" id="v-environment" role="tabpanel" aria-labelledby="" tabindex="4">{% cache "cat4" ttl(86400) %}{{ render(url('backend_search', {label: 'Préserver l\'Environnement', class: 'tab-result', filters: '(categories.uniqueName:environment)', iconName: 'leaf'})) }}{% endcache %}</div>
+        <div class="tab-pane fade" id="v-environment" role="tabpanel" aria-labelledby="" tabindex="4">
+            {% cache "cat4" ttl(86400) %}
+                {{ render(path('category_tab', {category: 'environment'})) }}
+            {% endcache %}
+        </div>
 
-        <div class="tab-pane fade" id="v-humane" role="tabpanel" aria-labelledby="" tabindex="5">{% cache "cat5" ttl(86400) %}{{ render(url('backend_search', {label: '✊🏻✊🏽✊🏿 Solidarité', class: 'tab-result' , filters: '(categories.uniqueName:humane)', iconName: 'none'})) }}{% endcache %}</div>
+        <div class="tab-pane fade" id="v-humane" role="tabpanel" aria-labelledby="" tabindex="5">
+            {% cache "cat5" ttl(86400) %}
+                {{ render(path('category_tab', {category: 'humane'})) }}
+            {% endcache %}
+        </div>
 
-        <div class="tab-pane fade" id="v-db" role="tabpanel" aria-labelledby="" tabindex="6">{% cache "cat6" ttl(86400) %}{{ render(url('backend_search', {label: 'Bases de Données', class: 'tab-result' , filters: '(categories.uniqueName:data)', iconName: 'network' } ) ) }}{% endcache %}</div>
+        <div class="tab-pane fade" id="v-db" role="tabpanel" aria-labelledby="" tabindex="6">
+            {% cache "cat6" ttl(86400) %}
+                {{ render(path('category_tab', {category: 'data'})) }}
+            {% endcache %}
+        </div>
 
     </div>
 

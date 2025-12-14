@@ -56,12 +56,21 @@
     const clearInput = () => {
       if (input) input.value = '';
       results?.classList.add('d-none');
+      filterPanel?.classList.add('d-none');
       resetContainer?.classList.add('unseen');
     };
 
     icon?.addEventListener('click', showBar);
     back?.addEventListener('click', hideBar);
     resetIcon?.addEventListener('click', clearInput);
+    input?.addEventListener('input', () => {
+      if (!resetContainer) return;
+      if (input.value && input.value.length > 0) {
+        resetContainer.classList.remove('unseen');
+      } else {
+        resetContainer.classList.add('unseen');
+      }
+    });
 
     filterIcon?.addEventListener('click', () => {
       if (!filterPanel) return;

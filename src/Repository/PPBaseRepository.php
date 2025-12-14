@@ -19,6 +19,28 @@ class PPBaseRepository extends ServiceEntityRepository
     /**
      * @return PPBase[]
      */
+    public function findPublishedByCategories(array $categories, int $limit = 16): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->andWhere('p.isPublished = :published')
+            ->andWhere('(p.isDeleted IS NULL OR p.isDeleted = :notDeleted)')
+            ->setParameter('published', true)
+            ->setParameter('notDeleted', false)
+            ->setMaxResults($limit)
+            ->orderBy('p.createdAt', 'DESC');
+
+        if (!empty($categories)) {
+            $qb->join('p.categories', 'c')
+               ->andWhere('c.uniqueName IN (:cats)')
+               ->setParameter('cats', $categories);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * @return PPBase[]
+     */
     public function findLatestPublished(int $limit = 50): array
     {
         return $this->createQueryBuilder('p')
