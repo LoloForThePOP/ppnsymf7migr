@@ -102,6 +102,8 @@
 
     {% if userPresenter %}
 
+        {% set categoriesKeywordsForm = categoriesKeywordsForm is defined ? categoriesKeywordsForm : null %}
+
     {% endif %}
 
 
@@ -110,18 +112,30 @@
     {% set hasKeywords = presentation.keywords is not empty %}
 
     {% set presentationCategories = presentation.categories %}
+
     {% set countCategories = presentationCategories | length %}
 
-    {# To do : make sure only presenter can have that #}
-    {% set categoriesKeywordsForm = categoriesKeywordsForm is defined ? categoriesKeywordsForm : null %}
-
-    {% set statusesCatalog = constant('App\\\Enum\\\ProjectStatuses::CATALOG') %}
 
 
     {% set countComments = presentation.comments | length %}
 
-
     {% set likesCount = presentation.likes | length %}
+
+    {% set pageInfo %}
+
+        <li class="mb-1">
+            Page créée le {{ presentation.createdAt ? presentation.createdAt|date('Y - m - d') : 'N/A' }}.
+        </li>
+
+        <li class="mb-1">
+            Par {{ presentation.creator ? presentation.creator.username : 'Non renseigné' }}.
+        </li>
+
+        <li>
+            <p class="text-muted mb-1">Propon souhaite vous fournir une information fiable mais ne peut garantir l'exactitude ou la complétude des informations présentées.</p>
+        </li>
+        
+    {% endset %}
 
 
     {% include 'project_presentation/edit_show/share_modal.html.twig' %}
@@ -132,9 +146,18 @@
 
         {# statuses catalog #}
 
+        {% set statusesCatalog = constant('App\\\Enum\\\ProjectStatuses::CATALOG') %}
+
+
         {% set thisProjectActiveStatuses = presentation.getStatuses() %}
 
-        {% include 'project_presentation/edit_show/statuses/edit_box.html.twig' %}
+        {% if userPresenter %}
+        
+            {% include 'project_presentation/edit_show/statuses/edit_box.html.twig' %}    
+        
+        {% endif %}
+        
+
 
 
 
@@ -272,24 +295,24 @@
 
                 {% set countBC = presentation.getOtherComponents().getComponents('business_cards') | length %}
 
+                <div class="col-lg-6 pp-struct-container-wrapper">
 
-                {% if countBC > 0 %}{% endif %}
+                {# to do: drop or not: Old way reminder: in tag attribute
+            
+                    <div id="businessCards-struct-container" data-display="{{countBC > 0 or privateMessagesActive ? "true" : "false"}}" class="pp-struct-container col-12">
+            
+                #}
 
-                    <div class="col-lg-6 pp-struct-container-wrapper">
+                    <div id="businessCards-struct-container" class="pp-struct-container col-12{% if countBC == 0 %} pp-edition-mode {% endif %}">
 
-                    {# to do: drop or not: Old way reminder: in tag attribute
+                        {% include 'project_presentation/edit_show/contact_possibilities.html.twig' %}
+
+                    </div>    
                 
-                       <div id="businessCards-struct-container" data-display="{{countBC > 0 or privateMessagesActive ? "true" : "false"}}" class="pp-struct-container col-12">
-                
-                    #}
+                </div>
 
-                        <div id="businessCards-struct-container" class="pp-struct-container col-12{% if countBC == 0 %} pp-edition-mode {% endif %}">
 
-                            {% include 'project_presentation/edit_show/contact_possibilities.html.twig' %}
-
-                        </div>    
-                    
-                    </div>
+                {% include 'project_presentation/edit_show/misc_structure_container.html.twig' %}
 
                 
 

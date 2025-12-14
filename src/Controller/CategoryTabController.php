@@ -19,7 +19,7 @@ class CategoryTabController extends AbstractController
         $cats = ($category === '' || $category === 'all') ? [] : [$category];
         $items = $this->repo->findPublishedByCategories($cats, 16);
 
-        return $this->render('home/_category_tab_results.html.twig', [
+        return $this->render('home/projects_by_category_tabs/_each_tab_content.html.twig', [
             'items' => $items,
         ]);
     }

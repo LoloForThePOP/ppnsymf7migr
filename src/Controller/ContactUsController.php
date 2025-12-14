@@ -17,16 +17,31 @@ class ContactUsController extends AbstractController
         Request $request,
         MailerInterface $mailer,
     ): Response {
-        $form = $this->createForm(ContactUsType::class);
+        $context = (string) $request->query->get('context', '');
+        $item = (string) $request->query->get('item', '');
+        $identifier = (string) $request->query->get('identifier', '');
+
+        $subject = 'Contact';
+        if ($context === 'report_abuse' && $item && $identifier) {
+            $subject = sprintf('Signalement %s (%s)', $item, $identifier);
+        }
+
+        $form = $this->createForm(ContactUsType::class, [
+            'subject' => $subject,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
+            $body = $data['content'];
+            if ($context || $item || $identifier) {
+                $body .= "\n\n---\nContexte: {$context}\nObjet: {$item}\nIdentifiant: {$identifier}\n";
+            }
             $email = (new Email())
                 ->from($data['authorEmail'])
                 ->to($this->getParameter('app.email.contact'),)
                 ->subject('[Contact] ' . $data['subject'])
-                ->text($data['content']);
+                ->text($body);
 
             $mailer->send($email);
             $this->addFlash('success', 'Merci, votre message a bien été envoyé.');
@@ -37,6 +52,9 @@ class ContactUsController extends AbstractController
         return $this->render('static/contact_us.html.twig', [
             'form' => $form->createView(),
             'contactUsPhone' => $this->getParameter('app.phone.contact'),
+            'context' => $context,
+            'item' => $item,
+            'identifier' => $identifier,
         ]);
     }
 }
