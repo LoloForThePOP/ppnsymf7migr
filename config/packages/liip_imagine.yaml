@@ -82,3 +82,8 @@ liip_imagine:
         slide_upload:
 
             format: jpg
+
+        slide_display:
+            quality: 75
+            filters:
+                thumbnail: { size: [1400, 900], mode: inset }

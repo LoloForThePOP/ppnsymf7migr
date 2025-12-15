@@ -10,7 +10,16 @@
 		
 			<div id="image-slide-wrapper-{{slide.id}}" class="image-slide-wrapper">
 			
-				<img id="{{slide.id}}" src="{{ vich_uploader_asset(slide) }}" alt="{{slide.imageFile}}">
+				{% set assetPath = vich_uploader_asset(slide) %}
+				{% if assetPath %}
+					<img
+						id="{{slide.id}}"
+						src="{{ assetPath | imagine_filter('slide_display') }}"
+						loading="lazy"
+						alt="{{ slide.caption|default('Slide image') }}"
+						data-full="{{ assetPath }}"
+					>
+				{% endif %}
 				
 			</div>
 
