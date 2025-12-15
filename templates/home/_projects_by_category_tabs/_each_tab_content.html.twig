@@ -1,6 +1,6 @@
 {% from 'project_presentation/cards/list.html.twig' import collection as project_collection %}
 
-{{ project_collection('', items, 'tab-result') }}
+{{ project_collection('', items, 'tab-result', 'hide-335', '', presentationStats|default({})) }}
 
 {% if items is empty %}
     <div class="alert alert-info">Aucun projet trouvé pour cette catégorie.</div>

@@ -16,6 +16,8 @@
         showMeta: true,
         showViews: true,
         showCreator: false,
+        likesCount: null,
+        commentsCount: null,
         fallbackImageText: 'Aucune image'
     } %}
     {% set options = defaults|merge(opts) %}
@@ -71,11 +73,13 @@
                 <div class="stats">
                     <span class="stat-chunk">
                         <img class="" src="{{ asset('thumb_up_dark.svg', 'misc')}}" alt="thumb-up icon">
-                        {{ presentation.likes|default([])|length }}
+                        {% set likes = options.likesCount is not null ? options.likesCount : presentation.likes|default([])|length %}
+                        {{ likes }}
                     </span>
                     <span class="stat-chunk">
                         <img class="" src="{{ asset('comment.svg', 'misc')}}" alt="comment icon">
-                        {{ presentation.comments|default([])|length }}
+                        {% set comments = options.commentsCount is not null ? options.commentsCount : presentation.comments|default([])|length %}
+                        {{ comments }}
                     </span>
                     {% if options.showViews %}
                         {% set views = presentation.extra.viewsCount ?? 0 %}

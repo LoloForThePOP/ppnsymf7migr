@@ -35,7 +35,7 @@
 
     {# Propon Project Presentation Page might be accessed with different urls, so we use a canonical tag to provide a central one for SEO #}
 
-    <link rel= "canonical" href= "{{ absolute_url ( 'edit_show_project_presentation' , {'stringId' : presentation.stringId }) }}" />
+    <link rel= "canonical" href= "{{ url ('edit_show_project_presentation', {'stringId': presentation.stringId}) }}" />
 
     {# TinyMCE Script only if the user can edit the presentation (add a news, update project description #}
 

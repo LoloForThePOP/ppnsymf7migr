@@ -2,6 +2,8 @@
 
 namespace App\Repository;
 
+use App\Entity\Comment;
+use App\Entity\Like;
 use App\Entity\PPBase;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -86,5 +88,48 @@ class PPBaseRepository extends ServiceEntityRepository
         if ($flush) {
             $em->flush();
         }
+    }
+
+    /**
+     * Returns likes/comments counts for the given PPBase ids.
+     *
+     * @param int[] $ids
+     * @return array<int, array{likes:int, comments:int}>
+     */
+    public function getEngagementCountsForIds(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        $counts = array_fill_keys($ids, ['likes' => 0, 'comments' => 0]);
+
+        $commentRows = $this->getEntityManager()->createQueryBuilder()
+            ->select('IDENTITY(c.projectPresentation) AS id', 'COUNT(c.id) AS comments')
+            ->from(Comment::class, 'c')
+            ->where('c.projectPresentation IN (:ids)')
+            ->groupBy('c.projectPresentation')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getArrayResult();
+
+        foreach ($commentRows as $row) {
+            $counts[(int) $row['id']]['comments'] = (int) $row['comments'];
+        }
+
+        $likeRows = $this->getEntityManager()->createQueryBuilder()
+            ->select('IDENTITY(l.projectPresentation) AS id', 'COUNT(l.id) AS likes')
+            ->from(Like::class, 'l')
+            ->where('l.projectPresentation IN (:ids)')
+            ->groupBy('l.projectPresentation')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getArrayResult();
+
+        foreach ($likeRows as $row) {
+            $counts[(int) $row['id']]['likes'] = (int) $row['likes'];
+        }
+
+        return $counts;
     }
 }

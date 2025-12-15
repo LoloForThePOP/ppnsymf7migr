@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Repository\PPBaseRepository;
 use App\Form\ProfileType;
 use App\Form\UserAccountEmailType;
 use Symfony\Component\Form\FormError;
@@ -23,11 +24,22 @@ final class ProfileController extends AbstractController
 
     #[Route('/user/{usernameSlug}', name: 'user_profile_show')]
     public function show(
-    #[MapEntity(mapping: ['usernameSlug' => 'usernameSlug'])] User $user
+        #[MapEntity(mapping: ['usernameSlug' => 'usernameSlug'])] User $user,
+        PPBaseRepository $ppBaseRepository,
     ): Response
     {
+        $presentations = $ppBaseRepository->findBy(
+            ['creator' => $user],
+            ['createdAt' => 'DESC', 'id' => 'DESC']
+        );
+        $presentationStats = $ppBaseRepository->getEngagementCountsForIds(
+            array_map(static fn ($pp) => $pp->getId(), $presentations)
+        );
+
         return $this->render('user/profile/index.html.twig', [
             'user' => $user,
+            'presentations' => $presentations,
+            'presentationStats' => $presentationStats,
         ]);
     }
 

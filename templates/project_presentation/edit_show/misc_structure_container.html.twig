@@ -29,7 +29,7 @@
 
                 {# Page Info #}
 
-                <button id="page-info-dropdown" data-bs-toggle="dropdown" aria-expanded="false" type="button" class="pp-consultation-mode btn btn-light fw-normal me-2 mb-2 ">Informations sur la page ▾</button>
+                <button id="page-info-dropdown" data-bs-toggle="dropdown" aria-expanded="false" type="button" class="page-info-btn pp-consultation-mode btn btn-light fw-normal me-2 mb-2 ">Informations sur la page ▾</button>
 
                 <ul id="page-info-dropdown-content" class="dropdown-menu px-3" aria-labelledby="page-info-dropdown" style="max-width: 360px;">
 
@@ -41,7 +41,7 @@
 
                 <a class="text-decoration-none" href="{{ path('contact_us', {'context': 'report_abuse', 'item' : 'project_presentation', 'identifier': presentation.stringId }) }}">
 
-                    <button type="button" class="pp-consultation-mode btn btn-light fw-normal mb-2 ">Signaler un problème</button>
+                    <button type="button" class="report-problem-btn pp-consultation-mode btn btn-light fw-normal mb-2 ">Signaler un problème</button>
                     
                 </a>
 
@@ -83,6 +83,12 @@
 
         margin-right: 5px;
         margin-left: 6px;
+    }
+
+    #misc-struct-container .report-problem-btn, #misc-struct-container .page-info-btn {
+
+        border-radius: 11px;
+
     }
 
     @media (max-width: 575px) {

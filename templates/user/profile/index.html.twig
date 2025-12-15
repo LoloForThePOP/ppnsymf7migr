@@ -170,7 +170,52 @@
     
     {% endif %}
 
-    <!-- end of User Websites --> 
+    <!-- end of User Websites -->
+
+
+
+    <!-- User Created Project Presentations -->
+    
+    <div class="mb-5">
+        
+        {% if presentations | default([]) | length > 0 %}
+
+            {% set userPresentations = presentations %}
+
+            {% set userPresentationsLabel %}
+
+                {% if userPresentations | length == 1 %}
+
+                    1 présentation créée
+
+                {% else %}
+
+                    {{userPresentations | length}} présentations créées
+
+                {% endif %}
+
+            {% endset %}
+
+            
+            {% import "project_presentation/cards/list.html.twig" as displayUserPresenterProjects %}
+
+            {% block javascripts %}<script src="/js/show_more_less_button.js"></script>{% endblock %}
+
+            {{ displayUserPresenterProjects.collection(
+                userPresentationsLabel,
+                userPresentations | reverse,
+                'tab-result',
+                'hide-335',
+                '',
+                presentationStats | default({})
+            ) }}
+            
+        {% endif %}
+
+    </div>
+
+    <!-- End of User Created Project Presentations -->
+
 
     
 

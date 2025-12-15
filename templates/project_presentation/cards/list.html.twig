@@ -1,7 +1,7 @@
 
 
 
-{% macro collection ( title="", items, class="", hideThreshold = "hide-335", icon = "" ) %}
+{% macro collection ( title="", items, class="", hideThreshold = "hide-335", icon = "", stats = {} ) %}
     {% from 'project_presentation/cards/card.html.twig' import project_card %}
 
     <div class="titled-projects-container {{class}}">
@@ -21,6 +21,7 @@
         <div class="hide-too-long {{ hideThreshold }} show-tiny-screens collection-container">
                 
             {% for item in items %}
+                {% set itemStats = (item.id is defined and stats[item.id] is defined) ? stats[item.id] : null %}
 
                 {# Project presentation card #}
 
@@ -32,6 +33,8 @@
                     showCreator: true,
                     showViews: true,
                     showMeta: true,
+                    likesCount: itemStats ? itemStats.likes : null,
+                    commentsCount: itemStats ? itemStats.comments : null,
                 }) }}   
 
      

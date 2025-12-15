@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\PPBase;
 use App\Repository\PPBaseRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,9 +19,12 @@ class CategoryTabController extends AbstractController
     {
         $cats = ($category === '' || $category === 'all') ? [] : [$category];
         $items = $this->repo->findPublishedByCategories($cats, 16);
+        $ids = array_map(static fn (PPBase $pp) => $pp->getId(), $items);
+        $stats = $this->repo->getEngagementCountsForIds($ids);
 
-        return $this->render('home/projects_by_category_tabs/_each_tab_content.html.twig', [
+        return $this->render('home/_projects_by_category_tabs/_each_tab_content.html.twig', [
             'items' => $items,
+            'presentationStats' => $stats,
         ]);
     }
 }
