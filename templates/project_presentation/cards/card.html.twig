@@ -58,15 +58,16 @@
         {% endif %}
 
         <div class="goal-container">
-            {# <div class="goal">{{ presentation.goal }}</div> #}
-            {% if presentation.title %}
+            {% set goalText = presentation.goal|default('') %}
+            <div class="goal">{{ goalText ? goalText|truncate(81) : '' }}</div> 
+            {# {% if presentation.title %}
                 <div class="title">{{ presentation.title }}</div>
-            {% endif %}
+            {% endif %}#}
         </div>
 
-        {% if options.showKeywords and presentation.keywords %}
+        {# {% if options.showKeywords and presentation.keywords %}
             <div class="keywords px-3 pb-2">{{ presentation.keywords }}</div>
-        {% endif %}
+        {% endif %} #}
 
         {% if options.showMeta %}
             <div class="other-info-container">

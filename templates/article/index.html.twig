@@ -20,7 +20,7 @@
             
         </div>
 
-        {% if is_granted('ROLE_ADMIN') %}
+        {% if is_granted("ROLE_ADMIN") or is_granted("ROLE_ARTICLE_EDIT") %}
             <div class="call-to-action-container">
             
                 <a class="cta-btn" href="{{ path ('edit_article') }}"><div class="flip-horiz me-2 mb-2">✍️</div><div class=""> Écrire un article sur Propon</div></a>

@@ -76,6 +76,10 @@
 {% block body %}
 
 
+    {# statuses catalog and active statuses, needed in edit and display statuses partials #}
+    {% set statusesCatalog = constant('App\\Enum\\ProjectStatuses::CATALOG') %}
+    {% set thisProjectActiveStatuses = presentation.getStatuses() %}
+
     {% if userPresenter %}
 
         {% set categoriesKeywordsForm = categoriesKeywordsForm is defined ? categoriesKeywordsForm : null %}
@@ -131,18 +135,12 @@
     {% endset %}
 
 
-    {% include 'project_presentation/edit_show/share_modal.html.twig' %}
+        {% include 'project_presentation/edit_show/share_modal.html.twig' %}
     
 
     <div class="pp-container {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}} container">
 
 
-        {# statuses catalog #}
-
-        {% set statusesCatalog = constant('App\\\Enum\\\ProjectStatuses::CATALOG') %}
-
-        {% set thisProjectActiveStatuses = presentation.getStatuses() %}
-        
 
         {% include 'project_presentation/edit_show/upper_box_structure.html.twig' %}
 
@@ -264,7 +262,7 @@
                 
                     #}
 
-                    <div id="businessCards-struct-container" class="pp-struct-container col-12{% if countBC == 0 %} pp-edition-mode {% endif %}">
+                    <div id="businessCards-struct-container" class="pp-struct-container col-12 {% if countBC == 0 %} pp-edition-mode {% endif %}">
 
                         {% include 'project_presentation/edit_show/contact_possibilities.html.twig' %}
 

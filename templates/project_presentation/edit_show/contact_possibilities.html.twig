@@ -67,8 +67,6 @@
 
             {# To do: implement when relevant: Private Messages Button Display
 
-
-
             {% if privateMessagesActive or userPresenter %}
 
                 <div id="createPrivateMessageCard" data-display="{{privateMessagesActive ? "true" : "false"}}" class="privateMessagesCard pp-consultation-mode disabled bc-outer d-flex align-items-center">
@@ -111,70 +109,70 @@
  #}
         </div>
 
-                <style>
+        <style>
 
-                    #businessCards{
+            #businessCards{
 
-                        display: flex;
-                        justify-content: center;
-                        padding-left: 0px; 
+                display: flex;
+                justify-content: center;
+                padding-left: 0px; 
 
-                    }
+            }
 
-                    /* Private Messages Card "herites" from business_card.css */
+            /* Private Messages Card "herites" from business_card.css */
 
-                    #createPrivateMessageCard a{
-                        display: flex;
-                        align-items:center; 
-                        justify-content:center; 
-                        text-align: center;
-                        height: 125px;
-                        font-weight: bold;
-                        font-size: 18px;
-                        width: 100%;
-                        background-color: rgb(245, 245, 252);
-                        color: rgb(25, 24, 16);
-                        border-radius: 4px;
-                        border: 1px solid #c3bff8;
-                        
-                    }
-
-
-                    #createPrivateMessageCard:hover{
-                        background-color: #f3f3fd;
-                    }
-
-                    .pm-1{
-                        background-color: rgb(227, 255, 227);
-                    }
-
-                    .pm-{
-                        background-color: rgb(251, 198, 198);
-                    }
-
-                    #managePrivateMessagesCard {
-                        height: 151px;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: space-evenly;
-                        font-weight: bold;
-                        text-align: center;
-                        font-size: 18px;
-                    }
+            #createPrivateMessageCard a{
+                display: flex;
+                align-items:center; 
+                justify-content:center; 
+                text-align: center;
+                height: 125px;
+                font-weight: bold;
+                font-size: 18px;
+                width: 100%;
+                background-color: rgb(245, 245, 252);
+                color: rgb(25, 24, 16);
+                border-radius: 4px;
+                border: 1px solid #c3bff8;
+                
+            }
 
 
-                    @media screen and (max-width: 580px) {
+            #createPrivateMessageCard:hover{
+                background-color: #f3f3fd;
+            }
 
-                        #createPrivateMessageCard a{
-                        
-                            border: none;
-                            
-                        }
+            .pm-1{
+                background-color: rgb(227, 255, 227);
+            }
 
-                    }
+            .pm-{
+                background-color: rgb(251, 198, 198);
+            }
 
-                </style>
+            #managePrivateMessagesCard {
+                height: 151px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: space-evenly;
+                font-weight: bold;
+                text-align: center;
+                font-size: 18px;
+            }
+
+
+            @media screen and (max-width: 580px) {
+
+                #createPrivateMessageCard a{
+                
+                    border: none;
+                    
+                }
+
+            }
+
+        </style>
             
     {% endblock %}
         

@@ -1,0 +1,3 @@
+security:
+    access_control:
+        - { path: ^/, roles: PUBLIC_ACCESS, requires_channel: https }

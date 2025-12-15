@@ -24,6 +24,7 @@ class PPBaseRepository extends ServiceEntityRepository
     public function findPublishedByCategories(array $categories, int $limit = 16): array
     {
         $qb = $this->createQueryBuilder('p')
+            ->select('DISTINCT p')
             ->andWhere('p.isPublished = :published')
             ->andWhere('(p.isDeleted IS NULL OR p.isDeleted = :notDeleted)')
             ->setParameter('published', true)

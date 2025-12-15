@@ -59,6 +59,11 @@ final class SlugService
         }
 
         $entity->$setter($slug);
+
+        if ($entity instanceof PPBase) {
+            // Once a human-friendly slug is generated, mark it as non-random to prevent silent changes later.
+            $entity->getExtra()->setIsRandomizedStringId(false);
+        }
     }
 
     private function getSlugSource(object $entity): array
@@ -68,6 +73,11 @@ final class SlugService
         }
 
         if ($entity instanceof PPBase) {
+            // Do not regenerate slugs for published projects when the slug has been finalized.
+            if ($entity->getStringId() && !$entity->getExtra()->isRandomizedStringId() && $entity->isPublished()) {
+                return ['', null];
+            }
+
             return ['stringId', $entity->getTitle() ?: $entity->getGoal()];
         }
 

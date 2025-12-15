@@ -56,7 +56,7 @@ vich_uploader:
 
         profile_image:
 
-            uri_prefix: /media/uploads/profile_images
+            uri_prefix: /media/uploads/persorgs_images
             upload_destination: '%kernel.project_dir%/public/media/uploads/persorgs_images'
             namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
    

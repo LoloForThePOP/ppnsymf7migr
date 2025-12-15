@@ -10,9 +10,8 @@ class WebsiteComponent implements ComponentInterface
     // User-provided fields
     // ============================
 
-    #[Assert\NotBlank(groups: ['input'])] //validation group allows to validate specific properties.
     #[Assert\Length(max: 150, groups: ['input'])]
-    private string $title;
+    private ?string $title;
 
     #[Assert\NotBlank(groups: ['input'])]
     #[Assert\Url(
@@ -40,7 +39,7 @@ class WebsiteComponent implements ComponentInterface
 
     public function __construct(
         string $id,
-        string $title,
+        ?string $title,
         string $url,
         string $icon,
         int $position,
@@ -61,7 +60,7 @@ class WebsiteComponent implements ComponentInterface
     // Factory for new items
     // ============================
 
-    public static function createNew(string $title, string $url): self
+    public static function createNew(?string $title, string $url): self
     {
         return new self(
             id: bin2hex(random_bytes(16)),
@@ -85,11 +84,11 @@ class WebsiteComponent implements ComponentInterface
         return $this->id;
     }
 
-    public function getTitle(): string
+    public function getTitle(): ?string
     {
         return $this->title;
     }
-    public function setTitle(string $title): void
+    public function setTitle(?string $title): void
     {
         $this->title = $title;
     }
@@ -155,27 +154,27 @@ class WebsiteComponent implements ComponentInterface
 
 
 
-public static function fromArray(array $data): self
-{
-    $createdAt = $data['createdAt'] ?? null;
-    if (!$createdAt instanceof \DateTimeImmutable) {
-        // Fallback to "now" or null
-        $createdAt = new \DateTimeImmutable();
-    }
+    public static function fromArray(array $data): self
+    {
+        $createdAt = $data['createdAt'] ?? null;
+        if (!$createdAt instanceof \DateTimeImmutable) {
+            // Fallback to "now" or null
+            $createdAt = new \DateTimeImmutable();
+        }
 
-    $updatedAt = $data['updatedAt'] ?? null;
-    if ($updatedAt !== null && !$updatedAt instanceof \DateTimeImmutable) {
-        $updatedAt = null;
-    }
+        $updatedAt = $data['updatedAt'] ?? null;
+        if ($updatedAt !== null && !$updatedAt instanceof \DateTimeImmutable) {
+            $updatedAt = null;
+        }
 
-    return new self(
-        id: $data['id'],
-        title: $data['title'],
-        url: $data['url'],
-        icon: $data['icon'] ?? '',
-        position: $data['position'] ?? 0,
-        createdAt: $createdAt,
-        updatedAt: $updatedAt,
+        return new self(
+            id: $data['id'],
+            title: $data['title'] ?? null,
+            url: $data['url'],
+            icon: $data['icon'] ?? '',
+            position: $data['position'] ?? 0,
+            createdAt: $createdAt,
+            updatedAt: $updatedAt,
     );
 }
 
