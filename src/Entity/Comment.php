@@ -187,12 +187,17 @@ class Comment
 
     public function getCommentedEntityType(): string
     {
-        return match (true) {
-            //to fill $this->projectPresentation !== null => 'projectPresentation',
-            //$this->article !== null             => 'article',
-            //$this->news !== null                => 'news',
-            default                             => throw new \LogicException('Unknown commented entity type.'),
-        };
+        if ($this->projectPresentation !== null) {
+            return 'projectPresentation';
+        }
+        if ($this->article !== null) {
+            return 'article';
+        }
+        if ($this->news !== null) {
+            return 'news';
+        }
+
+        throw new \LogicException('Unknown commented entity type.');
     }
 
     public function getArticle(): ?Article

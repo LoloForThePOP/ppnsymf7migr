@@ -21,6 +21,7 @@
         <div class="hide-too-long {{ hideThreshold }} show-tiny-screens collection-container">
                 
             {% for item in items %}
+            
                 {% set itemStats = (item.id is defined and stats[item.id] is defined) ? stats[item.id] : null %}
 
                 {# Project presentation card #}
@@ -28,7 +29,7 @@
                 {{ project_card(item, {
                     image: item.extra.cacheThumbnailUrl is defined ? item.extra.cacheThumbnailUrl : null,
                     fallbackImageText: item.goal|default('Aucune image'),
-                    fetchImagesLink: item.stringId is defined ? path('project_fetch_images', {'stringId': item.stringId}) : null,
+                    fetchImagesLink: (is_granted('ROLE_ADMIN') and item.stringId is defined) ? path('project_fetch_images', {'stringId': item.stringId}) : null,
                     deleteLink: (is_granted('ROLE_ADMIN') and item.stringId is defined) ? path('project_delete_from_images', {'stringId': item.stringId}) : null,
                     showCreator: true,
                     showViews: true,

@@ -274,6 +274,23 @@
                 {% include 'project_presentation/edit_show/misc_structure_container.html.twig' %}
 
 
+
+                
+                {# Project Presentation Comments #}
+
+                {% include "comment/_js.html.twig" %}
+
+                <div class="col-lg-6 pp-struct-container-wrapper">
+
+                    <div id="comments-struct-container" class="pp-struct-container">
+
+                        {% include "comment/_comments.html.twig" with {commentedEntityType: "projectPresentation", commentedEntityId: presentation.id, commentedEntityComments: presentation.comments } %}
+
+                    </div>
+                
+                </div>
+
+
             </div>
 
         </div>
@@ -300,6 +317,19 @@
             {% include 'project_presentation/edit_show/wysiwyg.html.twig' %}
 
             {% include 'project_presentation/edit_show/_partials/first_time_edit_toggle_hint.html.twig' %}
+
+        {% endif %}
+
+
+         {% if not userPresenter %}
+
+            {% set odd = [0,0,0,0,0,0,1] %}
+
+            {% if random (odd) == 1 and not app.user  %}
+
+                <p class="text-center">Pour rendre votre projet plus visible, <br class="d-md-none">présentez-le gratuitement ( 👉 <a href="{{path('create_project_presentation')}}">c'est ici</a> ).</p>
+            
+            {% endif %}
 
         {% endif %}
 

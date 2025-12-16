@@ -1,0 +1,57 @@
+{#
+
+To use this template, we need access to those variables :
+
+    - the commented entity type (ex: a projectPresentation, an article, etc)
+    - the commented entity id
+    - the comments from the commented entity
+
+#}
+
+{% from 'comment/_macro.html.twig' import oneCommentContainer, commentForm %}
+
+
+{% set countCommentedEntityComments = commentedEntityComments | length %}
+
+<h3 class="commentSectionTitle">{{countCommentedEntityComments}} Commentaire{% if countCommentedEntityComments > 1 %}s{% endif %} </h3>
+
+{{ commentForm(commentedEntityType, commentedEntityId) }}
+
+{# Comments display loop #}
+
+{% for comment in commentedEntityComments | reverse %}
+
+    {% if comment.getParent is null %} {# we display only parent comments (and then its potential child) #}
+
+        <!-- thread container -->
+
+        <article class="threadContainer">
+
+            {{ oneCommentContainer(commentedEntityType, commentedEntityId, comment, comment.id) }}
+
+            <!-- Maybe Some Comment Childs -->
+
+            {% if comment.replies | length > 0 %}
+
+                <!-- Child Comments container with Indentation -->
+
+                <div class="commentRepliesContainer">
+
+                    {% for subComment in comment.replies %}
+
+                        {{ oneCommentContainer(commentedEntityType, commentedEntityId, subComment, comment.id) }}
+
+                    {% endfor %}
+                
+                </div>
+                <!-- End Of Comment Child Comments container -->
+
+            {% endif %}
+
+            <!-- End of Comment Section -->
+
+        </article>
+
+    {% endif %}
+
+{% endfor %}
