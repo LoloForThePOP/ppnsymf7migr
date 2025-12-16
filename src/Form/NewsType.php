@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Form\ProjectPresentation;
+namespace App\Form;
 
 use App\Entity\News;
 use Symfony\Component\Form\AbstractType;
