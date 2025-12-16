@@ -234,6 +234,25 @@
             {% include "_partials/footer.html.twig" %}
 
         {% endblock %}
+
+
+        {# Fullscreen overlay container used for news creation and similar flows #}
+        <div id="fullscreen-overlay" class="overlay-container">
+            <div class="close-button">&times;</div>
+        </div>
+
+        {# Overlay close button snippet #}
+        <script>
+            const overlayCloseButton = document.querySelector('#fullscreen-overlay .close-button');
+            const overlayContainer = document.querySelector('#fullscreen-overlay');
+
+            overlayCloseButton.addEventListener('click', function() {
+                overlayContainer.style.display = 'none';
+                overlayContainer.classList.remove('displayFlex');
+            });
+        </script>
+
+        {# End of overlay snippet #}
         
 
 

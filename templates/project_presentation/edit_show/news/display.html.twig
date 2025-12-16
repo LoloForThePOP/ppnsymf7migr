@@ -1,11 +1,11 @@
 
-{% embed "/project_presentation/_show/structure_content_skeleton.html.twig" with {'iconName': "news", 'title': "Actualités",} %}
+{% embed "/project_presentation/edit_show/skeleton/tructure_content.html.twig" with {'iconName': "news", 'title': "Actualités",} %}
 
       {% block editButtons %}
 
         {# Add a news button (triggers a covering footer to create the news) #}
 
-        <button class="js-footer-news pp-edition-mode plus-btn btn btn-light btn-sm me-3">+</button>
+        <button class="js-footer-news pp-edition-mode plus-btn btn btn-light btn-sm me-3"><span class="plus-sign">+</span></button>
 
 
     {% endblock %}
@@ -32,7 +32,7 @@
 
                     {% set newsTextContent = news.textContent %}
 
-                    {% include "project_presentation/_show/_news_card.html.twig" %}
+                    {% include "project_presentation/edit_show/news/card.html.twig" %}
 
                 {% endfor %}  
 

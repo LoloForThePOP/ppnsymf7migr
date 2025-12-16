@@ -3,7 +3,7 @@
 namespace App\Controller\ProjectPresentation;
 
 use App\Entity\PPBase;
-use App\Form\ProjectPresentation\BusinessCardType;
+use App\Form\NewsType;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\ProjectPresentation\LogoType;
 use App\Form\ProjectPresentation\WebsiteType;
@@ -14,6 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Form\ProjectPresentation\ImageSlideType;
 use App\Form\ProjectPresentation\VideoSlideType;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
+use App\Form\ProjectPresentation\BusinessCardType;
 use App\Form\ProjectPresentation\QuestionAnswerType;
 use App\Form\ProjectPresentation\TextDescriptionType;
 use App\Form\ProjectPresentation\CategoriesKeywordsType;
@@ -42,6 +43,7 @@ class EditShowController extends AbstractController
             $addQuestionAnswerForm = $this->createForm(QuestionAnswerType::class);
             $addImageSlideForm = $this->createForm(ImageSlideType::class);
             $addVideoSlideForm = $this->createForm(VideoSlideType::class);
+            $addNewsForm = $this->createForm(NewsType::class);
             $textDescriptionForm = $this->createForm(TextDescriptionType::class, $presentation);
             $categoriesKeywordsForm = $this->createForm(
                 CategoriesKeywordsType::class,
@@ -61,6 +63,7 @@ class EditShowController extends AbstractController
                 'addQuestionAnswerForm' => $addQuestionAnswerForm->createView(),
                 'addImageSlideForm' => $addImageSlideForm->createView(),
                 'addVideoSlideForm' => $addVideoSlideForm->createView(),
+                'addNewsForm' => $addNewsForm->createView(),
                 'textDescriptionForm' => $textDescriptionForm->createView(),
                 'categoriesKeywordsForm' => $categoriesKeywordsForm->createView(),
                 'addDocumentForm' => $addDocumentForm->createView(),

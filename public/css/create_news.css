@@ -57,7 +57,7 @@
 
 @media screen and (max-width: 580px) {
 
-    #covering-footer .news-form-struct{
+    #fullscreen-overlay .news-form-struct{
         
         margin-left: 10px;
         margin-right: 10px;

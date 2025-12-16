@@ -50,12 +50,11 @@
         
 {# Edit project presentation thumbnail link #}
 
-{% macro editPresentationThumbnail(stringId) %}
+{% macro editPresentationThumbnail (stringId) %}
     
     <span class="pp-edition-mode ms-2 ms-md-3"><a class="" style="color: rgb(33, 37, 41);" href="{{ path ('pp_edit_thumbnail', {'stringId': stringId}) }}">🖼️ Vignette</a></span>
     
 {% endmacro %}
-
 
 <div class="pp-upper-box pp-struct-container row"> 
 
@@ -189,15 +188,13 @@
     </div>
 
 
-    {# Middle column (only >= lg screens)
-
-        To do : keep or not this column  #}
+    {# Middle column (only >= lg screens) #}
 
     {% if userPresenter %}
 
         <div class="middle-col-md pp-edition-mode container col-lg-3 d-none d-lg-flex">
         
-          {#  {{newsFormProxy}} #}
+          {{ newsFormProxy }}
         
         </div>
 

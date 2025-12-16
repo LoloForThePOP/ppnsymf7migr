@@ -4,8 +4,11 @@
 
 $(document).ready(function(){
 
-    $("#covering-footer").append($(".news-form-struct"));
-    $(".news-form-struct").css("display","block");
+    const $newsForm = $(".news-form-struct");
+    if ($newsForm.length) {
+        $("#fullscreen-overlay").append($newsForm);
+        $newsForm.hide();
+    }
 
     $(".proxy-news-input, .js-footer-news").on('click', function (e){
 
@@ -22,8 +25,9 @@ $(document).ready(function(){
 
     function populateFooterNews() {
 
-        $("#covering-footer").addClass("displayFlex");
-        $("#covering-footer").show();
+        $("#fullscreen-overlay").addClass("displayFlex");
+        $("#fullscreen-overlay").show();
+        $newsForm.show();
         tinymce.execCommand('mceFocus',false,'news_textContent');
 
     }

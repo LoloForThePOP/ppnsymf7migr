@@ -1,10 +1,10 @@
 <div class="news-form-container">
 
-    {{ form_start(form) }}
+    {{ form_start(addNewsForm) }}
 
         <div class="textarea-container">
 
-            {{form_widget(form.textContent)}}
+            {{form_widget(addNewsForm.textContent)}}
         
         </div>
 
@@ -20,7 +20,7 @@
 
                     <span class="add-image-label" data-image-position="1">Ajouter une image ...</span>
                     
-                    <div class="caption-input-container" data-caption-position="1">{{form_widget(form.captionImage1)}}</div>
+                    <div class="caption-input-container" data-caption-position="1">{{form_widget(addNewsForm.captionImage1)}}</div>
                     
                 </div>
 
@@ -30,7 +30,7 @@
 
                     <span class="add-image-label" data-image-position="2">Ajouter une image ...</span>
                     
-                    <div class="caption-input-container" data-caption-position="2">{{form_widget(form.captionImage2)}}</div>
+                    <div class="caption-input-container" data-caption-position="2">{{form_widget(addNewsForm.captionImage2)}}</div>
                     
                 </div>
 
@@ -40,7 +40,7 @@
 
                     <span class="add-image-label" data-image-position="3">Ajouter une image ...</span>
                     
-                    <div class="caption-input-container" data-caption-position="3">{{form_widget(form.captionImage3)}}</div>
+                    <div class="caption-input-container" data-caption-position="3">{{form_widget(addNewsForm.captionImage3)}}</div>
                     
                 </div>
             
@@ -49,13 +49,13 @@
 
             <div class="d-none">
 
-                {{form_row(form.image1File, {'attr': {'data-position': '1'}})}}
+                {{form_row(addNewsForm.image1File, {'attr': {'data-position': '1'}})}}
                 
 
-                {{form_row(form.image2File, {'attr': {'data-position': '2'}})}}
+                {{form_row(addNewsForm.image2File, {'attr': {'data-position': '2'}})}}
                 
 
-                {{form_row(form.image3File, {'attr': {'data-position': '3'}})}}
+                {{form_row(addNewsForm.image3File, {'attr': {'data-position': '3'}})}}
             
             </div>
 
@@ -63,7 +63,7 @@
         
         </div>
 
-    {{ form_end(form) }}
+    {{ form_end(addNewsForm) }}
 
 
 </div>
