@@ -8,26 +8,34 @@ Produit un JSON UTF-8 valide :
 {
   "title": "string",
   "goal": "string",
-  "description_html": "<p>Paragraphe 1</p><p>Paragraphe 2</p><p>Paragraphe 3</p>",
+  "description_html": "<p>Paragraphe 1</p><p>Paragraphe 2</p>",
   "qa": [
     {"question": "string", "answer": "string"}
   ],
   "logo_url": "string|null",
-  "image_urls": ["string"],
+  "images": [{"url": "string", "caption": "string|null"}],
+  "videos": [{"url": "string", "caption": "string|null"}],
   "categories": ["software|science|inform|humane|animals|material|restore|transport|environment|history|money|food|services|arts|entertainment|data|health|idea|space|crisis"],
+  "keywords": ["string"],
   "source_url": "string|null",
   "websites": [
     {"title": "string", "url": "string"}
   ]
 }
 
+
 Contraintes :
 - Langue : français uniquement.
-- description_html : 3 paragraphes max, balisés avec <p>…</p>, sans autres balises.
-- qa : 2 à 4 Q/R concises en français.
+- description_html : 2 paragraphes, balisés avec <p>…</p>, sans autres balises.
+- qa : 2 à 4 questions/réponses relativement courtes qui ne recoupent pas avec goal et pas avec description_html pour rendre le contenu digestible (en français).
 - image_urls : seulement les URLs listées dans IMAGES (aucune invention), dédupliquer, max 5.
+- images : si des légendes sont associées aux images (ex. liste numérotée de légendes après les URLs), renvoie un tableau d’objets aligné dans l’ordre d’apparition avec url + caption (caption peut être null si absente). Ne jamais inventer de légende. Sinon, renvoyer [].
+- videos : extraire uniquement les URLs YouTube explicites présentes (aucune invention), dédupliquer. Si des légendes sont associées (ex : titre ou phrase avant/après le lien), inclure dans caption (sinon null). Sinon, renvoyer [].
 - logo_url : URL de logo explicite si présente dans IMAGES ou le HTML fourni ; sinon null. Ne pas inventer.
 - categories : 1 à 3 valeurs parmi la liste autorisée ; sinon ["services"].
+- keywords : 3 à 5 mots-clés courts issus du texte. Pas d’invention ; si rien de pertinent, renvoyer [].
 - source_url : si un lien principal ressort dans LINKS, sinon null.
 - websites : 0..5 liens pertinents pris dans LINKS (titre = host lisible ou texte).
 - Retourne uniquement le JSON, pas de texte supplémentaire.
+
+
