@@ -10,6 +10,7 @@ use App\Form\CommentType;
 use App\Service\CommentService;
 use App\Service\NotificationService;
 use App\Repository\CommentRepository;
+use App\Repository\NewsRepository;
 use App\Repository\PPBaseRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,6 +27,7 @@ class CommentController extends AbstractController
         Request $request,
         EntityManagerInterface $manager,
         PPBaseRepository $ppRepo,
+        NewsRepository $newsRepo,
         CommentService $commentService,
         /* NotificationService $notificationService */
     ): Response
@@ -63,12 +65,17 @@ class CommentController extends AbstractController
                     $newComment->setArticle($article);
                     break; */
 
-               /*  case 'news':
+                case 'news':
 
-                    $news = $this->getDoctrine()->getRepository(News::class)->findOneBy(['id' => $commentedEntityId]);
-                    
+                    $news = $newsRepo->findOneBy(['id' => $commentedEntityId]);
+                    if ($news === null) {
+                        return new JsonResponse(
+                            ['error' => 'Actualité introuvable.'],
+                            Response::HTTP_BAD_REQUEST,
+                        );
+                    }
                     $newComment->setNews($news);
-                    break; */
+                    break;
                 
                 default:
                     # code...
@@ -197,6 +204,14 @@ class CommentController extends AbstractController
                 ]);
                 break;
 
+            case 'news':
+
+                $goBackUrl = $this->generateUrl('edit_show_project_presentation', [
+                    'stringId' => $comment->getNews()->getProject()->getStringId(),
+                    '_fragment' => 'news-struct-container',
+                ]);
+                break;
+
             default:
                 throw new \Exception("Unknown Go Back Button Route");
                 
@@ -222,19 +237,20 @@ class CommentController extends AbstractController
                     ]);
                     break;
 
+                case 'news':
+                    return $this->redirectToRoute('edit_show_project_presentation', [
+                        'stringId' => $comment->getNews()->getProject()->getStringId(),
+                        '_fragment' => 'news-struct-container',
+                    ]);
+                    break;
+
                /*  case 'article':
                     return $this->redirectToRoute('show_article', [
                         'slug' => $comment->getArticle()->getSlug(),
                         '_fragment' => 'comments-struct-container',
                     ]);
                     break;
-
-                case 'news':
-                    return $this->redirectToRoute('show_presentation', [
-                        'stringId' => $comment->getNews()->getProject()->getStringId(),
-                        '_fragment' => 'news-struct-container',
-                    ]);
-                    break; */
+                */
                 
                 default:
                     # code...

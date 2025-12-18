@@ -183,6 +183,39 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
         return $this->getUserIdentifier() === $user->getUserIdentifier();
     }
 
+    // ────────────────────────────────────────
+    // Serializable Interface Implementation
+    // ────────────────────────────────────────
+
+    public function __serialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'email' => $this->email,
+            'roles' => $this->roles,
+            'password' => $this->password,
+        ];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        if (!array_key_exists('id', $data)) {
+            $normalized = [];
+            foreach ($data as $key => $value) {
+                if (is_string($key) && str_contains($key, "\0")) {
+                    $parts = explode("\0", $key);
+                    $key = end($parts);
+                }
+                $normalized[$key] = $value;
+            }
+            $data = $normalized;
+        }
+
+        $this->id = $data['id'] ?? null;
+        $this->email = $data['email'] ?? null;
+        $this->roles = $data['roles'] ?? [];
+        $this->password = $data['password'] ?? null;
+    }
 
 
 

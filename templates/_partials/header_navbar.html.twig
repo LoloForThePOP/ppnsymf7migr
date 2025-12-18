@@ -266,6 +266,11 @@
 
         <ul class="navbar-nav ms-md-auto gap-2">
 
+          {# Theme selection #}
+
+            <img class="d-inline-block cursor-pointer me-1" src="{{ asset('color-palette.svg', 'misc')}}" alt="color palette icon" width="34">
+
+
           {# Access admin panel icon (admins only) #}
           
           {% if is_granted("ROLE_ADMIN") %}
@@ -411,6 +416,10 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <style>
+
+  .navbar{
+    z-index: 30;
+  }
 
   .dropdown-item{
     font-size: 1.15em;

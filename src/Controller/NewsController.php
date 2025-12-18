@@ -12,10 +12,16 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class NewsController extends AbstractController
 {
-    #[Route('/news/edit/{id}', name: 'edit_news')]
-    public function index(News $news, Request $request, EntityManagerInterface $manager): Response
+    #[Route('/news/edit/{id}', name: 'edit_news', methods: ['GET', 'POST'])]
+    public function edit(News $news, Request $request, EntityManagerInterface $manager): Response
     {
-        $this->denyAccessUnlessGranted('edit', $news);
+        $presentation = $news->getProject();
+
+        if ($presentation !== null) {
+            $this->denyAccessUnlessGranted('edit', $presentation);
+        } else {
+            $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        }
 
         $newsForm = $this->createForm(NewsType::class, $news);
         $newsForm->handleRequest($request);
@@ -24,12 +30,14 @@ class NewsController extends AbstractController
             
             $manager->flush();
 
+            $this->addFlash('success', '✅ News mise à jour.');
+
             return $this->redirectToRoute(
-                'show_presentation',
+                'edit_show_project_presentation',
 
                 [
 
-                    'stringId' => $news->getProject()->getStringId(),
+                    'stringId' => $presentation?->getStringId(),
                     '_fragment' => 'news-struct-container'
 
                 ]
@@ -38,10 +46,10 @@ class NewsController extends AbstractController
 
         }
 
-        return $this->render('news/edit.html.twig', [
+        return $this->render('project_presentation/edit_show/news/edit.html.twig', [
             'newsForm' => $newsForm->createView(),
             'news' => $news,
-            'ppStringId' => $news->getProject()->getStringId(),
+            'ppStringId' => $presentation?->getStringId(),
         ]);
 
     }

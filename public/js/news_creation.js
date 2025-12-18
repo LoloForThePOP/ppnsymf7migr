@@ -5,30 +5,45 @@
 $(document).ready(function(){
 
     const $newsForm = $(".news-form-struct");
-    if ($newsForm.length) {
-        $("#fullscreen-overlay").append($newsForm);
-        $newsForm.hide();
+    const $overlay = $("#fullscreen-overlay");
+    if (!$newsForm.length || !$overlay.length) {
+        return;
     }
+
+    const defaultPresentationId = $newsForm.data("pp-id") || null;
+
+    $overlay.append($newsForm);
+    $newsForm.hide();
+
+    const setPresentationId = function (presentationId) {
+        const targetId = presentationId || defaultPresentationId;
+        if (targetId && $("#news_presentationId").length) {
+            $("#news_presentationId").val(targetId);
+        }
+    };
 
     $(".proxy-news-input, .js-footer-news").on('click', function (e){
 
         e.preventDefault();
 
+        setPresentationId($(this).data("pp-id"));
         populateFooterNews();
-        
-        // If user have several presentation, we post news targeted presentation.
-        var presentationId = $(this).data("pp-id");
-        $("#news_presentationId").val(presentationId);
 
     });
 
+    $overlay.find('.close-button').on('click', function() {
+        $newsForm.hide();
+    });
 
     function populateFooterNews() {
 
-        $("#fullscreen-overlay").addClass("displayFlex");
-        $("#fullscreen-overlay").show();
+        $overlay.addClass("displayFlex");
+        $overlay.show();
         $newsForm.show();
-        tinymce.execCommand('mceFocus',false,'news_textContent');
+
+        if (window.tinymce) {
+            tinymce.execCommand('mceFocus',false,'news_textContent');
+        }
 
     }
 

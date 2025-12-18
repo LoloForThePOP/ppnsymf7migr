@@ -2,6 +2,7 @@
 
 namespace App\Controller\ProjectPresentation;
 
+use App\Entity\News;
 use App\Entity\PPBase;
 use App\Form\NewsType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -43,7 +44,17 @@ class EditShowController extends AbstractController
             $addQuestionAnswerForm = $this->createForm(QuestionAnswerType::class);
             $addImageSlideForm = $this->createForm(ImageSlideType::class);
             $addVideoSlideForm = $this->createForm(VideoSlideType::class);
-            $addNewsForm = $this->createForm(NewsType::class);
+            $addNewsForm = $this->createForm(
+                NewsType::class,
+                new News(),
+                [
+                    'action' => $this->generateUrl('pp_create_news', [
+                        'stringId' => $presentation->getStringId(),
+                    ]),
+                    'method' => 'POST',
+                ]
+            );
+            $addNewsForm->get('presentationId')->setData($presentation->getId());
             $textDescriptionForm = $this->createForm(TextDescriptionType::class, $presentation);
             $categoriesKeywordsForm = $this->createForm(
                 CategoriesKeywordsType::class,

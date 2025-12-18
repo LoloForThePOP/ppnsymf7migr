@@ -163,7 +163,7 @@
 
             {# Screen covering add news ui triggered when user clicks on add a news proxy input #}
 
-            <div class="news-form-struct pp-edition-mode" style="display:none;"> 
+            <div class="news-form-struct pp-edition-mode" data-pp-id="{{ presentation.id }}" style="display:none;"> 
 
                 <h4 class="news-form-struct-title"><img id="" class="news-icon me-1" src="{{ asset('news.svg', 'misc')}}" alt="news icon (a radio wave)" width="22" height="22" style=" transform: scaleX(-1);">Partager des Nouvelles<img id="" class="news-icon ms-1" src="{{ asset('news.svg', 'misc')}}" alt="news icon (a radio wave)" width="22" height="22"></h4>
 
@@ -243,6 +243,21 @@
 
                 </div>
 
+
+
+                {# News #}
+
+                {% set countNews = presentation.news | length %}
+               
+                <div class="col-lg-6 pp-struct-container-wrapper {% if countNews == 0 %} pp-edition-mode {% endif %}">
+
+                    <div id="news-struct-container" data-structure="news" class="pp-struct-container">
+
+                        {% include 'project_presentation/edit_show/news/display.html.twig' %}
+
+                    </div>
+
+                </div>
 
 
                 {# Questions & Answers #}

@@ -101,13 +101,13 @@
 
         <div class="mt-5 d-flex justify-content-center">
 
-            <button id="" type="submit" class="btn btn-validate me-5">✔️ Valider</button>
+            <a href="{{path('edit_show_project_presentation', {'stringId': ppStringId, '_fragment': 'news-struct-container' })}}">
 
-            <a href="{{path('show_presentation', {'stringId': ppStringId })}}">
-
-                <button type="button" class="btn btn-go-back">❌ Annuler</button>
+                <button type="button" class="btn btn-go-back me-5">❌ Annuler</button>
 
             </a>
+
+            <button id="" type="submit" class="btn btn-validate">✔️ Valider</button>
 
         </div>
 

@@ -3,110 +3,46 @@
 namespace App\Security\Voter;
 
 use App\Entity\News;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Voter;
+use Symfony\Component\Security\Core\User\UserInterface;
 
-class ManageNewsVoter extends Voter
+final class ManageNewsVoter extends Voter
 {
-
-    private $requestStack;
-
-    public function __construct(RequestStack $requestStack) {
-
-        $this->requestStack = $requestStack;
-
-    }
-
-
-    protected function supports(string $attribute, $subject): bool
+    protected function supports(string $attribute, mixed $subject): bool
     {
-
-        return in_array($attribute, ['delete', 'edit'])
+        return in_array($attribute, ['delete', 'edit'], true)
             && $subject instanceof News;
     }
 
-    protected function voteOnAttribute(string $attribute, $news, TokenInterface $token): bool
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
-
+        /** @var News $news */
+        $news = $subject;
         $user = $token->getUser();
 
-        switch ($attribute) {
-
-            case 'edit':
-
-                return $this->canEdit($news, $token);
-
-                break;
-
-
-            case 'delete':
-
-                return $this->canDelete($news, $token);
-
-                break;
-        }
-
-        return false;
-    }
-
-    private function canEdit(News $news, TokenInterface $token)
-    {
-
-        // !! $token->getUser() represents an user ONLY if user is logged in. Otherwise, it is not an instance of class User. To check if user is not logged in (i.e. anonymous), test !$token->getUser() instanceof UserInterface
-
-        $user = $token->getUser();
-
-        // if user is anonymous, do not grant access
         if (!$user instanceof UserInterface) {
             return false;
         }
 
-        // if user is an admin, he can edit
-        if(in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_NEWS_MANAGE', $user->getRoles())){
+        if ($this->hasRole($user, 'ROLE_ADMIN') || $this->hasRole($user, 'ROLE_NEWS_MANAGE')) {
             return true;
         }
 
-        // if user is article creator
-        if ($user == $news->getAuthor()){
+        $projectCreator = $news->getProject()?->getCreator();
+        if ($projectCreator !== null && $user === $projectCreator) {
+            return true;
+        }
+
+        if ($news->getCreator() !== null && $user === $news->getCreator()) {
             return true;
         }
 
         return false;
     }
 
-
-    private function canDelete(News $news, TokenInterface $token)
+    private function hasRole(UserInterface $user, string $role): bool
     {
-
-        // !! $token->getUser() represents an user ONLY if user is logged in. Otherwise, it is not an instance of class User. To check if user is not logged in (i.e. anonymous), test !$token->getUser() instanceof UserInterface
-
-        $user = $token->getUser();
-
-        // if user is anonymous, do not grant access
-        if (!$user instanceof UserInterface) {
-            return false;
-        }
-
-        // if user is an admin
-        if(in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_NEWS_MANAGE', $user->getRoles())){
-            return true;
-        }
-
-        // if user is news creator
-        if ($user == $news->getAuthor()){
-            return true;
-        }
-
-        return false;
+        return in_array($role, $user->getRoles(), true);
     }
-
-
-
-
-
-
-
-
 }
