@@ -1,5 +1,11 @@
 {% extends 'base.html.twig' %}
 
+{% set showThemeSelector = true %}
+
+{% block header_navbar %}
+    {% include "_partials/header_navbar.html.twig" with { showThemeSelector: true } %}
+{% endblock %}
+
 
 {# Setting some presentation metadata for SEO, Open Graph #}
 
@@ -412,6 +418,10 @@
         {% include 'project_presentation/edit_show/places/_js.html.twig' with { presentation: presentation } %}
         
     
+    {% endif %}
+
+    {% if showThemeSelector %}
+        <script src="/js/theme_selector.js"></script>
     {% endif %}
     
 	{# Image Zoom Only On Large Screens #}

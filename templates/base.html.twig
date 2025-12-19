@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+{% set storedTheme = app.user and app.user.profile ? (app.user.profile.extra.theme|default('classic')) : 'classic' %}
+{% set resolvedTheme = storedTheme == 'light' ? 'classic' : storedTheme %}
+
+<html data-theme="{{ resolvedTheme }}">
 
     <head>
 
@@ -46,6 +49,21 @@
         <meta name="apple-mobile-web-app-title" content="Propon" />
         <link rel="manifest" href="/site.webmanifest" />
 
+
+        {# Theme preference for anonymous users (localStorage) #}
+
+        {% if not app.user %}
+            <script>
+                (function() {
+                    try {
+                        var storedTheme = localStorage.getItem('propon_theme');
+                        if (storedTheme) {
+                            document.documentElement.setAttribute('data-theme', storedTheme);
+                        }
+                    } catch (e) {}
+                })();
+            </script>
+        {% endif %}
 
         {# Google Fonts #}
 
@@ -155,7 +173,9 @@
 
         {# Header Navbar #}
 
-        {% include "_partials/header_navbar.html.twig" %}
+        {% block header_navbar %}
+            {% include "_partials/header_navbar.html.twig" %}
+        {% endblock %}
 
         {# feedback when no internet connection #}
 

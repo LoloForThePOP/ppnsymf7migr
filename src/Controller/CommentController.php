@@ -29,7 +29,7 @@ class CommentController extends AbstractController
         PPBaseRepository $ppRepo,
         NewsRepository $newsRepo,
         CommentService $commentService,
-        /* NotificationService $notificationService */
+        NotificationService $notificationService
     ): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER'); //only logged in users can comment
@@ -132,6 +132,8 @@ class CommentController extends AbstractController
             $manager->persist($newComment);
 
             $manager->flush();
+
+            $notificationService->notifyCommentCreated($newComment);
 
             //notification management
 

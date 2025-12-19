@@ -1,0 +1,71 @@
+{% set storedTheme = app.user and app.user.profile ? (app.user.profile.extra.theme|default('classic')) : 'classic' %}
+{% set currentTheme = storedTheme == 'light' ? 'classic' : storedTheme %}
+
+<li
+  class="nav-item dropdown d-inline-flex align-items-center theme-selector js-theme-selector"
+  data-current-theme="{{ currentTheme }}"
+  data-authenticated="{{ app.user ? '1' : '0' }}"
+  {% if app.user %}
+    data-sync-url="{{ path('user_theme_update') }}"
+    data-csrf-token="{{ csrf_token('update_theme') }}"
+  {% endif %}
+>
+  <button
+    class="btn p-0 border-0 bg-transparent dropdown-toggle theme-selector-toggle"
+    type="button"
+    id="themeDropdown"
+    data-bs-toggle="dropdown"
+    aria-expanded="false"
+    aria-label="Choisir un thème"
+  >
+    <img class="d-inline-block cursor-pointer me-1" src="{{ asset('color-palette.svg', 'misc')}}" alt="color palette icon" width="34">
+  </button>
+
+  <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="themeDropdown">
+    <li>
+      <h6 class="dropdown-header">Thèmes</h6>
+    </li>
+    <li>
+      {% set isActive = currentTheme == 'classic' %}
+      <button class="dropdown-item d-flex align-items-center js-theme-option {{ isActive ? 'active' : '' }}" type="button" data-theme="classic">
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#f97316;margin-right:8px;"></span>
+        Classique
+        <span class="badge bg-success ms-auto js-theme-active {{ isActive ? '' : 'd-none' }}">Actif</span>
+      </button>
+    </li>
+    <li>
+      {% set isActive = currentTheme == 'sand' %}
+      <button class="dropdown-item d-flex align-items-center js-theme-option {{ isActive ? 'active' : '' }}" type="button" data-theme="sand">
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#d6b27f;margin-right:8px;"></span>
+        Sable
+        <span class="badge bg-success ms-auto js-theme-active {{ isActive ? '' : 'd-none' }}">Actif</span>
+      </button>
+    </li>
+    <li>
+      {% set isActive = currentTheme == 'mint' %}
+      <button class="dropdown-item d-flex align-items-center js-theme-option {{ isActive ? 'active' : '' }}" type="button" data-theme="mint">
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#34d399;margin-right:8px;"></span>
+        Menthe
+        <span class="badge bg-success ms-auto js-theme-active {{ isActive ? '' : 'd-none' }}">Actif</span>
+      </button>
+    </li>
+    <li>
+      {% set isActive = currentTheme == 'slate' %}
+      <button class="dropdown-item d-flex align-items-center js-theme-option {{ isActive ? 'active' : '' }}" type="button" data-theme="slate">
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#64748b;margin-right:8px;"></span>
+        Ardoise
+        <span class="badge bg-success ms-auto js-theme-active {{ isActive ? '' : 'd-none' }}">Actif</span>
+      </button>
+    </li>
+    <li><hr class="dropdown-divider"></li>
+    <li>
+      <span class="dropdown-item-text text-muted">
+        {% if app.user %}
+          Préférence enregistrée sur votre compte.
+        {% else %}
+          Préférence enregistrée sur cet appareil.
+        {% endif %}
+      </span>
+    </li>
+  </ul>
+</li>

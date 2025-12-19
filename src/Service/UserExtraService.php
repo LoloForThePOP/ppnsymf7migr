@@ -71,7 +71,7 @@ class UserExtraService
 
         $this->assertType($key, $value);
 
-        $extra = $profile->getExtra();
+        $extra = $this->initializeIfNeeded($profile);
         $extra[$key] = $this->normalizeValue($key, $value);
         $profile->setExtra($extra);
     }

@@ -2,7 +2,7 @@
 
 <header>
 
-  <nav class="navbar navbar-expand-md fixed-top navbar-light bg-white" style="border-bottom: 2px solid orange;">
+  <nav class="navbar navbar-expand-md fixed-top navbar-light bg-white" style="border-bottom: 2px solid var(--theme-accent);">
 
     <div class="container-fluid ps-3 ps-md-5">
 
@@ -266,9 +266,11 @@
 
         <ul class="navbar-nav ms-md-auto gap-2">
 
-          {# Theme selection #}
+          {# Theme selection (optional) #}
 
-            <img class="d-inline-block cursor-pointer me-1" src="{{ asset('color-palette.svg', 'misc')}}" alt="color palette icon" width="34">
+          {% if showThemeSelector|default(false) %}
+            {% include "_partials/theme_selector.html.twig" %}
+          {% endif %}
 
 
           {# Access admin panel icon (admins only) #}

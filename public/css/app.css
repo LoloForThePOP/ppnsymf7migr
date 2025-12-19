@@ -34,6 +34,61 @@ a{
 
 }
 
+/* Theme variables */
+
+:root {
+    --theme-bg: #ffffff;
+    --theme-text: #1f2937;
+    --theme-accent: #f97316;
+    --theme-border: #e5e7eb;
+}
+
+:root[data-theme="classic"] {
+    --theme-bg: #ffffff;
+    --theme-text: #1f2937;
+    --theme-accent: #f97316;
+    --theme-border: #e5e7eb;
+}
+
+:root[data-theme="sand"] {
+    --theme-bg: #fdf6ed;
+    --theme-text: #3b2f2a;
+    --theme-accent: #d6a75c;
+    --theme-border: #eadcc7;
+}
+
+:root[data-theme="mint"] {
+    --theme-bg: #f1fbf7;
+    --theme-text: #0f2f27;
+    --theme-accent: #2da971;
+    --theme-border: #cfeede;
+}
+
+:root[data-theme="slate"] {
+    --theme-bg: #f5f6f8;
+    --theme-text: #1f2937;
+    --theme-accent: #64748b;
+    --theme-border: #d6dbe2;
+}
+
+body {
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
+}
+
+header .navbar {
+    border-bottom-color: var(--theme-accent) !important;
+}
+
+.theme-selector-toggle.dropdown-toggle::after {
+    display: none;
+}
+
+.theme-selector .dropdown-item.active {
+    font-weight: 600;
+    background-color: #f8fafc;
+}
+
 
 @media screen and (max-width: 580px) {
 

@@ -5,6 +5,7 @@ namespace App\Controller\ProjectPresentation;
 use App\Entity\News;
 use App\Entity\PPBase;
 use App\Form\NewsType;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,6 +26,7 @@ final class CreateNewsController extends AbstractController
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         Request $request,
         EntityManagerInterface $em,
+        NotificationService $notificationService,
     ): Response {
         $news = new News();
         $form = $this->createForm(NewsType::class, $news);
@@ -54,6 +56,8 @@ final class CreateNewsController extends AbstractController
 
         $em->persist($news);
         $em->flush();
+
+        $notificationService->notifyNewsCreated($news);
 
         $this->addFlash('success', '✅ Votre actualité a été publiée.');
 
