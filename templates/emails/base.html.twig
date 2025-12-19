@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Propon{% endblock %}</title>
+  </head>
+  <body style="margin:0;padding:0;background-color:#f4f7fb;font-family:Arial, Helvetica, sans-serif;color:#1f2937;">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
+      {% block preheader %}{% endblock %}
+    </div>
+    {% set cardWidth = maxWidth|default('600px') %}
+    {% set cardPadding = cardPadding|default('28px') %}
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color:#f4f7fb;padding:24px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:{{ cardWidth }};background-color:#ffffff;border-radius:14px;border:1px solid #e5e7eb;">
+            <tr>
+              <td style="padding:{{ cardPadding }};">
+                {% block content %}{% endblock %}
+              </td>
+            </tr>
+          </table>
+          <div style="margin-top:14px;font-size:11px;color:#94a3b8;">
+            {% block footer_note %}Propon &bull; Email automatique{% endblock %}
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

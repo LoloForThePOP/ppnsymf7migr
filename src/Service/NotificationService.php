@@ -570,6 +570,7 @@ class NotificationService
     private function excerpt(string $value, int $limit = 140): string
     {
         $value = trim(strip_tags($value));
+        $value = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         if ($value === '') {
             return '';
         }

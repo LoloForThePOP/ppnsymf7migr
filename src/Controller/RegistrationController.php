@@ -5,14 +5,17 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\RegistrationType;
 use App\Service\SlugService;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -35,20 +38,15 @@ final class RegistrationController extends AbstractController
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
-        // to fill : passer par une page intermédiaire : un e-mail vous a été envoyé à l'adresse ...
-
-        $email = (new Email())
-            ->from($this->getParameter('app.email.noreply'))
-            ->to($user->getEmail())
-            ->subject('Propon veuillez confirmer votre adresse e-mail')
-            ->html("
-                <p>Bonjour {$user->getUsername()},</p>
-                <p>Pour finaliser votre inscription sur Propon veuillez cliquer sur le lien ci-dessous :</p>
-                <p><a href='{$verificationUrl}'>{$verificationUrl}</a></p>
-                <p>Si vous n'avez pas créé ce compte Propon veuillez ignorer ce message.</p>
-                <p>Merci d'utiliser Propon.</p>
-                <p>L'équipe Propon</p>
-            ");
+        $email = (new TemplatedEmail())
+            ->from(new Address($this->getParameter('app.email.noreply'), 'Propon'))
+            ->to(new Address($user->getEmail()))
+            ->subject('Propon - Confirmez votre adresse e-mail')
+            ->htmlTemplate('emails/verify_email.html.twig')
+            ->context([
+                'recipientName' => $user->getUsername(),
+                'verificationUrl' => $verificationUrl,
+            ]);
 
         $this->mailer->send($email);
     }
@@ -79,10 +77,24 @@ final class RegistrationController extends AbstractController
             $user->setEmailValidationToken($token);
             //$this->slugger->generate($user);
 
-            
-            $em->persist($user);
-            //dd($user);
-            $em->flush();
+            try {
+                $em->persist($user);
+                //dd($user);
+                $em->flush();
+            } catch (UniqueConstraintViolationException $exception) {
+                $errorMessage = (string) $exception->getMessage();
+                if (str_contains($errorMessage, 'UNIQ_IDENTIFIER_EMAIL')) {
+                    $form->get('email')->addError(new FormError('Cette adresse e-mail est déjà utilisée.'));
+                } elseif (str_contains($errorMessage, 'UNIQ_IDENTIFIER_USERNAME')) {
+                    $form->get('username')->addError(new FormError('Ce nom d\'utilisateur est déjà utilisé.'));
+                } else {
+                    $form->addError(new FormError('Ce compte existe déjà.'));
+                }
+
+                return $this->render('registration/register.html.twig', [
+                    'registrationForm' => $form->createView(),
+                ]);
+            }
 
             $this->sendVerificationEmail($user);
 

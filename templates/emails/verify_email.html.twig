@@ -1,0 +1,30 @@
+{% extends 'emails/base.html.twig' %}
+{% set emailTitle = 'Confirmez votre adresse e-mail' %}
+{% set greetingName = recipientName|default('') %}
+
+{% block title %}{{ emailTitle }}{% endblock %}
+{% block preheader %}Finalisez votre inscription sur Propon.{% endblock %}
+
+{% block content %}
+  <div style="font-size:18px;font-weight:700;color:#0f172a;">
+    {{ emailTitle }}
+  </div>
+  <div style="margin-top:10px;font-size:14px;color:#475569;">
+    Bonjour{% if greetingName %} {{ greetingName }}{% endif %},
+  </div>
+  <div style="margin-top:18px;font-size:15px;line-height:1.5;color:#1f2937;">
+    <p style="margin:0 0 12px 0;">Merci pour votre inscription sur Propon.</p>
+    <p style="margin:0 0 12px 0;">Pour activer votre compte, veuillez confirmer votre adresse e-mail.</p>
+  </div>
+  <div style="margin-top:18px;">
+    <a href="{{ verificationUrl }}" style="display:inline-block;background-color:#0f766e;color:#ffffff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600;">
+      Confirmer mon adresse
+    </a>
+  </div>
+  <div style="margin-top:16px;font-size:14px;color:#475569;">
+    L'équipe Propon
+  </div>
+  <div style="margin-top:18px;font-size:12px;color:#94a3b8;">
+    Si vous n'avez pas créé ce compte, vous pouvez ignorer ce message.
+  </div>
+{% endblock %}

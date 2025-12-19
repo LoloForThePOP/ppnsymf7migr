@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: /sitemap.xml
+Sitemap: https://www.propon.org/sitemap.xml

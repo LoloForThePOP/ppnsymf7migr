@@ -32,9 +32,12 @@ class RegistrationType extends AbstractType
                 'label' => 'Adresse e-mail',
                 'attr' => ['placeholder' => 'Écrire ici'],
                 'constraints' => [
-                    new Assert\NotBlank(['message' => 'Email cannot be empty.']),
-                    new Assert\Email(['message' => 'Please enter a valid email.']),
-                    new Assert\Length(['max' => 180]),
+                    new Assert\NotBlank(['message' => 'L\'adresse e-mail ne peut pas être vide.']),
+                    new Assert\Email(['message' => 'Veuillez entrer une adresse e-mail valide.']),
+                    new Assert\Length([
+                        'max' => 180,
+                        'maxMessage' => 'L\'adresse e-mail ne peut pas dépasser {{ limit }} caractères.',
+                    ]),
                 ],
             ])
 
@@ -44,11 +47,12 @@ class RegistrationType extends AbstractType
                 'mapped' => false,
                 'attr' => ['placeholder' => 'Écrire ici', 'autocomplete' => 'new-password'],
                 'constraints' => [
-                    new Assert\NotBlank(['message' => 'Password cannot be empty.']),
+                    new Assert\NotBlank(['message' => 'Le mot de passe ne peut pas être vide.']),
                     new Assert\Length([
                         'min' => 8,
                         'max' => 255,
-                        'minMessage' => 'Password must be at least {{ limit }} characters long.',
+                        'minMessage' => 'Le mot de passe doit contenir au moins {{ limit }} caractères.',
+                        'maxMessage' => 'Le mot de passe ne peut pas dépasser {{ limit }} caractères.',
                     ]),
                 ],
             ]);

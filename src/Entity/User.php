@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
@@ -29,6 +30,8 @@ use Symfony\Component\Security\Core\User\EquatableInterface;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
 #[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['email'], message: 'Cette adresse e-mail est déjà utilisée.', errorPath: 'email')]
+#[UniqueEntity(fields: ['username'], message: 'Ce nom d\'utilisateur est déjà utilisé.', errorPath: 'username')]
 class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUserInterface
 {
 
@@ -41,9 +44,9 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Assert\NotBlank(message: 'Email cannot be empty.')]
-    #[Assert\Email(message: 'Please enter a valid email address.')]
-    #[Assert\Length(max: 180, maxMessage: 'Email cannot exceed {{ limit }} characters.')]
+    #[Assert\NotBlank(message: 'L\'adresse e-mail ne peut pas être vide.')]
+    #[Assert\Email(message: 'Veuillez entrer une adresse e-mail valide.')]
+    #[Assert\Length(max: 180, maxMessage: 'L\'adresse e-mail ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $email = null;
 
     /**
@@ -85,11 +88,11 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
     private ?string $emailValidationToken = null;
 
     #[ORM\Column(length: 40)]
-    #[Assert\NotBlank(message: 'Username cannot be empty.')]
-    #[Assert\Length(min: 2, max: 40, minMessage: 'Username must be at least {{ limit }} characters long.')]
+    #[Assert\NotBlank(message: 'Le nom d\'utilisateur ne peut pas être vide.')]
+    #[Assert\Length(min: 2, max: 40, minMessage: 'Le nom d\'utilisateur doit contenir au moins {{ limit }} caractères.')]
     #[Assert\Regex(
         pattern: '/^[\p{L}\p{N}\s._-]+$/u',
-        message: 'Username can only contain letters, numbers, spaces, dots, underscores, and dashes.'
+        message: 'Le nom d\'utilisateur ne peut contenir que des lettres, chiffres, espaces, points, tirets bas et traits d\'union.'
     )]
     private ?string $username = null;
 

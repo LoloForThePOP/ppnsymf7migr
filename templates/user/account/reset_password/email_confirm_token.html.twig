@@ -1,19 +1,30 @@
+{% extends 'emails/base.html.twig' %}
+{% set emailTitle = 'Réinitialisation du mot de passe' %}
+{% set greetingName = user.username|default('') %}
 
-<div style="font-size:17px;">
+{% block title %}{{ emailTitle }}{% endblock %}
+{% block preheader %}Votre demande de réinitialisation de mot de passe.{% endblock %}
 
-    Une demande de réinitialisation de votre mot de passe a été effectuée sur le site Propon.
-
-    <br><br>
-    
-    Pour réinitialiser votre mot de passe, veuillez cliquer sur le lien suivant : <a href="{{ confirmationURL }}">{{ confirmationURL }}</a>
-
-
-    <p>Si vous n'avez pas demandé de changement de mot de passe veuillez ignorer ce message.</p>
-
-    <p>L'équipe Propon</p>
-
-    <p style="margin-top: 16px; color: #555; font-size: 14px;">
-        Propon — Présenter les projets
-    </p>
-
-</div>
+{% block content %}
+  <div style="font-size:18px;font-weight:700;color:#0f172a;">
+    {{ emailTitle }}
+  </div>
+  <div style="margin-top:10px;font-size:14px;color:#475569;">
+    Bonjour{% if greetingName %} {{ greetingName }}{% endif %},
+  </div>
+  <div style="margin-top:18px;font-size:15px;line-height:1.5;color:#1f2937;">
+    <p style="margin:0 0 12px 0;">Une demande de réinitialisation de votre mot de passe a été effectuée sur Propon.</p>
+    <p style="margin:0 0 12px 0;">Pour continuer, cliquez sur le bouton ci-dessous.</p>
+  </div>
+  <div style="margin-top:18px;">
+    <a href="{{ confirmationURL }}" style="display:inline-block;background-color:#0f766e;color:#ffffff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600;">
+      Réinitialiser mon mot de passe
+    </a>
+  </div>
+  <div style="margin-top:16px;font-size:14px;color:#475569;">
+    L'équipe Propon
+  </div>
+  <div style="margin-top:18px;font-size:12px;color:#94a3b8;">
+    Si vous n'avez pas demandé de changement de mot de passe, veuillez ignorer ce message.
+  </div>
+{% endblock %}
