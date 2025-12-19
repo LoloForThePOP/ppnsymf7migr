@@ -51,13 +51,20 @@
                     <script>
                         
                         let slideIndexNews = 1;
+                        const newsSliderDisabled = window.matchMedia('(max-width: 580px)').matches;
 
                         // Next/previous controls
                         function plusSlidesNews(n) {
+                        if (newsSliderDisabled) {
+                            return;
+                        }
                         showSlidesNews(slideIndexNews += n);
                         }
 
                         function showSlidesNews(n) {
+                        if (newsSliderDisabled) {
+                            return;
+                        }
                         let i;
                         let slides = document.getElementsByClassName("news-card");
                         
@@ -205,8 +212,24 @@
 
             @media screen and (max-width: 580px) {
 
+                #news{
+                    display: flex;
+                    gap: 14px;
+                    overflow-x: auto;
+                    scroll-snap-type: x mandatory;
+                    -webkit-overflow-scrolling: touch;
+                    padding-bottom: 8px;
+                }
+
+                #news::-webkit-scrollbar {
+                    display: none;
+                }
+
                 .news-card {
                     display: block;
+                    flex: 0 0 82%;
+                    scroll-snap-align: start;
+                    scroll-snap-stop: always;
                 }
 
             }
