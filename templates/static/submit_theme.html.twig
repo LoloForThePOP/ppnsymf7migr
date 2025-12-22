@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block headTag %}
+    <meta name="description" content="Proposer un thème communautaire pour Propon : palette, style, attribution et contact.">
+{% endblock %}
+
+{% block title %}Proposer un thème{% endblock %}
+
+{% block stylesheets %}<link href="/css/static_content.css" rel="stylesheet">{% endblock %}
+
+{% block body %}
+
+    <div class="page-container static-content container px-0 col-md-11 col-lg-7">
+        <h1 style="color: green;">Proposer un thème</h1>
+
+        <section>
+            <p>
+                Vous souhaitez contribuer à Propon avec un thème graphique ? Cela nous fait plaisir. Nous mettons en avant les thèmes créés par la communauté avec une attribution.
+            </p>
+        </section>
+
+        <section>
+            <h2 style="color: green;">Ce que nous mettons en avant</h2>
+            <ul>
+                <li>Nom du thème + votre nom (ou pseudo selon votre préférence).</li>
+                <li>Lien vers votre site web ou réseau social.</li>
+                <li>Une description courte de l’ambiance.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 style="color: green;">Ce dont nous avons besoin</h2>
+            <ul>
+                <li>Un fichier CSS (ou variables).</li>
+                <li>Une palette cohérente (fond, surface, texte, accent, bordure, icônes).</li>
+                <li>Une police principale + une police titres (Google Fonts si possible).</li>
+                <li>Une miniature/aperçu du thème (optionnel).</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 style="color: green;">Envoyer votre proposition</h2>
+            <p>
+                Vous pouvez envoyer votre proposition à <a href="mailto:{{ contactEmail }}">{{ contactEmail }}</a>.
+                Indiquez en objet : <b>Proposition de thème</b>.
+            </p>
+            <p>
+                Si votre thème est sélectionné, nous reviendrons vers vous pour l’intégration finale et la mention des crédits.
+            </p>
+        </section>
+    </div>
+
+{% endblock %}

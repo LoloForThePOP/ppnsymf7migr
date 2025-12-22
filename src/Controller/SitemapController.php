@@ -18,6 +18,7 @@ final class SitemapController extends AbstractController
         'credits',
         'terms',
         'privacy',
+        'submit_theme',
     ];
 
     private const STATIC_ROUTES = [

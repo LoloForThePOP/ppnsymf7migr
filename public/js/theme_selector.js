@@ -31,8 +31,36 @@ document.addEventListener('DOMContentLoaded', function () {
     const applyTheme = function (theme) {
         const resolved = normalizeTheme(theme);
         root.setAttribute('data-theme', resolved);
+        root.setAttribute('data-theme-variant', resolved === 'classic' ? 'classic' : 'custom');
         selector.dataset.currentTheme = resolved;
         setActiveOption(resolved);
+        if (window.ProponThemeFonts && typeof window.ProponThemeFonts.load === 'function') {
+            window.ProponThemeFonts.load(resolved);
+        }
+    };
+
+    const initThemePreviews = function () {
+        const previewShells = selector.querySelectorAll('.theme-preview-shell');
+        previewShells.forEach(function (shell) {
+            const img = shell.querySelector('.theme-preview-img');
+            const src = shell.dataset.thumbnailSrc;
+            if (!img || !src) {
+                return;
+            }
+
+            img.addEventListener('load', function () {
+                shell.classList.add('is-image');
+            });
+            img.addEventListener('error', function () {
+                shell.classList.remove('is-image');
+            });
+
+            img.src = src;
+
+            if (img.complete && img.naturalWidth > 0) {
+                shell.classList.add('is-image');
+            }
+        });
     };
 
     const persistTheme = function (theme) {
@@ -77,6 +105,7 @@ document.addEventListener('DOMContentLoaded', function () {
     })();
 
     applyTheme(initialTheme);
+    initThemePreviews();
 
     selector.addEventListener('click', function (event) {
         const target = event.target.closest('.js-theme-option');

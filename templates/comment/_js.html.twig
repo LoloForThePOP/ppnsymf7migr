@@ -38,7 +38,8 @@
 
             $(this).parent().after( $(".replyCommentForm:first").show()); // insert reply comment form after the message to answer
             
-            $(".replyCommentForm textarea").val('').focus(); 
+            $(".replyCommentForm textarea").val('').focus();
+            $(".replyCommentForm").removeClass('is-filled');
 
             $(".replyCommentForm").attr("data-commented-entity-type", $(this).attr("data-commented-entity-type")) //for data base storage.
 
@@ -50,22 +51,22 @@
 
         });
 
-        // Change send button color when input changed
+        // Change send button state when input changed
 
-        $('.commentForm textarea').bind('input propertychange', function() {
+        $('.commentForm textarea').on('input propertychange', function() {
 
-            var buttonColor;
+            var $form = $(this).closest('.commentForm');
+            var hasContent = this.value.trim().length > 0;
 
-            if(this.value.length){
+            $form.toggleClass('is-filled', hasContent);
 
-                buttonColor = "#ddf5c4";
-               
+            if (document.documentElement.getAttribute('data-theme-variant') === 'custom') {
+                $("button", $form).css('background-color', '');
+                return;
             }
 
-            else{ buttonColor = "#ecf0f1";}
-
-            //$('.commentForm button').css('background-color', buttonColor);
-            $("button", $(this).parent()).css('background-color', buttonColor);
+            var buttonColor = hasContent ? "#ddf5c4" : "#ecf0f1";
+            $("button", $form).css('background-color', buttonColor);
 
         });
 

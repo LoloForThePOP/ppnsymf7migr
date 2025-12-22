@@ -22,8 +22,10 @@
 
     scroll-margin-top: 85px; /* Prevent anchors to be messed up by fixed horizontal navbar */
     
-    border: 1px solid #dee2e6;
-    border-radius: 0.25rem;
+    background-color: var(--pp-card-bg);
+    border: 1px solid var(--pp-card-border);
+    border-radius: var(--pp-card-radius);
+    box-shadow: var(--pp-card-shadow);
     
 } 
 
@@ -36,7 +38,7 @@
 }
 
 #slideshow-struct-container {
-	border: 1px solid #dee2e6;
+	border: 1px solid var(--pp-card-border);
 }
 
 
@@ -61,7 +63,7 @@
 .pp-struct-title{
 
     display: inline;
-    color : navy;
+    color: var(--pp-title-color);
     font-size: 1.8rem;
     margin: 0px;
 
@@ -79,7 +81,7 @@
 
     /* change svg color. Thanks at https://codepen.io/sosuke/pen/Pjoqqp */
     
-    filter: invert(55%) sepia(60%) saturate(316%) hue-rotate(118deg) brightness(87%) contrast(78%);
+    filter: var(--pp-icon-filter);
 }
 
 /* Each Structure Content */
@@ -228,7 +230,7 @@
     .pp-struct-title{
 
         font-size: 20px;
-        color : navy;
+        color: var(--pp-title-color);
 
     }
 
@@ -260,4 +262,74 @@
         padding: 12px 7px 10px 7px;
     }
 
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .page-info-btn,
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .report-problem-btn {
+    background-color: var(--theme-surface-alt);
+    border-color: var(--theme-border);
+    color: var(--theme-text);
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .page-info-btn:hover,
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .report-problem-btn:hover {
+    background-color: var(--theme-surface);
+    border-color: var(--theme-accent);
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #page-info-dropdown-content {
+    background-color: var(--theme-surface);
+    border-color: var(--theme-border);
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #page-info-dropdown-content a {
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #page-info-dropdown-content a:hover {
+    color: var(--theme-accent);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #page-info-dropdown-content .text-muted {
+    color: var(--theme-text-muted) !important;
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .follow-button,
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .share-presentation-button {
+    background-color: var(--theme-surface-alt);
+    border-color: var(--theme-accent);
+    color: var(--theme-text);
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .share-presentation-button .text {
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .share-presentation-button img,
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .follow-button img,
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-upper-box .shareIcon,
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-upper-box .commentIcon,
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-upper-box .upper-box-page-info-icon,
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .fake-send-button img {
+    filter: brightness(0) saturate(100%) var(--theme-icon-filter);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .likeIcon {
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .like-button.isLiked .likeIcon.filled {
+    color: var(--theme-accent);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .like-button .likesCount {
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .like-button.isLiked .likesCount {
+    color: var(--theme-accent);
 }

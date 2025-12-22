@@ -36,6 +36,7 @@
     border-radius: 50px;
 }
 
+
 .oneCommentContainer{
     max-width: 450px;
     padding: 8px 10px 5px 10px;
@@ -130,6 +131,88 @@
 
 .commentRepliesContainer .oneCommentContainer:first-of-type{
     margin-top: -5px;
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .commentSectionTitle {
+    color: var(--pp-title-color);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .commentForm textarea {
+    background-color: var(--theme-surface);
+    border-color: var(--theme-border);
+    color: var(--theme-text) !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .commentForm textarea::placeholder {
+    color: var(--theme-text-muted) !important;
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .commentForm textarea:focus {
+    border-color: var(--theme-accent);
+    outline: none;
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .commentForm button[type="submit"] {
+    background-color: var(--theme-surface-alt) !important;
+    border-color: var(--theme-border) !important;
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .commentForm.is-filled button[type="submit"] {
+    background-color: var(--theme-accent) !important;
+    border-color: var(--theme-accent) !important;
+    color: var(--theme-accent-contrast);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .oneCommentContainer {
+    background-color: var(--theme-surface);
+    border-color: var(--theme-border);
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .oneCommentContainer.activeUserAuthor {
+    background-color: var(--theme-surface-alt);
+    border-color: var(--theme-accent);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .oneCommentContainer .commentUserName {
+    color: var(--theme-title);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .oneCommentContainer .commentDate {
+    color: var(--theme-text-muted);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .commentContent {
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .replyCommentButton {
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .replyCommentButton:hover {
+    background-color: var(--theme-surface-alt);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .commentFooter a {
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .commentFooter a:hover {
+    color: var(--theme-accent);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .repliedUserBadge {
+    color: var(--theme-accent);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .liveNewComment {
+    background-color: var(--theme-surface-alt);
+    border: 1px solid var(--theme-border);
+    border-left: 3px solid var(--theme-accent);
+    color: var(--theme-text);
 }
 
 

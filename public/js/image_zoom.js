@@ -4,49 +4,114 @@
   // Thanks to https://www.w3schools.com/howto/howto_js_image_zoom.asp
   function imageZoom(imgParentWrapperId, resultID) {
 
-    var img, lens, result, cx, cy, timeout, imgWrapper,
+    var img, lens, result, cx, cy, timeout, imgWrapper;
 
     imgWrapper = document.getElementById(imgParentWrapperId);
 
     result = document.getElementById(resultID);
 
-    if (imgWrapper==null){return;} //case slide do not contains a image (for example it contains a video)
-    
-    else{
+    if (imgWrapper == null || result == null) {
+      return;
+    } //case slide do not contains a image (for example it contains a video)
 
-      img = imgWrapper.getElementsByTagName('img')[0];
+    img = imgWrapper.getElementsByTagName('img')[0];
+    if (!img) {
+      return;
+    }
 
-      /* Create lens: */
-      lens = document.createElement("DIV");
-      lens.setAttribute("class", "img-zoom-lens");
+    /* Create lens: */
+    lens = document.createElement("DIV");
+    lens.setAttribute("class", "img-zoom-lens");
 
-      /* Insert lens: */
-      img.parentElement.insertBefore(lens, img);
+    /* Insert lens: */
+    img.parentElement.insertBefore(lens, img);
+
+    cx = 1;
+    cy = 1;
+
+    var zoomSourceFallback = img.currentSrc || img.src;
+    var zoomSource = zoomSourceFallback;
+    var zoomSourceResolved = false;
+
+    function getImageSize() {
+      return {
+        width: img.offsetWidth || img.width || 0,
+        height: img.offsetHeight || img.height || 0,
+      };
+    }
+
+    function refreshFallbackSource() {
+      zoomSourceFallback = img.currentSrc || img.src;
+      if (!zoomSource) {
+        zoomSource = zoomSourceFallback;
+      }
+    }
+
+    function resolveZoomSource() {
+      if (zoomSourceResolved) {
+        return;
+      }
+      zoomSourceResolved = true;
+
+      var full = img.getAttribute('data-full');
+      if (!full || full === zoomSourceFallback) {
+        zoomSource = zoomSourceFallback;
+        return;
+      }
+
+      var probe = new Image();
+      probe.onload = function() {
+        zoomSource = full;
+        updateZoomBackground();
+      };
+      probe.onerror = function() {
+        zoomSource = zoomSourceFallback;
+        updateZoomBackground();
+      };
+      probe.src = full;
+    }
+
+    function updateZoomBackground() {
+      var size = getImageSize();
+      if (!size.width || !size.height) {
+        return false;
+      }
 
       /* Calculate the ratio between result DIV and lens: */
       cx = result.offsetWidth / lens.offsetWidth;
       cy = result.offsetHeight / lens.offsetHeight;
 
+      resolveZoomSource();
+      var source = zoomSource || img.currentSrc || img.src;
+
       /* Set background properties for the result DIV */
-      result.style.backgroundImage = "url('" + img.src + "')";
-      result.style.backgroundSize = (img.width * cx) + "px " + (img.height * cy) + "px";
-
-
-
-      /* Execute a function when someone moves the cursor over the image, or the lens: */
-      lens.addEventListener("mousemove", moveLens);
-      img.addEventListener("mousemove", moveLens);
-      
-      lens.addEventListener("mouseout", closeZoom);
-      img.addEventListener("mouseout", closeZoom);
-
-      /* And also for touch screens:
-      lens.addEventListener("touchmove", moveLens);
-      img.addEventListener("touchmove", moveLens); */
-
-      lens.style.opacity="0";
-    
+      result.style.backgroundImage = "url('" + source + "')";
+      result.style.backgroundSize = (size.width * cx) + "px " + (size.height * cy) + "px";
+      return true;
     }
+
+    refreshFallbackSource();
+    resolveZoomSource();
+
+    if (!updateZoomBackground()) {
+      img.addEventListener('load', function() {
+        refreshFallbackSource();
+        updateZoomBackground();
+      }, { once: true });
+    }
+
+    /* Execute a function when someone moves the cursor over the image, or the lens: */
+    lens.addEventListener("mousemove", moveLens);
+    img.addEventListener("mousemove", moveLens);
+    
+    lens.addEventListener("mouseout", closeZoom);
+    img.addEventListener("mouseout", closeZoom);
+
+    /* And also for touch screens:
+    lens.addEventListener("touchmove", moveLens);
+    img.addEventListener("touchmove", moveLens); */
+
+    lens.style.opacity="0";
 
 
     function moveLens(e) {
@@ -62,14 +127,19 @@
       /* Get the cursor's x and y positions: */
       pos = getCursorPos(e);
 
+      var size = getImageSize();
+      if (!size.width || !size.height) {
+        return;
+      }
+
       /* Calculate the position of the lens: */
       x = pos.x - (lens.offsetWidth / 2);
       y = pos.y - (lens.offsetHeight / 2);
-      
+
       /* Prevent the lens from being positioned outside the image: */
-      if (x > img.width - lens.offsetWidth) {x = img.width - lens.offsetWidth; }
+      if (x > size.width - lens.offsetWidth) {x = size.width - lens.offsetWidth; }
       if (x < 0) {x = 0;}
-      if (y > img.height - lens.offsetHeight) {y = img.height - lens.offsetHeight;}
+      if (y > size.height - lens.offsetHeight) {y = size.height - lens.offsetHeight;}
       if (y < 0) {y = 0;}
 
       /* Set the position of the lens: */

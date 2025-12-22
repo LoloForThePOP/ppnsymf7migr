@@ -1,5 +1,40 @@
 {% set storedTheme = app.user and app.user.profile ? (app.user.profile.extra.theme|default('classic')) : 'classic' %}
 {% set currentTheme = storedTheme == 'light' ? 'classic' : storedTheme %}
+{% set themeGroups = [
+  {
+    label: 'Classiques',
+    themes: [
+      { id: 'classic', label: 'Classique', preview: { bg: '#ffffff', surface: '#ffffff', accent: 'orange', text: '#1f2937', border: '#e5e7eb' } },
+      { id: 'mint', label: 'Menthe', preview: { bg: '#f1fbf7', surface: '#f7fff9', accent: '#2da971', text: '#0f2f27', border: '#cfeede' } }
+    ]
+  },
+  {
+    label: 'Populaires',
+    themes: [
+      { id: 'dark', label: 'Nuit', preview: { bg: '#0b0f16', surface: '#141a24', accent: '#38bdf8', text: '#e5e7eb', border: '#283344' } },
+      { id: 'eco-green', label: 'Eco Green', preview: { bg: '#f3f7f2', surface: '#ffffff', accent: '#2f9e44', text: '#1f3d2a', border: '#dce7d9' } },
+      { id: 'palm-beach', label: 'Palm Beach', preview: { bg: '#f4fffb', surface: '#ffffff', accent: '#ff7a59', text: '#0f3d3e', border: '#cdeee7' } },
+      { id: 'pink-lady', label: 'Pink Lady', preview: { bg: '#fff3f7', surface: '#ffffff', accent: '#ec4899', text: '#4a1f2f', border: '#f5c2d4' } }
+    ]
+  },
+  {
+    label: 'Tendances',
+    themes: [
+      { id: 'neon', label: 'Néon', preview: { bg: '#0b0411', surface: '#160a20', accent: '#f72585', text: '#f5e9ff', border: '#3b1b4f' } },
+      { id: 'cyberpunk', label: 'Cyberpunk', preview: { bg: '#0b0d0f', surface: '#111418', accent: '#facc15', text: '#e0f2fe', border: '#263238' } },
+      { id: 'vaporwave', label: 'Vaporwave', preview: { bg: '#f5e9ff', surface: '#fff1fb', accent: '#ff4fd8', text: '#4c1d95', border: '#e3c5ff' } },
+      { id: 'retro-game', label: 'Retro Game', preview: { bg: '#0f1912', surface: '#16261c', accent: '#80ed99', text: '#c7f9cc', border: '#2f4f3a' } }
+    ]
+  },
+  {
+    label: 'Nouveautés',
+    themes: [
+      { id: 'concentration', label: 'Concentration', preview: { bg: '#f6f7fb', surface: '#ffffff', accent: '#3b82f6', text: '#1e293b', border: '#e2e8f0' } },
+      { id: 'luxury-black', label: 'Noir de Luxe', preview: { bg: '#0b0b0b', surface: '#141414', accent: '#d4af37', text: '#f5f5f4', border: '#2a2a2a' } },
+      { id: 'deep-ocean', label: 'Sous l\'océan', preview: { bg: '#02121a', surface: '#06202c', accent: '#22d3ee', text: '#d1f5ff', border: '#0f3a4a' } }
+    ]
+  }
+] %}
 
 <li
   class="nav-item dropdown d-inline-flex align-items-center theme-selector js-theme-selector"
@@ -21,49 +56,50 @@
     <img class="d-inline-block cursor-pointer me-1" src="{{ asset('color-palette.svg', 'misc')}}" alt="color palette icon" width="34">
   </button>
 
-  <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="themeDropdown">
-    <li>
-      <h6 class="dropdown-header">Thèmes</h6>
-    </li>
-    <li>
-      {% set isActive = currentTheme == 'classic' %}
-      <button class="dropdown-item d-flex align-items-center js-theme-option {{ isActive ? 'active' : '' }}" type="button" data-theme="classic">
-        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#f97316;margin-right:8px;"></span>
-        Classique
-        <span class="badge bg-success ms-auto js-theme-active {{ isActive ? '' : 'd-none' }}">Actif</span>
-      </button>
-    </li>
-    <li>
-      {% set isActive = currentTheme == 'sand' %}
-      <button class="dropdown-item d-flex align-items-center js-theme-option {{ isActive ? 'active' : '' }}" type="button" data-theme="sand">
-        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#d6b27f;margin-right:8px;"></span>
-        Sable
-        <span class="badge bg-success ms-auto js-theme-active {{ isActive ? '' : 'd-none' }}">Actif</span>
-      </button>
-    </li>
-    <li>
-      {% set isActive = currentTheme == 'mint' %}
-      <button class="dropdown-item d-flex align-items-center js-theme-option {{ isActive ? 'active' : '' }}" type="button" data-theme="mint">
-        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#34d399;margin-right:8px;"></span>
-        Menthe
-        <span class="badge bg-success ms-auto js-theme-active {{ isActive ? '' : 'd-none' }}">Actif</span>
-      </button>
-    </li>
-    <li>
-      {% set isActive = currentTheme == 'slate' %}
-      <button class="dropdown-item d-flex align-items-center js-theme-option {{ isActive ? 'active' : '' }}" type="button" data-theme="slate">
-        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#64748b;margin-right:8px;"></span>
-        Ardoise
-        <span class="badge bg-success ms-auto js-theme-active {{ isActive ? '' : 'd-none' }}">Actif</span>
-      </button>
-    </li>
+  <ul class="dropdown-menu dropdown-menu-end shadow-sm theme-selector-menu" aria-labelledby="themeDropdown">
+    {% for group in themeGroups %}
+      <li class="theme-selector-group">
+        <h6 class="dropdown-header theme-selector-group-title">{{ group.label }}</h6>
+        <div class="theme-selector-grid">
+          {% for theme in group.themes %}
+            {% set isActive = currentTheme == theme.id %}
+            <button
+              class="theme-option-card js-theme-option {{ isActive ? 'active' : '' }}"
+              type="button"
+              data-theme="{{ theme.id }}"
+            >
+              <span
+                class="theme-preview theme-preview-shell"
+                data-thumbnail-src="{{ asset('theme_thumbnails/' ~ theme.id ~ '.avif', 'larger') }}"
+                style="--preview-bg: {{ theme.preview.bg }}; --preview-surface: {{ theme.preview.surface }}; --preview-accent: {{ theme.preview.accent }}; --preview-text: {{ theme.preview.text }}; --preview-border: {{ theme.preview.border }};"
+              >
+                <img class="theme-preview-img" alt="Aperçu du thème {{ theme.label }}" loading="lazy" decoding="async">
+                <span class="theme-preview-fallback">
+                  <span class="theme-preview-top"></span>
+                  <span class="theme-preview-card">
+                    <span class="theme-preview-line"></span>
+                    <span class="theme-preview-line short"></span>
+                    <span class="theme-preview-chip"></span>
+                  </span>
+                </span>
+              </span>
+              <span class="theme-option-label">{{ theme.label }}</span>
+              <span class="badge bg-success js-theme-active {{ isActive ? '' : 'd-none' }}">Actif</span>
+            </button>
+          {% endfor %}
+        </div>
+      </li>
+    {% endfor %}
     <li><hr class="dropdown-divider"></li>
+    <li>
+      <a class="dropdown-item" href="{{ path('static_page', { slug: 'submit_theme' }) }}">Proposer un thème</a>
+    </li>
     <li>
       <span class="dropdown-item-text text-muted">
         {% if app.user %}
-          Préférence enregistrée sur votre compte.
+          Votre préférence de thème est enregistrée sur votre compte.
         {% else %}
-          Préférence enregistrée sur cet appareil.
+          Votre préférence de thème est enregistrée sur cet appareil, créez un compte pour la conserver sur différents appareils.
         {% endif %}
       </span>
     </li>

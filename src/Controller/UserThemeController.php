@@ -28,7 +28,21 @@ final class UserThemeController extends AbstractController
         }
 
         $theme = $this->normalizeTheme($payload['theme'] ?? '');
-        $allowedThemes = ['classic', 'sand', 'mint', 'slate'];
+        $allowedThemes = [
+            'classic',
+            'mint',
+            'dark',
+            'concentration',
+            'neon',
+            'cyberpunk',
+            'vaporwave',
+            'palm-beach',
+            'retro-game',
+            'eco-green',
+            'pink-lady',
+            'luxury-black',
+            'deep-ocean',
+        ];
 
         if (!in_array($theme, $allowedThemes, true)) {
             return new JsonResponse(['error' => 'Thème invalide.'], Response::HTTP_BAD_REQUEST);

@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 
-{% set storedTheme = app.user and app.user.profile ? (app.user.profile.extra.theme|default('classic')) : 'classic' %}
+{% set allowThemeSelection = showThemeSelector|default(false) %}
+{% set storedTheme = allowThemeSelection and app.user and app.user.profile ? (app.user.profile.extra.theme|default('classic')) : 'classic' %}
 {% set resolvedTheme = storedTheme == 'light' ? 'classic' : storedTheme %}
+{% set themeVariant = resolvedTheme == 'classic' ? 'classic' : 'custom' %}
 
-<html data-theme="{{ resolvedTheme }}">
+<html data-theme="{{ resolvedTheme }}" data-theme-variant="{{ themeVariant }}">
 
     <head>
 
@@ -52,24 +54,128 @@
 
         {# Theme preference for anonymous users (localStorage) #}
 
-        {% if not app.user %}
+        {% if not app.user and allowThemeSelection %}
             <script>
                 (function() {
                     try {
                         var storedTheme = localStorage.getItem('propon_theme');
                         if (storedTheme) {
+                            if (storedTheme === 'light') {
+                                storedTheme = 'classic';
+                            }
+                            var variant = storedTheme === 'classic' ? 'classic' : 'custom';
                             document.documentElement.setAttribute('data-theme', storedTheme);
+                            document.documentElement.setAttribute('data-theme-variant', variant);
                         }
                     } catch (e) {}
                 })();
             </script>
         {% endif %}
+        <script>
+            (function() {
+                var root = document.documentElement;
+                function markReady() {
+                    root.classList.add('theme-ready');
+                }
+                if (window.requestAnimationFrame) {
+                    requestAnimationFrame(function() {
+                        requestAnimationFrame(markReady);
+                    });
+                } else {
+                    setTimeout(markReady, 0);
+                }
+            })();
+        </script>
 
         {# Google Fonts #}
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+        <script>
+            (function() {
+                var fontLinksByTheme = {
+                    mint: ['family=Quicksand:wght@400;600;700'],
+                    dark: ['family=Space+Grotesk:wght@400;600;700'],
+                    concentration: ['family=Source+Sans+3:wght@400;600;700'],
+                    neon: [
+                        'family=Space+Grotesk:wght@400;600;700',
+                        'family=Orbitron:wght@400;600;700'
+                    ],
+                    cyberpunk: [
+                        'family=Rajdhani:wght@400;600;700',
+                        'family=Oxanium:wght@400;600;700'
+                    ],
+                    vaporwave: [
+                        'family=Quicksand:wght@400;600;700',
+                        'family=VT323'
+                    ],
+                    'palm-beach': [
+                        'family=Quicksand:wght@400;600;700',
+                        'family=Playfair+Display:wght@400;600;700'
+                    ],
+                    'retro-game': [
+                        'family=VT323',
+                        'family=Press+Start+2P'
+                    ],
+                    'eco-green': [
+                        'family=Alegreya+Sans:wght@400;600;700',
+                        'family=Playfair+Display:wght@400;600;700'
+                    ],
+                    'pink-lady': [
+                        'family=Quicksand:wght@400;600;700',
+                        'family=Playfair+Display:wght@400;600;700'
+                    ],
+                    'luxury-black': [
+                        'family=Source+Sans+3:wght@400;600;700',
+                        'family=Cinzel:wght@400;600;700'
+                    ],
+                    'deep-ocean': [
+                        'family=Alegreya+Sans:wght@400;600;700',
+                        'family=Space+Grotesk:wght@400;600;700'
+                    ]
+                };
+
+                var loaded = {};
+
+                function buildUrl(families) {
+                    return 'https://fonts.googleapis.com/css2?' + families.join('&') + '&display=swap';
+                }
+
+                function loadThemeFonts(theme) {
+                    if (!theme || theme === 'classic') {
+                        return;
+                    }
+
+                    var families = fontLinksByTheme[theme];
+                    if (!families || families.length === 0) {
+                        return;
+                    }
+
+                    var key = families.join('|');
+                    if (loaded[key]) {
+                        return;
+                    }
+                    loaded[key] = true;
+
+                    var link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = buildUrl(families);
+                    link.media = 'print';
+                    link.onload = function() {
+                        link.media = 'all';
+                    };
+                    document.head.appendChild(link);
+                }
+
+                window.ProponThemeFonts = {
+                    load: loadThemeFonts
+                };
+
+                var initialTheme = document.documentElement.getAttribute('data-theme') || 'classic';
+                loadThemeFonts(initialTheme);
+            })();
+        </script>
 
 
         <title>{% block title %}Bienvenue sur Propon{% endblock %}</title>
@@ -165,7 +271,7 @@
     </head>
 
 
-    <body>
+    <body data-theme-scope="{{ allowThemeSelection ? 'presentation' : 'default' }}">
 
         {# GDPR Frontend (modal box cookies user selection) #}
 

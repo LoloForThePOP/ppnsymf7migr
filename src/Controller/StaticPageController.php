@@ -21,6 +21,7 @@ class StaticPageController extends AbstractController
         'credits'         => ['template' => 'static/credits.html.twig', 'title' => 'Crédits & remerciements'],
         'terms'           => ['template' => 'static/terms.html.twig', 'title' => 'Conditions d’utilisation'],
         'privacy'         => ['template' => 'static/privacy.html.twig', 'title' => 'Politique de confidentialité'],
+        'submit_theme'    => ['template' => 'static/submit_theme.html.twig', 'title' => 'Proposer un thème'],
     ];
 
     #[Route('/pages/{slug}', name: 'static_page', methods: ['GET'])]
@@ -34,6 +35,7 @@ class StaticPageController extends AbstractController
         return $this->render($page['template'], [
             'page_title' => $page['title'],
             'slug' => $slug,
+            'contactEmail' => $this->getParameter('app.email.contact'),
         ]);
     }
 }

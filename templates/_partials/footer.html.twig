@@ -75,7 +75,7 @@
 
   <!-- Copyright -->
 
-  <div class="text-center p-4" style="background-color: rgba(111, 166, 251, 0.07);">
+  <div class="footer-bottom text-center p-4">
 
     © 2026 Copyright :
 
@@ -122,6 +122,33 @@
     text-decoration: none;
     font-weight: bold;
 
+  }
+
+  footer .footer-bottom {
+    background-color: rgba(111, 166, 251, 0.07);
+  }
+
+  html[data-theme-variant="custom"] body[data-theme-scope="presentation"] footer {
+    background-color: var(--theme-surface);
+    border-top-color: var(--theme-border);
+    color: var(--theme-text);
+  }
+
+  html[data-theme-variant="custom"] body[data-theme-scope="presentation"] footer h3 {
+    color: var(--pp-title-color, var(--theme-title));
+  }
+
+  html[data-theme-variant="custom"] body[data-theme-scope="presentation"] footer a {
+    color: var(--theme-text);
+  }
+
+  html[data-theme-variant="custom"] body[data-theme-scope="presentation"] footer a:hover {
+    color: var(--theme-accent);
+  }
+
+  html[data-theme-variant="custom"] body[data-theme-scope="presentation"] footer .footer-bottom {
+    background-color: var(--theme-surface-alt);
+    color: var(--theme-text-muted);
   }
       
   @media screen and (max-width: 768px) {
