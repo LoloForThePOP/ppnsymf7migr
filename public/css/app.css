@@ -341,6 +341,7 @@ html.theme-ready header .navbar,
 html.theme-ready .pp-struct-container,
 html.theme-ready .pp-struct-title,
 html.theme-ready .pp-struct-icon,
+html.theme-ready .pp-theme-icon,
 html.theme-ready .theme-selector-menu,
 html.theme-ready .theme-option-card,
 html.theme-ready .theme-preview,
@@ -359,6 +360,14 @@ html.theme-ready a {
         border-color 220ms ease,
         box-shadow 220ms ease,
         filter 220ms ease;
+}
+
+.pp-theme-icon {
+    filter: none;
+}
+
+html[data-theme-variant="custom"] .pp-theme-icon {
+    filter: brightness(0) saturate(100%) var(--theme-icon-filter);
 }
 
 header .navbar {
@@ -1419,6 +1428,57 @@ html[data-theme-variant="custom"] .sm-connect-btn:focus {
     background-color: var(--theme-surface-alt);
     border-color: var(--theme-accent);
     color: var(--theme-text);
+}
+
+/* Login page helper links */
+
+html[data-theme-variant="custom"] #login-other-choices {
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] #login-other-choices a {
+    color: var(--theme-accent);
+}
+
+html[data-theme-variant="custom"] #login-other-choices a:hover,
+html[data-theme-variant="custom"] #login-other-choices a:focus {
+    color: var(--theme-accent);
+}
+
+/* Homepage motto */
+
+.last-moto {
+    color: #287152;
+}
+
+@media screen and (max-width: 580px) {
+    .last-moto {
+        color: #168016;
+        font-size: 15px !important;
+        padding: 15px 0;
+        background-color: #46af461f;
+        border-radius: 5px;
+        width: 99%;
+        margin: auto;
+        margin-bottom: -16px;
+        margin-top: -11px;
+    }
+
+    .last-moto div {
+        padding: 5px 8px;
+    }
+}
+
+html[data-theme-variant="custom"] .last-moto {
+    color: var(--theme-accent);
+}
+
+@media screen and (max-width: 580px) {
+    html[data-theme-variant="custom"] .last-moto {
+        color: var(--theme-accent);
+        background-color: var(--theme-surface-alt);
+        border: 1px solid var(--theme-border);
+    }
 }
 
 

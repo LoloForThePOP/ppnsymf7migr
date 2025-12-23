@@ -8,9 +8,9 @@
 
     {% block text %}
 
-        <h1 class="jumbotron-title display-5 lh-1 mb-lg-4 text-success text-center">Ici on présente nos projets</h1>
+        <h1 class="jumbotron-title display-5 lh-1 mb-lg-4 text-center">Ici on présente nos projets</h1>
 
-        <p class="jbtr-descr text-center text-md-start lead"><strong><span class="display-md-none"> </span>Présentez gratuitement votre projet et rendez-le <b><span class="green-highlight">PLUS VISIBLE</span></b> grâce à notre outil <b style="color:green;">simple</b> et <b style="color:green;">rapide</b>. Donnez des nouvelles et recevez des nouvelles d'autres projets.</strong></p>
+        <p class="jbtr-descr text-center text-md-start lead"><strong><span class="display-md-none"> </span>Présentez gratuitement votre projet et rendez-le <b><span class="jbtr-highlight">PLUS VISIBLE</span></b> grâce à notre outil <b class="jbtr-accent">simple</b> et <b class="jbtr-accent">rapide</b>. Donnez des nouvelles et recevez des nouvelles d'autres projets.</strong></p>
 
         <div class="d-flex flex-column flex-md-row justify-content-center align-items-center pt-3">
 
@@ -18,7 +18,7 @@
 
             <a class="" href="{{ path('static_page', {'slug': 'short_manifesto'}) }}">
 
-                <button class="jbtr-cta-btn fw-bold btn d-flex justify-content-center align-items-center pt-2 pe-4 me-md-4 mb-3 mb-md-0" style=" height:50px; padding-bottom: 10px;" data-track-click='{"key":"read-the-pop-manifesto"}'>
+                <button class="jbtr-cta-btn fw-bold btn d-flex justify-content-center align-items-center pt-2 pe-4 me-md-4 mb-3 mb-md-0" data-track-click='{"key":"read-the-pop-manifesto"}'>
 
                 <img class="m" src="{{ asset('reading_book.png', 'misc')}}" width="32" alt="a opened book with hands handling it">
                 <span class="ps-1">Lire notre Manifeste</span>
@@ -34,7 +34,7 @@
 
                 <button class="jbtr-cta-btn jbtr-cta-btn-present-project btn d-flex justify-content-center align-items-center px-3 pt-2" data-track-click='{"key":"clicked-jumbotron-create-presentation"}'>
         
-                  <img class="mb-2" src="{{ asset('add_presentation.svg', 'misc')}}" alt="bucket with a plus icon">
+                  <img class="pp-theme-icon" src="{{ asset('add_presentation.svg', 'misc')}}" alt="bucket with a plus icon">
                   
                   <span class="fw-bold ps-2">Présenter son projet maintenant</span>
               
@@ -43,54 +43,6 @@
             </a>
 
         </div>
-
-        {# Overiding some default styles #}
-
-        <style>
-
-            .jbtr-cta-btn{
-                min-width: 202px;
-                border-radius: 11px;
-                border-color: rgb(216, 216, 201);
-                
-            }
-
-            .jbtr-cta-btn-present-project{
-                background-color: #f9fffc;
-            }
-
-            .jumbotron-title{
-                font-size: 34px;
-                
-            }
-
-            .jbtr-descr .green-highlight{
-                background-color: rgb(234, 255, 230);
-                border-radius: 4px;
-                padding : 4px 8px 4px 8px; 
-            }
-
-            .jbtr-cta-btn:hover{
-                background-color: rgb(245, 255, 243);
-            }
-            
-            @media screen and (max-width: 580px) {
-
-                .jumbotron-title{
-                    font-size: 24px;
-                    margin-left: -3px;
-                    margin-right: -3px;
-                    
-                }
-
-                .jbtr-cta-btn{
-                    min-width: 230px;
-                    
-                }
-
-            }
-
-        </style>
 
     {% endblock %}
 

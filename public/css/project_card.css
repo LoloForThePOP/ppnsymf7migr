@@ -78,6 +78,22 @@
     margin-right: 0;
 }
 
+.stat-chunk {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pp-card-icon {
+    width: 16px;
+    height: 16px;
+    filter: invert(38%) sepia(5%) saturate(0%) hue-rotate(152deg) brightness(90%) contrast(90%);
+}
+
+html[data-theme-variant="custom"] .pp-card-icon {
+    filter: brightness(0) saturate(100%) var(--theme-icon-filter);
+}
+
 html[data-theme-variant="custom"] .project-card {
     background-color: var(--theme-surface);
     border-color: var(--theme-border);

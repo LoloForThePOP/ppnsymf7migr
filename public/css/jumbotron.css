@@ -3,6 +3,14 @@
 
 .jumbotron{
     margin-bottom: 40px;
+    --jbtr-title-color: #3d488a;
+    --jbtr-accent: #40814d;
+    --jbtr-accent-soft: #eaffe6;
+    --jbtr-border: #d8d8c9;
+    --jbtr-btn-bg: transparent;
+    --jbtr-btn-hover: #f5fff3;
+    --jbtr-btn-accent-bg: #f9fffc;
+    --jbtr-text: inherit;
 }
 
     
@@ -14,11 +22,55 @@
 
 .jumbotron-title{
 
-    font-size: 38px;
+    font-size: 34px;
     font-weight: bold;
     margin-bottom: 16px;
+    color: var(--jbtr-title-color);
 
 }
+
+.jbtr-descr .jbtr-highlight{
+    background-color: var(--jbtr-accent-soft);
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+.jbtr-accent{
+    color: var(--jbtr-accent);
+}
+
+.jbtr-cta-btn{
+    min-width: 202px;
+    border-radius: 11px;
+    border: 1px solid var(--jbtr-border);
+    background-color: var(--jbtr-btn-bg);
+    color: var(--jbtr-text);
+    height: 50px;
+    padding-bottom: 10px;
+}
+
+.jbtr-cta-btn-present-project{
+    background-color: var(--jbtr-btn-accent-bg);
+}
+
+.jbtr-cta-btn:hover,
+.jbtr-cta-btn:focus{
+    background-color: var(--jbtr-btn-hover);
+    color: var(--jbtr-text);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--jbtr-accent) 80%, transparent);
+}
+
+html[data-theme-variant="custom"] .jumbotron{
+    --jbtr-title-color: var(--theme-title);
+    --jbtr-accent: var(--theme-accent);
+    --jbtr-accent-soft: var(--theme-surface-alt);
+    --jbtr-border: var(--theme-border);
+    --jbtr-btn-bg: var(--theme-surface);
+    --jbtr-btn-hover: var(--theme-surface-alt);
+    --jbtr-btn-accent-bg: var(--theme-surface-alt);
+    --jbtr-text: var(--theme-text);
+}
+
 
 .jumbotron-btn{
     padding: 0.5rem 1.5rem;
@@ -91,6 +143,10 @@
         text-align: center;
         
         padding-top: 0px;
+    }
+
+    .jbtr-cta-btn{
+        min-width: 230px;
     }
 
     .jumbotron-text{
