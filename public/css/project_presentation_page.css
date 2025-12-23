@@ -72,16 +72,34 @@
 /* Each Structure Icon */
 
 .pp-struct-icon{
-    
+    display: inline-block;
     width: 22px;
     height: 22px; 
 
     margin-right : 7px;
     margin-bottom: 5px;
+    vertical-align: middle;
+    line-height: 1;
 
-    /* change svg color. Thanks at https://codepen.io/sosuke/pen/Pjoqqp */
-    
-    filter: var(--pp-icon-filter);
+    background-color: var(--pp-struct-icon-color, #065fd4);
+    background-image: var(--pp-struct-icon-url);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+@supports ((-webkit-mask-image: url("")) or (mask-image: url(""))) {
+    .pp-struct-icon{
+        background-image: none;
+        -webkit-mask-image: var(--pp-struct-icon-url);
+        mask-image: var(--pp-struct-icon-url);
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+    }
 }
 
 /* Each Structure Content */
@@ -240,6 +258,7 @@
         height:20px;
 
         margin-right:5px;
+        margin-bottom: 4px;
 
     }
 
@@ -272,6 +291,10 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-st
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-struct-icon{
+    --pp-struct-icon-color: var(--theme-accent);
+}
+
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .page-info-btn:hover,
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .report-problem-btn:hover {
     background-color: var(--theme-surface);
@@ -301,6 +324,10 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #pp-keyw
     color: var(--theme-accent);
 }
 
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #categories-dropdown {
+    color: var(--theme-accent);
+}
+
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .follow-button,
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-upper-box .follow-button,
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .share-presentation-button {
@@ -324,18 +351,16 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .fake-se
     filter: brightness(0) saturate(100%) var(--theme-icon-filter);
 }
 
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .like-button {
+    --pp-like-icon-color: #000000;
+    --pp-like-icon-active-color: #000000;
+    --pp-like-count-color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .like-button.isLiked {
+    --pp-like-count-color: var(--theme-accent);
+}
+
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .likeIcon {
-    color: var(--theme-text);
-}
-
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .like-button.isLiked .likeIcon.filled {
-    color: var(--theme-accent);
-}
-
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .like-button .likesCount {
-    color: var(--theme-text);
-}
-
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .like-button.isLiked .likesCount {
-    color: var(--theme-accent);
+    filter: brightness(0) saturate(100%) var(--theme-icon-filter);
 }

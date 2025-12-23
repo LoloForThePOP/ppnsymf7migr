@@ -18,15 +18,12 @@ It contains :
             
             {% block icon %}
 
-                <img 
-                
-                    src= "{{ asset(iconName ~ '.svg', 'pp_consult') }}"
-                    class= "pp-struct-icon"  
-                    height= "27" 
-                    width= "27" 
-                    alt= "{% block iconName %}{% endblock %}"
-                    
-                >
+                <span
+                    class="pp-struct-icon"
+                    style="--pp-struct-icon-url: url('{{ asset(iconName ~ '.svg', 'pp_consult') }}');"
+                    role="img"
+                    aria-label="{% block iconName %}{% endblock %}"
+                ></span>
 
             {% endblock %}
 
