@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 
-{% set allowThemeSelection = showThemeSelector|default(false) %}
+{% set showThemeSelector = showThemeSelector|default(true) %}
+{% set allowThemeSelection = showThemeSelector %}
 {% set storedTheme = allowThemeSelection and app.user and app.user.profile ? (app.user.profile.extra.theme|default('classic')) : 'classic' %}
 {% set resolvedTheme = storedTheme == 'light' ? 'classic' : storedTheme %}
 {% set themeVariant = resolvedTheme == 'classic' ? 'classic' : 'custom' %}
 
-<html data-theme="{{ resolvedTheme }}" data-theme-variant="{{ themeVariant }}">
+<html class="is-loading" data-theme="{{ resolvedTheme }}" data-theme-variant="{{ themeVariant }}">
 
     <head>
 
@@ -84,6 +85,51 @@
                 } else {
                     setTimeout(markReady, 0);
                 }
+            })();
+        </script>
+        <script>
+            (function() {
+                var root = document.documentElement;
+                var overlay;
+
+                function getOverlay() {
+                    if (!overlay) {
+                        overlay = document.querySelector('.propon-loader-overlay');
+                    }
+                    return overlay;
+                }
+
+                function setLoading(loading) {
+                    root.classList.toggle('is-loading', loading);
+                    var element = getOverlay();
+                    if (element) {
+                        element.setAttribute('aria-hidden', loading ? 'false' : 'true');
+                    }
+                }
+
+                window.ProponLoader = {
+                    show: function() {
+                        setLoading(true);
+                    },
+                    hide: function() {
+                        setLoading(false);
+                    },
+                    toggle: function(force) {
+                        if (typeof force === 'boolean') {
+                            setLoading(force);
+                            return;
+                        }
+                        setLoading(!root.classList.contains('is-loading'));
+                    }
+                };
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    setLoading(root.classList.contains('is-loading'));
+                });
+
+                window.addEventListener('load', function() {
+                    setLoading(false);
+                });
             })();
         </script>
 
@@ -278,6 +324,18 @@
 
         {% include "_partials/GDPR.html.twig" %}
 
+        {# Loader overlay (kept for later use)
+        <div class="propon-loader-overlay" aria-hidden="true">
+            <div class="propon-loader">
+                <span class="propon-loader-pulse"></span>
+                {% include "_partials/propon_logo_inline.html.twig" with {
+                    logoClass: 'propon-logo propon-loader-logo',
+                    logoTitle: 'Propon'
+                } %}
+            </div>
+        </div>
+        #}
+
         {# Header Navbar #}
 
         {% block header_navbar %}
@@ -382,6 +440,7 @@
 
         {# End of overlay snippet #}
 
+        <script src="/js/theme_selector.js"></script>
         <script src="/js/search_overlay.js"></script>
         
 

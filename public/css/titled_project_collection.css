@@ -32,6 +32,10 @@
     margin-left: 47%;
 }
 
+html[data-theme-variant="custom"] .collection-title {
+    color: var(--theme-title);
+}
+
 
 
 

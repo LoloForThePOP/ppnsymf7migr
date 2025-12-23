@@ -78,6 +78,29 @@
     margin-right: 0;
 }
 
+html[data-theme-variant="custom"] .project-card {
+    background-color: var(--theme-surface);
+    border-color: var(--theme-border);
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] .project-card:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.16);
+}
+
+html[data-theme-variant="custom"] .project-card .goal,
+html[data-theme-variant="custom"] .project-card .keywords {
+    color: var(--theme-accent);
+}
+
+html[data-theme-variant="custom"] .project-card .title {
+    color: var(--theme-title);
+}
+
+html[data-theme-variant="custom"] .collection-container .other-info-container {
+    color: var(--theme-text-muted);
+}
+
 @media screen and (max-width: 810px) {
     .project-card {
         width: 210px;

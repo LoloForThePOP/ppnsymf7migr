@@ -34,3 +34,29 @@
     font-size: 1.1em;
 
 }
+
+.static-accent-title {
+    color: #008000;
+}
+
+html[data-theme-variant="custom"] .static-content {
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] .static-content h1,
+html[data-theme-variant="custom"] .static-content h2,
+html[data-theme-variant="custom"] .static-content h3 {
+    color: var(--theme-title);
+}
+
+html[data-theme-variant="custom"] .static-content a {
+    color: var(--theme-accent);
+}
+
+html[data-theme-variant="custom"] .static-content a:hover {
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] .static-content .static-accent-title {
+    color: var(--theme-accent);
+}

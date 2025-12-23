@@ -10,7 +10,10 @@
 
       <a class="navbar-brand py-0 me-0 me-lg-4" href="/">
 
-        <img class="website-logo" src="/media/static/images/propon_logo.svg" alt="website logo" loading="lazy"/>
+        {% include "_partials/propon_logo_inline.html.twig" with {
+          logoClass: 'website-logo propon-logo',
+          logoTitle: 'Propon'
+        } %}
 
       </a>
 
@@ -19,6 +22,8 @@
         .website-logo{
 
           width: 88px;
+          height: auto;
+          display: block;
 
         }
       
@@ -348,18 +353,6 @@
                 </button>
 
               </a>
-
-              {# Styles for tiny screens login button #}
-
-              <style>
-
-                .sm-connect-btn{
-
-                    width: 210px;
-
-                }
-              
-              </style>
 
             </div>
 

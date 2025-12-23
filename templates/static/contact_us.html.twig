@@ -8,13 +8,15 @@
 
 {% endblock %}
 
+{% block stylesheets %}<link href="/css/static_content.css" rel="stylesheet">{% endblock %}
+
 {% block body %}
 
-    <div class="container page-container contact-us-page-container col-md-9 col-lg-6 px-0">
+    <div class="container page-container static-content contact-us-page-container col-md-9 col-lg-6 px-0">
 
         <div class="pt-md-4 mb-4">
         
-            <h1 class="h2 sm-text-center fw-bold mb-4" style="color: green;">Contactez-nous</h1>
+            <h1 class="h2 sm-text-center fw-bold mb-4 static-accent-title">Contactez-nous</h1>
 
             <p class="mb-4">
                 Pour toute demande, problème, ou suggestion, vous pouvez :
@@ -63,12 +65,12 @@
 
             <a href="{{path('homepage')}}">
                 <button type="button" value="" class="btn btn-go-back me-3">
-                    <span class="">❌ Annuler</span> 
+                    <span class="">Annuler</span> 
                 </button>
             </a>
 
             <button type="submit" value="" class="btn btn-validate">
-                <span class="">✔️ Envoyer</span> 
+                <span class="">Envoyer</span> 
             </button>
             
         </div>
@@ -82,7 +84,11 @@
 
         .contact-form label{
             font-size: 1.1em;
-            color:rgb(26, 26, 56);
+            color: #1a1a38;
+        }
+
+        html[data-theme-variant="custom"] .contact-form label{
+            color: var(--theme-text);
         }
 
         @media (min-width: 768px) {
