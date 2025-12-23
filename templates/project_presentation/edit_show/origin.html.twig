@@ -368,8 +368,6 @@
 
             </button>
 
-            {% include 'project_presentation/edit_show/statuses/javascripts.html.twig' %}
-            
             {% include 'project_presentation/edit_show/reorder_delete_elements.html.twig' %}
 
             {% include 'project_presentation/edit_show/wysiwyg.html.twig' %}
@@ -393,10 +391,12 @@
 
 
     </div>
-    
+
 {% endblock %}
 
 {% block javascripts %}
+
+    {% include 'project_presentation/edit_show/statuses/javascripts.html.twig' %}
 
     {% if userPresenter %}
     

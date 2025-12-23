@@ -22,19 +22,41 @@ class SearchController extends AbstractController
     public function searchProjects(Request $request): JsonResponse
     {
         $q = (string) $request->query->get('q', '');
-        $limit = (int) $request->query->get('limit', 20);
-        $limit = max(1, min($limit, 50));
+        $limit = (int) $request->query->get('limit', 16);
+        $limit = max(1, min($limit, 16));
+        $page = (int) $request->query->get('page', 1);
+        $page = max(1, $page);
+
+        $categories = $request->query->all('categories');
+        if (!is_array($categories) || $categories === []) {
+            $rawCategories = $request->query->get('categories', '');
+            $categories = is_string($rawCategories)
+                ? array_filter(array_map('trim', explode(',', $rawCategories)))
+                : [];
+        }
+        $categories = array_values(array_filter(
+            array_map(static fn ($value) => trim((string) $value), $categories),
+            static fn ($value) => $value !== ''
+        ));
 
         if (mb_strlen(trim($q)) < 2) {
             return $this->json([
                 'query' => $q,
                 'count' => 0,
+                'total' => 0,
+                'page' => 1,
+                'pages' => 0,
+                'limit' => $limit,
                 'results' => [],
                 'message' => 'Tapez au moins 2 caractères',
             ]);
         }
 
-        $results = $this->searchService->search($q, $limit);
+        $result = $this->searchService->searchWithFilters($q, $categories, $limit, $page);
+        $results = $result['items'];
+        $total = $result['total'];
+        $page = $result['page'];
+        $pages = $result['pages'];
 
         $uploader = $this->uploaderHelper;
         $payload = array_map(function ($pp) use ($uploader) {
@@ -46,6 +68,13 @@ class SearchController extends AbstractController
                 $thumb = $uploader->asset($pp, 'logoFile');
             }
             $url = $pp->getStringId() ? $this->generateUrl('edit_show_project_presentation', ['stringId' => $pp->getStringId()]) : null;
+            $categories = [];
+            foreach ($pp->getCategories() as $category) {
+                $categories[] = [
+                    'uniqueName' => $category->getUniqueName(),
+                    'label' => $category->getLabel() ?? $category->getUniqueName(),
+                ];
+            }
             return [
                 'id' => $pp->getId(),
                 'title' => $pp->getTitle(),
@@ -54,12 +83,17 @@ class SearchController extends AbstractController
                 'url' => $url,
                 'createdAt' => $pp->getCreatedAt()?->format(DATE_ATOM),
                 'thumbnail' => $thumb,
+                'categories' => $categories,
             ];
         }, $results);
 
         return $this->json([
             'query' => $q,
             'count' => count($payload),
+            'total' => $total,
+            'page' => $page,
+            'pages' => $pages,
+            'limit' => $limit,
             'results' => $payload,
         ]);
     }

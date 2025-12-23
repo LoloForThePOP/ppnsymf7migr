@@ -185,6 +185,7 @@
 
         <link href="/css/bootstrap.css" rel="stylesheet"> {# Bootstrap is currently used #}
         <link href="/css/app.css" rel="stylesheet"> {# General stylesheet for Propon #}
+        <link href="/css/search_overlay.css" rel="stylesheet">
 
         {% block stylesheets %}{% endblock %}
 
@@ -312,6 +313,7 @@
                     to fill
 
                     {% include "_partials/search_experience.html.twig" %}#}
+                    {% include "search/_overlay.html.twig" %}
 
                     <!-- Flash Messages Display (see app.css for appearance and cosmetic) -->
 
@@ -379,6 +381,8 @@
         </script>
 
         {# End of overlay snippet #}
+
+        <script src="/js/search_overlay.js"></script>
         
 
 

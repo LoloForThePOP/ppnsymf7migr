@@ -3,7 +3,6 @@
     <span class="status-pill-view"
           data-status="{{ item.uniqueName }}"
           data-text="{{ item.short_description_fr }}"
-          style="background-color: {{ item.bg_color }};"
           title="{{ item.description_fr }}">
         {{ item.short_description_fr }}
     </span>
@@ -15,7 +14,7 @@
 {% set remarks = presentation.statusRemarks|default('') %}
 {% set showMore = (items|length > 1) or (remarks|length > 10) %}
 
-<div class="status-summary d-flex align-items-center gap-2 flex-wrap">
+<div class="status-summary d-flex align-items-center justify-content-center gap-2 flex-wrap">
     <span class="status-summary-main">
         {% if items|length > 0 %}
             {{ pills.pill(items|first) }}
@@ -73,8 +72,9 @@
 
     .status-pill {
         font-size: 0.9rem;
-        color: #222;
-        border: 1px solid rgba(0,0,0,0.05);
+        color: var(--theme-text);
+        border: 1px solid var(--theme-border);
+        background-color: var(--theme-surface-alt);
         box-shadow: 0 1px 3px rgba(0,0,0,0.08);
         cursor: default;
         transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -83,6 +83,9 @@
     .status-pill-view {
         padding: 5px 10px;
         border-radius: 10px;
+        background-color: var(--theme-surface-alt);
+        border: 1px solid var(--theme-border);
+        color: var(--theme-text);
     }
 
 
@@ -93,7 +96,7 @@
     }
 
     .status-pill.active {
-        outline: 2px solid #4b9c3f;
+        outline: 2px solid var(--theme-accent);
         font-weight: 600;
     }
 

@@ -1,0 +1,45 @@
+{# Fullscreen search overlay #}
+<div id="search-overlay" class="search-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="search-overlay__header">
+        <div class="search-overlay__title">Rechercher</div>
+        <div class="search-overlay__input-wrap">
+            <input
+                id="search-overlay-input"
+                class="search-overlay__input"
+                type="search"
+                placeholder="Rechercher un projet, un mot-cle..."
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+            >
+            <button class="search-overlay__clear d-none" type="button" data-search-clear aria-label="Effacer la recherche">&times;</button>
+        </div>
+        <button class="search-overlay__close" type="button" data-search-close aria-label="Fermer">&times;</button>
+    </div>
+
+    <div class="search-overlay__body">
+        <aside class="search-overlay__filters">
+            <div class="search-overlay__filters-header">
+                <span class="search-overlay__filters-title">Categories</span>
+                <button class="search-overlay__filters-clear" type="button" data-search-clear-filters>Effacer filtres</button>
+            </div>
+            <div id="search-overlay-categories" class="search-overlay__categories">
+                <div class="search-overlay__categories-empty">Tapez pour afficher les categories.</div>
+            </div>
+        </aside>
+
+        <section class="search-overlay__results">
+            <div class="search-overlay__meta">
+                <span id="search-overlay-status" class="search-overlay__status">Tapez au moins 2 caracteres.</span>
+                <span class="search-overlay__limit">16 resultats max</span>
+            </div>
+            <div id="search-overlay-count" class="search-overlay__count"></div>
+            <div id="search-overlay-results" class="search-results-grid"></div>
+            <div id="search-overlay-empty" class="search-overlay__empty d-none">Aucun resultat pour le moment.</div>
+            <div class="search-overlay__pagination d-none">
+                <button class="search-overlay__more" type="button" data-search-more>Afficher plus</button>
+                <span id="search-overlay-page" class="search-overlay__page"></span>
+            </div>
+        </section>
+    </div>
+</div>

@@ -90,7 +90,6 @@
 
                                 data-status="{{ item.uniqueName }}"
                                 data-category="{{ uniqueCategoryName }}"
-                                style="background-color: {{ item.bg_color }};"
                                 title="{{ item.description_fr }}"
                                                                 
                             >
@@ -210,7 +209,9 @@
         cursor: pointer;
         font-size: 17px;
         line-height: 1.15;
-        background-color: cornsilk;
+        background-color: var(--theme-surface-alt);
+        color: var(--theme-text);
+        border-color: var(--theme-border);
         display: flex;
         align-items: center;
     }
@@ -221,10 +222,11 @@
     }
 
     .project-status-button.list-group-item-action.active {
-        color: black;
+        color: var(--theme-text);
         z-index: 2;
-        background-color: #cce1ff;
-        border-color: #bcd7ff;
+        background-color: var(--theme-surface);
+        border-color: var(--theme-accent);
+        box-shadow: 0 0 0 1px var(--theme-accent);
     }
 
     .statusIcon {

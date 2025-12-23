@@ -113,7 +113,6 @@ function renderStatuses(newStatuses, newRemarks) {
                     text: item.short_description_fr,
                     status: item.uniqueName,
                     title: item.description_fr,
-                    color: item.bg_color,
                 });
             }
         });
@@ -131,7 +130,6 @@ function renderStatuses(newStatuses, newRemarks) {
                 'data-status': item.status,
                 title: item.title,
                 text: item.text,
-                css: { backgroundColor: item.color },
             });
             $container.append(pill);
         });
@@ -151,7 +149,7 @@ function renderStatuses(newStatuses, newRemarks) {
         if (activeItems.length > 0) {
             const first = activeItems[0];
             $summaryMain.html(
-                `<span class="status-pill-view" data-status="${first.status}" title="${first.title}" style="background-color:${first.color};">${first.text}</span>`
+                `<span class="status-pill-view" data-status="${first.status}" title="${first.title}">${first.text}</span>`
             );
         } else if ((newRemarks || '').trim().length > 0) {
             const snippet = (newRemarks || '').slice(0, 30) + ((newRemarks || '').length > 30 ? '…' : '');

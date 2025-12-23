@@ -526,6 +526,8 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #navbar_
     color: var(--theme-text-muted);
     padding-left: 0;
     padding-right: 0;
+    font-size: 1.3rem;
+    margin-bottom: 5px;
 }
 
 .theme-selector-menu .dropdown-divider {
@@ -678,6 +680,11 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #navbar_
 
     .theme-selector-grid {
         grid-template-columns: 1fr;
+    }
+
+    .theme-selector-menu .dropdown-header {
+        font-size: 1.1rem;
+        margin-bottom: 4px;
     }
 }
 

@@ -32,7 +32,7 @@ Contraintes :
 - images : si des légendes sont associées aux images (ex. liste numérotée de légendes après les URLs), renvoie un tableau d’objets aligné dans l’ordre d’apparition avec url + caption (caption peut être null si absente). Ne jamais inventer de légende. Sinon, renvoyer [].
 - videos : extraire uniquement les URLs YouTube explicites présentes (aucune invention), dédupliquer. Si des légendes sont associées (ex : titre ou phrase avant/après le lien), inclure dans caption (sinon null). Sinon, renvoyer [].
 - logo_url : URL de logo explicite si présente dans IMAGES ou le HTML fourni ; sinon null. Ne pas inventer.
-- categories : 1 à 3 valeurs parmi la liste autorisée ; sinon ["services"].
+- categories : 1 à 3 valeurs parmi la liste autorisée ; sinon ["services"]. La catégorie "restore" concerne des restaurations de monuments ou autres objets du patrimoine.
 - keywords : 3 à 5 mots-clés courts issus du texte. Pas d’invention ; si rien de pertinent, renvoyer [].
 - source_url : si un lien principal ressort dans LINKS, sinon null.
 - websites : 0..5 liens pertinents pris dans LINKS (titre = host lisible ou texte).

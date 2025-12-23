@@ -1,5 +1,9 @@
 {% set storedTheme = app.user and app.user.profile ? (app.user.profile.extra.theme|default('classic')) : 'classic' %}
 {% set currentTheme = storedTheme == 'light' ? 'classic' : storedTheme %}
+{% set dropdownId = dropdownId|default('themeDropdown') %}
+{% set wrapperClass = wrapperClass|default('d-inline-flex') %}
+{% set iconClass = iconClass|default('d-inline-block cursor-pointer me-1') %}
+{% set iconWidth = iconWidth|default(34) %}
 {% set themeGroups = [
   {
     label: 'Classiques',
@@ -37,7 +41,7 @@
 ] %}
 
 <li
-  class="nav-item dropdown d-inline-flex align-items-center theme-selector js-theme-selector"
+  class="nav-item dropdown align-items-center theme-selector js-theme-selector {{ wrapperClass }}"
   data-current-theme="{{ currentTheme }}"
   data-authenticated="{{ app.user ? '1' : '0' }}"
   {% if app.user %}
@@ -48,15 +52,15 @@
   <button
     class="btn p-0 border-0 bg-transparent dropdown-toggle theme-selector-toggle"
     type="button"
-    id="themeDropdown"
+    id="{{ dropdownId }}"
     data-bs-toggle="dropdown"
     aria-expanded="false"
     aria-label="Choisir un thème"
   >
-    <img class="d-inline-block cursor-pointer me-1" src="{{ asset('color-palette.svg', 'misc')}}" alt="color palette icon" width="34">
+    <img class="{{ iconClass }}" src="{{ asset('color-palette.svg', 'misc')}}" alt="color palette icon" width="{{ iconWidth }}">
   </button>
 
-  <ul class="dropdown-menu dropdown-menu-end shadow-sm theme-selector-menu" aria-labelledby="themeDropdown">
+  <ul class="dropdown-menu dropdown-menu-end shadow-sm theme-selector-menu" aria-labelledby="{{ dropdownId }}">
     {% for group in themeGroups %}
       <li class="theme-selector-group">
         <h6 class="dropdown-header theme-selector-group-title">{{ group.label }}</h6>

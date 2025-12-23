@@ -124,22 +124,24 @@
         {# tiny screens display #}
         
         <li class="nav-item d-md-none">
-
-          {# search icon on mobile, triggers a search bar appearance on click #}
-
-          <img id="search_icon_small_screens" class="navbar-icon" src="{{ asset('search.svg', 'misc')}}" alt="search icon" style="height:26px;">
-
-          {# search bar html structure + js + styles handling on tiny screens #}
-
-          {% include "search/_bar_sm.html.twig" %}
-
+          <button class="btn btn-link p-0" type="button" data-search-trigger aria-label="Rechercher">
+            <img id="search_icon_small_screens" class="navbar-icon" src="{{ asset('search.svg', 'misc')}}" alt="search icon" style="height:26px;">
+          </button>
         </li>
+
+        {% if showThemeSelector|default(false) %}
+          {% include "_partials/theme_selector.html.twig" with {
+            dropdownId: 'themeDropdownSm',
+            wrapperClass: 'd-inline-flex d-md-none ms-3',
+            iconClass: 'd-inline-block cursor-pointer',
+            iconWidth: 30
+          } %}
+        {% endif %}
 
         {# search bar for large screens #}
 
         <div class="d-none d-md-block position-relative">
-          <input id="navbar_md_search_input" class="form-control d-inline me-2" type="search" placeholder="Rechercher un Projet" aria-label="Search" autocomplete="off">
-          <div id="navbar_md_search_results" class="list-group position-absolute shadow-sm mt-1 d-none" style="min-width:260px; z-index: 2000;"></div>
+          <input id="navbar_md_search_input" class="form-control d-inline me-2" type="search" placeholder="Rechercher un Projet" aria-label="Search" autocomplete="off" data-search-trigger>
         </div>
 
         {# styles for search bar for large screens #}
@@ -154,10 +156,6 @@
             #navbar_md_search_input{
               width: 169px;
             }
-          }
-
-          #navbar_md_search_results a {
-            font-size: 14px;
           }
 
         </style>
@@ -270,7 +268,10 @@
           {# Theme selection (optional) #}
 
           {% if showThemeSelector|default(false) %}
-            {% include "_partials/theme_selector.html.twig" %}
+            {% include "_partials/theme_selector.html.twig" with {
+              dropdownId: 'themeDropdownLg',
+              wrapperClass: 'd-none d-md-inline-flex'
+            } %}
           {% endif %}
 
 
@@ -406,17 +407,6 @@
 </header>
 
 <script src="/js/project_search.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  if (window.ProjectSearch && typeof ProjectSearch.init === 'function') {
-    ProjectSearch.init({
-      inputSelector: '#navbar_md_search_input',
-      resultsSelector: '#navbar_md_search_results',
-      minLength: 2
-    });
-  }
-});
-</script>
 
 <style>
 

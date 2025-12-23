@@ -207,7 +207,7 @@
 
     .pp-container{
 
-        margin-top: 33px;
+        margin-top: 24px;
         padding: 0;
     
     }
@@ -297,7 +297,12 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #page-in
     color: var(--theme-text-muted) !important;
 }
 
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #pp-keywords {
+    color: var(--theme-accent);
+}
+
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .follow-button,
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-upper-box .follow-button,
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .share-presentation-button {
     background-color: var(--theme-surface-alt);
     border-color: var(--theme-accent);
@@ -311,6 +316,7 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-st
 
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .share-presentation-button img,
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .follow-button img,
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-upper-box .follow-button img,
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-upper-box .shareIcon,
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-upper-box .commentIcon,
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-upper-box .upper-box-page-info-icon,
