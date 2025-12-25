@@ -33,6 +33,36 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
+    const updateThemeIcons = function (theme) {
+        selectors.forEach(function (selector) {
+            const icons = selector.querySelectorAll('.js-theme-icon');
+            icons.forEach(function (icon) {
+                const template = icon.dataset.iconTemplate;
+                if (!template) {
+                    return;
+                }
+                const src = template.replace('THEME', theme);
+                icon.dataset.fallbackApplied = '';
+                icon.src = src;
+
+                if (!icon.dataset.fallbackBound) {
+                    icon.dataset.fallbackBound = '1';
+                    icon.addEventListener('error', function () {
+                        if (icon.dataset.fallbackApplied === '1') {
+                            return;
+                        }
+                        const fallback = icon.dataset.iconFallback;
+                        if (!fallback) {
+                            return;
+                        }
+                        icon.dataset.fallbackApplied = '1';
+                        icon.src = fallback;
+                    });
+                }
+            });
+        });
+    };
+
     const applyTheme = function (theme) {
         const resolved = normalizeTheme(theme);
         root.setAttribute('data-theme', resolved);
@@ -41,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
             selector.dataset.currentTheme = resolved;
         });
         setActiveOption(resolved);
+        updateThemeIcons(resolved);
         if (window.ProponThemeFonts && typeof window.ProponThemeFonts.load === 'function') {
             window.ProponThemeFonts.load(resolved);
         }

@@ -4,6 +4,9 @@
 {% set wrapperClass = wrapperClass|default('d-inline-flex') %}
 {% set iconClass = iconClass|default('d-inline-block cursor-pointer me-1') %}
 {% set iconWidth = iconWidth|default(34) %}
+{% set paletteIconTemplate = asset('color-palette--THEME.svg', 'misc') %}
+{% set paletteIconFallback = asset('color-palette--generic.svg', 'misc') %}
+{% set paletteIconSrc = paletteIconTemplate|replace({'THEME': currentTheme}) %}
 {% set themeGroups = [
   {
     label: 'Classiques',
@@ -57,7 +60,12 @@
     aria-expanded="false"
     aria-label="Choisir un thème"
   >
-    <img class="{{ iconClass }}" src="{{ asset('color-palette.svg', 'misc')}}" alt="color palette icon" width="{{ iconWidth }}">
+    <img class="{{ iconClass }} js-theme-icon"
+         src="{{ paletteIconSrc }}"
+         data-icon-template="{{ paletteIconTemplate }}"
+         data-icon-fallback="{{ paletteIconFallback }}"
+         alt="color palette icon"
+         width="{{ iconWidth }}">
   </button>
 
   <ul class="dropdown-menu dropdown-menu-end shadow-sm theme-selector-menu" aria-labelledby="{{ dropdownId }}">

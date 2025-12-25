@@ -27,7 +27,7 @@ class ProjectPresentationCreationType extends AbstractType
             ->add('goal', TextType::class, [
                 'label' => "Quel est l'objectif du projet ?",
                 'attr' => [
-                    'placeholder' => "Écrire ici l'objectif",
+                    'placeholder' => "Écrire ici l'objectif du projet",
                 ],
                 'required' => true,
             ])

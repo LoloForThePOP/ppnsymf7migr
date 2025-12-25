@@ -91,7 +91,7 @@ a{
     --theme-font-body: 'Quicksand', sans-serif;
     --theme-font-heading: 'Quicksand', sans-serif;
     --theme-accent: #2da971;
-    --theme-accent-contrast: #0f2f27;
+    --theme-accent-contrast: #eafff6;
     --theme-border: #cfeede;
     --theme-title: #0f2f27;
     --pp-card-bg: #f7fff9;
@@ -187,14 +187,14 @@ a{
     --theme-text: #4c1d95;
     --theme-text-muted: #7c3aed;
     --theme-font-body: 'Quicksand', sans-serif;
-    --theme-font-heading: 'VT323', monospace;
-    --theme-accent: #ff4fd8;
+    --theme-font-heading: 'Geologica', sans-serif;
+    --theme-accent: #f2a1d9;
     --theme-accent-contrast: #ffffff;
     --theme-border: #e3c5ff;
     --theme-title: #7c3aed;
     --pp-card-bg: #fff1fb;
     --pp-card-border: #e3c5ff;
-    --pp-card-shadow: 0 14px 26px rgba(168, 85, 247, 0.18);
+    --pp-card-shadow: 0 14px 26px rgba(242, 161, 217, 0.18);
     --pp-title-color: #a855f7;
     --theme-button-weight: 600;
 }
@@ -206,9 +206,9 @@ a{
     --theme-text: #0f3d3e;
     --theme-text-muted: #2f6f6f;
     --theme-font-body: 'Quicksand', sans-serif;
-    --theme-font-heading: 'Playfair Display', serif;
-    --theme-accent: #ff7a59;
-    --theme-accent-contrast: #0f3d3e;
+    --theme-font-heading: 'Manrope', sans-serif;
+    --theme-accent: #f58b76;
+    --theme-accent-contrast: #fff3ee;
     --theme-border: #cdeee7;
     --theme-title: #0f3d3e;
     --pp-card-bg: #ffffff;
@@ -245,7 +245,7 @@ a{
     --theme-text: #1f3d2a;
     --theme-text-muted: #4f6f57;
     --theme-font-body: 'Alegreya Sans', sans-serif;
-    --theme-font-heading: 'Playfair Display', serif;
+    --theme-font-heading: 'Manrope', sans-serif;
     --theme-accent: #2f9e44;
     --theme-accent-contrast: #ffffff;
     --theme-border: #dce7d9;
@@ -263,7 +263,7 @@ a{
     --theme-text: #4a1f2f;
     --theme-text-muted: #8b4b63;
     --theme-font-body: 'Quicksand', sans-serif;
-    --theme-font-heading: 'Playfair Display', serif;
+    --theme-font-heading: 'Quicksand', sans-serif;
     --theme-accent: #ec4899;
     --theme-accent-contrast: #ffffff;
     --theme-border: #f5c2d4;
@@ -1035,6 +1035,12 @@ html[data-theme-variant="custom"] .modal-footer {
     border-bottom-left-radius: 5px;
 }
 
+html[data-theme-variant="custom"] .no-internet-connection {
+    background-color: color-mix(in srgb, var(--theme-accent) 18%, var(--theme-surface));
+    color: var(--theme-text);
+    border: 1px solid color-mix(in srgb, var(--theme-accent) 50%, var(--theme-border));
+}
+
 body.user-offline .no-internet-connection{
     display: block;
 }
@@ -1443,6 +1449,37 @@ html[data-theme-variant="custom"] #login-other-choices a {
 html[data-theme-variant="custom"] #login-other-choices a:hover,
 html[data-theme-variant="custom"] #login-other-choices a:focus {
     color: var(--theme-accent);
+}
+
+/* Login re-auth hint */
+
+.login-reauth-note {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #2d3748;
+}
+
+html[data-theme-variant="custom"] .login-reauth-note {
+    color: color-mix(in srgb, var(--theme-accent) 70%, var(--theme-text));
+}
+
+.login-info-note {
+    font-size: 0.95rem;
+    color: #4a5568;
+}
+
+html[data-theme-variant="custom"] .login-info-note {
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] .login-info-note a {
+    color: var(--theme-accent);
+}
+
+/* Profile edit title */
+
+html[data-theme-variant="custom"] .profile-edit-title {
+    color: var(--theme-accent) !important;
 }
 
 /* Homepage motto */

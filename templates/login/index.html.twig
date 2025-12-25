@@ -19,6 +19,28 @@
 
                 <h3 class="fw-bold mb-4">Connexion</h3>
 
+                {% set targetPath = app.session ? app.session.get('_security.main.target_path') : null %}
+                {% set passwordPath = path('update_account_password') %}
+                {% set emailPath = path('update_account_email') %}
+                {% set reauthContext = targetPath and passwordPath in targetPath
+                    ? 'password'
+                    : (targetPath and emailPath in targetPath ? 'email' : null) %}
+                {% set showReauthHint = reauthContext is not null %}
+                {% set showLoggedInNotice = app.user and is_granted('IS_AUTHENTICATED_FULLY') and not showReauthHint %}
+
+                {% if showReauthHint %}
+                    <div class="login-reauth-note mb-3">
+                        Veuillez vous reconnecter pour modifier vos informations sensibles.
+                    </div>
+                {% endif %}
+
+                {% if showLoggedInNotice %}
+                    <div class="login-info-note mb-3">
+                        Vous êtes déjà connecté avec l'adresse {{ app.user.email }}.
+                        <a href="{{ path('app_logout') }}">Se déconnecter</a> si vous souhaitez utiliser un autre compte.
+                    </div>
+                {% endif %}
+
                 <div class="container mb-4 pb-3 px-0">
 
                     <a href="{{ path('connect_google_start') }}">
@@ -75,18 +97,6 @@
                     {% if error %}
 
                         <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-
-                    {% endif %}
-
-                    {# case user has already logged in #}
-
-                    {% if app.user %}
-
-                        <div class="mb-3">
-                            Vous êtes déjà connecté avec l'adresse {{ app.user.email }}, <a
-                                href="{{ path('app_logout') }}">se
-                                déconnecter</a>
-                        </div>
 
                     {% endif %}
 

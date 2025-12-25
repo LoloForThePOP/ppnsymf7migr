@@ -90,7 +90,7 @@ final class ProfileController extends AbstractController
 
 
     #[Route('account/update/email', name: 'update_account_email', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_USER')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function updateEmail(Request $request, EntityManagerInterface $em): Response
     {
         /** @var \App\Entity\User $user */
