@@ -21,47 +21,16 @@
         {# Image Upload Icon #}
 
         <div id="{{uploadIconId}}" class="add-image-square">
-            
-            <img src="{{asset ('image2.svg', 'misc')}}" class="" alt="Image icon" loading="lazy" width="50" height="50">
+            <span class="pp-create-upload-icon" role="img" aria-label="Image icon"></span>
 
             <div class="plus-sign">+</div>
         
         </div>
 
-        <style>
-
-
-            .add-image-square {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 130px;
-                height: 130px;
-                border: 2px solid #094171;
-                border-radius: 16px;
-                margin: auto;
-                cursor: pointer;
-                position: relative;
-            }
-
-            .plus-sign {
-                position: absolute;
-                top: 5px;
-                right: 20px;
-
-                font-size: 32px;
-                font-weight: bolder;
-                color: #094171;
-            }
-        
-        
-        
-        </style>
-
         <div class="d-none">{{ form_row(form.imageSlide.imageFile) }}</div>
 
-        <div id="preview-container" class = "d-flex justify-content-center" style="margin-top:1rem;">
-            <img id="preview" src="" alt="Preview" style="max-width:200px; display:none; border:1px solid #ccc; padding:5px; border-radius:5px;">
+        <div id="preview-container" class="d-flex justify-content-center">
+            <img id="preview" src="" alt="Preview">
         </div>
 
 

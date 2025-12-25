@@ -69,65 +69,16 @@
 
         {% if position != 0 %}
 
-            <a class="text-body " href="{{ path('create_project_presentation', {'stringId': stringId, 'position': previousPosition }) }}"><button type="button" class="action-button btn btn-outline-dark">Retour</button></a>        
+            <a href="{{ path('create_project_presentation', {'stringId': stringId, 'position': previousPosition }) }}"><button type="button" class="action-button btn btn-go-back btn-no-icon">Retour</button></a>        
                 
         {% endif %}
 
-        <button type="submit" class="validate action-button btn btn-success text-white">Continuer</button>
+        <button type="submit" class="validate action-button btn btn-validate">Continuer</button>
 
 
     </div>
 
 
             
-
-    <style>
-
-        .action-buttons-container{
-
-            display: flex;
-            justify-content: space-evenly;
-
-            margin-top : 34px;
-
-        }
-
-
-        .action-button{
-
-            padding: 9px 19px;
-            border-radius: 25px;
-            border: 2px solid #c7f5a;
-
-        }
-            
-
-        button.validate:hover {
-            background-color: #1fab1fff;
-        }
-                        
-
-        @media screen and (max-width: 580px) {
-        
-            .action-buttons-container{
-
-                justify-content: space-between;
-
-                margin-left: 20px;
-                margin-right: 20px;
-
-            }
-
-            .action-button {
-
-                margin-bottom: 22px !important;
-
-            }
-            
-        }     
-
-    </style>
-
-
 
 {{ form_end(form) }}

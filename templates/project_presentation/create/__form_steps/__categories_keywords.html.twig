@@ -71,7 +71,7 @@
             {% if cleanKeyword != '' %}
                 <button type="button" class="btn btn-outline-primary btn-sm keyword-chip" data-keyword="{{ cleanKeyword }}">
                     {{ cleanKeyword }}
-                    <span class="text-danger ms-1">×</span>
+                    <span class="keyword-remove ms-1">×</span>
                 </button>
             {% endif %}
         {% else %}
@@ -81,7 +81,7 @@
 
     <div class="input-group mb-2">
         <input type="text" class="form-control" id="keyword-input" placeholder="Ajouter un mot-clé puis Entrée">
-        <button class="btn btn-outline-success" type="button" id="keyword-add">Ajouter</button>
+        <button class="btn btn-primary" type="button" id="keyword-add">Ajouter</button>
     </div>
     <small class="text-muted">Séparer avec des virgules.</small>
 
@@ -150,7 +150,7 @@
                 btn.type = 'button';
                 btn.className = 'btn btn-outline-primary btn-sm keyword-chip';
                 btn.dataset.keyword = keyword;
-                btn.innerHTML = `${keyword} <span class="text-danger ms-1">×</span>`;
+                btn.innerHTML = `${keyword} <span class="keyword-remove ms-1">×</span>`;
                 btn.addEventListener('click', () => {
                     const updated = getKeywords().filter(k => k !== keyword);
                     setKeywords(updated);

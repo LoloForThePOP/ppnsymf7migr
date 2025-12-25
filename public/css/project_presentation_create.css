@@ -1,0 +1,266 @@
+/* Project presentation creation flow */
+
+#createPPModal.create-pp-modal {
+    --pp-create-accent: var(--theme-accent);
+    --pp-create-accent-contrast: var(--theme-accent-contrast);
+    --pp-create-title: #094171;
+    --pp-create-surface: #ffffff;
+    --pp-create-surface-alt: #f7ffe4;
+    --pp-create-border: #cbd5e0;
+    --pp-create-muted: #6c757d;
+    --pp-create-status-border: #dddddd;
+    --pp-create-status-hover-border: #bcd6ff;
+    --pp-create-status-hover-bg: #f7faff;
+    --pp-create-status-selected-border: #4a93ff;
+    --pp-create-status-selected-bg: #e8f0ff;
+    --pp-create-upload-border: #094171;
+    --pp-create-upload-color: #094171;
+}
+
+html[data-theme-variant="custom"] #createPPModal.create-pp-modal {
+    --pp-create-title: var(--theme-accent);
+    --pp-create-surface: var(--theme-surface);
+    --pp-create-surface-alt: var(--theme-surface-alt);
+    --pp-create-border: var(--theme-border);
+    --pp-create-muted: var(--theme-text-muted);
+    --pp-create-status-border: var(--theme-border);
+    --pp-create-status-hover-border: var(--theme-accent);
+    --pp-create-status-hover-bg: var(--theme-surface-alt);
+    --pp-create-status-selected-border: var(--theme-accent);
+    --pp-create-status-selected-bg: color-mix(in srgb, var(--theme-accent) 18%, var(--theme-surface));
+    --pp-create-upload-border: var(--theme-accent);
+    --pp-create-upload-color: var(--theme-accent);
+}
+
+#createPPModal.create-pp-modal .box-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 74px;
+    background-color: var(--pp-create-surface);
+    border-bottom: 1px solid var(--pp-create-border);
+}
+
+#createPPModal.create-pp-modal .website-logo {
+    width: 135px;
+}
+
+#createPPModal.create-pp-modal .box-title {
+    font-size: 15px;
+    color: var(--pp-create-title);
+}
+
+html[data-theme-variant="custom"] #createPPModal.create-pp-modal .box-title {
+    color: var(--theme-accent);
+}
+
+html[data-theme-variant="custom"] #createPPModal.create-pp-modal .propon-logo {
+    --propon-logo-primary: var(--pp-create-accent);
+    --propon-logo-secondary: var(--pp-create-accent);
+}
+
+html[data-theme-variant="custom"] #createPPModal.create-pp-modal .propon-logo .propon-logo-secondary {
+    opacity: 0.7;
+}
+
+#createPPModal.create-pp-modal .box-progress-bar {
+    margin-bottom: 50px;
+}
+
+#createPPModal.create-pp-modal .progress-line {
+    height: 4px;
+    background-color: var(--pp-create-accent);
+    position: relative;
+}
+
+#createPPModal.create-pp-modal .progress-line::after {
+    content: "";
+    position: absolute;
+    right: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid var(--pp-create-accent);
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+}
+
+#createPPModal.create-pp-modal .action-buttons-container {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 34px;
+}
+
+#createPPModal.create-pp-modal .action-button {
+    padding: 9px 19px;
+    border-radius: 25px;
+}
+
+#createPPModal.create-pp-modal .status-choice-btn {
+    border: 2px solid var(--pp-create-status-border);
+    border-radius: 12px;
+    width: 180px;
+    cursor: pointer;
+    background: var(--pp-create-surface);
+    color: var(--theme-text);
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+#createPPModal.create-pp-modal .status-choice-btn:hover {
+    border-color: var(--pp-create-status-hover-border);
+    background: var(--pp-create-status-hover-bg);
+}
+
+#createPPModal.create-pp-modal .status-choice-btn.selected {
+    border-color: var(--pp-create-status-selected-border);
+    background: var(--pp-create-status-selected-bg);
+}
+
+#createPPModal.create-pp-modal .add-image-square {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 130px;
+    height: 130px;
+    border: 2px solid var(--pp-create-upload-border);
+    border-radius: 16px;
+    margin: auto;
+    cursor: pointer;
+    position: relative;
+    background-color: var(--pp-create-surface);
+}
+
+#createPPModal.create-pp-modal .plus-sign {
+    position: absolute;
+    top: 5px;
+    right: 20px;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--pp-create-upload-border);
+}
+
+#createPPModal.create-pp-modal .pp-create-upload-icon {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    background-color: var(--pp-create-upload-color);
+    -webkit-mask: url("/media/static/images/icons/miscellaneous/image2.svg") no-repeat center / contain;
+    mask: url("/media/static/images/icons/miscellaneous/image2.svg") no-repeat center / contain;
+}
+
+#createPPModal.create-pp-modal #preview-container {
+    margin-top: 1rem;
+}
+
+#createPPModal.create-pp-modal #preview {
+    max-width: 200px;
+    display: none;
+    border: 1px solid var(--pp-create-border);
+    padding: 5px;
+    border-radius: 5px;
+    background-color: var(--pp-create-surface);
+}
+
+#createPPModal.create-pp-modal .keyword-chip.btn-outline-primary {
+    color: var(--pp-create-accent);
+    border-color: var(--pp-create-accent);
+}
+
+#createPPModal.create-pp-modal .keyword-chip.btn-outline-primary:hover,
+#createPPModal.create-pp-modal .keyword-chip.btn-outline-primary:focus {
+    background-color: var(--pp-create-accent);
+    color: var(--pp-create-accent-contrast);
+}
+
+#createPPModal.create-pp-modal #keyword-add.btn-primary {
+    background-color: var(--pp-create-accent);
+    border-color: var(--pp-create-accent);
+    color: var(--pp-create-accent-contrast);
+}
+
+#createPPModal.create-pp-modal #keyword-add.btn-primary:hover,
+#createPPModal.create-pp-modal #keyword-add.btn-primary:focus,
+#createPPModal.create-pp-modal #keyword-add.btn-primary:active {
+    filter: brightness(0.96);
+    color: var(--pp-create-accent-contrast);
+}
+
+#createPPModal.create-pp-modal .keyword-remove {
+    color: var(--pp-create-accent);
+}
+
+#createPPModal.create-pp-modal .keyword-chip.btn-outline-primary:hover .keyword-remove,
+#createPPModal.create-pp-modal .keyword-chip.btn-outline-primary:focus .keyword-remove,
+#createPPModal.create-pp-modal .keyword-chip.btn-outline-primary:active .keyword-remove {
+    color: var(--pp-create-accent-contrast);
+}
+
+#createPPModal.create-pp-modal .selected-category {
+    background-color: var(--pp-create-surface);
+    border-color: var(--pp-create-border);
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] #createPPModal.create-pp-modal .selected-category {
+    background-color: var(--theme-surface-alt);
+}
+
+html[data-theme-variant="custom"] #createPPModal.create-pp-modal .text-muted {
+    color: var(--pp-create-muted) !important;
+}
+
+@media (max-width: 576px) {
+    #createPPModal.create-pp-modal .website-logo {
+        width: 75px;
+    }
+}
+
+@media screen and (min-width: 580px) {
+    #createPPModal.create-pp-modal .modal-content {
+        background-color: var(--pp-create-surface-alt);
+    }
+
+    #createPPModal.create-pp-modal .box-content {
+        display: flex;
+        justify-content: center;
+    }
+
+    #createPPModal.create-pp-modal .form-container {
+        width: 1000px;
+        padding: 50px;
+        min-height: unset;
+        border-radius: 15px;
+        background-color: var(--pp-create-surface);
+        border: 1px solid var(--pp-create-border);
+    }
+}
+
+@media screen and (max-width: 580px) {
+    #createPPModal.create-pp-modal {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    #createPPModal.create-pp-modal .box-content {
+        margin: 0;
+    }
+
+    #createPPModal.create-pp-modal .fs-4 {
+        font-size: 19px !important;
+    }
+
+    #createPPModal.create-pp-modal .sm-fs-4 {
+        font-size: 16px;
+    }
+
+    #createPPModal.create-pp-modal .action-buttons-container {
+        justify-content: space-between;
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+
+    #createPPModal.create-pp-modal .action-button {
+        margin-bottom: 22px !important;
+    }
+}
