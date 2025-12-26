@@ -295,6 +295,10 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-stru
     --pp-struct-icon-color: var(--theme-accent);
 }
 
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .pp-struct-icon{
+    --pp-struct-icon-color: var(--theme-highlight);
+}
+
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .page-info-btn:hover,
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .report-problem-btn:hover {
     background-color: var(--theme-surface);
@@ -324,8 +328,17 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #pp-keyw
     color: var(--theme-accent);
 }
 
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] #pp-keywords {
+    color: var(--theme-highlight);
+    font-weight: 700;
+}
+
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #categories-dropdown {
     color: var(--theme-accent);
+}
+
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] #categories-dropdown {
+    color: var(--theme-sky);
 }
 
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .follow-button,
@@ -351,6 +364,15 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .fake-se
     filter: brightness(0) saturate(100%) var(--theme-icon-filter);
 }
 
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] #misc-struct-container .share-presentation-button img,
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] #misc-struct-container .follow-button img,
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .pp-upper-box .follow-button img,
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .pp-upper-box .shareIcon,
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .pp-upper-box .commentIcon,
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .pp-upper-box .upper-box-page-info-icon {
+    filter: brightness(0) saturate(100%) var(--theme-icon-filter-sky);
+}
+
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .like-button {
     --pp-like-icon-color: #000000;
     --pp-like-icon-active-color: #000000;
@@ -363,4 +385,22 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .like-bu
 
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .likeIcon {
     filter: brightness(0) saturate(100%) var(--theme-icon-filter);
+}
+
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .like-button {
+    --pp-like-icon-color: var(--theme-sky);
+    --pp-like-icon-active-color: var(--theme-sky);
+}
+
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .likeIcon {
+    filter: none;
+}
+
+html[data-theme-variant="custom"][data-theme="dark"] body[data-theme-scope="presentation"] .question-container:hover,
+html[data-theme-variant="custom"][data-theme="neon"] body[data-theme-scope="presentation"] .question-container:hover,
+html[data-theme-variant="custom"][data-theme="cyberpunk"] body[data-theme-scope="presentation"] .question-container:hover,
+html[data-theme-variant="custom"][data-theme="matrix"] body[data-theme-scope="presentation"] .question-container:hover,
+html[data-theme-variant="custom"][data-theme="luxury-black"] body[data-theme-scope="presentation"] .question-container:hover,
+html[data-theme-variant="custom"][data-theme="deep-ocean"] body[data-theme-scope="presentation"] .question-container:hover {
+    background-color: var(--theme-surface-alt);
 }

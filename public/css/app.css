@@ -180,6 +180,27 @@ a{
     --theme-button-weight: 600;
 }
 
+:root[data-theme="matrix"] {
+    --theme-bg: #0a0f0c;
+    --theme-surface: #111a15;
+    --theme-surface-alt: #17231c;
+    --theme-text: #e0f2e6;
+    --theme-text-muted: #9ab3a4;
+    --theme-font-body: 'IBM Plex Sans', sans-serif;
+    --theme-font-heading: 'Space Mono', monospace;
+    --theme-accent: #2fbf71;
+    --theme-accent-contrast: #07110b;
+    --theme-border: #203629;
+    --theme-title: #9ef2c1;
+    --theme-icon-filter: invert(79%) sepia(16%) saturate(510%) hue-rotate(88deg) brightness(94%) contrast(90%);
+    --pp-card-bg: #0f1713;
+    --pp-card-border: #203629;
+    --pp-card-shadow: 0 18px 36px rgba(6, 16, 12, 0.6);
+    --pp-title-color: #9ef2c1;
+    --pp-icon-filter: var(--theme-icon-filter);
+    --theme-button-weight: 600;
+}
+
 :root[data-theme="vaporwave"] {
     --theme-bg: #f5e9ff;
     --theme-surface: #fff1fb;
@@ -217,25 +238,52 @@ a{
     --pp-title-color: #0f766e;
 }
 
-:root[data-theme="retro-game"] {
-    --theme-bg: #0f1912;
-    --theme-surface: #16261c;
-    --theme-surface-alt: #1d3224;
-    --theme-text: #c7f9cc;
-    --theme-text-muted: #8bd5a1;
-    --theme-font-body: 'VT323', monospace;
-    --theme-font-heading: 'Press Start 2P', monospace;
-    --theme-accent: #80ed99;
-    --theme-accent-contrast: #0f1912;
-    --theme-border: #2f4f3a;
-    --theme-title: #c7f9cc;
-    --theme-icon-filter: invert(85%) sepia(16%) saturate(412%) hue-rotate(94deg) brightness(92%) contrast(86%);
-    --pp-card-bg: #132019;
-    --pp-card-border: #2f4f3a;
-    --pp-card-shadow: 0 14px 28px rgba(16, 25, 18, 0.6);
-    --pp-title-color: #c7f9cc;
+:root[data-theme="sunny-beach"] {
+    --theme-bg: #e7f8ff;
+    --theme-surface: #ffffff;
+    --theme-surface-alt: #effbff;
+    --theme-text: #1b2a3a;
+    --theme-text-muted: #4f6b8a;
+    --theme-font-body: 'Sora', sans-serif;
+    --theme-font-heading: 'Chakra Petch', sans-serif;
+    --theme-accent: #ffa700;
+    --theme-accent-contrast: #2a2100;
+    --theme-border: #a8e6f0;
+    --theme-title: #00b092;
+    --theme-icon-filter: invert(62%) sepia(32%) saturate(676%) hue-rotate(128deg) brightness(94%) contrast(90%);
+    --pp-card-bg: #ffffff;
+    --pp-card-border: #a8e6f0;
+    --pp-card-shadow: 0 12px 24px rgba(85, 211, 235, 0.24);
+    --pp-title-color: #00b092;
     --pp-icon-filter: var(--theme-icon-filter);
-    --theme-button-weight: 500;
+    --theme-button-weight: 600;
+}
+
+:root[data-theme="retro-game"] {
+    --theme-bg: #ecf9ff;
+    --theme-surface: #ffffff;
+    --theme-surface-alt: #f2fcff;
+    --theme-text: #1b2a3a;
+    --theme-text-muted: #52697a;
+    --theme-font-body: 'Sora', sans-serif;
+    --theme-font-heading: 'Chakra Petch', sans-serif;
+    --theme-vegetation: #2fb85b;
+    --theme-vegetation-soft: #74d28a;
+    --theme-highlight: #f4b400;
+    --theme-sky: #2f9edb;
+    --theme-accent: var(--theme-vegetation-soft);
+    --theme-accent-contrast: #f7fff8;
+    --theme-border: #c2edd2;
+    --theme-title: #1f8f43;
+    --theme-icon-filter: invert(85%) sepia(49%) saturate(586%) hue-rotate(357deg) brightness(103%) contrast(103%);
+    --theme-icon-filter-vegetation: invert(46%) sepia(93%) saturate(720%) hue-rotate(88deg) brightness(96%) contrast(94%);
+    --theme-icon-filter-sky: invert(55%) sepia(74%) saturate(538%) hue-rotate(169deg) brightness(93%) contrast(92%);
+    --pp-card-bg: #ffffff;
+    --pp-card-border: #c2edd2;
+    --pp-card-shadow: 0 12px 24px rgba(47, 184, 91, 0.18);
+    --pp-title-color: #1f8f43;
+    --pp-icon-filter: var(--theme-icon-filter);
+    --theme-button-weight: 600;
 }
 
 :root[data-theme="eco-green"] {
@@ -370,6 +418,10 @@ html[data-theme-variant="custom"] .pp-theme-icon {
     filter: brightness(0) saturate(100%) var(--theme-icon-filter);
 }
 
+html[data-theme-variant="custom"][data-theme="retro-game"] img.pp-theme-icon[src*="add_presentation.svg"] {
+    filter: brightness(0) saturate(100%) var(--theme-icon-filter-vegetation);
+}
+
 header .navbar {
     border-bottom-color: var(--theme-accent) !important;
 }
@@ -461,6 +513,28 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] header .
     opacity: 0.7;
 }
 
+html[data-theme-variant="custom"][data-theme="retro-game"] .propon-logo {
+    --propon-logo-primary: var(--theme-vegetation);
+    --propon-logo-secondary: var(--theme-highlight);
+}
+
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] header .propon-logo {
+    --propon-logo-primary: var(--theme-vegetation);
+    --propon-logo-secondary: var(--theme-highlight);
+}
+
+html[data-theme-variant="custom"][data-theme="retro-game"] .propon-logo .propon-logo-arrow {
+    fill: var(--theme-sky);
+}
+
+html[data-theme-variant="custom"][data-theme="retro-game"] .propon-logo .propon-logo-letter-p {
+    fill: var(--theme-sky);
+}
+
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] header .propon-logo .propon-logo-secondary {
+    opacity: 1;
+}
+
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] header .navbar .form-control {
     background-color: var(--theme-surface-alt);
     border-color: var(--theme-border);
@@ -482,7 +556,7 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] header .
 html[data-theme-variant="custom"][data-theme="dark"] body[data-theme-scope="presentation"] header .navbar .navbar-toggler-icon,
 html[data-theme-variant="custom"][data-theme="neon"] body[data-theme-scope="presentation"] header .navbar .navbar-toggler-icon,
 html[data-theme-variant="custom"][data-theme="cyberpunk"] body[data-theme-scope="presentation"] header .navbar .navbar-toggler-icon,
-html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] header .navbar .navbar-toggler-icon,
+html[data-theme-variant="custom"][data-theme="matrix"] body[data-theme-scope="presentation"] header .navbar .navbar-toggler-icon,
 html[data-theme-variant="custom"][data-theme="luxury-black"] body[data-theme-scope="presentation"] header .navbar .navbar-toggler-icon,
 html[data-theme-variant="custom"][data-theme="deep-ocean"] body[data-theme-scope="presentation"] header .navbar .navbar-toggler-icon {
     background-image: var(--theme-navbar-toggler-icon-dark);
@@ -1263,6 +1337,10 @@ body.user-offline .no-internet-connection{
     ::placeholder {
         font-size: 1.1em !important;
         color: #7b8a8b  !important;
+    }
+
+    html[data-theme-variant="custom"] input[type="checkbox"]:not(.toggle-switch) {
+        accent-color: var(--theme-accent);
     }
 
 
