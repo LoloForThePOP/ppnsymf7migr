@@ -52,6 +52,7 @@ a{
     --theme-font-heading: 'Lato', sans-serif;
     --theme-navbar-toggler-icon-light: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
     --theme-navbar-toggler-icon-dark: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    --theme-btn-close-filter: none;
     --theme-button-weight: 700;
 
     --pp-card-bg: #ffffff;
@@ -113,6 +114,7 @@ a{
     --theme-accent-contrast: #0b0f16;
     --theme-border: #283344;
     --theme-title: #f8fafc;
+    --theme-btn-close-filter: invert(1);
     --theme-icon-filter: invert(88%) sepia(9%) saturate(330%) hue-rotate(175deg) brightness(96%) contrast(90%);
     --pp-card-bg: #131a25;
     --pp-card-border: #1f2a3a;
@@ -151,6 +153,7 @@ a{
     --theme-accent-contrast: #160a20;
     --theme-border: #3b1b4f;
     --theme-title: #f5e9ff;
+    --theme-btn-close-filter: invert(1);
     --theme-icon-filter: invert(92%) sepia(5%) saturate(332%) hue-rotate(213deg) brightness(96%) contrast(90%);
     --pp-card-bg: #15081f;
     --pp-card-border: #2c113b;
@@ -172,6 +175,7 @@ a{
     --theme-accent-contrast: #0b0d0f;
     --theme-border: #263238;
     --theme-title: #facc15;
+    --theme-btn-close-filter: invert(1);
     --theme-icon-filter: invert(88%) sepia(13%) saturate(339%) hue-rotate(181deg) brightness(98%) contrast(88%);
     --pp-card-bg: #10161c;
     --pp-card-border: #1f2a33;
@@ -193,6 +197,7 @@ a{
     --theme-accent-contrast: #07110b;
     --theme-border: #203629;
     --theme-title: #9ef2c1;
+    --theme-btn-close-filter: invert(1);
     --theme-icon-filter: invert(79%) sepia(16%) saturate(510%) hue-rotate(88deg) brightness(94%) contrast(90%);
     --pp-card-bg: #0f1713;
     --pp-card-border: #203629;
@@ -336,6 +341,7 @@ a{
     --theme-accent-contrast: #0b0b0b;
     --theme-border: #2a2a2a;
     --theme-title: #f5f5f4;
+    --theme-btn-close-filter: invert(1);
     --theme-icon-filter: invert(90%) sepia(9%) saturate(320%) hue-rotate(35deg) brightness(96%) contrast(88%);
     --pp-card-bg: #121212;
     --pp-card-border: #2a2a2a;
@@ -356,6 +362,7 @@ a{
     --theme-accent-contrast: #02121a;
     --theme-border: #0f3a4a;
     --theme-title: #d1f5ff;
+    --theme-btn-close-filter: invert(1);
     --theme-icon-filter: invert(86%) sepia(12%) saturate(286%) hue-rotate(165deg) brightness(95%) contrast(88%);
     --pp-card-bg: #05212d;
     --pp-card-border: #0f3a4a;
@@ -639,6 +646,20 @@ html[data-theme-variant="custom"] .btn-secondary {
     color: var(--theme-text);
 }
 
+html[data-theme-variant="custom"] .btn-light {
+    background-color: var(--theme-surface-alt);
+    border-color: var(--theme-border);
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] .btn-light:hover,
+html[data-theme-variant="custom"] .btn-light:focus,
+html[data-theme-variant="custom"] .btn-light:active {
+    background-color: var(--theme-surface);
+    border-color: var(--theme-border);
+    color: var(--theme-text);
+}
+
 html[data-theme-variant="custom"] .btn-secondary:hover,
 html[data-theme-variant="custom"] .btn-secondary:focus,
 html[data-theme-variant="custom"] .btn-secondary:active {
@@ -777,6 +798,25 @@ html[data-theme-variant="custom"] .modal-content {
 html[data-theme-variant="custom"] .modal-header,
 html[data-theme-variant="custom"] .modal-footer {
     border-color: var(--theme-border);
+}
+
+html[data-theme-variant="custom"] .modal .form-control,
+html[data-theme-variant="custom"] .modal .form-select {
+    background-color: var(--theme-surface-alt);
+}
+
+html[data-theme-variant="custom"] .modal .form-control:disabled,
+html[data-theme-variant="custom"] .modal .form-select:disabled {
+    background-color: var(--theme-surface);
+}
+
+html[data-theme-variant="custom"] .modal .text-muted,
+html[data-theme-variant="custom"] .modal .form-text {
+    color: var(--theme-text-muted) !important;
+}
+
+html[data-theme-variant="custom"] .modal .btn-close {
+    filter: var(--theme-btn-close-filter);
 }
 
 .theme-selector-toggle.dropdown-toggle::after {
@@ -1338,7 +1378,7 @@ body.user-offline .no-internet-connection{
 
     ::placeholder {
         font-size: 1.1em !important;
-        color: #7b8a8b  !important;
+        color: var(--theme-text-muted) !important;
     }
 
     html[data-theme-variant="custom"] input[type="checkbox"]:not(.toggle-switch) {

@@ -184,16 +184,32 @@
 
 /* Position edit slide button on tiny screen */
 
-    .edit-slide-button{
+.edit-slide-button{
         top: 0;
-        right:40px;
-        width:30px;
-        height:30px;
-        position: absolute; 
-        bottom:0; 
-        right:0; 
-        background-color: white;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #e2f6e1;
+        border: 1px solid #79be81;
+        padding: 0;
+        padding-top: 6px;
+        line-height: 1;
     }
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .edit-slide-button {
+        background-color: var(--theme-surface-alt);
+        border-color: var(--theme-accent);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .edit-slide-button img {
+        filter: brightness(0) saturate(100%) var(--theme-icon-filter);
+}
 
 
     /* Specific display when only one slide */

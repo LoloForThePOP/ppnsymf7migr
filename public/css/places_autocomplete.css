@@ -3,9 +3,9 @@
     height: 54px;
     padding: 0.375rem 0.75rem; 
 
-    color: #7b8a8b;
-    background-color: #ecf0f1;
-    border: 1px solid #dee2e6 !important; 
+    color: var(--theme-text);
+    background-color: var(--theme-surface);
+    border: 1px solid var(--theme-border); 
 }
     
 .pac-container, .pac-item {
@@ -15,10 +15,23 @@
 
 .pac-container{
     z-index: 2000 !important;
+    background-color: var(--theme-surface);
+    border: 1px solid var(--theme-border);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+}
+
+.pac-item{
+    color: var(--theme-text);
+}
+
+.pac-item:hover,
+.pac-item-selected {
+    background-color: var(--theme-surface-alt);
 }
 
 .pac-item-query {
     font-size: 1.05em !important;
+    color: var(--theme-title);
 }
 
 
@@ -36,12 +49,13 @@
     padding: 0.75rem 1.25rem;
     margin-bottom: 1.5rem;
     
-    color: #212529;
+    color: var(--theme-text);
     font-size: 1.171875rem;
     font-weight: 500;
     line-height: 1.6;
 
-    background-color: #ecf0f1;
+    background-color: var(--theme-surface-alt);
+    border: 1px solid var(--theme-border);
 
 }
 
@@ -51,21 +65,42 @@
     
 }
 
+html[data-theme-variant="custom"] #managePlacesModal #projectPlacesTable {
+    --bs-table-bg: var(--theme-surface);
+    --bs-table-color: var(--theme-text);
+    --bs-table-border-color: var(--theme-border);
+    --bs-table-hover-bg: var(--theme-surface-alt);
+    --bs-table-hover-color: var(--theme-text);
+    --bs-table-striped-bg: var(--theme-surface-alt);
+    --bs-table-striped-color: var(--theme-text);
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] #managePlacesModal #projectPlacesTable thead th {
+    background-color: var(--theme-surface-alt);
+    color: var(--theme-title);
+}
+
+html[data-theme-variant="custom"] #managePlacesModal #projectPlacesTable tbody td,
+html[data-theme-variant="custom"] #managePlacesModal #projectPlacesTable tbody th {
+    color: var(--theme-text);
+}
+
 /* Place Holders */
 
-::-webkit-input-placeholder { /* Edge */
-font-size:1.15em;
-color: rgb(49, 25, 93);
+#autocomplete::-webkit-input-placeholder { /* Edge */
+font-size: 1.15em;
+color: var(--theme-text-muted);
 }
 
-:-ms-input-placeholder { /* Internet Explorer 10-11 */
-font-size:1.15em;
-color: rgb(49, 25, 93);
+#autocomplete:-ms-input-placeholder { /* Internet Explorer 10-11 */
+font-size: 1.15em;
+color: var(--theme-text-muted);
 }
 
-::placeholder {
-font-size:1.15em !important;
-color: rgb(49, 25, 93)  !important;
+#autocomplete::placeholder {
+font-size: 1.15em !important;
+color: var(--theme-text-muted) !important;
 }
 
 

@@ -15,23 +15,6 @@
             <img class="edit-icon" src="{{ asset('edit.svg', 'pp_wysiwyg')}}" height="17" width="17" alt="edit icon" >
         </button>
 
-        <style>
-
-           .edit-places-btn {
-                display: inline-flex !important;
-                flex-wrap: inherit;
-                align-items: center;
-                justify-content: center;
-                width: 30px;
-                height: 30px;
-                margin-right: 10px;
-                border-radius: 50%;
-                background-color: #e2f6e1;
-                border: 1px solid #79be81;
-            }
-
-        </style>
-
     {% endblock %}
 
     {% block deleteElementsButtons %}
@@ -63,10 +46,7 @@
                 >
                     <div class="cta container">
                         <div class="row disabled">
-                            <div class="col-2 present-places-img-cta">
-                                <img class="no-place" src="{{ asset('no_place.png', 'pp_wysiwyg')}}" alt="A map with a pointer on it.">
-                            </div>
-                            <div class="col-10 present-places-text-cta">
+                            <div class="col-12 present-places-text-cta">
                                 <div class="text-container">Si votre projet est relié à des villes ou d'autres lieux (régions; pays; etc.), signalez-les ici.</div>
                             </div>
                         </div>
@@ -99,24 +79,9 @@
                     .present-places-text-cta .text-container {
                         padding: 5px 10px;
                         border-radius: 5px;
-                        color: #5d87ac;
-                        background-color: #fffcf9;
-                        border: 1px solid #ffbe46;
-                    }
-
-                    .present-places-img-cta{
-
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                        padding: 0;
-                        padding-left: 5px;
-                    }
-                                    
-                    img.no-place {
-                        max-width: 80px;
-                        border-radius: 4px;
+                        color: var(--theme-title);
+                        background-color: var(--theme-surface-alt);
+                        border: 1px solid var(--theme-accent);
                     }
 
                     @media screen and (max-width: 580px) {
@@ -125,7 +90,7 @@
 
                            padding: 15px 10px;
                            margin-bottom: 10px;
-                           background-color: #fff0e1;
+                           background-color: var(--theme-surface-alt);
                            border-radius: 6px;
                            
                         }
@@ -137,21 +102,10 @@
                         .present-places-text-cta .text-container {
                             padding: unset;
                             border: none;
-                            color: #296429;
+                            color: var(--theme-title);
                             background-color: unset;
                             line-height: 1.2;
                             font-size: 14px;
-                        }
-
-                        .present-places-img-cta{
-
-                            padding: 0;
-                            padding-left: 5px;
-                        }
-
-                        img.no-place {
-                            max-width: 100%;
-                            padding: 0;
                         }
 
                     }
@@ -335,18 +289,20 @@
                         font-size: 17px;
                         font-weight: bold;
                         cursor: pointer;
-                        border-left: 3px solid yellowgreen;
-                        background-color: rgb(233, 250, 232);
+                        border-left: 3px solid var(--theme-accent);
+                        background-color: var(--theme-surface-alt);
+                        color: var(--theme-text);
 
                     }
 
                     .place-card:hover{
-                        background-color: inherit;
+                        background-color: var(--theme-surface);
                     }
 
                     .place-details{
 
                         font-size: 15px;
+                        color: var(--theme-text-muted);
 
                     }
 
@@ -366,8 +322,8 @@
                             font-size: 16px;
                             font-weight: normal;
                             cursor: pointer;
-                            border-left: 3px solid yellowgreen;
-                            background-color: rgb(233, 250, 232);
+                            border-left: 3px solid var(--theme-accent);
+                            background-color: var(--theme-surface-alt);
                 
                         }
 

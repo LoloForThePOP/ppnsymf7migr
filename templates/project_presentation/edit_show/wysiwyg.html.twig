@@ -33,10 +33,10 @@
                 }
 
                 if (shouldCollapse) {
-                    $container.addClass("is-collapsed");
+                    $container.removeClass("is-expanded").addClass("is-collapsed");
                     $toggle.removeClass("is-expanded").attr("aria-expanded", "false");
                 } else {
-                    $container.removeClass("is-collapsed");
+                    $container.addClass("is-expanded").removeClass("is-collapsed");
                     $toggle.addClass("is-expanded").attr("aria-expanded", "true");
                 }
             });
@@ -53,11 +53,13 @@
             e.preventDefault();
 
             var $container = $(this).closest(".pp-struct-container");
-            var isCollapsed = $container.toggleClass("is-collapsed").hasClass("is-collapsed");
+            var isExpanded = $container.toggleClass("is-expanded").hasClass("is-expanded");
+
+            $container.toggleClass("is-collapsed", !isExpanded);
 
             $(this)
-                .toggleClass("is-expanded", !isCollapsed)
-                .attr("aria-expanded", isCollapsed ? "false" : "true");
+                .toggleClass("is-expanded", isExpanded)
+                .attr("aria-expanded", isExpanded ? "true" : "false");
         });
 
             

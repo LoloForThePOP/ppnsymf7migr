@@ -52,7 +52,7 @@
 
 {% macro editPresentationThumbnail (stringId) %}
     
-    <span class="pp-edition-mode ms-2 ms-md-3"><a class="" style="color: rgb(33, 37, 41);" href="{{ path ('pp_edit_thumbnail', {'stringId': stringId}) }}">🖼️ Vignette</a></span>
+    <span class="pp-edition-mode ms-2 ms-md-3"><a class="pp-edit-thumbnail-link" href="{{ path ('pp_edit_thumbnail', {'stringId': stringId}) }}">🖼️ Vignette</a></span>
     
 {% endmacro %}
 
