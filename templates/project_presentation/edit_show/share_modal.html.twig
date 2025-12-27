@@ -46,7 +46,7 @@
                             
                             <!-- AddToAny END -->
 
-                            <p class="pt-2"><span class="text-success">Ou copiez son adresse et partagez-là 👇</span></p>
+                            <p class="pt-2"><span class="share-accent">Ou copiez son adresse et partagez-là 👇</span></p>
 
                             {# "Copy link" do not work on mobile so we hide copyable textarea on mobile and we use a simple div instead
 
@@ -101,7 +101,7 @@
  
                 </div>
 
-                <div class="col-12 col-lg-5 px-0">
+                <div class="col-12 col-lg-5 d-flex align-items-center justify-content-center px-0">
 
                     <div class="image-container">
 
@@ -148,131 +148,112 @@
 </script>
 
 <style>
+    #pp-share .modal-title{
+        text-align: center;
+        color: var(--theme-title);
+    }
 
-    .share-whole-content .content-header{
+    #pp-share .share-whole-content{
+        padding: 0 8px;
+    }
+
+    #pp-share .share-whole-content .content-header{
         font-size: 1.25rem;
-	    color: #0d6efd !important;
-        font-weight: bold;
+        color: var(--theme-title);
+        font-weight: 700;
         margin-bottom: 20px;
     }
 
-    .share-whole-content .text-container{
-
+    #pp-share .share-whole-content .text-container{
         text-align: center;
-    }
-
-    #pp-share .modal-title{
-        text-align: center;
-        color: green;
-    }
-    
-    #pp-share textarea {
-
-        width: 100%;
-        resize: none;
-        margin-bottom: 10px;
-        border: none;
-        background-color: inherit;
-        font-weight: bold;
-        
-
-        
-    }
-
-
-    .share-whole-content{
-        padding:  0 8px;
-    }
-
-
-    .share-whole-content .image-container{
-
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        height:100%;
-
-        padding: 15px;
-
-        background-color: #f8f9fa;
-        border: 1px solid #eee;
-        border-radius: 240px;
-        
-    }
-
-    .share-whole-content .image-container img{
-
-        max-width: 100%; 
-        height: auto;
-    }
-
-    .share-whole-content .text-container{
-
         height: 100%;
-        
         padding: 15px 8px;
-
         font-size: 20px;
         font-weight: 600;
         line-height: 1.1;
-
-        background-color: rgb(255, 255, 255);
-
+        background-color: var(--theme-surface);
+        color: var(--theme-text);
     }
 
-    #presentationAbsoluteURL{ /* Center Text in Textarea */
-            
+    #pp-share .share-whole-content .image-container{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 15px;
+        background-color: var(--theme-surface-alt);
+        border: 1px solid var(--theme-border);
+        border-radius: 240px;
+    }
+
+    #pp-share .share-whole-content .image-container img{
+        max-width: 100%;
+        height: auto;
+    }
+
+    #pp-share textarea{
+        width: 100%;
+        min-height: 90px;
+        resize: none;
+        margin-bottom: 10px;
+        border: 1px solid var(--theme-border);
+        border-radius: 8px;
+        background-color: var(--theme-surface-alt);
+        color: var(--theme-text);
+        font-weight: 700;
+        padding: 10px 12px;
+    }
+
+    #pp-share textarea:focus{
+        border-color: var(--theme-accent);
+        outline: none;
+    }
+
+    #pp-share #presentationAbsoluteURL{
         white-space: normal;
         text-align: justify;
-        -moz-text-align-last: center; /* Firefox 12+ */
+        -moz-text-align-last: center;
         text-align-last: center;
-
     }
 
-    .copyUrlButton{
-
-        background-color: #f9fffb;
-        border: 2px solid orange !important;
+    #pp-share .copyUrlButton{
+        background-color: var(--theme-accent);
+        border: 2px solid var(--theme-accent);
         border-radius: 50px;
-
+        color: var(--theme-accent-contrast);
     }
 
+    #pp-share .copyUrlButton:hover,
+    #pp-share .copyUrlButton:focus{
+        filter: brightness(0.95);
+    }
 
+    #pp-share .share-accent,
+    #pp-share #copyURLFeedbackBox{
+        color: var(--theme-accent);
+    }
 
     @media screen and (max-width: 768px) {
-
-        .share-whole-content .text-container{
-
+        #pp-share .share-whole-content .text-container{
             font-size: 18px;
-
         }
-
     }
 
-
     @media screen and (max-width: 580px) {
-
-            
-        .share-whole-content .content-header{
+        #pp-share .share-whole-content .content-header{
             font-size: 1.15rem;
         }
 
-        .share-whole-content .text-container{
-
+        #pp-share .share-whole-content .text-container{
             text-align: center;
             font-size: 15px;
-
         }
 
-            
-        .share-whole-content .image-container img{
-
+        #pp-share .share-whole-content .image-container img{
             width: 148px;
-
         }
-
+        
+        #pp-share textarea{
+            min-height: 72px;
+        }
     }
-
-
 </style>

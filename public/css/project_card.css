@@ -123,6 +123,21 @@ html[data-theme-variant="custom"][data-theme="retro-game"] .project-card .goal {
     color: var(--theme-sky);
 }
 
+html[data-theme-variant="custom"][data-theme="vaporwave"] .project-card .goal,
+html[data-theme-variant="custom"][data-theme="vaporwave"] .project-card .keywords {
+    color: var(--theme-title);
+    font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    line-height: 1.15;
+}
+
+html[data-theme-variant="custom"][data-theme="vaporwave"] .project-card .goal {
+    font-weight: 700;
+}
+
+html[data-theme-variant="custom"][data-theme="vaporwave"] .project-card .keywords {
+    font-weight: 600;
+}
+
 html[data-theme-variant="custom"] .project-card .title {
     color: var(--theme-title);
 }

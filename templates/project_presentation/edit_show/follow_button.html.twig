@@ -65,10 +65,12 @@
     /* These styles are overrided when avoce button is reused elsewhere */
 
     .follow-button {
-        padding: 1px 8px 1px 8px;
-        border: 2px solid rgb(158, 196, 137);
-        border-radius: 50px;
-        color: #373737;
+        padding: var(--follow-button-padding, 1px 8px);
+        border: 2px solid var(--follow-button-border, rgb(158, 196, 137));
+        border-radius: var(--follow-button-radius, 50px);
+        color: var(--follow-button-text, #373737);
+        background-color: var(--follow-button-bg, transparent);
+        transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
         cursor: pointer;
     }
 

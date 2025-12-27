@@ -16,33 +16,6 @@
         {% set businessCardForm = addBusinessCardForm %}
         {% include "project_presentation/edit_show/business_cards/form.html.twig" %}
 
-        <style>
-
-            @media screen and (max-width: 580px) {
-
-                .modal-body{
-                    padding: 10px 9px;
-                }
-
-                form[name="business_card"] .contact-icon {
-    
-                    margin-right: 5px;
-                    margin-bottom: 6px;
-    
-                }
-
-                form[name="business_card"] label {
-    
-                    display: inline;
-                    font-size: 17px !important;
-                    font-weight: normal !important;
-    
-                }
-    
-            }
-
-        </style>
-
     {% endblock %}
 
     {% block footerButtons %}

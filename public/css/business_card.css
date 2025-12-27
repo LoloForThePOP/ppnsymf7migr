@@ -30,6 +30,47 @@
     margin-right : 5px;
 }
 
+form[name="business_card"] .form-row{
+    margin-bottom: 30px;
+}
+
+form[name="business_card"] .contact-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 7px;
+    margin-bottom: 8px;
+}
+
+form[name="business_card"] .contact-icon-title {
+    width: 30px;
+    height: 32px;
+    margin-right: 12px;
+    margin-left: 3px;
+    margin-top: 1px;
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] form[name="business_card"] .contact-icon,
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] form[name="business_card"] .contact-icon-title {
+    filter: brightness(0) saturate(100%) var(--theme-contact-icon-filter);
+}
+
+@media screen and (max-width: 580px) {
+    #add_business_card_form_modal .modal-body{
+        padding: 10px 9px;
+    }
+
+    #add_business_card_form_modal form[name="business_card"] .contact-icon{
+        margin-right: 5px;
+        margin-bottom: 6px;
+    }
+
+    #add_business_card_form_modal form[name="business_card"] label{
+        display: inline;
+        font-size: 17px;
+        font-weight: 400;
+    }
+}
+
 
 
 @media screen and (max-width: 768px) {

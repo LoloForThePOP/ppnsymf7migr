@@ -47,6 +47,7 @@ a{
     --theme-border: #e5e7eb;
     --theme-title: #0f172a;
     --theme-icon-filter: invert(55%) sepia(60%) saturate(316%) hue-rotate(118deg) brightness(87%) contrast(78%);
+    --theme-contact-icon-filter: var(--theme-icon-filter);
     --theme-font-body: 'Lato', sans-serif;
     --theme-font-heading: 'Lato', sans-serif;
     --theme-navbar-toggler-icon-light: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
@@ -208,7 +209,7 @@ a{
     --theme-text: #4c1d95;
     --theme-text-muted: #7c3aed;
     --theme-font-body: 'Quicksand', sans-serif;
-    --theme-font-heading: 'Geologica', sans-serif;
+    --theme-font-heading: 'Quicksand', sans-serif;
     --theme-accent: #f2a1d9;
     --theme-accent-contrast: #ffffff;
     --theme-border: #e3c5ff;
@@ -278,6 +279,7 @@ a{
     --theme-icon-filter: invert(85%) sepia(49%) saturate(586%) hue-rotate(357deg) brightness(103%) contrast(103%);
     --theme-icon-filter-vegetation: invert(46%) sepia(93%) saturate(720%) hue-rotate(88deg) brightness(96%) contrast(94%);
     --theme-icon-filter-sky: invert(55%) sepia(74%) saturate(538%) hue-rotate(169deg) brightness(93%) contrast(92%);
+    --theme-contact-icon-filter: var(--theme-icon-filter-vegetation);
     --pp-card-bg: #ffffff;
     --pp-card-border: #c2edd2;
     --pp-card-shadow: 0 12px 24px rgba(47, 184, 91, 0.18);

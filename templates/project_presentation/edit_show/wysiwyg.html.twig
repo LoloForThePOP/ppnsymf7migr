@@ -6,6 +6,60 @@
     
     $(document).ready(function(){
 
+        function setupStructCollapse() {
+            $(".pp-container .pp-struct-container").each(function() {
+                var $container = $(this);
+
+                if ($container.data("ppStructReady")) {
+                    return;
+                }
+
+                $container.data("ppStructReady", true);
+
+                if ($container.children(".pp-struct-toggle").length === 0) {
+                    $container.prepend('<button type="button" class="pp-struct-toggle" aria-expanded="false" aria-label="Basculer cette section"></button>');
+                }
+
+            });
+        }
+
+        function applyStructCollapseState(shouldCollapse) {
+            $(".pp-container .pp-struct-container").each(function() {
+                var $container = $(this);
+                var $toggle = $container.children(".pp-struct-toggle");
+
+                if (!$toggle.length) {
+                    return;
+                }
+
+                if (shouldCollapse) {
+                    $container.addClass("is-collapsed");
+                    $toggle.removeClass("is-expanded").attr("aria-expanded", "false");
+                } else {
+                    $container.removeClass("is-collapsed");
+                    $toggle.addClass("is-expanded").attr("aria-expanded", "true");
+                }
+            });
+        }
+
+        setupStructCollapse();
+        applyStructCollapseState($(".pp-container").hasClass("in-edition-mode"));
+
+        $(document).on("click", ".pp-struct-toggle", function(e) {
+            if (!$(".pp-container").hasClass("in-edition-mode")) {
+                return;
+            }
+
+            e.preventDefault();
+
+            var $container = $(this).closest(".pp-struct-container");
+            var isCollapsed = $container.toggleClass("is-collapsed").hasClass("is-collapsed");
+
+            $(this)
+                .toggleClass("is-expanded", !isCollapsed)
+                .attr("aria-expanded", isCollapsed ? "false" : "true");
+        });
+
             
         // make delete item icons appear when clicking on a trash icon        
     
@@ -68,6 +122,8 @@
             // hide / show flash messages
 
             $("#flash-messages").toggleClass("pp-edition-mode");
+
+            applyStructCollapseState($(".pp-container").hasClass("in-edition-mode"));
 
 
         });

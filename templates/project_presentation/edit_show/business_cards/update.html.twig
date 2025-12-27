@@ -1,6 +1,10 @@
 
 {% embed "project_presentation/edit_show/skeletons/update_element.html.twig" %}
 
+    {% block stylesheets %}
+        <link href="/css/business_card.css" rel="stylesheet">
+    {% endblock %}
+
     {% block mainContentTitle %}Modifier une carte de visite{% endblock %}
 
     {% block collapsibleMoreInfo %}{% endblock %}

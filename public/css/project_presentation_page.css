@@ -19,6 +19,7 @@
     height: 100%;
 
     padding: 13px 12px 13px 12px;
+    position: relative;
 
     scroll-margin-top: 85px; /* Prevent anchors to be messed up by fixed horizontal navbar */
     
@@ -106,6 +107,64 @@
 
 .pp-struct-content{
     padding-left: 30px;
+}
+
+.pp-struct-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--theme-border);
+    background-color: var(--theme-surface-alt);
+    color: var(--theme-text);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    z-index: 2;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.pp-struct-toggle::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+}
+
+.pp-struct-toggle.is-expanded::before {
+    transform: rotate(-135deg);
+}
+
+.pp-container.in-edition-mode .pp-struct-toggle {
+    display: inline-flex;
+}
+
+.pp-container.in-edition-mode .pp-struct-toggle:hover,
+.pp-container.in-edition-mode .pp-struct-toggle:focus {
+    background-color: var(--theme-surface);
+    border-color: var(--theme-accent);
+    color: var(--theme-accent);
+}
+
+.pp-container.in-edition-mode .pp-struct-container.is-collapsed > :not(.pp-struct-title-container):not(.pp-struct-toggle):not(h1):not(h2):not(h3):not(h4) {
+    display: none;
+}
+
+.pp-container.in-edition-mode .pp-struct-container.is-collapsed #text_description {
+    display: none;
+}
+
+.pp-container.in-edition-mode #places-struct-container.is-collapsed #places,
+.pp-container.in-edition-mode #businessCards-struct-container.is-collapsed #businessCards,
+.pp-container.in-edition-mode #websites-struct-container.is-collapsed #websites {
+    display: none;
 }
 
 
@@ -291,6 +350,24 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-st
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
+html[data-theme-variant="classic"] body[data-theme-scope="presentation"] #misc-struct-container {
+    --pp-action-border: rgb(196, 228, 178);
+    --pp-action-text: #373737;
+    --pp-action-bg: transparent;
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container {
+    --pp-action-border: var(--theme-accent);
+    --pp-action-text: var(--theme-text);
+    --pp-action-bg: var(--theme-surface-alt);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-upper-box {
+    --follow-button-border: var(--theme-accent);
+    --follow-button-text: var(--theme-text);
+    --follow-button-bg: var(--theme-surface-alt);
+}
+
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-struct-icon{
     --pp-struct-icon-color: var(--theme-accent);
 }
@@ -339,19 +416,6 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #categor
 
 html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] #categories-dropdown {
     color: var(--theme-sky);
-}
-
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .follow-button,
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-upper-box .follow-button,
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .share-presentation-button {
-    background-color: var(--theme-surface-alt);
-    border-color: var(--theme-accent);
-    color: var(--theme-text);
-    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .share-presentation-button .text {
-    color: var(--theme-text);
 }
 
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .share-presentation-button img,
