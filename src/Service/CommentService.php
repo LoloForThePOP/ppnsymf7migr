@@ -33,9 +33,10 @@ class CommentService {
         $commentCreationApproximateTimespan = time() - $formTimeLoaded;
 
         $constraints = [
-
-            new Assert\GreaterThan(['value'=> 5, 'message' => 'Veuillez patienter quelques secondes avant d\'ajouter un commentaire']),
-            
+            new Assert\GreaterThan(
+                value: 5,
+                message: 'Veuillez patienter quelques secondes avant d\'ajouter un commentaire'
+            ),
         ];
 
         
@@ -56,9 +57,7 @@ class CommentService {
         // check if honey pot is filled
 
         $constraints = [
-
-            new Assert\Blank(['message' => 'Ce champ devrait être nul']),
-            
+            new Assert\Blank(message: 'Ce champ devrait être nul'),
         ];
 
         // use the validator to validate the value
@@ -79,15 +78,14 @@ class CommentService {
         // check if comment is not empty
 
         $constraints = [
-
-            new Assert\NotBlank(['message' => 'Veuillez remplir ce champ']),
+            new Assert\NotBlank(message: 'Veuillez remplir ce champ'),
             new NotContainsUrlOrEmail(),
-            new Assert\Length([
-                'min' => 1,
-                'max' => 2000,
-                'minMessage' => 'Votre message doit faire minimum {{ limit }} caractère',
-                'maxMessage' => 'Votre message doit faire maximum {{ limit }} caractères',
-            ]),
+            new Assert\Length(
+                min: 1,
+                max: 2000,
+                minMessage: 'Votre message doit faire minimum {{ limit }} caractère',
+                maxMessage: 'Votre message doit faire maximum {{ limit }} caractères'
+            ),
         ];
 
         $trimmedcommentContent = trim($comment->getContent());
@@ -117,9 +115,10 @@ class CommentService {
                 $userLastCommentTimespan = time() - $userComments->first()->getCreatedAt()->getTimestamp();
 
                 $constraints = [
-
-                    new Assert\GreaterThan(['value'=> 20, 'message' => 'Veuillez patienter quelques secondes avant d\'ajouter un nouveau commentaire !']),
-                    
+                    new Assert\GreaterThan(
+                        value: 20,
+                        message: 'Veuillez patienter quelques secondes avant d\'ajouter un nouveau commentaire !'
+                    ),
                 ];
 
                 // use the validator to validate the value

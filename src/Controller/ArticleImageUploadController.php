@@ -31,7 +31,8 @@ class ArticleImageUploadController extends AbstractController
 
         // Basic same-origin guard for TinyMCE uploads
         $baseUrl = $request->getScheme().'://'.$request->getHttpHost().$request->getBasePath();
-        if (isset($_SERVER['HTTP_ORIGIN']) && $_SERVER['HTTP_ORIGIN'] !== $baseUrl) {
+        $origin = $request->headers->get('origin');
+        if ($origin !== null && $origin !== $baseUrl) {
             return new JsonResponse(['message' => 'Origin Denied'], Response::HTTP_FORBIDDEN);
         }
 

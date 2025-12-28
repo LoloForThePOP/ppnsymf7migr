@@ -19,7 +19,7 @@ final class LiveSaveControllerTest extends WebTestCase
     {
         $user = (new User())
             ->setEmail(sprintf('editor+%s@example.com', uniqid('', true)))
-            ->setUsername('editor')
+            ->setUsername(sprintf('editor_%s', uniqid('', true)))
             ->setPassword('dummy')
             ->setIsActive(true)
             ->setIsVerified(true);
@@ -116,6 +116,39 @@ final class LiveSaveControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(400);
         $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
         self::assertStringContainsString('manquantes', (string) ($payload['error'] ?? ''));
+    }
+
+    public function testNonOwnerIsForbidden(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $otherUser = $this->createUser($em);
+
+        $client->loginUser($otherUser);
+
+        $token = $this->getCsrfToken($client, 'live_save_pp');
+        $metadata = json_encode([
+            'entity' => 'ppbase',
+            'id' => $presentation->getId(),
+            'property' => 'title',
+        ], JSON_THROW_ON_ERROR);
+
+        $client->request(
+            'POST',
+            '/project/ajax-inline-save',
+            [
+                '_token' => $token,
+                'metadata' => $metadata,
+                'content' => 'Unauthorized update',
+            ],
+            [],
+            ['HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest']
+        );
+
+        self::assertResponseStatusCodeSame(403);
     }
 
     public function testLiveSaveUpdatesTitle(): void

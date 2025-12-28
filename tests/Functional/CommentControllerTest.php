@@ -54,6 +54,47 @@ final class CommentControllerTest extends WebTestCase
         self::assertSame('Jeton CSRF invalide.', $payload['error'] ?? null);
     }
 
+    public function testCreateCommentCreatesComment(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $project = $this->createProject($em, $owner);
+        $commenter = $this->createUser($em);
+
+        $client->loginUser($commenter);
+
+        $token = $this->getCsrfToken($client, 'comment_mutation');
+
+        $client->request(
+            'POST',
+            '/comment/ajax-create',
+            [
+                'commentedEntityType' => 'projectPresentation',
+                'commentedEntityId' => $project->getId(),
+                'commentContent' => 'Merci pour ce projet',
+                'formTimeLoaded' => (string) (time() - 10),
+                'hnyPt' => '',
+                '_token' => $token,
+            ],
+            [],
+            ['HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest']
+        );
+
+        self::assertResponseIsSuccessful();
+        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertNotEmpty($payload['newCommentEditionUrl'] ?? null);
+
+        $em->clear();
+        $comment = $em->getRepository(Comment::class)->findOneBy([
+            'creator' => $commenter,
+            'projectPresentation' => $project,
+            'content' => 'Merci pour ce projet',
+        ]);
+        self::assertNotNull($comment);
+    }
+
     public function testDeleteCommentMissingCsrfIsRejected(): void
     {
         $client = static::createClient();

@@ -148,6 +148,122 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         self::assertSame('Une actualité de test.', $presentation->getNews()->first()->getTextContent());
     }
 
+    public function testAddWebsiteCreatesComponent(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/add-website', $presentation->getStringId()),
+            [
+                'website' => [
+                    'title' => 'Official site',
+                    'url' => 'https://example.com',
+                    '_token' => $token,
+                ],
+            ]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+        self::assertStringContainsString(
+            sprintf('/%s', $presentation->getStringId()),
+            (string) $client->getResponse()->headers->get('Location')
+        );
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        $websites = $presentation->getOtherComponents()->getComponents('websites');
+        self::assertCount(1, $websites);
+        self::assertSame('Official site', $websites[0]->getTitle());
+        self::assertSame('https://example.com', $websites[0]->getUrl());
+        self::assertNotEmpty($websites[0]->getIcon());
+    }
+
+    public function testAddQuestionAnswerCreatesComponent(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/add-question-answer', $presentation->getStringId()),
+            [
+                'question_answer' => [
+                    'question' => 'How does the project help?',
+                    'answer' => 'It helps by reducing waste and sharing tools.',
+                    '_token' => $token,
+                ],
+            ]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+        self::assertStringContainsString(
+            sprintf('/%s', $presentation->getStringId()),
+            (string) $client->getResponse()->headers->get('Location')
+        );
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        $items = $presentation->getOtherComponents()->getComponents('questions_answers');
+        self::assertCount(1, $items);
+        self::assertSame('How does the project help?', $items[0]->getQuestion());
+        self::assertSame('It helps by reducing waste and sharing tools.', $items[0]->getAnswer());
+    }
+
+    public function testAddBusinessCardCreatesComponent(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/add-business-card', $presentation->getStringId()),
+            [
+                'business_card' => [
+                    'title' => 'Jane Doe',
+                    'email1' => 'jane@example.com',
+                    'tel1' => '+33 6 12 34 56 78',
+                    'website1' => 'https://example.com',
+                    'website2' => 'https://linkedin.com/in/janedoe',
+                    'postalMail' => '1 Rue de Test, 75000 Paris',
+                    'remarks' => 'Contact by email',
+                    '_token' => $token,
+                ],
+            ]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+        self::assertStringContainsString(
+            sprintf('/%s', $presentation->getStringId()),
+            (string) $client->getResponse()->headers->get('Location')
+        );
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        $cards = $presentation->getOtherComponents()->getComponents('business_cards');
+        self::assertCount(1, $cards);
+        self::assertSame('Jane Doe', $cards[0]->getTitle());
+        self::assertSame('jane@example.com', $cards[0]->getEmail1());
+        self::assertSame('+33 6 12 34 56 78', $cards[0]->getTel1());
+        self::assertSame('https://example.com', $cards[0]->getWebsite1());
+    }
+
     public function testAddDocumentRejectsMissingFile(): void
     {
         $client = static::createClient();

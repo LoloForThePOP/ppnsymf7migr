@@ -6,6 +6,7 @@ use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
@@ -39,6 +40,26 @@ final class ArticleImageUploadControllerTest extends WebTestCase
         return $client;
     }
 
+    private function createTempImagePath(): string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'upload');
+        if ($path === false) {
+            throw new \RuntimeException('Failed to create temp file.');
+        }
+
+        $png = base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==',
+            true
+        );
+        if ($png === false) {
+            throw new \RuntimeException('Failed to decode PNG fixture.');
+        }
+
+        file_put_contents($path, $png);
+
+        return $path;
+    }
+
     private function getCsrfToken(KernelBrowser $client, string $tokenId): string
     {
         $container = $client->getContainer();
@@ -66,6 +87,64 @@ final class ArticleImageUploadControllerTest extends WebTestCase
         }
 
         return $token;
+    }
+
+    public function testValidImageUploadReturnsLocation(): void
+    {
+        $client = $this->createClientWithUser();
+
+        $token = $this->getCsrfToken($client, 'tinymce_image_upload');
+        $tempFile = $this->createTempImagePath();
+
+        $client->request(
+            'POST',
+            '/articles/upload-image',
+            ['_token' => $token],
+            ['file' => new UploadedFile($tempFile, 'test.png', 'image/png', null, true)],
+            ['HTTP_ORIGIN' => 'http://localhost']
+        );
+
+        self::assertResponseIsSuccessful();
+        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertNotEmpty($payload['location'] ?? null);
+
+        $path = parse_url($payload['location'], PHP_URL_PATH);
+        self::assertNotEmpty($path);
+        self::assertStringContainsString('/media/uploads/articles/images/', (string) $path);
+
+        $filename = basename((string) $path);
+        $uploadDir = rtrim((string) $client->getContainer()->getParameter('app.image_upload_directory'), '/');
+        $storedFile = $uploadDir.'/'.$filename;
+
+        self::assertFileExists($storedFile);
+
+        if (is_file($storedFile)) {
+            unlink($storedFile);
+        }
+    }
+
+    public function testOriginMismatchIsRejected(): void
+    {
+        $client = $this->createClientWithUser();
+
+        $token = $this->getCsrfToken($client, 'tinymce_image_upload');
+        $tempFile = $this->createTempImagePath();
+
+        $client->request(
+            'POST',
+            '/articles/upload-image',
+            ['_token' => $token],
+            ['file' => new UploadedFile($tempFile, 'test.png', 'image/png', null, true)],
+            ['HTTP_ORIGIN' => 'https://evil.test']
+        );
+
+        self::assertResponseStatusCodeSame(403);
+        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame('Origin Denied', $payload['message'] ?? null);
+
+        if (is_file($tempFile)) {
+            unlink($tempFile);
+        }
     }
 
     public function testMissingCsrfIsRejected(): void
