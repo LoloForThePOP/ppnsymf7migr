@@ -1,0 +1,218 @@
+.connected-home {
+    margin-top: 10px;
+    margin-bottom: 44px;
+}
+
+.connected-hero {
+    border: 1px solid var(--theme-border);
+    background-color: var(--theme-surface);
+}
+
+.connected-hero-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.connected-title {
+    margin-bottom: 6px;
+    font-size: 2rem;
+    color: var(--theme-title);
+}
+
+.connected-subtitle {
+    margin-bottom: 0;
+    color: var(--theme-text-muted);
+}
+
+.connected-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.connected-resume {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--theme-border);
+    background-color: var(--theme-surface-alt);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.connected-resume-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1 1 320px;
+    min-width: 240px;
+}
+
+.connected-resume-thumbnail {
+    width: 110px;
+    height: 72px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--theme-border);
+    background-color: var(--theme-surface);
+    flex: 0 0 auto;
+}
+
+.connected-resume-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.connected-resume-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: var(--theme-text-muted);
+}
+
+.connected-resume-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.connected-resume-title {
+    font-weight: 700;
+    color: var(--theme-title);
+    margin-bottom: 4px;
+}
+
+.connected-resume-name {
+    font-weight: 600;
+    color: var(--theme-text);
+}
+
+.connected-resume-meta {
+    color: var(--theme-text-muted);
+    font-size: 0.95rem;
+}
+
+.connected-resume-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.connected-news-proxy {
+    margin-top: 8px;
+    margin-bottom: 6px;
+    width: 100%;
+    max-width: 360px;
+    justify-content: flex-start;
+    gap: 10px;
+}
+
+.connected-news-proxy .proxy-news-input {
+    flex: 1;
+    min-width: 200px;
+}
+
+.connected-resume-news {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 260px;
+    max-width: 380px;
+}
+
+.connected-resume .connected-resume-title {
+    margin-bottom: 4px;
+}
+
+.connected-card {
+    border: 1px solid var(--theme-border);
+    background-color: var(--theme-surface);
+}
+
+.connected-card-title {
+    font-weight: 700;
+    color: var(--theme-title);
+    margin-bottom: 12px;
+}
+
+.connected-actions-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.connected-activity .activity-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--theme-border);
+}
+
+.connected-activity .activity-item:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.activity-link {
+    color: var(--theme-text);
+    font-weight: 600;
+}
+
+.activity-link:hover,
+.activity-link:focus {
+    color: var(--theme-accent);
+}
+
+.activity-snippet {
+    margin-top: 4px;
+    color: var(--theme-text);
+    font-size: 0.95rem;
+}
+
+.activity-meta {
+    color: var(--theme-text-muted);
+    font-size: 0.85rem;
+    margin-top: 3px;
+}
+
+.connected-home .titled-projects-container.connected-collection {
+    margin-top: 36px;
+    margin-bottom: 36px;
+}
+
+.connected-home .connected-collection .collection-title {
+    justify-content: flex-start;
+    font-size: 22px;
+    margin-bottom: 24px;
+}
+
+.connected-home .connected-collection .collection-container {
+    justify-content: flex-start;
+}
+
+@media screen and (max-width: 580px) {
+    .connected-title {
+        font-size: 1.6rem;
+    }
+
+    .connected-resume {
+        padding: 12px 12px;
+    }
+
+    .connected-resume-thumbnail {
+        width: 70px;
+        height: 50px;
+    }
+
+    .connected-home .connected-collection .collection-title {
+        font-size: 20px;
+        margin-bottom: 18px;
+    }
+}

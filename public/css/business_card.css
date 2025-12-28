@@ -33,6 +33,7 @@
 .btn-add-bc {
     border-radius: 999px;
     border: 1px solid var(--theme-accent);
+    margin-bottom: 4px;
 }
 
 html[data-theme-variant="custom"] .btn-light.btn-add-bc {

@@ -1,0 +1,154 @@
+{% from 'project_presentation/cards/list.html.twig' import collection as project_collection %}
+
+<div class="connected-home">
+    <div class="card connected-hero mb-4">
+        <div class="card-body">
+            <div class="connected-hero-top">
+                <div>
+                    <h1 class="connected-title">Bon retour {{ app.user.username }}</h1>
+                    <p class="connected-subtitle">Reprenez vos projets, publiez vos avancées et gagnez en visibilité.</p>
+                </div>
+                <div class="connected-actions">
+                    <a class="btn btn-primary" href="{{ path('create_project_presentation') }}">Créer un projet</a>
+                    {% if continuePresentation %}
+                        <a class="btn btn-light" href="{{ path('edit_show_project_presentation', {'stringId': continuePresentation.stringId}) }}">Continuer</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if continuePresentation %}
+                {% set continueTitle = continuePresentation.title ?: continuePresentation.goal %}
+                {% set continueThumbnail = continuePresentation.extra.cacheThumbnailUrl ?? null %}
+                <div class="connected-resume">
+                    <div class="connected-resume-main">
+                        <div class="connected-resume-thumbnail">
+                            {% if continueThumbnail %}
+                                <img src="{{ continueThumbnail }}" alt="{{ continueTitle }}">
+                            {% else %}
+                                <div class="connected-resume-placeholder">Aperçu</div>
+                            {% endif %}
+                        </div>
+                        <div class="connected-resume-content">
+                            <div class="connected-resume-title">Reprendre</div>
+                            <div class="connected-resume-name">
+                                {{ continueTitle|length > 80 ? continueTitle|slice(0, 80) ~ '...' : continueTitle }}
+                            </div>
+                            <div class="connected-resume-meta">
+                                {% if continuePresentation.isCreationFormCompleted is not same as(true) %}
+                                    Brouillon
+                                {% else %}
+                                    Publié
+                                {% endif %}
+                                • Dernière mise à jour {{ (continuePresentation.updatedAt ?? continuePresentation.createdAt)|date('d/m/Y') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="connected-resume-actions">
+                        <a class="btn btn-outline-primary btn-sm" href="{{ path('edit_show_project_presentation', {'stringId': continuePresentation.stringId}) }}">Éditer</a>
+                        <a class="btn btn-light btn-sm" href="{{ path('pp_edit_thumbnail', {'stringId': continuePresentation.stringId}) }}">Vignette</a>
+                        <a class="btn btn-light btn-sm" href="{{ path('edit_show_project_presentation', {'stringId': continuePresentation.stringId}) }}#slideshow-struct-container">Médias</a>
+                    </div>
+                    {% if addNewsForm %}
+                        <div class="connected-resume-news">
+                            
+                            <div class="proxy-news-creation-container connected-news-proxy">
+                                <input class="proxy-news-input" data-pp-id="{{ continuePresentation.id }}" type="text" placeholder="Donner des nouvelles">
+                                <div class="fake-send-button">
+                                    <img src="{{ asset('send_message.svg', 'misc')}}" alt="paper plane icon">
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="connected-resume">
+                    <div>
+                        <div class="connected-resume-title">Démarrer</div>
+                        <div class="connected-resume-name">Vous n'avez pas encore de projet sur Propon.</div>
+                        <div class="connected-resume-meta">Commencez par créer votre première page.</div>
+                    </div>
+                    <div class="connected-resume-actions">
+                        <a class="btn btn-primary btn-sm" href="{{ path('create_project_presentation') }}">Créer un projet</a>
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    {% if continuePresentation and addNewsForm %}
+        <div class="news-form-struct homepage-news-form" data-pp-id="{{ continuePresentation.id }}" style="display:none;">
+            <h4 class="news-form-struct-title">
+                <img class="news-icon me-1" src="{{ asset('news.svg', 'misc')}}" alt="news icon (a radio wave)" width="22" height="22" style="transform: scaleX(-1);">
+                Partager des Nouvelles
+                <img class="news-icon ms-1" src="{{ asset('news.svg', 'misc')}}" alt="news icon (a radio wave)" width="22" height="22">
+            </h4>
+            {% include "project_presentation/edit_show/news/add.html.twig" %}
+        </div>
+    {% endif %}
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-7">
+            <div class="card connected-card h-100">
+                <div class="card-body">
+                    <div class="connected-card-title">Actions rapides</div>
+                    <div class="connected-actions-grid">
+                        <a class="btn btn-light btn-sm" href="{{ path('create_project_presentation') }}">Nouveau projet</a>
+                        {% if continuePresentation %}
+                            <a class="btn btn-light btn-sm" href="{{ path('edit_show_project_presentation', {'stringId': continuePresentation.stringId}) }}">Ouvrir le projet</a>
+                            <a class="btn btn-light btn-sm" href="{{ path('edit_show_project_presentation', {'stringId': continuePresentation.stringId}) }}#slideshow-struct-container">Ajouter des images</a>
+                            <a class="btn btn-light btn-sm" href="{{ path('edit_show_project_presentation', {'stringId': continuePresentation.stringId}) }}#places-struct-container">Ajouter des lieux</a>
+                            <a class="btn btn-light btn-sm" href="{{ path('edit_show_project_presentation', {'stringId': continuePresentation.stringId}) }}#businessCards-struct-container">Ajouter un contact</a>
+                        {% else %}
+                            <span class="text-muted">Créez votre premier projet pour débloquer plus d'actions.</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card connected-card h-100">
+                <div class="card-body">
+                    <div class="connected-card-title">Derniers retours</div>
+                    {% if recentComments|length > 0 %}
+                        <div class="connected-activity">
+                            {% for comment in recentComments %}
+                                {% set project = comment.projectPresentation %}
+                                {% if project %}
+                                    <div class="activity-item">
+                                        <a class="activity-link" href="{{ path('edit_show_project_presentation', {'stringId': project.stringId}) }}#comments-struct-container">
+                                            {{ project.title ?? project.goal|slice(0, 60) }}
+                                        </a>
+                                        <div class="activity-snippet">
+                                            {{ comment.content|length > 120 ? comment.content|slice(0, 120) ~ '...' : comment.content }}
+                                        </div>
+                                        <div class="activity-meta">
+                                            {{ comment.createdAt|date('d/m/Y') }}
+                                            {% if comment.creator %}
+                                                · {{ comment.creator.username }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">Pas encore de retours sur vos projets.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if creatorPresentations|length > 0 %}
+        {{ project_collection('Vos projets récents', creatorPresentations, 'connected-collection', 'hide-335', '', creatorPresentationStats) }}
+    {% endif %}
+
+    {% if recommendedPresentations|length > 0 %}
+        {{ project_collection('À explorer pour vous', recommendedPresentations, 'connected-collection', 'hide-335', '', recommendedPresentationStats) }}
+    {% endif %}
+
+    {% if followedPresentations|length > 0 %}
+        {{ project_collection('Projets suivis', followedPresentations, 'connected-collection', 'hide-335', '', followedPresentationStats) }}
+    {% endif %}
+</div>

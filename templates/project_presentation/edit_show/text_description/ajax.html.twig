@@ -9,6 +9,16 @@
 
             let editorChangeHandlerId;
 
+            const buildTinyMceContentStyle = function (padding) {
+                const rootStyles = getComputedStyle(document.documentElement);
+                const themeSurface = rootStyles.getPropertyValue('--theme-surface').trim() || '#ffffff';
+                const themeText = rootStyles.getPropertyValue('--theme-text').trim() || '#1f2937';
+                const themeFont = rootStyles.getPropertyValue('--theme-font-body').trim() || 'Lato, sans-serif';
+                const safePadding = padding || '0 15px';
+
+                return 'body { background-color: ' + themeSurface + '; color: ' + themeText + '; font-family: ' + themeFont + '; padding: ' + safePadding + '; line-height: 1.6; }';
+            };
+
             tinymce.init({
 
                     mode : "specific_textareas",
@@ -30,7 +40,7 @@
                     }, 
 
                     language: 'fr_FR',
-                    content_style: "body {padding: 0px 15px;}",
+                    content_style: buildTinyMceContentStyle(),
                     nowrap : false,
 
                     setup: function(editor) {

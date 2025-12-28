@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Comment;
 use App\Entity\Like;
 use App\Entity\PPBase;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -55,6 +56,67 @@ class PPBaseRepository extends ServiceEntityRepository
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @return PPBase[]
+     */
+    public function findLatestByCreator(User $creator, int $limit = 6): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.creator = :creator')
+            ->andWhere('p.isDeleted IS NULL OR p.isDeleted = :notDeleted')
+            ->setParameter('creator', $creator)
+            ->setParameter('notDeleted', false)
+            ->addSelect('COALESCE(p.updatedAt, p.createdAt) AS HIDDEN activityAt')
+            ->orderBy('activityAt', 'DESC')
+            ->addOrderBy('p.id', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return PPBase[]
+     */
+    public function findLatestPublishedExcludingCreator(User $creator, int $limit = 6): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.isPublished = :published')
+            ->andWhere('p.isDeleted IS NULL OR p.isDeleted = :notDeleted')
+            ->andWhere('p.creator != :creator')
+            ->setParameter('published', true)
+            ->setParameter('notDeleted', false)
+            ->setParameter('creator', $creator)
+            ->orderBy('p.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return PPBase[]
+     */
+    public function findPublishedByCategoriesForCreator(User $creator, array $categories, int $limit = 6): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->select('DISTINCT p')
+            ->andWhere('p.isPublished = :published')
+            ->andWhere('p.isDeleted IS NULL OR p.isDeleted = :notDeleted')
+            ->andWhere('p.creator != :creator')
+            ->setParameter('published', true)
+            ->setParameter('notDeleted', false)
+            ->setParameter('creator', $creator)
+            ->setMaxResults($limit)
+            ->orderBy('p.createdAt', 'DESC');
+
+        if (!empty($categories)) {
+            $qb->join('p.categories', 'c')
+               ->andWhere('c.uniqueName IN (:cats)')
+               ->setParameter('cats', $categories);
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
     //    /**

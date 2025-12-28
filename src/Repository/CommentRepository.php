@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Comment;
+use App\Entity\User;
+use App\Enum\CommentStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +16,24 @@ class CommentRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Comment::class);
+    }
+
+    /**
+     * @return Comment[]
+     */
+    public function findLatestForCreatorProjects(User $creator, int $limit = 5): array
+    {
+        return $this->createQueryBuilder('c')
+            ->innerJoin('c.projectPresentation', 'p')
+            ->andWhere('p.creator = :creator')
+            ->andWhere('c.status = :status')
+            ->andWhere('c.creator IS NULL OR c.creator != :creator')
+            ->setParameter('creator', $creator)
+            ->setParameter('status', CommentStatus::Approved)
+            ->orderBy('c.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
     }
 
 //    /**

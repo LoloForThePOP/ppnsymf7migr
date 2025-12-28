@@ -1118,6 +1118,17 @@ html[data-theme-variant="custom"] .modal .btn-close {
 	border: 1px solid rgba(255,255,255,0.3);
 }
 
+html[data-theme-variant="custom"] #fullscreen-overlay {
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] #fullscreen-overlay .close-button {
+    color: var(--theme-text);
+    background-color: var(--theme-surface-alt);
+    border-color: var(--theme-border);
+}
+
 @media screen and (max-width: 580px) {
     #fullscreen-overlay {
         padding: 6px;
