@@ -10,7 +10,6 @@ use App\Service\WebsiteProcessingService;
 use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,6 +19,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class ImageFetchController extends AbstractController
 {
     #[Route('/project/{stringId}/images', name: 'project_fetch_images', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function __invoke(
         string $stringId,
         PPBaseRepository $repository,
@@ -27,6 +27,13 @@ class ImageFetchController extends AbstractController
         WebpageContentExtractor $extractor,
         Request $request
     ): Response {
+        if ($request->isMethod('POST')) {
+            $token = (string) $request->request->get('_token');
+            if (!$this->isCsrfTokenValid('project_fetch_images', $token)) {
+                return $this->denyInvalidCsrf($request, $stringId);
+            }
+        }
+
         $project = $repository->findOneBy(['stringId' => $stringId]);
 
         if (!$project) {
@@ -71,8 +78,18 @@ class ImageFetchController extends AbstractController
 
     #[Route('/project/{stringId}/images/delete', name: 'project_delete_from_images', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function delete(string $stringId, PPBaseRepository $repository): RedirectResponse
+    public function delete(
+        string $stringId,
+        Request $request,
+        PPBaseRepository $repository
+    ): RedirectResponse
     {
+        $token = (string) $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('project_delete_from_images', $token)) {
+            $this->addFlash('danger', 'Jeton CSRF invalide.');
+            return $this->redirectToRoute('project_fetch_images', ['stringId' => $stringId]);
+        }
+
         $project = $repository->findOneBy(['stringId' => $stringId]);
 
         if ($project) {
@@ -94,6 +111,10 @@ class ImageFetchController extends AbstractController
         ImageDownloader $downloader,
         ImageCandidateFetcher $imageCandidateFetcher
     ): Response {
+        if (!$this->isCsrfTokenValid('project_image_use_as_logo', (string) $request->request->get('_token'))) {
+            return $this->denyInvalidCsrf($request, $stringId);
+        }
+
         $project = $repository->findOneBy(['stringId' => $stringId]);
         if (!$project) {
             throw $this->createNotFoundException();
@@ -126,6 +147,10 @@ class ImageFetchController extends AbstractController
         ImageDownloader $downloader,
         ImageCandidateFetcher $imageCandidateFetcher
     ): Response {
+        if (!$this->isCsrfTokenValid('project_image_add_slide', (string) $request->request->get('_token'))) {
+            return $this->denyInvalidCsrf($request, $stringId);
+        }
+
         $project = $repository->findOneBy(['stringId' => $stringId]);
         if (!$project) {
             throw $this->createNotFoundException();
@@ -168,6 +193,10 @@ class ImageFetchController extends AbstractController
         ImageCandidateFetcher $imageCandidateFetcher,
         WebsiteProcessingService $websiteProcessingService
     ): Response {
+        if (!$this->isCsrfTokenValid('project_image_add_links', (string) $request->request->get('_token'))) {
+            return $this->denyInvalidCsrf($request, $stringId);
+        }
+
         $project = $repository->findOneBy(['stringId' => $stringId]);
         if (!$project) {
             throw $this->createNotFoundException();
@@ -217,4 +246,16 @@ class ImageFetchController extends AbstractController
             'fromPastedHtml' => $fromPastedHtml,
         ]);
     }
+
+    private function denyInvalidCsrf(Request $request, string $stringId): Response
+    {
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(['error' => 'Jeton CSRF invalide.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $this->addFlash('danger', 'Jeton CSRF invalide.');
+
+        return $this->redirectToRoute('project_fetch_images', ['stringId' => $stringId]);
+    }
+
 }

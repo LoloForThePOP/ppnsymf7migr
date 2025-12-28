@@ -6,6 +6,7 @@
     function initializePlacesModal() {
 
         $('#feedbackBox').hide();
+        const placeCsrfToken = "{{ csrf_token('pp_place_mutation') }}";
 
         // Initialize Google Places Input Field
 
@@ -97,6 +98,7 @@
                 "administrativeAreaLevel2": componentMap.administrative_area_level_2,
                 "locality": componentMap.locality,                 
                 "sublocalityLevel1": componentMap.sublocality_level_1,
+                "_token": placeCsrfToken,
                 //"route": componentMap.route,                 
 
             },
@@ -138,6 +140,7 @@
                         dataType:   'json',
                         data: {
                         "placeId": placeId,
+                        "_token": placeCsrfToken,
                         },
 
                         async: true,  

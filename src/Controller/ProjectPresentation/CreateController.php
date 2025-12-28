@@ -106,11 +106,7 @@ class CreateController extends AbstractController
             $presentation->isCreationFormCompleted(true);
             $this->em->flush();
 
-            $this->addFlash('success fs-4', <<<HTML
-                ✅ Votre page de présentation est prête.<br>
-                Explorez les possibilités et apportez des modifications qui vous intéressent.<br>
-                🙋 Si vous avez besoin d'aide, utilisez le bouton d'aide rapide en bas de page.
-            HTML);
+            $this->addFlash('success fs-4', "✅ Votre page de présentation est prête.\nExplorez les possibilités et apportez des modifications qui vous intéressent.\n🙋 Si vous avez besoin d'aide, utilisez le bouton d'aide rapide en bas de page.");
 
             // show one-time hint on edit / consult toggle (first time after project presentation creation)
             $request->getSession()->set('show_edit_toggle_hint', true);

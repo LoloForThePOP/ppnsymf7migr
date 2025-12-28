@@ -8,6 +8,7 @@
             // TinyMCE Rich Text Editor Init
 
             let editorChangeHandlerId;
+            const liveSaveCsrfToken = "{{ csrf_token('live_save_pp') }}";
 
             const buildTinyMceContentStyle = function (padding) {
                 const rootStyles = getComputedStyle(document.documentElement);
@@ -62,13 +63,14 @@
                                     data: {
                                         "metadata": metadata,
                                         "content": editorContent,
+                                        "_token": liveSaveCsrfToken,
                                     },
                                     
                                     success: function(data) {
                                         //removing previous feedback symbol
                                         $(".edit-text-feedback" ).remove(); 
                                         //refreshing read only content
-                                         $("#collapseTextDescription").html(editorContent); 
+                                         $("#collapseTextDescription").html(data.content || ''); 
                                         //adding some positive feedback to editor
                                          $( ".tox-toolbar__group" ).append('<div  class="edit-text-feedback text-success" style="display: flex; align-items: center; padding-left: 10px; font-weight: bold; ">enregistré ✅</div>'); 
                                         

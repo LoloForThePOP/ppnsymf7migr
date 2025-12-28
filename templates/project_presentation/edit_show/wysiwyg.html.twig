@@ -6,60 +6,166 @@
     
     $(document).ready(function(){
 
-        function setupStructCollapse() {
-            $(".pp-container .pp-struct-container").each(function() {
-                var $container = $(this);
+        var $ppContainer = $(".pp-container");
+        var liveSaveCsrfToken = "{{ csrf_token('live_save_pp') }}";
 
-                if ($container.data("ppStructReady")) {
+        function containerHasContent($container) {
+            var hasContent = false;
+            var $children = $container.children().not(".pp-struct-title-container").not(".pp-struct-toggle");
+
+            $children.each(function() {
+                var $node = $(this);
+
+                if ($node.is("script, style, link")) {
                     return;
                 }
 
-                $container.data("ppStructReady", true);
+                if ($node.is("img, svg, video, canvas, iframe, input, textarea, select, button")) {
+                    hasContent = true;
+                    return false;
+                }
 
-                if ($container.children(".pp-struct-toggle").length === 0) {
+                if ($node.text().trim().length) {
+                    hasContent = true;
+                    return false;
+                }
+
+                if ($node.children().not("script, style, link").length) {
+                    hasContent = true;
+                    return false;
+                }
+            });
+
+            return hasContent;
+        }
+
+        function setupStructCollapse() {
+            $(".pp-container .pp-struct-container").each(function() {
+                var $container = $(this);
+                var $toggle = $container.children(".pp-struct-toggle");
+                var shouldHaveToggle = containerHasContent($container);
+
+                if (!shouldHaveToggle) {
+                    $toggle.remove();
+                    return;
+                }
+
+                if ($toggle.length === 0) {
                     $container.prepend('<button type="button" class="pp-struct-toggle" aria-expanded="false" aria-label="Basculer cette section"></button>');
                 }
 
             });
         }
 
-        function applyStructCollapseState(shouldCollapse) {
+        function setupGlobalToggle() {
+            if (!$ppContainer.length || $ppContainer.children(".pp-struct-expand-toggle-container").length) {
+                return;
+            }
+
+            var $toggleContainer = $('<div class="pp-struct-expand-toggle-container"><button type="button" class="pp-struct-expand-toggle" aria-pressed="false">Tout afficher</button></div>');
+            var $upperBox = $ppContainer.children(".pp-upper-box").first();
+
+            if ($upperBox.length) {
+                $toggleContainer.insertAfter($upperBox);
+            } else {
+                $ppContainer.prepend($toggleContainer);
+            }
+        }
+
+        function getDefaultExpanded($container) {
+            var defaultExpanded = $container.data("ppDefaultExpanded");
+
+            if (defaultExpanded === undefined) {
+                return $container.hasClass("is-expanded");
+            }
+
+            return defaultExpanded === true || defaultExpanded === "true";
+        }
+
+        function setStructExpanded($container, isExpanded) {
+            var $toggle = $container.children(".pp-struct-toggle");
+
+            $container
+                .toggleClass("is-expanded", isExpanded)
+                .toggleClass("is-collapsed", !isExpanded);
+
+            if ($toggle.length) {
+                $toggle
+                    .toggleClass("is-expanded", isExpanded)
+                    .attr("aria-expanded", isExpanded ? "true" : "false");
+            }
+        }
+
+        function updateGlobalToggleState() {
+            var $toggleButton = $(".pp-struct-expand-toggle");
+            var $containers = $(".pp-container .pp-struct-container").has(".pp-struct-toggle");
+
+            if (!$toggleButton.length || !$containers.length) {
+                return;
+            }
+
+            var expandedCount = $containers.filter(".is-expanded").length;
+            var allExpanded = expandedCount === $containers.length;
+
+            $toggleButton
+                .toggleClass("is-all-expanded", allExpanded)
+                .attr("aria-pressed", allExpanded ? "true" : "false")
+                .text(allExpanded ? "Réduire tout" : "Tout afficher");
+        }
+
+        function applyStructCollapseState(isEditMode, forceExpanded) {
             $(".pp-container .pp-struct-container").each(function() {
                 var $container = $(this);
-                var $toggle = $container.children(".pp-struct-toggle");
 
-                if (!$toggle.length) {
+                if (!$container.children(".pp-struct-toggle").length) {
                     return;
                 }
 
-                if (shouldCollapse) {
-                    $container.removeClass("is-expanded").addClass("is-collapsed");
-                    $toggle.removeClass("is-expanded").attr("aria-expanded", "false");
-                } else {
-                    $container.addClass("is-expanded").removeClass("is-collapsed");
-                    $toggle.addClass("is-expanded").attr("aria-expanded", "true");
+                var shouldExpand = true;
+
+                if (isEditMode) {
+                    if (typeof forceExpanded === "boolean") {
+                        shouldExpand = forceExpanded;
+                    } else {
+                        shouldExpand = getDefaultExpanded($container);
+                    }
                 }
+
+                setStructExpanded($container, shouldExpand);
             });
+
+            updateGlobalToggleState();
         }
 
         setupStructCollapse();
-        applyStructCollapseState($(".pp-container").hasClass("in-edition-mode"));
+        setupGlobalToggle();
+        applyStructCollapseState($ppContainer.hasClass("in-edition-mode"));
 
         $(document).on("click", ".pp-struct-toggle", function(e) {
-            if (!$(".pp-container").hasClass("in-edition-mode")) {
+            if (!$ppContainer.hasClass("in-edition-mode")) {
                 return;
             }
 
             e.preventDefault();
 
             var $container = $(this).closest(".pp-struct-container");
-            var isExpanded = $container.toggleClass("is-expanded").hasClass("is-expanded");
+            var isExpanded = !$container.hasClass("is-expanded");
 
-            $container.toggleClass("is-collapsed", !isExpanded);
+            setStructExpanded($container, isExpanded);
+            updateGlobalToggleState();
+        });
 
-            $(this)
-                .toggleClass("is-expanded", isExpanded)
-                .attr("aria-expanded", isExpanded ? "true" : "false");
+        $(document).on("click", ".pp-struct-expand-toggle", function(e) {
+            if (!$ppContainer.hasClass("in-edition-mode")) {
+                return;
+            }
+
+            e.preventDefault();
+
+            var $containers = $(".pp-container .pp-struct-container").has(".pp-struct-toggle");
+            var allExpanded = $containers.length && $containers.filter(".is-expanded").length === $containers.length;
+
+            applyStructCollapseState(true, !allExpanded);
         });
 
             
@@ -182,6 +288,7 @@
                 data: {
                     "metadata": metadata,
                     "content": content,
+                    "_token": liveSaveCsrfToken,
                 },
                 
                 success: function(data) {

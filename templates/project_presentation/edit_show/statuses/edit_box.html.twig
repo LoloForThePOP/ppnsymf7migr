@@ -54,6 +54,7 @@
             {# User can choose some enumerated status types #}
 
             <div id="project-statuses-editor" class="d-flex flex-column flex-lg-row justify-content-around px-2 mb-2" data-update-url="{{ path('ajax_project_statuses_update', { stringId: presentation.stringId }) }}"
+                data-csrf-token="{{ csrf_token('project_statuses_update') }}"
 >
 
                 {% for statusCategory in statusesCatalog %}
@@ -64,7 +65,7 @@
 
                     <h5 class="category-title" data-bs-toggle="collapse" href="#category-{{uniqueCategoryName}}">
                         
-                        {{statusCategory.categoryLabels.description_fr  | raw }}
+                        {{ statusCategory.categoryLabels.description_fr }}
                         &nbsp;▾
                     
                     </h5>
@@ -94,7 +95,7 @@
                                                                 
                             >
 
-                                {{item.description_fr | raw }}
+                                {{ item.description_fr }}
                         
                             </li>
                         

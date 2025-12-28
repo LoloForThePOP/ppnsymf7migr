@@ -15,7 +15,7 @@
 
         function displayFeedback(message, type) {
             var htmlClass = "fixed-flash alert alert-" + type;
-            $('#flash-messages').addClass(htmlClass).html(message).fadeIn(1000).delay(3000).fadeOut(1000);
+            $('#flash-messages').addClass(htmlClass).text(message).fadeIn(1000).delay(3000).fadeOut(1000);
         }
 
         function ajaxMutation(url, payload) {

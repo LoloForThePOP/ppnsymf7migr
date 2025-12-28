@@ -24,6 +24,10 @@ class LiveSaveController extends AbstractController
             return $this->json(['error' => 'Requête invalide.'], Response::HTTP_BAD_REQUEST);
         }
 
+        if (!$this->isCsrfTokenValid('live_save_pp', (string) $request->request->get('_token'))) {
+            return $this->json(['error' => 'Jeton CSRF invalide.'], Response::HTTP_FORBIDDEN);
+        }
+
         // Keep malformed payloads out early to avoid propagating undefined indexes later.
         $metadataPayload = $request->request->get('metadata');
         if ($metadataPayload === null) {
@@ -80,7 +84,12 @@ class LiveSaveController extends AbstractController
             $liveSave->save();
             $scoreService->scoreUpdate($liveSave->getPresentation());
 
-            return $this->json(['success' => true]);
+            $response = ['success' => true];
+            if ($property === 'textDescription') {
+                $response['content'] = $liveSave->getContent();
+            }
+
+            return $this->json($response);
         } catch (\InvalidArgumentException|\LogicException|\RuntimeException $exception) {
             return $this->json(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
         }

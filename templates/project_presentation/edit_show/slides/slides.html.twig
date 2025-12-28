@@ -329,7 +329,7 @@
                 } else if (dots[slideIndex-1]) {
                     text = dots[slideIndex-1].getAttribute('data-caption') || '';
                 }
-                captionText.innerHTML = text;
+                captionText.textContent = text;
             }
 
         }
@@ -341,5 +341,4 @@
 		});
 
     </script>
-
 

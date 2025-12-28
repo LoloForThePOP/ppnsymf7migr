@@ -47,8 +47,14 @@
           a.appendChild(img);
         }
         const text = document.createElement('div');
-        text.innerHTML = `<div class="fw-bold mb-1">${item.title ?? '(Sans titre)'}</div>
-                          <div class="small text-muted">${item.goal ?? ''}</div>`;
+        const title = document.createElement('div');
+        title.className = 'fw-bold mb-1';
+        title.textContent = item.title ?? '(Sans titre)';
+        const goal = document.createElement('div');
+        goal.className = 'small text-muted';
+        goal.textContent = item.goal ?? '';
+        text.appendChild(title);
+        text.appendChild(goal);
         a.appendChild(text);
         results.appendChild(a);
       });

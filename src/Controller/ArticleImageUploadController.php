@@ -25,6 +25,10 @@ class ArticleImageUploadController extends AbstractController
             throw new AccessDeniedHttpException();
         }
 
+        if (!$this->isCsrfTokenValid('tinymce_image_upload', (string) $request->request->get('_token'))) {
+            return new JsonResponse(['message' => 'CSRF Denied'], Response::HTTP_FORBIDDEN);
+        }
+
         // Basic same-origin guard for TinyMCE uploads
         $baseUrl = $request->getScheme().'://'.$request->getHttpHost().$request->getBasePath();
         if (isset($_SERVER['HTTP_ORIGIN']) && $_SERVER['HTTP_ORIGIN'] !== $baseUrl) {

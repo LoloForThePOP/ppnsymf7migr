@@ -26,6 +26,14 @@ class ProjectStatusesController extends AbstractController
 
         $data = json_decode($request->getContent(), true);
 
+        if (!is_array($data)) {
+            return new JsonResponse(['error' => 'Invalid data format'], 400);
+        }
+
+        if (!$this->isCsrfTokenValid('project_statuses_update', (string) ($data['_token'] ?? ''))) {
+            return new JsonResponse(['error' => 'Jeton CSRF invalide.'], 403);
+        }
+
         if (!isset($data['statuses']) || !is_array($data['statuses'])) {
             return new JsonResponse(['error' => 'Invalid data format'], 400);
         }

@@ -158,7 +158,7 @@
             {# Add a News Proxy Form (Tiny Screens) (>md screens managed in upper_box #}
             <div class="pp-edition-mode d-md-none">
 
-                <div class="proxy-news-creation-container pp-struct-container">
+                <div class="proxy-news-creation-container pp-struct-container is-expanded" data-pp-default-expanded="true">
 
                     {{ newsFormProxy}}
 
@@ -192,12 +192,13 @@
             <div class="row">
 
                 {% set countSlides = presentation.slides | length %}
+                {% set hasSlides = countSlides > 0 %}
                 
                 {# Slideshow images & videos #}
 
                 <div class="col-lg-6 pp-struct-container-wrapper {% if countSlides == 0 %} pp-edition-mode {% endif %}">
 
-                    <div id="slideshow-struct-container" class="pp-struct-container">
+                    <div id="slideshow-struct-container" class="pp-struct-container{{ hasSlides ? ' is-expanded' : '' }}" {% if hasSlides %}data-pp-default-expanded="true"{% endif %}>
                             
                         {% include 'project_presentation/edit_show/slides/slides.html.twig' %}
 
@@ -210,7 +211,9 @@
 
                 <div class="col-lg-6 pp-struct-container-wrapper">
 
-                    <div id="text-description-struct-container" class="pp-struct-container">
+                    {% set hasTextDescription = presentation.textDescription|default('')|striptags|trim is not empty %}
+
+                    <div id="text-description-struct-container" class="pp-struct-container{{ hasTextDescription ? ' is-expanded' : '' }}" {% if hasTextDescription %}data-pp-default-expanded="true"{% endif %}>
                         
                         {% include 'project_presentation/edit_show/text_description/main.html.twig' %}
 
@@ -222,10 +225,11 @@
                 {# Places #}
 
                 {% set countPlaces = presentation.places | length %}
+                {% set hasPlaces = countPlaces > 0 %}
 
                 <div class="col-lg-6 pp-struct-container-wrapper {% if countPlaces == 0 %} pp-edition-mode {% endif %}">
                     
-                    <div id="places-struct-container" class="pp-struct-container">
+                    <div id="places-struct-container" class="pp-struct-container{{ hasPlaces ? ' is-expanded' : '' }}" {% if hasPlaces %}data-pp-default-expanded="true"{% endif %}>
                         
                     {% include 'project_presentation/edit_show/places/display.html.twig' %}
                     
@@ -237,10 +241,11 @@
                 {# Documents #}
 
                 {% set countDocuments = presentation.documents | length %}
+                {% set hasDocuments = countDocuments > 0 %}
                
                 <div class="col-lg-6 pp-struct-container-wrapper {% if countDocuments == 0 %} pp-edition-mode {% endif %}">
 
-                    <div id="documents-struct-container" class="pp-struct-container">
+                    <div id="documents-struct-container" class="pp-struct-container{{ hasDocuments ? ' is-expanded' : '' }}" {% if hasDocuments %}data-pp-default-expanded="true"{% endif %}>
 
                         {% include 'project_presentation/edit_show/documents/display.html.twig' %}
 
@@ -254,10 +259,11 @@
                 {# News #}
 
                 {% set countNews = presentation.news | length %}
+                {% set hasNews = countNews > 0 %}
                
                 <div class="col-lg-6 pp-struct-container-wrapper {% if countNews == 0 %} pp-edition-mode {% endif %}">
 
-                    <div id="news-struct-container" data-structure="news" class="pp-struct-container">
+                    <div id="news-struct-container" data-structure="news" class="pp-struct-container{{ hasNews ? ' is-expanded' : '' }}" {% if hasNews %}data-pp-default-expanded="true"{% endif %}>
 
                         {% include 'project_presentation/edit_show/news/display.html.twig' %}
 
@@ -269,11 +275,12 @@
                 {# Questions & Answers #}
 
                 {% set countQA = presentation.getOtherComponents().getComponents('questions_answers') | length %}
+                {% set hasQA = countQA > 0 %}
                 
 
                 <div class="col-lg-6 pp-struct-container-wrapper {% if countQA == 0 %} pp-edition-mode {% endif %}">
                 
-                    <div id="questionsAnswers-struct-container" class="pp-struct-container ">
+                    <div id="questionsAnswers-struct-container" class="pp-struct-container{{ hasQA ? ' is-expanded' : '' }}" {% if hasQA %}data-pp-default-expanded="true"{% endif %}>
                 
                         {% include "project_presentation/edit_show/questions_answers/display.html.twig" %}
                 
@@ -285,11 +292,12 @@
                 {# Websites #}
 
                 {% set countWebsites = presentation.getOtherComponents().getComponents('websites') | length %}
+                {% set hasWebsites = countWebsites > 0 %}
 
 
                 <div class="col-lg-6 pp-struct-container-wrapper {% if countWebsites == 0 %} pp-edition-mode {% endif %}">
             
-                    <div id="websites-struct-container" class="pp-struct-container col-12">
+                    <div id="websites-struct-container" class="pp-struct-container col-12{{ hasWebsites ? ' is-expanded' : '' }}" {% if hasWebsites %}data-pp-default-expanded="true"{% endif %}>
                     
                         {% include 'project_presentation/edit_show/websites/content.html.twig' %}
                             
@@ -311,6 +319,7 @@
                 {# Business cards #}
 
                 {% set countBC = presentation.getOtherComponents().getComponents('business_cards') | length %}
+                {% set hasBusinessCards = countBC > 0 or privateMessagesActive|default(false) %}
 
                 <div class="col-lg-6 pp-struct-container-wrapper {% if countBC == 0 %} pp-edition-mode {% endif %}">
 
@@ -320,7 +329,7 @@
                 
                     #}
 
-                    <div id="businessCards-struct-container" class="pp-struct-container col-12 {% if countBC == 0 %} pp-edition-mode {% endif %}">
+                    <div id="businessCards-struct-container" class="pp-struct-container col-12 {% if countBC == 0 %} pp-edition-mode {% endif %}{{ hasBusinessCards ? ' is-expanded' : '' }}" {% if hasBusinessCards %}data-pp-default-expanded="true"{% endif %}>
 
                         {% include 'project_presentation/edit_show/contact_possibilities.html.twig' %}
 
@@ -340,7 +349,9 @@
 
                 <div class="col-lg-6 pp-struct-container-wrapper">
 
-                    <div id="comments-struct-container" class="pp-struct-container">
+                    {% set hasComments = countComments > 0 %}
+
+                    <div id="comments-struct-container" class="pp-struct-container{{ hasComments ? ' is-expanded' : '' }}" {% if hasComments %}data-pp-default-expanded="true"{% endif %}>
 
                         {% include "comment/_comments.html.twig" with {commentedEntityType: "projectPresentation", commentedEntityId: presentation.id, commentedEntityComments: presentation.comments } %}
 

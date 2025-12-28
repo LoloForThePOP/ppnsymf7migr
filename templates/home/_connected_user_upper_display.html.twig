@@ -9,7 +9,7 @@
                     <p class="connected-subtitle">Reprenez vos projets, publiez vos avancées et gagnez en visibilité.</p>
                 </div>
                 <div class="connected-actions">
-                    <a class="btn btn-primary" href="{{ path('create_project_presentation') }}">Créer un projet</a>
+                    <a class="btn btn-primary" href="{{ path('create_project_presentation') }}">Présenter un projet</a>
                     {% if continuePresentation %}
                         <a class="btn btn-light" href="{{ path('edit_show_project_presentation', {'stringId': continuePresentation.stringId}) }}">Continuer</a>
                     {% endif %}
@@ -19,7 +19,9 @@
             {% if continuePresentation %}
                 {% set continueTitle = continuePresentation.title ?: continuePresentation.goal %}
                 {% set continueThumbnail = continuePresentation.extra.cacheThumbnailUrl ?? null %}
-                <div class="connected-resume">
+                {% set continueEditUrl = path('edit_show_project_presentation', {'stringId': continuePresentation.stringId}) %}
+                <div class="connected-resume is-clickable">
+                    <a class="connected-resume-link" href="{{ continueEditUrl }}" aria-label="Reprendre {{ continueTitle }}"></a>
                     <div class="connected-resume-main">
                         <div class="connected-resume-thumbnail">
                             {% if continueThumbnail %}
@@ -44,9 +46,9 @@
                         </div>
                     </div>
                     <div class="connected-resume-actions">
-                        <a class="btn btn-outline-primary btn-sm" href="{{ path('edit_show_project_presentation', {'stringId': continuePresentation.stringId}) }}">Éditer</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ continueEditUrl }}">Éditer</a>
                         <a class="btn btn-light btn-sm" href="{{ path('pp_edit_thumbnail', {'stringId': continuePresentation.stringId}) }}">Vignette</a>
-                        <a class="btn btn-light btn-sm" href="{{ path('edit_show_project_presentation', {'stringId': continuePresentation.stringId}) }}#slideshow-struct-container">Médias</a>
+                        <a class="btn btn-light btn-sm" href="{{ continueEditUrl }}#slideshow-struct-container">Médias</a>
                     </div>
                     {% if addNewsForm %}
                         <div class="connected-resume-news">
@@ -68,7 +70,7 @@
                         <div class="connected-resume-meta">Commencez par créer votre première page.</div>
                     </div>
                     <div class="connected-resume-actions">
-                        <a class="btn btn-primary btn-sm" href="{{ path('create_project_presentation') }}">Créer un projet</a>
+                        <a class="btn btn-primary btn-sm" href="{{ path('create_project_presentation') }}">Présenter un projet</a>
                     </div>
                 </div>
             {% endif %}

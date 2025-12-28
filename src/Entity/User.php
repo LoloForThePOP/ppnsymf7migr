@@ -87,6 +87,9 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $emailValidationToken = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $emailValidationTokenExpiresAt = null;
+
     #[ORM\Column(length: 40)]
     #[Assert\NotBlank(message: 'Le nom d\'utilisateur ne peut pas être vide.')]
     #[Assert\Length(min: 2, max: 40, minMessage: 'Le nom d\'utilisateur doit contenir au moins {{ limit }} caractères.')]
@@ -104,6 +107,9 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $resetPasswordToken = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $resetPasswordTokenExpiresAt = null;
 
 
     // ────────────────────────────────────────
@@ -379,6 +385,18 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
         return $this;
     }
 
+    public function getEmailValidationTokenExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->emailValidationTokenExpiresAt;
+    }
+
+    public function setEmailValidationTokenExpiresAt(?\DateTimeImmutable $expiresAt): static
+    {
+        $this->emailValidationTokenExpiresAt = $expiresAt;
+
+        return $this;
+    }
+
     public function getUsername(): ?string
     {
         return $this->username;
@@ -433,6 +451,18 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
     public function setResetPasswordToken(?string $resetPasswordToken): static
     {
         $this->resetPasswordToken = $resetPasswordToken;
+
+        return $this;
+    }
+
+    public function getResetPasswordTokenExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->resetPasswordTokenExpiresAt;
+    }
+
+    public function setResetPasswordTokenExpiresAt(?\DateTimeImmutable $expiresAt): static
+    {
+        $this->resetPasswordTokenExpiresAt = $expiresAt;
 
         return $this;
     }

@@ -1,0 +1,18 @@
+framework:
+    rate_limiter:
+        verify_email_resend_ip:
+            policy: 'sliding_window'
+            limit: 10
+            interval: '1 hour'
+        verify_email_resend_email:
+            policy: 'sliding_window'
+            limit: 3
+            interval: '1 hour'
+        reset_password_request_ip:
+            policy: 'sliding_window'
+            limit: 10
+            interval: '1 hour'
+        reset_password_request_email:
+            policy: 'sliding_window'
+            limit: 3
+            interval: '1 hour'

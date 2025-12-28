@@ -42,6 +42,7 @@ class UpdateSlideController extends AbstractController
         #[MapEntity(mapping: ['id_slide' => 'id'])] Slide $slide,
     ): Response {
         $this->denyAccessUnlessGranted('edit', $pp);
+        $this->assertSlideOwnership($pp, $slide);
 
         return match ($slide->getType()) {
             SlideType::IMAGE         => $this->redirectToRoute('pp_update_image_slide', [
@@ -68,6 +69,7 @@ class UpdateSlideController extends AbstractController
         EntityManagerInterface $manager
     ): Response {
         $this->denyAccessUnlessGranted('edit', $presentation);
+        $this->assertSlideOwnership($presentation, $slide);
 
         $form = $this->createForm(ImageSlideType::class, $slide);
         $form->handleRequest($request);
@@ -106,6 +108,7 @@ class UpdateSlideController extends AbstractController
         EntityManagerInterface $manager
     ): Response {
         $this->denyAccessUnlessGranted('edit', $pp);
+        $this->assertSlideOwnership($pp, $slide);
 
         // reset image file field as we are dealing with an video slide
 
@@ -134,5 +137,12 @@ class UpdateSlideController extends AbstractController
             'stringId' => $pp->getStringId(),
 
         ]);
+    }
+
+    private function assertSlideOwnership(PPBase $presentation, Slide $slide): void
+    {
+        if ($slide->getProjectPresentation() !== $presentation) {
+            throw $this->createNotFoundException('Slide introuvable.');
+        }
     }
 }

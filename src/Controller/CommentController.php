@@ -36,6 +36,13 @@ class CommentController extends AbstractController
 
         if ($request->isXmlHttpRequest()) {
 
+            if (!$this->isCsrfTokenValid('comment_mutation', (string) $request->request->get('_token'))) {
+                return new JsonResponse(
+                    ['error' => 'Jeton CSRF invalide.'],
+                    Response::HTTP_FORBIDDEN,
+                );
+            }
+
             session_write_close();
 
             $commentedEntityType = $request->request->get('commentedEntityType');
@@ -276,6 +283,13 @@ class CommentController extends AbstractController
    public function delete(Request $request, EntityManagerInterface $manager, CommentRepository $repo){
 
     if ($request->isXmlHttpRequest()) {
+
+        if (!$this->isCsrfTokenValid('comment_mutation', (string) $request->request->get('_token'))) {
+            return new JsonResponse(
+                ['error' => 'Jeton CSRF invalide.'],
+                Response::HTTP_FORBIDDEN,
+            );
+        }
 
         $commentId = $request->request->get('commentId');
 

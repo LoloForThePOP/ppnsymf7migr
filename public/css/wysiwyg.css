@@ -20,6 +20,36 @@
     display: initial;
 }
 
+/* Global expand/collapse toggle for edit mode */
+
+.pp-struct-expand-toggle-container {
+    display: flex;
+    justify-content: flex-end;
+    margin: 6px 0 18px;
+}
+
+.in-consultation-mode .pp-struct-expand-toggle-container {
+    display: none;
+}
+
+.pp-struct-expand-toggle {
+    border-radius: 999px;
+    border: 1px solid var(--theme-border);
+    background-color: var(--theme-surface-alt);
+    color: var(--theme-text);
+    padding: 6px 14px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.pp-struct-expand-toggle:hover,
+.pp-struct-expand-toggle:focus {
+    background-color: var(--theme-surface);
+    border-color: var(--theme-accent);
+    color: var(--theme-accent);
+}
+
 
 /* This class is applied when we want an editable zone to react on mouse hover */
 

@@ -24,7 +24,7 @@ class UserAccountEmailType extends AbstractType
                 'attr' => ['placeholder' => 'Écrire ici'],
                 'constraints' => [
                     new Assert\NotBlank(['message' => 'L\'adresse e-mail ne peut être vide.']),
-                    new Assert\Email(['message' => 'VEuillez entrer une adresse e-mail valide.']),
+                    new Assert\Email(['message' => 'Veuillez entrer une adresse e-mail valide.']),
                     new Assert\Length(['max' => 180]),
                 ],
             ])

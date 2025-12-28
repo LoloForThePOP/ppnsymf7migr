@@ -10,6 +10,7 @@ class ImageDownloader
 {
     public function __construct(
         private readonly HttpClientInterface $httpClient,
+        private readonly UrlSafetyChecker $urlSafetyChecker,
     ) {
     }
 
@@ -19,6 +20,10 @@ class ImageDownloader
     public function download(string $url): ?UploadedFile
     {
         if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return null;
+        }
+
+        if (!$this->urlSafetyChecker->isAllowed($url)) {
             return null;
         }
 

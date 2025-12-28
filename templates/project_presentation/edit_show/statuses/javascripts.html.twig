@@ -48,6 +48,7 @@ function saveEnumStatusesAndRemarks() {
     const $pill = $(this);
     const $container = $('#project-statuses-editor');
     const updateUrl = $container.data('update-url');
+    const csrfToken = $container.data('csrf-token');
     const remarks = $('#status-remarks-textarea').val();
 
     const $feedback = $('#remarks-feedback');
@@ -65,7 +66,7 @@ function saveEnumStatusesAndRemarks() {
 
         url: updateUrl,
         type: 'POST',
-        data: JSON.stringify({ statuses: activeStatuses, remarks: remarks }),
+        data: JSON.stringify({ statuses: activeStatuses, remarks: remarks, _token: csrfToken }),
         contentType: 'application/json',
 
         success: function (response) {
@@ -146,16 +147,22 @@ function renderStatuses(newStatuses, newRemarks) {
     const showMore = activeItems.length > 1 || ((newRemarks || '').trim().length > 10);
     const $summaryMain = $('.status-summary-main');
     if ($summaryMain.length) {
+        $summaryMain.empty();
         if (activeItems.length > 0) {
             const first = activeItems[0];
-            $summaryMain.html(
-                `<span class="status-pill-view" data-status="${first.status}" title="${first.title}">${first.text}</span>`
-            );
+            const pill = $('<span>', {
+                class: 'status-pill-view',
+                'data-status': first.status,
+                title: first.title,
+            }).text(first.text);
+            $summaryMain.append(pill);
         } else if ((newRemarks || '').trim().length > 0) {
             const snippet = (newRemarks || '').slice(0, 30) + ((newRemarks || '').length > 30 ? '…' : '');
-            $summaryMain.html(`<span class="text-muted small">${snippet}</span>`);
-        } else {
-            $summaryMain.empty();
+            const snippetEl = $('<span>', {
+                class: 'text-muted small',
+                text: snippet,
+            });
+            $summaryMain.append(snippetEl);
         }
     }
     $('.status-popover-btn').toggle(showMore);
@@ -187,7 +194,7 @@ function initStatusPopovers() {
             content: contentHtml,
             customClass: 'wide-popover',
             trigger: 'manual',
-            sanitize: false,
+            sanitize: true,
         });
 
         $(btn).off('click.statusPopover').on('click.statusPopover', function (e) {

@@ -26,6 +26,8 @@
     
     $(document).ready(function(){
 
+        const commentCsrfToken = "{{ csrf_token('comment_mutation') }}";
+
         // creating a reply comment form (in addition to the create new parent comment form)
         var replyForm = $(".commentForm:first").clone().addClass("replyCommentForm");
         $(".commentForm").after(replyForm);
@@ -111,6 +113,7 @@
 
                     "formTimeLoaded": formTimeLoaded,
                     "hnyPt": hnyPt,
+                    "_token": commentCsrfToken,
               },
   
               async: true,  
@@ -168,6 +171,7 @@
                     dataType:   'json',
                     data: {
                         "commentId": commentId,
+                        "_token": commentCsrfToken,
                     },
 
                     async: true,  

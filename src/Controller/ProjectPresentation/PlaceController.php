@@ -28,6 +28,10 @@ class PlaceController extends AbstractController
             return $this->json(['error' => 'Requête invalide.'], Response::HTTP_BAD_REQUEST);
         }
 
+        if (!$this->isCsrfTokenValid('pp_place_mutation', (string) $request->request->get('_token'))) {
+            return $this->json(['error' => 'Jeton CSRF invalide.'], Response::HTTP_FORBIDDEN);
+        }
+
         $payload = $request->request;
         $latitude = filter_var($payload->get('latitude'), FILTER_VALIDATE_FLOAT);
         $longitude = filter_var($payload->get('longitude'), FILTER_VALIDATE_FLOAT);
@@ -70,6 +74,10 @@ class PlaceController extends AbstractController
 
         if (!$request->isXmlHttpRequest()) {
             return $this->json(['error' => 'Requête invalide.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        if (!$this->isCsrfTokenValid('pp_place_mutation', (string) $request->request->get('_token'))) {
+            return $this->json(['error' => 'Jeton CSRF invalide.'], Response::HTTP_FORBIDDEN);
         }
 
         $placeId = filter_var($request->request->get('placeId'), FILTER_VALIDATE_INT);

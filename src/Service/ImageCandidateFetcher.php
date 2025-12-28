@@ -16,6 +16,7 @@ class ImageCandidateFetcher
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
+        private readonly UrlSafetyChecker $urlSafetyChecker,
     ) {
     }
 
@@ -92,6 +93,10 @@ class ImageCandidateFetcher
 
     private function fetchHtml(string $url): ?string
     {
+        if (!$this->urlSafetyChecker->isAllowed($url)) {
+            return null;
+        }
+
         try {
             $response = $this->httpClient->request('GET', $url, [
                 'timeout' => 10,

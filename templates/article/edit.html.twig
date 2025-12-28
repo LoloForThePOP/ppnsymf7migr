@@ -163,6 +163,7 @@
     <script>
 
         const image_upload_handler = (blobInfo, progress) => new Promise((resolve, reject) => {
+          const csrfToken = '{{ csrf_token('tinymce_image_upload') }}';
 
           const xhr = new XMLHttpRequest();
           xhr.withCredentials = false;
@@ -203,6 +204,7 @@
 
           const formData = new FormData();
           formData.append('file', blobInfo.blob(), blobInfo.filename());
+          formData.append('_token', csrfToken);
 
           xhr.send(formData);
 

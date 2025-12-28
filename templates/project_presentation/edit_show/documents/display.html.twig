@@ -5,6 +5,8 @@
 
 {% endblock %}
 
+{% set countDocuments = presentation.documents | length %}
+
 {% embed "/project_presentation/edit_show/skeletons/structure_content.html.twig" with {'iconName': "documents", 'title': "Documents Attachés",} %}
 
     {% block editButtons %}
@@ -12,6 +14,16 @@
         {# Add document button (triggers a modal) #}
 
         <button data-bs-toggle="modal" data-bs-target="#addDocumentFormModal" class="pp-edition-mode plus-btn btn btn-light btn-sm me-3"><span class="plus-sign">+</span></button>
+
+    {% endblock %}
+
+    {% block deleteElementsButtons %}
+
+        {% if countDocuments > 0 %}
+        
+            {{ parent() }}
+        
+        {% endif %}
 
     {% endblock %}
 
@@ -83,7 +95,6 @@
     {% endblock %}
 
 {% endembed %}
-
 
 
 

@@ -44,6 +44,35 @@
     gap: 16px;
     align-items: center;
     justify-content: space-between;
+    position: relative;
+}
+
+.connected-resume.is-clickable {
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.connected-resume.is-clickable .connected-resume-main,
+.connected-resume.is-clickable .connected-resume-main * {
+    pointer-events: none;
+}
+
+.connected-resume.is-clickable:hover {
+    border-color: var(--theme-accent);
+    box-shadow: 0 0 0 1px var(--theme-accent);
+}
+
+.connected-resume-link {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.connected-resume > :not(.connected-resume-link) {
+    position: relative;
+    z-index: 2;
 }
 
 .connected-resume-main {

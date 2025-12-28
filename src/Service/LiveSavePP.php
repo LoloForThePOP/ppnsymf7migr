@@ -10,6 +10,8 @@ use App\Entity\Embeddables\PPBase\OtherComponentsModels\QuestionAnswerComponent;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 
 
 class LiveSavePP {
@@ -73,16 +75,23 @@ class LiveSavePP {
     protected $em;
     protected $validator;
     protected $security;
+    private HtmlSanitizerInterface $textDescriptionSanitizer;
 
 
 
 
-    public function __construct(Security $security, EntityManagerInterface $em, ValidatorInterface $validator)
+    public function __construct(
+        Security $security,
+        EntityManagerInterface $em,
+        ValidatorInterface $validator,
+        #[Autowire(service: 'html_sanitizer.sanitizer.text_description')] HtmlSanitizerInterface $textDescriptionSanitizer
+    )
     {
       
         $this->security = $security;
         $this->em = $em;
         $this->validator = $validator;
+        $this->textDescriptionSanitizer = $textDescriptionSanitizer;
 
     }
 
@@ -270,7 +279,22 @@ class LiveSavePP {
         return $this->pp;
     }
 
+    public function getContent(): string
+    {
+        return $this->content;
+    }
+
+    private function sanitizeContentIfNeeded(string $content): string
+    {
+        if ($this->property === 'textDescription') {
+            return $this->textDescriptionSanitizer->sanitize($content);
+        }
+
+        return $content;
+    }
+
     public function save(){
+        $this->content = $this->sanitizeContentIfNeeded($this->content);
 
         switch ($this->property) {
 

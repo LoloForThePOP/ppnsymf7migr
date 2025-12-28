@@ -25,11 +25,13 @@
                         {% if is_granted('ROLE_ADMIN') %}
                             <div class="d-flex flex-column gap-1 mt-2">
                         <form method="post" action="{{ path('project_image_use_as_logo', {'stringId': project.stringId}) }}" class="ajaxable">
+                            <input type="hidden" name="_token" value="{{ csrf_token('project_image_use_as_logo') }}">
                             <input type="hidden" name="image_url" value="{{ img.url }}">
                             <input type="hidden" name="page_html" value="{{ pageHtml|default('') }}">
                             <button type="submit" class="btn btn-outline-primary btn-sm w-100">Utiliser comme logo</button>
                         </form>
                         <form method="post" action="{{ path('project_image_add_slide', {'stringId': project.stringId}) }}" class="ajaxable">
+                            <input type="hidden" name="_token" value="{{ csrf_token('project_image_add_slide') }}">
                             <input type="hidden" name="image_url" value="{{ img.url }}">
                             <input type="hidden" name="page_html" value="{{ pageHtml|default('') }}">
                             <button type="submit" class="btn btn-outline-secondary btn-sm w-100">Ajouter en slide</button>

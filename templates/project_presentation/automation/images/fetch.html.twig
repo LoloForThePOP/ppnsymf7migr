@@ -13,6 +13,7 @@
         {% if is_granted('ROLE_ADMIN') %}
             <div class="d-flex gap-2 mb-3">
                 <form method="post" action="{{ path('project_delete_from_images', {'stringId': project.stringId}) }}" onsubmit="return confirm('Supprimer définitivement ce projet ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('project_delete_from_images') }}">
                     <button type="submit" class="btn btn-danger btn-sm">Supprimer ce projet</button>
                 </form>
                 <a class="btn btn-outline-secondary btn-sm" href="{{ path('project_fetch_images', {'stringId': project.stringId}) }}">Rafraîchir</a>
@@ -27,6 +28,7 @@
         <div class="card my-3">
             <div class="card-body">
                 <form method="post" action="{{ path('project_fetch_images', {'stringId': project.stringId}) }}" class="ajaxable">
+                    <input type="hidden" name="_token" value="{{ csrf_token('project_fetch_images') }}">
                     <div class="mb-2">
                         <label for="page_html" class="form-label">Coller le code source de la page pour extraire les images</label>
                         <textarea class="form-control" id="page_html" name="page_html" rows="6" placeholder="&lt;html&gt;..." spellcheck="false">{{ pageHtml|default('') }}</textarea>
@@ -39,8 +41,9 @@
         {% if links is defined and links %}
             <div class="card my-3">
                 <div class="card-body">
-                    <form method="post" action="{{ path('project_image_add_links', {'stringId': project.stringId}) }}" class="ajaxable">
-                        <h2 class="h6 mb-2">Liens détectés</h2>
+                <form method="post" action="{{ path('project_image_add_links', {'stringId': project.stringId}) }}" class="ajaxable">
+                    <input type="hidden" name="_token" value="{{ csrf_token('project_image_add_links') }}">
+                    <h2 class="h6 mb-2">Liens détectés</h2>
                         <div class="small text-muted mb-2">Sélectionner les liens à ajouter comme sites web du projet</div>
                         <div class="row g-2">
                             {% for link in links %}
