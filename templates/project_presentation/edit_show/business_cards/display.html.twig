@@ -160,10 +160,12 @@
 
                 {# Websites with potential troncature #}
 
-                {% if not editionMode %}
+                {% set safeWebsite1 = bc.website1|safe_href %}
+
+                {% if not editionMode and safeWebsite1 %}
                 
                     <a class="text-decoration-none text-body"
-                    href="{{bc.website1}}" target="_blank" rel="noopener noreferrer">
+                    href="{{ safeWebsite1 }}" target="_blank" rel="noopener noreferrer">
 
                 {% endif %}
                 
@@ -173,7 +175,7 @@
                         ...
                     {% endif %}
 
-                {% if not editionMode %}
+                {% if not editionMode and safeWebsite1 %}
 
                     </a>
 

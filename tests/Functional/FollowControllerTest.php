@@ -11,6 +11,20 @@ final class FollowControllerTest extends WebTestCase
     use ResetDatabase;
     use FunctionalTestHelper;
 
+    public function testAnonymousUserIsRedirectedToLogin(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $creator = $this->createUser($em);
+        $project = $this->createProject($em, $creator);
+
+        $client->request('POST', sprintf('/project/%s/follow', $project->getStringId()));
+
+        self::assertResponseStatusCodeSame(302);
+        self::assertStringContainsString('/login', (string) $client->getResponse()->headers->get('Location'));
+    }
+
     public function testMissingCsrfIsRejected(): void
     {
         $client = static::createClient();

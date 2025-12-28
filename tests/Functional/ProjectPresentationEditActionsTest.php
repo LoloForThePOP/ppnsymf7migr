@@ -396,6 +396,102 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         self::assertSame(1, $positions[(string) $documentA->getId()] ?? null);
     }
 
+    public function testUpdateImageSlideUpdatesImage(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $slide = $this->createSlide($em, $presentation);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/slide/update-image/%s', $presentation->getStringId(), (string) $slide->getId()),
+            ['image_slide' => ['caption' => 'Nouvelle legende', '_token' => $token]],
+            ['image_slide' => ['imageFile' => ['file' => $this->createUploadedImage()]]]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+        self::assertStringContainsString(
+            sprintf('/%s', $presentation->getStringId()),
+            (string) $client->getResponse()->headers->get('Location')
+        );
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        $updatedSlide = $presentation->getSlides()->first();
+        self::assertNotEmpty($updatedSlide?->getImagePath());
+        self::assertSame('Nouvelle legende', $updatedSlide?->getCaption());
+    }
+
+    public function testUpdateVideoSlideUpdatesUrl(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $slide = $this->createSlide($em, $presentation, 0, SlideType::YOUTUBE_VIDEO);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/slides/edit-youtube-video/%s', $presentation->getStringId(), (string) $slide->getId()),
+            [
+                'video_slide' => [
+                    'youtubeUrl' => 'https://youtu.be/wwl05u5U9vo',
+                    'caption' => 'Nouvelle video',
+                    '_token' => $token,
+                ],
+            ]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+        self::assertStringContainsString(
+            sprintf('/%s', $presentation->getStringId()),
+            (string) $client->getResponse()->headers->get('Location')
+        );
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        $updatedSlide = $presentation->getSlides()->first();
+        self::assertSame('https://youtu.be/wwl05u5U9vo', $updatedSlide?->getYoutubeUrl());
+        self::assertSame('Nouvelle video', $updatedSlide?->getCaption());
+    }
+
+    public function testUpdateDocumentUpdatesTitle(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $document = $this->createDocument($em, $presentation);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/documents/%s', (string) $document->getId()),
+            ['document' => ['title' => 'Document mis a jour', '_token' => $token]]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+        self::assertStringContainsString(
+            sprintf('/%s', $presentation->getStringId()),
+            (string) $client->getResponse()->headers->get('Location')
+        );
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        $updatedDocument = $presentation->getDocuments()->first();
+        self::assertSame('Document mis a jour', $updatedDocument?->getTitle());
+    }
+
     public function testAddImageSlideIsForbiddenForNonOwner(): void
     {
         $client = static::createClient();
@@ -795,10 +891,15 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         return new UploadedFile($path, 'document.txt', 'text/plain', null, true);
     }
 
-    private function createSlide(EntityManagerInterface $em, PPBase $presentation, int $position = 0): Slide
+    private function createSlide(
+        EntityManagerInterface $em,
+        PPBase $presentation,
+        int $position = 0,
+        SlideType $type = SlideType::IMAGE
+    ): Slide
     {
         $slide = (new Slide())
-            ->setType(SlideType::IMAGE)
+            ->setType($type)
             ->setPosition($position);
 
         $presentation->addSlide($slide);
