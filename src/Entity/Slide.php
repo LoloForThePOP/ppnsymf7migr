@@ -62,7 +62,7 @@ class Slide
     // ────────────────────────────────────────
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\Url(message: 'Veuillez saisir une adresse YouTube valide.')]
+    #[Assert\Url(message: 'Veuillez saisir une adresse YouTube valide.', requireTld: false)]
     #[Assert\Regex(
         pattern: self::YOUTUBE_URL_PATTERN,
         message: 'Le lien doit être un lien YouTube valide.'

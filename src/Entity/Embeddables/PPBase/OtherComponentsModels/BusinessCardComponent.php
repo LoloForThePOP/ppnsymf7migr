@@ -19,11 +19,11 @@ class BusinessCardComponent implements ComponentInterface
     #[Assert\Regex(pattern: '/^[0-9+\s().-]{6,20}$/', message: 'Veuillez saisir un numéro de téléphone valide.', groups: ['input'])]
     private ?string $tel1;
 
-    #[Assert\Url(message: 'Veuillez saisir une adresse web valide.', groups: ['input'])]
+    #[Assert\Url(message: 'Veuillez saisir une adresse web valide.', groups: ['input'], requireTld: false)]
     #[Assert\Length(max: 255, groups: ['input'])]
     private ?string $website1;
 
-    #[Assert\Url(message: 'Veuillez saisir une adresse web valide.', groups: ['input'])]
+    #[Assert\Url(message: 'Veuillez saisir une adresse web valide.', groups: ['input'], requireTld: false)]
     #[Assert\Length(max: 255, groups: ['input'])]
     private ?string $website2;
 

@@ -87,6 +87,7 @@ class Document
         mimeType: 'mimeType',
         size: 'size'
     )]
+    #[Assert\NotNull(message: 'Le fichier est requis.', groups: ['file_required'])]
     #[Assert\File(
         maxSize: '13M',
         maxSizeMessage: 'Ce fichier dépasse la limite de taille maximale : {{ limit }} {{ suffix }}.',

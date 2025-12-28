@@ -33,17 +33,17 @@ class Profile
 
     
     #[ORM\Column(length: 150, nullable: true)]
-    #[Assert\Url(message: 'Veuillez indérer une adresse web valide pour le premier site web (url).')]
+    #[Assert\Url(message: 'Veuillez indérer une adresse web valide pour le premier site web (url).', requireTld: false)]
     #[Assert\Length(max: 150)]
     private ?string $website1 = null;
 
     #[ORM\Column(length: 150, nullable: true)]
-    #[Assert\Url(message: 'Veuillez indérer une adresse web valide pour le second site web (url).')]
+    #[Assert\Url(message: 'Veuillez indérer une adresse web valide pour le second site web (url).', requireTld: false)]
     #[Assert\Length(max: 150)]
     private ?string $website2 = null;
 
     #[ORM\Column(length: 150, nullable: true)]
-    #[Assert\Url(message: 'Veuillez indérer une adresse web valide pour le troisième site web (url).')]
+    #[Assert\Url(message: 'Veuillez indérer une adresse web valide pour le troisième site web (url).', requireTld: false)]
     #[Assert\Length(max: 150)]
     private ?string $website3 = null;
     

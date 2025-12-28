@@ -103,7 +103,7 @@ class CreateController extends AbstractController
             $this->assessPPScore->scoreUpdate($presentation);
 
             // mark presentation as completed for later cleanup
-            $presentation->isCreationFormCompleted(true);
+            $presentation->setIsCreationFormCompleted(true);
             $this->em->flush();
 
             $this->addFlash('success fs-4', "✅ Votre page de présentation est prête.\nExplorez les possibilités et apportez des modifications qui vous intéressent.\n🙋 Si vous avez besoin d'aide, utilisez le bouton d'aide rapide en bas de page.");

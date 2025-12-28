@@ -5,6 +5,7 @@ namespace App\Form\ProjectPresentation;
 use App\Entity\Document;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Vich\UploaderBundle\Form\Type\VichFileType;
@@ -43,6 +44,11 @@ class DocumentType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Document::class,
             'file_required' => true,
+            'validation_groups' => static function (FormInterface $form): array {
+                $fileRequired = (bool) $form->getConfig()->getOption('file_required');
+
+                return $fileRequired ? ['Default', 'file_required'] : ['Default'];
+            },
         ]);
     }
 }
