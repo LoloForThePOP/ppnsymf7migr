@@ -198,7 +198,7 @@
 
                 <div class="col-lg-6 pp-struct-container-wrapper {% if countSlides == 0 %} pp-edition-mode {% endif %}">
 
-                    <div id="slideshow-struct-container" class="pp-struct-container{{ hasSlides ? ' is-expanded' : '' }}" {% if hasSlides %}data-pp-default-expanded="true"{% endif %}>
+                    <div id="slideshow-struct-container" class="pp-struct-container is-expanded" data-pp-default-expanded="true" data-pp-collapse="disabled">
                             
                         {% include 'project_presentation/edit_show/slides/slides.html.twig' %}
 
@@ -213,7 +213,7 @@
 
                     {% set hasTextDescription = presentation.textDescription|default('')|striptags|trim is not empty %}
 
-                    <div id="text-description-struct-container" class="pp-struct-container{{ hasTextDescription ? ' is-expanded' : '' }}" {% if hasTextDescription %}data-pp-default-expanded="true"{% endif %}>
+                    <div id="text-description-struct-container" class="pp-struct-container is-expanded" data-pp-default-expanded="true" data-pp-collapse="disabled">
                         
                         {% include 'project_presentation/edit_show/text_description/main.html.twig' %}
 
@@ -423,7 +423,7 @@
             version: 'v1',
             storage: 'auto',
             okLabel: 'Ok',
-            finishLabel: 'Terminer',
+            finishLabel: 'Ok',
             steps: tourSteps
         } %}
 

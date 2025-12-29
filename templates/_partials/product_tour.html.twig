@@ -3,7 +3,7 @@
     {% set tourVersion = tour.version|default('v1') %}
     {% set tourStorage = tour.storage|default('auto') %}
     {% set okLabel = tour.okLabel|default('Ok') %}
-    {% set finishLabel = tour.finishLabel|default('Terminer') %}
+    {% set finishLabel = tour.finishLabel|default('Ok') %}
     {% set isAuthenticated = app.user ? true : false %}
     {% set storedTours = (app.user and app.user.profile and app.user.profile.extra is iterable) ? (app.user.profile.extra.product_tours|default({})) : {} %}
     {% set storedVersion = (storedTours is iterable and storedTours[tourId] is defined) ? storedTours[tourId] : null %}

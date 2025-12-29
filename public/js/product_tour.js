@@ -90,6 +90,7 @@
         this.currentIndex = 0;
         this.blocker = null;
         this.spotlight = null;
+        this.pulseDisc = null;
         this.card = null;
         this.titleEl = null;
         this.bodyEl = null;
@@ -121,6 +122,9 @@
         this.spotlight = document.createElement("div");
         this.spotlight.className = "tour-spotlight";
 
+        this.pulseDisc = document.createElement("div");
+        this.pulseDisc.className = "tour-pulse-disc";
+
         this.card = document.createElement("div");
         this.card.className = "tour-card";
         this.card.setAttribute("role", "dialog");
@@ -146,6 +150,7 @@
 
         document.body.appendChild(this.blocker);
         document.body.appendChild(this.spotlight);
+        document.body.appendChild(this.pulseDisc);
         document.body.appendChild(this.card);
     };
 
@@ -253,6 +258,23 @@
 
         this.card.style.top = top + "px";
         this.card.style.left = left + "px";
+
+        if (this.pulseDisc) {
+            var discSize = this.pulseDisc.offsetWidth || 18;
+            var targetCenterX = rect.left + rect.width / 2;
+            var targetCenterY = rect.top + rect.height / 2;
+            var cardCenterX = left + cardRect.width / 2;
+            var cardCenterY = top + cardRect.height / 2;
+            var ratio = 0.2;
+            var discCenterX = targetCenterX + (cardCenterX - targetCenterX) * ratio;
+            var discCenterY = targetCenterY + (cardCenterY - targetCenterY) * ratio;
+
+            var discLeft = clamp(discCenterX - discSize / 2, 8, viewportWidth - discSize - 8);
+            var discTop = clamp(discCenterY - discSize / 2, 8, viewportHeight - discSize - 8);
+
+            this.pulseDisc.style.left = discLeft + "px";
+            this.pulseDisc.style.top = discTop + "px";
+        }
     };
 
     ProductTour.prototype.resolveTarget = function(selector) {
@@ -293,6 +315,9 @@
         }
         if (this.spotlight) {
             this.spotlight.remove();
+        }
+        if (this.pulseDisc) {
+            this.pulseDisc.remove();
         }
         if (this.card) {
             this.card.remove();

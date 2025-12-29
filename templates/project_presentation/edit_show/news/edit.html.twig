@@ -16,13 +16,13 @@
 
         {{ form_start(newsForm) }}
 
-        <div class="border border-primary rounded p-2 p-md-3 mb-3">
+        <div class="news-edit-card rounded p-2 p-md-3 mb-3">
 
             {{form_row(newsForm.textContent)}}
 
         </div>
 
-        <div class="border border-primary rounded p-3 mb-3">
+        <div class="news-edit-card rounded p-3 mb-3">
 
             {{form_label(newsForm.image1File)}}
             
@@ -48,7 +48,7 @@
         
         </div>
 
-        <div class="border border-primary rounded p-3 mb-3">
+        <div class="news-edit-card rounded p-3 mb-3">
 
             {{form_label(newsForm.image2File)}}
             
@@ -73,7 +73,7 @@
         
         </div>
 
-        <div class="border border-primary rounded p-3 mb-3">
+        <div class="news-edit-card rounded p-3 mb-3">
 
             {{form_label(newsForm.image3File)}}
             
@@ -128,7 +128,7 @@
         const themeSurface = rootStyles.getPropertyValue('--theme-surface').trim() || '#ffffff';
         const themeText = rootStyles.getPropertyValue('--theme-text').trim() || '#1f2937';
         const themeFont = rootStyles.getPropertyValue('--theme-font-body').trim() || 'Lato, sans-serif';
-        const safePadding = padding || '12px 15px';
+        const safePadding = padding || '0 15px';
 
         return 'body { background-color: ' + themeSurface + '; color: ' + themeText + '; font-family: ' + themeFont + '; padding: ' + safePadding + '; line-height: 1.5; }';
     };
@@ -160,6 +160,13 @@
     .news-image{
         max-width: 200px;
         height: auto;
+    }
+
+    .news-edit-card {
+        border: 1px solid color-mix(in srgb, var(--theme-accent) 55%, var(--theme-border));
+        background-color: var(--theme-surface);
+        box-shadow: var(--pp-card-shadow, 0 10px 22px rgba(0, 0, 0, 0.08));
+        border-radius: 16px;
     }
 
 
