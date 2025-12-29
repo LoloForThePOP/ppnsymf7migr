@@ -56,7 +56,7 @@ final class UpdateBusinessCardController extends AbstractController
 
             $target = $this->generateUrl('edit_show_project_presentation', [
                 'stringId' => $presentation->getStringId(),
-            ]) . '#businessCards';
+            ]) . '#businessCards-struct-container';
 
             return $this->redirect($target);
         }

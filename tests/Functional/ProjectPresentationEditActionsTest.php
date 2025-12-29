@@ -41,7 +41,7 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(302);
         self::assertStringContainsString(
-            sprintf('/%s', $presentation->getStringId()),
+            sprintf('/%s#websites-struct-container', $presentation->getStringId()),
             (string) $client->getResponse()->headers->get('Location')
         );
 
@@ -96,7 +96,7 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(302);
         self::assertStringContainsString(
-            sprintf('/%s', $presentation->getStringId()),
+            sprintf('/%s#questionsAnswers-struct-container', $presentation->getStringId()),
             (string) $client->getResponse()->headers->get('Location')
         );
 
@@ -152,7 +152,7 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(302);
         self::assertStringContainsString(
-            sprintf('/%s', $presentation->getStringId()),
+            sprintf('/%s#businessCards-struct-container', $presentation->getStringId()),
             (string) $client->getResponse()->headers->get('Location')
         );
 
@@ -186,7 +186,7 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(302);
         self::assertStringContainsString(
-            sprintf('/%s', $presentation->getStringId()),
+            sprintf('/%s#logo-struct-container', $presentation->getStringId()),
             (string) $client->getResponse()->headers->get('Location')
         );
 
@@ -655,7 +655,7 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(302);
         self::assertStringContainsString(
-            sprintf('/%s#businessCards', $presentation->getStringId()),
+            sprintf('/%s#businessCards-struct-container', $presentation->getStringId()),
             (string) $client->getResponse()->headers->get('Location')
         );
 
@@ -709,7 +709,7 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(302);
         self::assertStringContainsString(
-            sprintf('/%s#businessCards', $presentation->getStringId()),
+            sprintf('/%s#businessCards-struct-container', $presentation->getStringId()),
             (string) $client->getResponse()->headers->get('Location')
         );
 

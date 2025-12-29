@@ -42,6 +42,7 @@ final class UpdateLogoController extends AbstractController
 
             return $this->redirectToRoute('edit_show_project_presentation', [
                 'stringId' => $presentation->getStringId(),
+                '_fragment' => 'logo-struct-container',
             ]);
         }
 

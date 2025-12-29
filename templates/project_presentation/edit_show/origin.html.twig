@@ -329,7 +329,7 @@
                 
                     #}
 
-                    <div id="businessCards-struct-container" class="pp-struct-container col-12 {% if countBC == 0 %} pp-edition-mode {% endif %}{{ hasBusinessCards ? ' is-expanded' : '' }}" {% if hasBusinessCards %}data-pp-default-expanded="true"{% endif %}>
+                    <div id="businessCards-struct-container" class="pp-struct-container col-12{{ hasBusinessCards ? ' is-expanded' : '' }}" {% if hasBusinessCards %}data-pp-default-expanded="true"{% endif %}>
 
                         {% include 'project_presentation/edit_show/contact_possibilities.html.twig' %}
 

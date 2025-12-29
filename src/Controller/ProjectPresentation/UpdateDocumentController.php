@@ -44,7 +44,7 @@ class UpdateDocumentController extends AbstractController
 
             $target = $this->generateUrl('edit_show_project_presentation', [
                 'stringId' => $presentation->getStringId(),
-            ]) . '#documents';
+            ]) . '#documents-struct-container';
 
             return $this->redirect($target);
         }

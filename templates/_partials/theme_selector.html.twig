@@ -4,8 +4,8 @@
 {% set wrapperClass = wrapperClass|default('d-inline-flex') %}
 {% set iconClass = iconClass|default('d-inline-block cursor-pointer me-1') %}
 {% set iconWidth = iconWidth|default(34) %}
-{% set paletteIconTemplate = asset('color-palette--THEME.svg', 'misc') %}
-{% set paletteIconFallback = asset('color-palette--generic.svg', 'misc') %}
+{% set paletteIconTemplate = asset('color_palettes/color-palette--THEME.svg', 'misc') %}
+{% set paletteIconFallback = asset('color_palettes/color-palette--generic.svg', 'misc') %}
 {% set paletteIconSrc = paletteIconTemplate|replace({'THEME': currentTheme}) %}
 {% set themeGroups = [
   {

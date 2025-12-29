@@ -53,6 +53,6 @@ class AddDocumentController extends AbstractController
             'stringId' => $presentation->getStringId(),
         ]);
 
-        return $this->redirect($target . '#documents');
+        return $this->redirect($target . '#documents-struct-container');
     }
 }
