@@ -357,6 +357,47 @@
                 
         }
 
+        function initInfoTooltips() {
+            if (!(window.bootstrap && bootstrap.Popover)) {
+                return;
+            }
+
+            $(".pp-info-tooltip").each(function() {
+                var btn = this;
+                var existing = bootstrap.Popover.getInstance(btn);
+                if (existing) {
+                    existing.dispose();
+                }
+                new bootstrap.Popover(btn);
+            });
+        }
+
+        initInfoTooltips();
+
+        $(document).on("click", ".pp-info-tooltip", function() {
+            var current = this;
+            $(".pp-info-tooltip").not(current).each(function() {
+                var inst = bootstrap.Popover.getInstance(this);
+                if (inst) {
+                    inst.hide();
+                }
+            });
+        });
+
+        $(document).on("click", function(e) {
+            var $trigger = $(e.target).closest(".pp-info-tooltip, .popover");
+            if ($trigger.length) {
+                return;
+            }
+
+            $(".pp-info-tooltip").each(function() {
+                var inst = bootstrap.Popover.getInstance(this);
+                if (inst) {
+                    inst.hide();
+                }
+            });
+        });
+
 
 
     // + when a structure has just been made empty in edition mode, it should not be displayed in consultation mode.

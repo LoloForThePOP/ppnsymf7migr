@@ -6,25 +6,33 @@
 
         {# Manage places button #}
 
-        <button
-            type="button"
-            class="pp-edition-mode edit-places-btn"
-            data-bs-toggle="modal"
-            data-bs-target="#managePlacesModal"
-        >
-            <img class="edit-icon" src="{{ asset('edit.svg', 'pp_wysiwyg')}}" height="17" width="17" alt="edit icon" >
-        </button>
-
-        {% if countPlaces == 0 %}
-
+        <span class="pp-edit-actions">
             <button
                 type="button"
-                class="pp-edition-mode pp-info-tooltip"
-                title="Si votre projet est relié à des villes ou d'autres lieux (régions; pays; etc.), signalez-les ici."
-                aria-label="Si votre projet est relié à des villes ou d'autres lieux (régions; pays; etc.), signalez-les ici."
-            >i</button>
+                class="pp-edition-mode edit-places-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#managePlacesModal"
+            >
+                <img class="edit-icon" src="{{ asset('edit.svg', 'pp_wysiwyg')}}" height="17" width="17" alt="edit icon" >
+            </button>
 
-        {% endif %}
+            {% if countPlaces == 0 %}
+
+                <button
+                    type="button"
+                    class="pp-edition-mode pp-info-tooltip"
+                    data-bs-toggle="popover"
+                    data-bs-trigger="click"
+                    data-bs-placement="top"
+                    data-bs-custom-class="pp-info-tooltip-popover"
+                    data-bs-content="{{ "Si votre projet est relié à des villes ou d'autres lieux (régions, pays, etc.), signalez-les ici."| e('html_attr') }}"
+                    aria-label="Si votre projet est relié à des villes ou d'autres lieux (régions; pays; etc.), signalez-les ici."
+                >
+                    <img class="pp-info-tooltip-icon" src="{{ asset('info-non-circled.svg', 'misc') }}" alt="" aria-hidden="true">
+                </button>
+
+            {% endif %}
+        </span>
 
     {% endblock %}
 

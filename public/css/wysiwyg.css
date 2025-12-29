@@ -20,12 +20,22 @@
     display: initial;
 }
 
+/* Keep edition-mode buttons aligned when default display is overridden */
+.in-edition-mode .pp-edition-mode.plus-btn,
+.in-edition-mode .pp-edition-mode.pp-info-tooltip {
+    display: inline-flex;
+}
+
 /* This class is applied when we want an editable zone to react on mouse hover */
 
 .in-edition-mode .edit-hoverable-item:hover {
     cursor: pointer;
     background-color: #e0ecff;
     border-radius: 6px;
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .in-edition-mode .edit-hoverable-item:hover {
+    background-color: color-mix(in srgb, var(--theme-accent) 12%, var(--theme-surface));
 }
 
 
@@ -90,22 +100,53 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .plus-bt
     padding-bottom: 1px;
 }
 
+.pp-edit-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.pp-edit-actions .plus-btn,
+.pp-edit-actions .pp-info-tooltip,
+.pp-edit-actions .edit-places-btn {
+    margin-bottom: 0;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+}
+
+.pp-edit-actions .plus-btn,
+.pp-edit-actions .edit-places-btn {
+    margin-right: 0;
+}
+
 .pp-info-tooltip {
-    margin-bottom: 4px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    padding: 0;
     border-radius: 50%;
     border: 1px solid #b0d7b5;
     background-color: #e2f6e1;
     color: inherit;
-    font-size: 0.8rem;
-    font-weight: 700;
-    line-height: 1;
-    cursor: help;
+    line-height: 0;
+    font-size: 0;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.pp-info-tooltip:hover,
+.pp-info-tooltip:focus {
+    background-color: #ffffff;
+    border-color: #7fb587;
+}
+
+.pp-info-tooltip-icon {
+    width: 19px;
+    height: 19px;
+    display: block;
+    margin: 0;
 }
 
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info-tooltip {
@@ -117,6 +158,50 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info-tooltip:hover,
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info-tooltip:focus {
     background-color: var(--theme-surface);
+    border-color: var(--theme-accent);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info-tooltip-icon {
+    filter: brightness(0) saturate(100%) var(--theme-icon-filter);
+}
+
+.pp-info-tooltip-popover {
+    max-width: 360px;
+    background-color: var(--theme-surface);
+    border-color: var(--theme-border);
+    color: var(--theme-text);
+}
+
+.pp-info-tooltip-popover .popover-body {
+    color: var(--theme-text);
+}
+
+.pp-info-tooltip-popover.bs-popover-top > .popover-arrow::before,
+.pp-info-tooltip-popover.bs-popover-auto[data-popper-placement^=top] > .popover-arrow::before,
+.pp-info-tooltip-popover.bs-popover-end > .popover-arrow::before,
+.pp-info-tooltip-popover.bs-popover-auto[data-popper-placement^=right] > .popover-arrow::before,
+.pp-info-tooltip-popover.bs-popover-bottom > .popover-arrow::before,
+.pp-info-tooltip-popover.bs-popover-auto[data-popper-placement^=bottom] > .popover-arrow::before,
+.pp-info-tooltip-popover.bs-popover-start > .popover-arrow::before,
+.pp-info-tooltip-popover.bs-popover-auto[data-popper-placement^=left] > .popover-arrow::before {
+    border-top-color: var(--theme-border);
+    border-right-color: var(--theme-border);
+    border-bottom-color: var(--theme-border);
+    border-left-color: var(--theme-border);
+}
+
+.pp-info-tooltip-popover.bs-popover-top > .popover-arrow::after,
+.pp-info-tooltip-popover.bs-popover-auto[data-popper-placement^=top] > .popover-arrow::after,
+.pp-info-tooltip-popover.bs-popover-end > .popover-arrow::after,
+.pp-info-tooltip-popover.bs-popover-auto[data-popper-placement^=right] > .popover-arrow::after,
+.pp-info-tooltip-popover.bs-popover-bottom > .popover-arrow::after,
+.pp-info-tooltip-popover.bs-popover-auto[data-popper-placement^=bottom] > .popover-arrow::after,
+.pp-info-tooltip-popover.bs-popover-start > .popover-arrow::after,
+.pp-info-tooltip-popover.bs-popover-auto[data-popper-placement^=left] > .popover-arrow::after {
+    border-top-color: var(--theme-surface);
+    border-right-color: var(--theme-surface);
+    border-bottom-color: var(--theme-surface);
+    border-left-color: var(--theme-surface);
 }
 
 

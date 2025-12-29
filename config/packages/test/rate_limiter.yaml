@@ -1,0 +1,6 @@
+framework:
+    rate_limiter:
+        follow_toggle_user:
+            policy: 'sliding_window'
+            limit: 2
+            interval: '1 minute'

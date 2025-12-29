@@ -11,18 +11,26 @@
 
         {# Add website button (triggers a modal) #}
 
-        <button data-bs-toggle="modal" data-bs-target="#newWebsiteFormModal" class="pp-edition-mode plus-btn btn btn-light btn-sm me-3"><span class="plus-sign">+</span></button>
+        <span class="pp-edit-actions">
+            <button data-bs-toggle="modal" data-bs-target="#newWebsiteFormModal" class="pp-edition-mode plus-btn btn btn-light btn-sm"><span class="plus-sign">+</span></button>
 
-        {% if countWebsites == 0 %}
+            {% if countWebsites == 0 %}
 
             <button
                 type="button"
                 class="pp-edition-mode pp-info-tooltip"
-                title="Si vous utilisez déjà un site web ou des réseaux sociaux pour parler de votre projet ou faire progresser votre projet, ajoutez-les ici. Exemples de sites web : site vitrine, blog, boutique en ligne, page de collecte de fonds. Exemples de réseaux sociaux : Facebook, Twitter, Instagram, LinkedIn, TikTok, YouTube. Autres exemples : Github, Discord, Trello."
+                data-bs-toggle="popover"
+                data-bs-trigger="click"
+                data-bs-placement="top"
+                data-bs-custom-class="pp-info-tooltip-popover"
+                data-bs-content="{{ 'Si vous utilisez déjà un site web ou des réseaux sociaux pour parler de votre projet ou faire progresser votre projet, ajoutez-les ici. Exemples de sites web : site vitrine, blog, boutique en ligne, page de collecte de fonds. Exemples de réseaux sociaux : Facebook, Twitter, Instagram, LinkedIn, TikTok, YouTube. Autres exemples : Github, Discord, Trello.'|e('html_attr') }}"
                 aria-label="Vous utilisez déjà un site web ou des réseaux sociaux pour votre projet ? Ajoutez-les ici."
-            >i</button>
+            >
+                <img class="pp-info-tooltip-icon" src="{{ asset('info-non-circled.svg', 'misc') }}" alt="" aria-hidden="true">
+            </button>
 
-        {% endif %}
+            {% endif %}
+        </span>
 
     {% endblock %}
 
