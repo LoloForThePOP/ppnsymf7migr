@@ -14,6 +14,7 @@ use App\Entity\Embeddables\PPBase\OtherComponentsModels\QuestionAnswerComponent;
 
 final class AddQuestionAnswerController extends AbstractController
 {
+    use EditShowContextTrait;
 
 #[Route(
     '/projects/{stringId}/add-question-answer',
@@ -40,11 +41,12 @@ public function addQuestionAnswer(
     // INVALID → re-render, do NOT redirect
     if ($form->isSubmitted() && !$form->isValid()) {
 
-        return $this->render('project_presentation/edit_show/origin.html.twig', [
-            'presentation' => $presentation,
-            'addQuestionAnswerForm' => $form->createView(),
-
-        ]);
+        return $this->render(
+            'project_presentation/edit_show/origin.html.twig',
+            $this->buildEditShowContext($presentation, [
+                'addQuestionAnswerForm' => $form,
+            ])
+        );
     }
 
 

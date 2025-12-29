@@ -179,14 +179,17 @@
                     success: function(data, status) {
 
                         //case comment might have child : we delete parent and potential childs
+                        var $containers = $('.oneCommentContainer[data-comment-id="' + commentId + '"]');
 
-                        if($t.closest('.oneCommentContainer').parent(".threadContainer").length) {
+                        $containers.each(function() {
+                            var $container = $(this);
 
-                            $t.closest(".threadContainer").remove();
-
-	                    } else { // we delete only one comment
-	                    $t.closest('.oneCommentContainer').remove();
-	                    }                       
+                            if ($container.parent(".threadContainer").length) {
+                                $container.closest(".threadContainer").remove();
+                            } else { // we delete only one comment
+                                $container.remove();
+                            }
+                        });
                     
                     },  
 

@@ -14,6 +14,8 @@ use App\Entity\Embeddables\PPBase\OtherComponentsModels\BusinessCardComponent;
 
 final class AddBusinessCardController extends AbstractController
 {
+    use EditShowContextTrait;
+
     #[Route(
         '/projects/{stringId}/add-business-card',
         name: 'pp_add_business_card',
@@ -34,10 +36,12 @@ final class AddBusinessCardController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && !$form->isValid()) {
-            return $this->render('project_presentation/edit_show/origin.html.twig', [
-                'presentation' => $presentation,
-                'addBusinessCardForm' => $form->createView(),
-            ]);
+            return $this->render(
+                'project_presentation/edit_show/origin.html.twig',
+                $this->buildEditShowContext($presentation, [
+                    'addBusinessCardForm' => $form,
+                ])
+            );
         }
 
         if ($form->isSubmitted() && $form->isValid()) {

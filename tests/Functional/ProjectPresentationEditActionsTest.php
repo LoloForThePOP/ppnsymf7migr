@@ -3,6 +3,7 @@
 namespace App\Tests\Functional;
 
 use App\Entity\Document;
+use App\Entity\Category;
 use App\Entity\News;
 use App\Entity\PPBase;
 use App\Entity\Slide;
@@ -53,6 +54,29 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         self::assertNotEmpty($slide->getImagePath());
     }
 
+    public function testAddImageSlideRejectsMissingFile(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/add-image-slide', $presentation->getStringId()),
+            ['image_slide' => ['caption' => '', 'licence' => '', '_token' => $token]]
+        );
+
+        self::assertResponseIsSuccessful();
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertCount(0, $presentation->getSlides());
+    }
+
     public function testAddVideoSlideCreatesSlide(): void
     {
         $client = static::createClient();
@@ -83,6 +107,29 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         self::assertInstanceOf(Slide::class, $slide);
         self::assertSame(SlideType::YOUTUBE_VIDEO, $slide->getType());
         self::assertSame('https://www.youtube.com/watch?v=dQw4w9WgXcQ', $slide->getYoutubeUrl());
+    }
+
+    public function testAddVideoSlideRejectsInvalidUrl(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/add-video-slide', $presentation->getStringId()),
+            ['video_slide' => ['youtubeUrl' => 'invalid', '_token' => $token]]
+        );
+
+        self::assertResponseIsSuccessful();
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertCount(0, $presentation->getSlides());
     }
 
     public function testAddDocumentCreatesDocument(): void
@@ -185,6 +232,35 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         self::assertNotEmpty($websites[0]->getIcon());
     }
 
+    public function testAddWebsiteRejectsInvalidUrl(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/add-website', $presentation->getStringId()),
+            [
+                'website' => [
+                    'title' => 'Official site',
+                    'url' => 'invalid',
+                    '_token' => $token,
+                ],
+            ]
+        );
+
+        self::assertResponseIsSuccessful();
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertCount(0, $presentation->getOtherComponents()->getComponents('websites'));
+    }
+
     public function testAddQuestionAnswerCreatesComponent(): void
     {
         $client = static::createClient();
@@ -219,6 +295,35 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         self::assertCount(1, $items);
         self::assertSame('How does the project help?', $items[0]->getQuestion());
         self::assertSame('It helps by reducing waste and sharing tools.', $items[0]->getAnswer());
+    }
+
+    public function testAddQuestionAnswerRejectsEmptyQuestion(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/add-question-answer', $presentation->getStringId()),
+            [
+                'question_answer' => [
+                    'question' => '',
+                    'answer' => '',
+                    '_token' => $token,
+                ],
+            ]
+        );
+
+        self::assertResponseIsSuccessful();
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertCount(0, $presentation->getOtherComponents()->getComponents('questions_answers'));
     }
 
     public function testAddBusinessCardCreatesComponent(): void
@@ -262,6 +367,364 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         self::assertSame('jane@example.com', $cards[0]->getEmail1());
         self::assertSame('+33 6 12 34 56 78', $cards[0]->getTel1());
         self::assertSame('https://example.com', $cards[0]->getWebsite1());
+    }
+
+    public function testAddBusinessCardRejectsInvalidEmail(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/add-business-card', $presentation->getStringId()),
+            [
+                'business_card' => [
+                    'email1' => 'invalid-email',
+                    '_token' => $token,
+                ],
+            ]
+        );
+
+        self::assertResponseIsSuccessful();
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertCount(0, $presentation->getOtherComponents()->getComponents('business_cards'));
+    }
+
+    public function testAddLogoCreatesLogo(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/add-logo', $presentation->getStringId()),
+            ['logo' => ['_token' => $token]],
+            ['logo' => ['logoFile' => ['file' => $this->createUploadedImage()]]]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+        self::assertStringContainsString(
+            sprintf('/%s#logo-struct-container', $presentation->getStringId()),
+            (string) $client->getResponse()->headers->get('Location')
+        );
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertNotEmpty($presentation->getLogo());
+
+        $logoPath = sprintf(
+            '%s/public/media/uploads/pp/logos/%s',
+            (string) $client->getContainer()->getParameter('kernel.project_dir'),
+            $presentation->getLogo()
+        );
+        self::assertFileExists($logoPath);
+
+        if (is_file($logoPath)) {
+            unlink($logoPath);
+        }
+    }
+
+    public function testUpdateLogoUpdatesLogo(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $presentation->setLogo('old-logo.png');
+        $em->flush();
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+
+        $client->request(
+            'POST',
+            sprintf('/project/%s/update/logo', $presentation->getStringId()),
+            ['logo' => ['_token' => $token]],
+            ['logo' => ['logoFile' => ['file' => $this->createUploadedImage()]]]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+        self::assertStringContainsString(
+            sprintf('/%s', $presentation->getStringId()),
+            (string) $client->getResponse()->headers->get('Location')
+        );
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertNotEmpty($presentation->getLogo());
+        self::assertNotSame('old-logo.png', $presentation->getLogo());
+
+        $logoPath = sprintf(
+            '%s/public/media/uploads/pp/logos/%s',
+            (string) $client->getContainer()->getParameter('kernel.project_dir'),
+            $presentation->getLogo()
+        );
+        self::assertFileExists($logoPath);
+
+        if (is_file($logoPath)) {
+            unlink($logoPath);
+        }
+    }
+
+    public function testEditThumbnailUpdatesCustomThumbnail(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/edit/thumbnail', $presentation->getStringId()),
+            ['thumbnail' => ['_token' => $token]],
+            ['thumbnail' => ['customThumbnailFile' => ['file' => $this->createUploadedImage()]]]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+        self::assertStringContainsString(
+            sprintf('/%s', $presentation->getStringId()),
+            (string) $client->getResponse()->headers->get('Location')
+        );
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertNotEmpty($presentation->getCustomThumbnail());
+
+        $thumbnailPath = sprintf(
+            '%s/public/media/uploads/pp/custom_thumbnails/%s',
+            (string) $client->getContainer()->getParameter('kernel.project_dir'),
+            $presentation->getCustomThumbnail()
+        );
+        self::assertFileExists($thumbnailPath);
+
+        if (is_file($thumbnailPath)) {
+            unlink($thumbnailPath);
+        }
+    }
+
+    public function testUpdateCategoriesKeywordsPersists(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $categoryA = (new Category())
+            ->setUniqueName('energy')
+            ->setLabel('Energy');
+        $categoryB = (new Category())
+            ->setUniqueName('climate')
+            ->setLabel('Climate');
+
+        $em->persist($categoryA);
+        $em->persist($categoryB);
+        $em->flush();
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/categories-keywords', $presentation->getStringId()),
+            [
+                'categories_keywords' => [
+                    'categories' => ['energy', 'climate'],
+                    'keywords' => 'solar, reuse',
+                    '_token' => $token,
+                ],
+            ]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertSame('solar, reuse', $presentation->getKeywords());
+
+        $categoryNames = [];
+        foreach ($presentation->getCategories() as $category) {
+            $categoryNames[] = $category->getUniqueName();
+        }
+
+        sort($categoryNames);
+        self::assertSame(['climate', 'energy'], $categoryNames);
+    }
+
+    public function testUpdateCategoriesKeywordsRejectsInvalidCategory(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $categoryA = (new Category())
+            ->setUniqueName('energy')
+            ->setLabel('Energy');
+
+        $em->persist($categoryA);
+        $em->flush();
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $presentation->addCategory($categoryA);
+        $presentation->setKeywords('initial keywords');
+        $em->flush();
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/categories-keywords', $presentation->getStringId()),
+            [
+                'categories_keywords' => [
+                    'categories' => ['invalid-category'],
+                    'keywords' => 'updated keywords',
+                    '_token' => $token,
+                ],
+            ]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertSame('initial keywords', $presentation->getKeywords());
+
+        $categoryNames = [];
+        foreach ($presentation->getCategories() as $category) {
+            $categoryNames[] = $category->getUniqueName();
+        }
+
+        self::assertSame(['energy'], $categoryNames);
+    }
+
+    public function testUpdateBusinessCardUpdatesComponent(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $component = BusinessCardComponent::createNew();
+        $component->setTitle('Initial Name');
+        $component->setEmail1('initial@example.com');
+
+        $otherComponents = $presentation->getOtherComponents();
+        $otherComponents->addComponent('business_cards', $component);
+        $presentation->setOtherComponents($otherComponents);
+        $em->flush();
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/business-cards/%s', $presentation->getStringId(), $component->getId()),
+            [
+                'business_card' => [
+                    'title' => 'Updated Name',
+                    'email1' => 'updated@example.com',
+                    'tel1' => '+33 6 12 34 56 78',
+                    'website1' => 'https://example.com',
+                    'website2' => 'https://linkedin.com/in/example',
+                    'postalMail' => '1 Rue de Test, 75000 Paris',
+                    'remarks' => 'Updated note',
+                    '_token' => $token,
+                ],
+            ]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+        self::assertStringContainsString(
+            sprintf('/%s#businessCards', $presentation->getStringId()),
+            (string) $client->getResponse()->headers->get('Location')
+        );
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        $cards = $presentation->getOtherComponents()->getComponents('business_cards');
+        $updated = null;
+        foreach ($cards as $card) {
+            if ($card->getId() === $component->getId()) {
+                $updated = $card;
+                break;
+            }
+        }
+
+        self::assertNotNull($updated);
+        self::assertSame('Updated Name', $updated?->getTitle());
+        self::assertSame('updated@example.com', $updated?->getEmail1());
+        self::assertSame('https://example.com', $updated?->getWebsite1());
+    }
+
+    public function testUpdateBusinessCardRejectsInvalidEmail(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $component = BusinessCardComponent::createNew();
+        $component->setTitle('Initial Name');
+        $component->setEmail1('initial@example.com');
+
+        $otherComponents = $presentation->getOtherComponents();
+        $otherComponents->addComponent('business_cards', $component);
+        $presentation->setOtherComponents($otherComponents);
+        $em->flush();
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/business-cards/%s', $presentation->getStringId(), $component->getId()),
+            [
+                'business_card' => [
+                    'email1' => 'invalid-email',
+                    '_token' => $token,
+                ],
+            ]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+        self::assertStringContainsString(
+            sprintf('/%s#businessCards', $presentation->getStringId()),
+            (string) $client->getResponse()->headers->get('Location')
+        );
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        $cards = $presentation->getOtherComponents()->getComponents('business_cards');
+        $updated = null;
+        foreach ($cards as $card) {
+            if ($card->getId() === $component->getId()) {
+                $updated = $card;
+                break;
+            }
+        }
+
+        self::assertNotNull($updated);
+        self::assertSame('initial@example.com', $updated?->getEmail1());
     }
 
     public function testAddDocumentRejectsMissingFile(): void
@@ -512,6 +975,69 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         self::assertSame(1, $positions[(string) $documentA->getId()] ?? null);
     }
 
+    public function testUpdateSlideRedirectsToImageEditor(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $slide = $this->createSlide($em, $presentation, 0, SlideType::IMAGE);
+
+        $client->loginUser($owner);
+        $client->request(
+            'GET',
+            sprintf('/projects/%s/slides/update/%s', $presentation->getStringId(), (string) $slide->getId())
+        );
+
+        self::assertResponseStatusCodeSame(302);
+        self::assertStringContainsString(
+            sprintf('/projects/%s/slide/update-image/%s', $presentation->getStringId(), (string) $slide->getId()),
+            (string) $client->getResponse()->headers->get('Location')
+        );
+    }
+
+    public function testUpdateSlideRedirectsToVideoEditor(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $slide = $this->createSlide($em, $presentation, 0, SlideType::YOUTUBE_VIDEO);
+
+        $client->loginUser($owner);
+        $client->request(
+            'GET',
+            sprintf('/projects/%s/slides/update/%s', $presentation->getStringId(), (string) $slide->getId())
+        );
+
+        self::assertResponseStatusCodeSame(302);
+        self::assertStringContainsString(
+            sprintf('/projects/%s/slides/edit-youtube-video/%s', $presentation->getStringId(), (string) $slide->getId()),
+            (string) $client->getResponse()->headers->get('Location')
+        );
+    }
+
+    public function testUpdateSlideRejectsSlideFromDifferentPresentation(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $otherPresentation = $this->createProject($em, $owner);
+        $slide = $this->createSlide($em, $otherPresentation, 0, SlideType::IMAGE);
+
+        $client->loginUser($owner);
+        $client->request(
+            'GET',
+            sprintf('/projects/%s/slides/update/%s', $presentation->getStringId(), (string) $slide->getId())
+        );
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
     public function testUpdateImageSlideUpdatesImage(): void
     {
         $client = static::createClient();
@@ -579,6 +1105,46 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         self::assertSame('Nouvelle video', $updatedSlide?->getCaption());
     }
 
+    public function testUpdateVideoSlideRejectsInvalidUrl(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $slide = $this->createSlide($em, $presentation, 0, SlideType::YOUTUBE_VIDEO);
+        $slide->setYoutubeUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+        $em->flush();
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/slides/edit-youtube-video/%s', $presentation->getStringId(), (string) $slide->getId()),
+            [
+                'video_slide' => [
+                    'youtubeUrl' => 'invalid',
+                    '_token' => $token,
+                ],
+            ]
+        );
+
+        self::assertResponseIsSuccessful();
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        $updatedSlide = null;
+        foreach ($presentation->getSlides() as $existing) {
+            if ($existing->getId() === $slide->getId()) {
+                $updatedSlide = $existing;
+                break;
+            }
+        }
+
+        self::assertNotNull($updatedSlide);
+        self::assertSame('https://www.youtube.com/watch?v=dQw4w9WgXcQ', $updatedSlide?->getYoutubeUrl());
+    }
+
     public function testUpdateDocumentUpdatesTitle(): void
     {
         $client = static::createClient();
@@ -606,6 +1172,32 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         $presentation = $this->fetchPresentation($client, $presentation->getStringId());
         $updatedDocument = $presentation->getDocuments()->first();
         self::assertSame('Document mis a jour', $updatedDocument?->getTitle());
+    }
+
+    public function testUpdateDocumentRejectsInvalidTitle(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $document = $this->createDocument($em, $presentation);
+        $originalTitle = $document->getTitle();
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/documents/%s', (string) $document->getId()),
+            ['document' => ['title' => 'a', '_token' => $token]]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        $updatedDocument = $presentation->getDocuments()->first();
+        self::assertSame($originalTitle, $updatedDocument?->getTitle());
     }
 
     public function testAddImageSlideIsForbiddenForNonOwner(): void
@@ -680,6 +1272,134 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         self::assertCount(0, $presentation->getNews());
     }
 
+    public function testUpdateCategoriesKeywordsIsForbiddenForNonOwner(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $viewer = $this->createUser($em);
+
+        $client->loginUser($viewer);
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/categories-keywords', $presentation->getStringId())
+        );
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testAddLogoIsForbiddenForNonOwner(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $viewer = $this->createUser($em);
+
+        $client->loginUser($viewer);
+        $client->request('POST', sprintf('/projects/%s/add-logo', $presentation->getStringId()));
+
+        self::assertResponseStatusCodeSame(403);
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertNull($presentation->getLogo());
+    }
+
+    public function testUpdateLogoIsForbiddenForNonOwner(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $presentation->setLogo('old-logo.png');
+        $em->flush();
+        $viewer = $this->createUser($em);
+
+        $client->loginUser($viewer);
+        $client->request('GET', sprintf('/project/%s/update/logo', $presentation->getStringId()));
+
+        self::assertResponseStatusCodeSame(403);
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertSame('old-logo.png', $presentation->getLogo());
+    }
+
+    public function testAddWebsiteIsForbiddenForNonOwner(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $viewer = $this->createUser($em);
+
+        $client->loginUser($viewer);
+        $client->request('POST', sprintf('/projects/%s/add-website', $presentation->getStringId()));
+
+        self::assertResponseStatusCodeSame(403);
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertCount(0, $presentation->getOtherComponents()->getComponents('websites'));
+    }
+
+    public function testAddQuestionAnswerIsForbiddenForNonOwner(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $viewer = $this->createUser($em);
+
+        $client->loginUser($viewer);
+        $client->request('POST', sprintf('/projects/%s/add-question-answer', $presentation->getStringId()));
+
+        self::assertResponseStatusCodeSame(403);
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertCount(0, $presentation->getOtherComponents()->getComponents('questions_answers'));
+    }
+
+    public function testAddBusinessCardIsForbiddenForNonOwner(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $viewer = $this->createUser($em);
+
+        $client->loginUser($viewer);
+        $client->request('POST', sprintf('/projects/%s/add-business-card', $presentation->getStringId()));
+
+        self::assertResponseStatusCodeSame(403);
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertCount(0, $presentation->getOtherComponents()->getComponents('business_cards'));
+    }
+
+    public function testEditThumbnailIsForbiddenForNonOwner(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $viewer = $this->createUser($em);
+
+        $client->loginUser($viewer);
+        $client->request(
+            'GET',
+            sprintf('/projects/%s/edit/thumbnail', $presentation->getStringId())
+        );
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
     public function testUpdateSlideIsForbiddenForNonOwner(): void
     {
         $client = static::createClient();
@@ -694,6 +1414,30 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         $client->request(
             'GET',
             sprintf('/projects/%s/slides/update/%s', $presentation->getStringId(), (string) $slide->getId())
+        );
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testUpdateBusinessCardIsForbiddenForNonOwner(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+        $viewer = $this->createUser($em);
+
+        $component = BusinessCardComponent::createNew();
+        $otherComponents = $presentation->getOtherComponents();
+        $otherComponents->addComponent('business_cards', $component);
+        $presentation->setOtherComponents($otherComponents);
+        $em->flush();
+
+        $client->loginUser($viewer);
+        $client->request(
+            'GET',
+            sprintf('/projects/%s/business-cards/%s', $presentation->getStringId(), $component->getId())
         );
 
         self::assertResponseStatusCodeSame(403);

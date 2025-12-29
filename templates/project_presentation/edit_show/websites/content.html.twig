@@ -13,6 +13,17 @@
 
         <button data-bs-toggle="modal" data-bs-target="#newWebsiteFormModal" class="pp-edition-mode plus-btn btn btn-light btn-sm me-3"><span class="plus-sign">+</span></button>
 
+        {% if countWebsites == 0 %}
+
+            <button
+                type="button"
+                class="pp-edition-mode pp-info-tooltip"
+                title="Si vous utilisez déjà un site web ou des réseaux sociaux pour parler de votre projet ou faire progresser votre projet, ajoutez-les ici. Exemples de sites web : site vitrine, blog, boutique en ligne, page de collecte de fonds. Exemples de réseaux sociaux : Facebook, Twitter, Instagram, LinkedIn, TikTok, YouTube. Autres exemples : Github, Discord, Trello."
+                aria-label="Vous utilisez déjà un site web ou des réseaux sociaux pour votre projet ? Ajoutez-les ici."
+            >i</button>
+
+        {% endif %}
+
     {% endblock %}
 
     {% block deleteElementsButtons %}
@@ -33,115 +44,7 @@
             data-structure="websites"
         >
 
-            {% if countWebsites == 0 %}
-
-                <div class="cta container" data-bs-toggle="modal" data-bs-target="#newWebsiteFormModal">
-                    
-                    <div class="row disabled">
-                        
-                        <div class="col-2 present-websites-img-cta">
-
-                            <img id="" class="no-websites" src="{{ asset('no_websites.png', 'pp_wysiwyg')}}"  alt="A radio transmitter antenna with waves.">
-
-                        
-                        </div>
-
-                        <div class="col-10 present-websites-text-cta">
-
-                            <div class="text-container">Vous utilisez déjà un site web ou des réseaux sociaux pour votre projet ? Ajoutez-les ici.</div>
-                        
-                        </div>
-                    
-                    </div>
-                
-                </div>          
-                
-                <style>
-
-                    #websites{
-
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                    }
-
-                    #websites .cta{
-
-                        cursor: pointer;
-                        margin-bottom: 25px;
-
-                    }
-
-                    .present-websites-text-cta{
-                        display: flex;
-                        align-items: center;
-                        font-weight: bold;
-                    }
-
-                    .present-websites-text-cta .text-container {
-                        padding: 5px 10px;
-                        border-radius: 5px;
-                        color: #5d87ac;
-                        background-color: #f1f3ff;
-                        border: 1px solid;
-                    }
-
-                    .present-websites-img-cta{
-
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                        padding: 0;
-                        padding-left: 5px;
-                    }
-                                    
-                    img.no-websites {
-                        max-width: 80px;
-                        border-radius: 4px;
-                    }
-
-                    @media screen and (max-width: 580px) {
-
-                        #websites .cta{
-
-                           padding: 15px 10px;
-                           margin-bottom: 10px;
-                           background-color: #f1f3ff;
-                           border-radius: 6px;
-                           
-                        }
-
-                        .present-websites-text-cta{
-                            padding-right: 0;
-                        }
-
-                        .present-websites-text-cta .text-container {
-                            padding: unset;
-                            border: none;
-                            color: #296429;
-                            background-color: unset;
-                            line-height: 1.2;
-                            font-size: 14px;
-                        }
-
-                        .present-websites-img-cta{
-
-                            padding: 0;
-                            padding-left: 5px;
-                        }
-
-                        img.no-websites {
-                            max-width: 100%;
-                            padding: 0;
-                        }
-
-                    }
-                
-                </style>
-
-            {% else %}
+            {% if countWebsites > 0 %}
                 
                 {% set websites = presentation.getOtherComponents().getComponents('websites') %}
 

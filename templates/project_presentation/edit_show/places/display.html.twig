@@ -15,6 +15,17 @@
             <img class="edit-icon" src="{{ asset('edit.svg', 'pp_wysiwyg')}}" height="17" width="17" alt="edit icon" >
         </button>
 
+        {% if countPlaces == 0 %}
+
+            <button
+                type="button"
+                class="pp-edition-mode pp-info-tooltip"
+                title="Si votre projet est relié à des villes ou d'autres lieux (régions; pays; etc.), signalez-les ici."
+                aria-label="Si votre projet est relié à des villes ou d'autres lieux (régions; pays; etc.), signalez-les ici."
+            >i</button>
+
+        {% endif %}
+
     {% endblock %}
 
     {% block deleteElementsButtons %}
@@ -35,85 +46,7 @@
             data-structure="places"
         >
 
-            {% if countPlaces == 0 %}
-
-                <div
-                    class="pp-edition-mode places-cta-trigger"
-                    role="button"
-                    tabindex="0"
-                    data-bs-toggle="modal"
-                    data-bs-target="#managePlacesModal"
-                >
-                    <div class="cta container">
-                        <div class="row disabled">
-                            <div class="col-12 present-places-text-cta">
-                                <div class="text-container">Si votre projet est relié à des villes ou d'autres lieux (régions; pays; etc.), signalez-les ici.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <style>
-
-                    #places{
-
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                    }
-
-                    #places .cta{
-
-                        cursor: pointer;
-                        margin-bottom: 25px;
-
-                    }
-
-                    .present-places-text-cta{
-                        display: flex;
-                        align-items: center;
-                        font-weight: bold;
-                    }
-
-                    .present-places-text-cta .text-container {
-                        padding: 5px 10px;
-                        border-radius: 5px;
-                        color: var(--theme-title);
-                        background-color: var(--theme-surface-alt);
-                        border: 1px solid var(--theme-accent);
-                    }
-
-                    @media screen and (max-width: 580px) {
-
-                        #places .cta{
-
-                           padding: 15px 10px;
-                           margin-bottom: 10px;
-                           background-color: var(--theme-surface-alt);
-                           border-radius: 6px;
-                           
-                        }
-
-                        .present-places-text-cta{
-                            padding-right: 0;
-                        }
-
-                        .present-places-text-cta .text-container {
-                            padding: unset;
-                            border: none;
-                            color: var(--theme-title);
-                            background-color: unset;
-                            line-height: 1.2;
-                            font-size: 14px;
-                        }
-
-                    }
-                
-                </style>
-            
-
-            {% else %}
+            {% if countPlaces > 0 %}
 
                 {% for place in presentation.places %}
 
@@ -275,10 +208,6 @@
                         flex-direction: column;
                         justify-content: center;
 
-                    }
-
-                    .places-cta-trigger {
-                        cursor: pointer;
                     }
 
                     .place-card{

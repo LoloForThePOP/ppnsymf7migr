@@ -49,6 +49,7 @@ class Slide
         fileNameProperty: 'imagePath',
         mimeType: 'mimeType'
     )]
+    #[Assert\NotNull(groups: ['file_required'], message: 'Veuillez choisir une image.')]
     #[Assert\Image(
         maxSize: '4500k',
         maxSizeMessage: 'Poids maximal accepté : {{ limit }} {{ suffix }}.',

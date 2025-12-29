@@ -17,6 +17,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class AddVideoSlideController extends AbstractController
 {
+    use EditShowContextTrait;
+
     #[Route(
         '/projects/{stringId}/add-video-slide',
         name: 'pp_add_video_slide',
@@ -37,10 +39,12 @@ final class AddVideoSlideController extends AbstractController
         $form->handleRequest($request);
 
         if (!$form->isSubmitted() || !$form->isValid()) {
-            return $this->render('project_presentation/edit_show/origin.html.twig', [
-                'presentation'      => $presentation,
-                'addVideoSlideForm' => $form->createView(),
-            ]);
+            return $this->render(
+                'project_presentation/edit_show/origin.html.twig',
+                $this->buildEditShowContext($presentation, [
+                    'addVideoSlideForm' => $form,
+                ])
+            );
         }
 
         $videoSlide->setPosition($presentation->getSlides()->count());

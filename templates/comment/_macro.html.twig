@@ -1,6 +1,6 @@
-{% macro oneCommentContainer(commentedEntityType, commentedEntityId, comment, parentCommentId, showRepliedUserName) %}
+{% macro oneCommentContainer(commentedEntityType, commentedEntityId, comment, parentCommentId, showRepliedUserName = false, showEdit = true, showReport = false, idPrefix = 'comment') %}
     
-    <div id="comment-{{comment.id}}" class="oneCommentContainer {% if app.user and app.user == comment.creator %}activeUserAuthor{% endif %}">
+    <div id="{{ idPrefix }}-{{ comment.id }}" class="oneCommentContainer {% if app.user and app.user == comment.creator %}activeUserAuthor{% endif %}" data-comment-id="{{ comment.id }}">
 
         <!-- Comment Header -->
         <div class="errors"></div>
@@ -58,9 +58,15 @@
 
             <!-- Edit Comment Access -->
 
-            {% if is_granted('update', comment) %}
+            {% if showEdit and is_granted('update', comment) %}
 
                 <a class="me-2" href="{{ path('update_comment', {'id': comment.id} ) }}">Modifier</a>
+
+            {% endif %}
+
+            {% if showReport %}
+
+                <a class="me-2" href="{{ path('contact_us', {'context': 'report_abuse', 'item': 'comment', 'identifier': comment.id }) }}">Signaler</a>
 
             {% endif %}
 

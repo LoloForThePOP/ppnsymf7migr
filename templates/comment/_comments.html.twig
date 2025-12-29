@@ -8,14 +8,101 @@ To use this template, we need access to those variables :
 
 #}
 
-{% from 'comment/_macro.html.twig' import oneCommentContainer, commentForm %}
+{% import 'comment/_macro.html.twig' as commentMacros %}
 
 
 {% set countCommentedEntityComments = commentedEntityComments | length %}
 
-<h3 class="commentSectionTitle">{{countCommentedEntityComments}} Commentaire{% if countCommentedEntityComments > 1 %}s{% endif %} </h3>
+{% set manageAllowed = commentedEntityType == 'projectPresentation' and (userPresenter | default(false) or userAdmin | default(false)) %}
+{% set manageModalId = 'manage-comments-modal-' ~ commentedEntityType ~ '-' ~ commentedEntityId %}
 
-{{ commentForm(commentedEntityType, commentedEntityId) }}
+<div class="commentSectionHeader d-flex align-items-center justify-content-between mb-3">
+
+    <h3 class="commentSectionTitle mb-0">{{countCommentedEntityComments}} Commentaire{% if countCommentedEntityComments > 1 %}s{% endif %} </h3>
+
+    {% if manageAllowed %}
+
+        <button
+            type="button"
+            class="pp-edition-mode btn btn-light btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#{{ manageModalId }}"
+        >Gérer</button>
+
+    {% endif %}
+
+</div>
+
+{% if manageAllowed %}
+
+    {% embed "utilities/modal_skeleton.html.twig" with {'modal_id': manageModalId, 'modal_size': "modal-lg modal-dialog-scrollable"} %}
+
+        {% block modalTitle %}
+            <h5 class="modal-title">Gérer les commentaires ({{ countCommentedEntityComments }})</h5>
+        {% endblock %}
+
+        {% block modalBody %}
+            {% import 'comment/_macro.html.twig' as commentMacros %}
+
+            {% if countCommentedEntityComments == 0 %}
+
+                <p class="text-muted mb-0">Aucun commentaire pour le moment.</p>
+
+            {% else %}
+
+                {% for comment in commentedEntityComments | reverse %}
+
+                    {% if comment.getParent is null %} {# we display only parent comments (and then its potential child) #}
+
+                        <article class="threadContainer">
+
+                            {{ commentMacros.oneCommentContainer(
+                                commentedEntityType=commentedEntityType,
+                                commentedEntityId=commentedEntityId,
+                                comment=comment,
+                                parentCommentId=comment.id,
+                                showEdit=false,
+                                showReport=true,
+                                idPrefix='comment-manage'
+                            ) }}
+
+                            {% if comment.replies | length > 0 %}
+
+                                <div class="commentRepliesContainer">
+
+                                    {% for subComment in comment.replies %}
+
+                                        {{ commentMacros.oneCommentContainer(
+                                            commentedEntityType=commentedEntityType,
+                                            commentedEntityId=commentedEntityId,
+                                            comment=subComment,
+                                            parentCommentId=comment.id,
+                                            showEdit=false,
+                                            showReport=true,
+                                            idPrefix='comment-manage'
+                                        ) }}
+
+                                    {% endfor %}
+
+                                </div>
+
+                            {% endif %}
+
+                        </article>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            {% endif %}
+
+        {% endblock %}
+
+    {% endembed %}
+
+{% endif %}
+
+{{ commentMacros.commentForm(commentedEntityType, commentedEntityId) }}
 
 {# Comments display loop #}
 
@@ -27,7 +114,7 @@ To use this template, we need access to those variables :
 
         <article class="threadContainer">
 
-            {{ oneCommentContainer(commentedEntityType, commentedEntityId, comment, comment.id) }}
+            {{ commentMacros.oneCommentContainer(commentedEntityType, commentedEntityId, comment, comment.id) }}
 
             <!-- Maybe Some Comment Childs -->
 
@@ -39,7 +126,7 @@ To use this template, we need access to those variables :
 
                     {% for subComment in comment.replies %}
 
-                        {{ oneCommentContainer(commentedEntityType, commentedEntityId, subComment, comment.id) }}
+                        {{ commentMacros.oneCommentContainer(commentedEntityType, commentedEntityId, subComment, comment.id) }}
 
                     {% endfor %}
                 

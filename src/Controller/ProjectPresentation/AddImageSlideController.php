@@ -16,6 +16,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class AddImageSlideController extends AbstractController
 {
+    use EditShowContextTrait;
+
     #[Route(
         '/projects/{stringId}/add-image-slide',
         name: 'pp_add_image_slide',
@@ -32,14 +34,18 @@ final class AddImageSlideController extends AbstractController
         $imageSlide = new Slide();
         $imageSlide->setType(SlideType::IMAGE);
 
-        $form = $this->createForm(ImageSlideType::class, $imageSlide);
+        $form = $this->createForm(ImageSlideType::class, $imageSlide, [
+            'validation_groups' => ['Default', 'file_required'],
+        ]);
         $form->handleRequest($request);
 
         if (!$form->isSubmitted() || !$form->isValid()) {
-            return $this->render('project_presentation/edit_show/origin.html.twig', [
-                'presentation'      => $presentation,
-                'addImageSlideForm' => $form->createView(),
-            ]);
+            return $this->render(
+                'project_presentation/edit_show/origin.html.twig',
+                $this->buildEditShowContext($presentation, [
+                    'addImageSlideForm' => $form,
+                ])
+            );
         }
 
         $imageSlide->setPosition($presentation->getSlides()->count());

@@ -349,9 +349,7 @@
 
                 <div class="col-lg-6 pp-struct-container-wrapper">
 
-                    {% set hasComments = countComments > 0 %}
-
-                    <div id="comments-struct-container" class="pp-struct-container{{ hasComments ? ' is-expanded' : '' }}" {% if hasComments %}data-pp-default-expanded="true"{% endif %}>
+                    <div id="comments-struct-container" class="pp-struct-container is-expanded" data-pp-default-expanded="true" data-pp-collapse="disabled">
 
                         {% include "comment/_comments.html.twig" with {commentedEntityType: "projectPresentation", commentedEntityId: presentation.id, commentedEntityComments: presentation.comments } %}
 

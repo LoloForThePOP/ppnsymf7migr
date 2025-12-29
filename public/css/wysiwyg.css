@@ -121,6 +121,35 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .plus-bt
     padding-bottom: 1px;
 }
 
+.pp-info-tooltip {
+    margin-bottom: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid #b0d7b5;
+    background-color: #e2f6e1;
+    color: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: help;
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info-tooltip {
+    background-color: var(--theme-surface-alt);
+    border-color: var(--theme-accent);
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info-tooltip:hover,
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info-tooltip:focus {
+    background-color: var(--theme-surface);
+}
+
 
 
 

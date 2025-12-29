@@ -16,6 +16,8 @@ class QuestionAnswerType extends AbstractType
         $builder
             ->add('question', TextType::class, [
                 'label' => 'Question',
+                'required' => true,
+                'empty_data' => '',
                 'attr' => [
                     'placeholder' => 'Composez votre question...',
                     'maxlength' => 2500,
@@ -23,6 +25,8 @@ class QuestionAnswerType extends AbstractType
             ])
             ->add('answer', TextareaType::class, [
                 'label' => 'Réponse',
+                'required' => true,
+                'empty_data' => '',
                 'attr' => [
                     'placeholder' => 'Votre réponse…',
                     'rows' => 8,

@@ -43,6 +43,12 @@
             $(".pp-container .pp-struct-container").each(function() {
                 var $container = $(this);
                 var $toggle = $container.children(".pp-struct-toggle");
+                var collapseDisabled = $container.data("ppCollapse") === "disabled";
+
+                if (collapseDisabled) {
+                    $toggle.remove();
+                    return;
+                }
                 var shouldHaveToggle = containerHasContent($container);
 
                 if (!shouldHaveToggle) {

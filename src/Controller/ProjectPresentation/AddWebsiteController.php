@@ -15,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class AddWebsiteController extends AbstractController
 {
+    use EditShowContextTrait;
 
 #[Route(
     '/projects/{stringId}/add-website',
@@ -41,10 +42,12 @@ public function addWebsite(
 
     // invalid form resend it
     if ($form->isSubmitted() && !$form->isValid()) {
-        return $this->render('project_presentation/edit_show/origin.html.twig', [
-            'presentation' => $presentation,
-            'addWebsiteForm' => $form->createView(),
-        ]);
+        return $this->render(
+            'project_presentation/edit_show/origin.html.twig',
+            $this->buildEditShowContext($presentation, [
+                'addWebsiteForm' => $form,
+            ])
+        );
     }
 
 

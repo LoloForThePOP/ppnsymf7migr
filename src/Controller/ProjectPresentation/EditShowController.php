@@ -24,6 +24,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class EditShowController extends AbstractController
 {
+    use EditShowContextTrait;
+
     #[Route(
         '/{stringId}',
         name: 'edit_show_project_presentation',
@@ -37,51 +39,11 @@ class EditShowController extends AbstractController
     ): Response
     {
 
-        if($this->isGranted('edit', $presentation)){
-
-            $addLogoForm = $this->createForm(LogoType::class, $presentation);
-            $addWebsiteForm = $this->createForm(WebsiteType::class);
-            $addQuestionAnswerForm = $this->createForm(QuestionAnswerType::class);
-            $addImageSlideForm = $this->createForm(ImageSlideType::class);
-            $addVideoSlideForm = $this->createForm(VideoSlideType::class);
-            $addNewsForm = $this->createForm(
-                NewsType::class,
-                new News(),
-                [
-                    'action' => $this->generateUrl('pp_create_news', [
-                        'stringId' => $presentation->getStringId(),
-                    ]),
-                    'method' => 'POST',
-                ]
+        if ($this->isGranted('edit', $presentation)) {
+            return $this->render(
+                'project_presentation/edit_show/origin.html.twig',
+                $this->buildEditShowContext($presentation)
             );
-            $addNewsForm->get('presentationId')->setData($presentation->getId());
-            $textDescriptionForm = $this->createForm(TextDescriptionType::class, $presentation);
-            $categoriesKeywordsForm = $this->createForm(
-                CategoriesKeywordsType::class,
-                $presentation,
-                ['validation_groups' => ['CategoriesKeywords']]
-            );
-            $addDocumentForm = $this->createForm(DocumentType::class);
-            $addBusinessCardForm = $this->createForm(BusinessCardType::class);
-            
-
-            return $this->render('project_presentation/edit_show/origin.html.twig', [
-                'presentation' => $presentation,
-                'userPresenter' => true, //flaging whether user can edit presentation
-                'userAdmin' => $this->isGranted('ROLE_ADMIN'), //flagging whether user is an admin
-                'addLogoForm' => $addLogoForm->createView(),
-                'addWebsiteForm' => $addWebsiteForm->createView(),
-                'addQuestionAnswerForm' => $addQuestionAnswerForm->createView(),
-                'addImageSlideForm' => $addImageSlideForm->createView(),
-                'addVideoSlideForm' => $addVideoSlideForm->createView(),
-                'addNewsForm' => $addNewsForm->createView(),
-                'textDescriptionForm' => $textDescriptionForm->createView(),
-                'categoriesKeywordsForm' => $categoriesKeywordsForm->createView(),
-                'addDocumentForm' => $addDocumentForm->createView(),
-                'addBusinessCardForm' => $addBusinessCardForm->createView(),
-
-            ]);
-
         }
 
         // Count a view once per session
