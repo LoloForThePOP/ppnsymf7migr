@@ -5,6 +5,7 @@ namespace App\Service;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class ImageDownloader
 {
@@ -23,15 +24,11 @@ class ImageDownloader
             return null;
         }
 
-        if (!$this->urlSafetyChecker->isAllowed($url)) {
-            return null;
-        }
-
         try {
-            $response = $this->httpClient->request('GET', $url, [
-                'timeout' => 10,
-                'max_redirects' => 3,
-            ]);
+            $response = $this->requestWithSafeRedirects($url);
+            if ($response === null) {
+                return null;
+            }
 
             $status = $response->getStatusCode();
             if ($status < 200 || $status >= 300) {
@@ -76,5 +73,77 @@ class ImageDownloader
         } catch (TransportExceptionInterface) {
             return null;
         }
+    }
+
+    private function requestWithSafeRedirects(string $url, int $maxRedirects = 3): ?ResponseInterface
+    {
+        $currentUrl = $url;
+
+        for ($i = 0; $i <= $maxRedirects; $i++) {
+            if (!$this->urlSafetyChecker->isAllowed($currentUrl)) {
+                return null;
+            }
+
+            $response = $this->httpClient->request('GET', $currentUrl, [
+                'timeout' => 10,
+                'max_redirects' => 0,
+            ]);
+
+            $status = $response->getStatusCode();
+            if ($status >= 300 && $status < 400) {
+                $headers = $response->getHeaders(false);
+                $location = $headers['location'][0] ?? null;
+                if (!is_string($location) || $location === '') {
+                    return null;
+                }
+
+                $resolved = $this->resolveRedirectUrl($location, $currentUrl);
+                if ($resolved === null) {
+                    return null;
+                }
+
+                $currentUrl = $resolved;
+                continue;
+            }
+
+            return $response;
+        }
+
+        return null;
+    }
+
+    private function resolveRedirectUrl(string $location, string $baseUrl): ?string
+    {
+        $location = trim($location);
+        if ($location === '') {
+            return null;
+        }
+
+        if (preg_match('#^https?://#i', $location)) {
+            return $location;
+        }
+
+        $base = parse_url($baseUrl);
+        if ($base === false || empty($base['host'])) {
+            return null;
+        }
+
+        if (str_starts_with($location, '//')) {
+            $scheme = $base['scheme'] ?? 'https';
+            return $scheme . ':' . $location;
+        }
+
+        $scheme = $base['scheme'] ?? 'https';
+        $host = $base['host'];
+        $port = isset($base['port']) ? ':' . $base['port'] : '';
+
+        if (str_starts_with($location, '/')) {
+            return sprintf('%s://%s%s%s', $scheme, $host, $port, $location);
+        }
+
+        $path = $base['path'] ?? '/';
+        $dir = rtrim(dirname($path), '/\\');
+
+        return sprintf('%s://%s%s/%s', $scheme, $host, $port, ltrim($dir . '/' . $location, '/'));
     }
 }

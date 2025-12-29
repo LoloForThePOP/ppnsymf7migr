@@ -34,26 +34,17 @@
 
         {# Notification to user copntainer #}
 
-        <div class="container px-0 px-md-3 my-4">
-        
-            {# Notification to user #}
+        <div class="status-editor container px-0 px-md-4 py-3">
 
-            <div class="status-box-global-info alert alert-info d-flex justify-content-center align-items-center fw-bold ps-3 pe-2" role="alert">
-                <div class="sm-fs-6 fs-5">
-
+            <div class="status-editor__intro">
+                <div class="status-editor__intro-text">
                     Sélectionnez les boutons qui correspondent à votre situation.
-
                 </div>
-
             </div>
-
-        </div>
-
-        <div class="container px-2 mt-4">
 
             {# User can choose some enumerated status types #}
 
-            <div id="project-statuses-editor" class="d-flex flex-column flex-lg-row justify-content-around px-2 mb-2" data-update-url="{{ path('ajax_project_statuses_update', { stringId: presentation.stringId }) }}"
+            <div id="project-statuses-editor" class="status-editor__grid" data-update-url="{{ path('ajax_project_statuses_update', { stringId: presentation.stringId }) }}"
                 data-csrf-token="{{ csrf_token('project_statuses_update') }}"
 >
 
@@ -66,7 +57,7 @@
                     <h5 class="category-title" data-bs-toggle="collapse" href="#category-{{uniqueCategoryName}}">
                         
                         {{ statusCategory.categoryLabels.description_fr }}
-                        &nbsp;▾
+                        <span class="category-title-chevron">▾</span>
                     
                     </h5>
 
@@ -84,7 +75,7 @@
                                     rounded-pill
                                     list-group-item 
                                     list-group-item-action 
-                                    py-3
+                                    py-2
                                     mb-3
 
                                 " 
@@ -114,28 +105,26 @@
 
             {# User can add some infos and remarks #}
 
-            <div class="textarea-container d-flex flex-column align-items-center p-4 mb-5">
+            <div class="status-editor__footer mt-4">
 
-                <label for="status-remarks-textarea" class="form-label fw-bold">Ici vous pouvez ajouter des précisions ou des détails sur l'avancement du projet :</label>
+                <div class="textarea-container status-editor__remarks d-flex flex-column align-items-center p-4">
 
-                <textarea 
-                
-                    id="status-remarks-textarea"
-                    class="form-control"
-                    rows="3"
-                    placeholder="Ajoutez des précisions sur l'avancement...">{{ presentation.statusRemarks }}</textarea>
+                    <label for="status-remarks-textarea" class="form-label fw-bold">Ici vous pouvez ajouter des précisions ou des détails sur l'avancement du projet :</label>
 
-                <small class="text-muted d-none" id="remarks-feedback"></small>
+                    <textarea 
+                    
+                        id="status-remarks-textarea"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Ajoutez des précisions sur l'avancement...">{{ presentation.statusRemarks }}</textarea>
 
-            </div>
+                    <small class="text-muted d-none" id="remarks-feedback"></small>
 
-        </div>
+                </div>
 
-        <div class="d-flex flex-row-reverse border-top pt-3">
-
-            <div class="me-5">
-
-                <button type="button" class="btn btn-validate px-2 my-3 me-5" data-bs-dismiss="modal">Ok</button>
+                <div class="status-editor__actions">
+                    <button type="button" class="btn btn-light status-editor__confirm px-4 py-2" data-bs-dismiss="modal">Ok</button>
+                </div>
 
             </div>
 
@@ -159,23 +148,69 @@
     
 <style>
 
-    .status-box-global-info{
-        background-color: #f2fdff;
-        color: 
+    #project_status_edition .modal-content {
+        background-color: var(--theme-bg);
+        color: var(--theme-text);
+    }
+
+    #project_status_edition .modal-header {
+        border-bottom: 1px solid var(--theme-border);
+    }
+
+    #project_status_edition .modal-title {
+        color: var(--theme-title);
+    }
+
+    #project_status_edition .modal-title img {
+        display: inline-block;
+    }
+
+    html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #project_status_edition .modal-title img {
+        filter: brightness(0) saturate(100%) var(--theme-icon-filter);
+    }
+
+    .status-editor {
+        max-width: 1200px;
+    }
+
+    .status-editor__intro {
+        border-radius: 16px;
+        border: 1px solid var(--theme-border);
+        background-color: var(--theme-surface-alt);
+        background-image: linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--theme-accent) 12%, transparent),
+            transparent
+        );
+        padding: 16px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 24px;
+    }
+
+    .status-editor__intro-text {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--theme-text);
+    }
+
+    .status-editor__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
     }
 
     .status-type-list-container{
 
-        min-width: 250px;
-        min-height: 390px;
-        margin-right: 1rem;
-        margin-bottom: 1rem;
-
-    }
-
-    .status-type-list-container:last-of-type{
-
-        margin-right: 0;
+        min-width: 240px;
+        min-height: 360px;
+        padding: 14px 14px 10px;
+        border-radius: 16px;
+        border: 1px solid var(--theme-border);
+        background-color: var(--theme-surface);
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
 
     }
 
@@ -185,36 +220,66 @@
         align-items: center;
         justify-content: center;
 
-        font-size: 1.10rem;
+        font-size: 1rem;
 
         text-align: center;
         
-        height: 63px;
+        min-height: 52px;
 
-        padding: 0 8px;
-        margin-bottom: 20px;
-        border-radius: 50px;
+        padding: 8px 12px;
+        margin-bottom: 16px;
+        border-radius: 999px;
 
         font-weight: bold;
-        
-        background-color:beige; 
+        color: var(--theme-title);
+        border: 1px solid var(--theme-border);
+        background-color: var(--theme-surface-alt);
         cursor:pointer;
+        gap: 8px;
 
     }
 
     .status-type-list-container .category-title:hover {
-        background-color: #bcd7ff;
+        border-color: var(--theme-accent);
+        color: var(--theme-accent);
+        background-color: var(--theme-surface-alt);
+        background-image: linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--theme-accent) 12%, transparent),
+            transparent
+        );
+    }
+
+    .category-title-chevron {
+        font-weight: 700;
+        opacity: 0.7;
+    }
+
+    .status-type-list-container .list-group {
+        border: none;
+        padding: 0;
+        margin: 0;
+        background: transparent;
     }
 
     .project-status-button{
         cursor: pointer;
-        font-size: 17px;
+        font-size: 0.98rem;
         line-height: 1.15;
         background-color: var(--theme-surface-alt);
         color: var(--theme-text);
         border-color: var(--theme-border);
         display: flex;
         align-items: center;
+        justify-content: center;
+        text-align: center;
+        transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+    }
+
+    .project-status-button:hover {
+        background-color: var(--theme-surface);
+        border-color: var(--theme-accent);
+        color: var(--theme-accent);
     }
 
     .status-hover{
@@ -225,7 +290,12 @@
     .project-status-button.list-group-item-action.active {
         color: var(--theme-text);
         z-index: 2;
-        background-color: var(--theme-surface);
+        background-color: var(--theme-surface-alt);
+        background-image: linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--theme-accent) 18%, transparent),
+            transparent
+        );
         border-color: var(--theme-accent);
         box-shadow: 0 0 0 1px var(--theme-accent);
     }
@@ -238,10 +308,62 @@
 
 
     #project_status_edition .textarea-container {
-        background-color: #e5fdd5;
-        border-radius: 35px;
+        width: 100%;
+        max-width: 860px;
+        border: 1px solid var(--theme-border);
+        background-color: var(--theme-surface-alt);
+        border-radius: 18px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     }
 
+    #project_status_edition #status-remarks-textarea {
+        border-color: var(--theme-border);
+        background-color: var(--theme-surface);
+        color: var(--theme-text);
+    }
+
+    #project_status_edition #status-remarks-textarea::placeholder {
+        color: var(--theme-text-muted);
+    }
+
+    #project_status_edition .status-editor__footer {
+        display: flex;
+        gap: 24px;
+        align-items: stretch;
+    }
+
+    #project_status_edition .status-editor__remarks {
+        flex: 1 1 auto;
+    }
+
+    #project_status_edition .status-editor__actions {
+        min-width: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #project_status_edition .status-editor__confirm {
+        border-radius: 14px;
+        border: 1px solid var(--theme-border);
+        background-color: var(--theme-surface-alt);
+        color: var(--theme-text);
+        font-weight: 600;
+        box-shadow: none;
+    }
+
+    #project_status_edition .status-editor__confirm:hover,
+    #project_status_edition .status-editor__confirm:focus {
+        background-color: var(--theme-surface);
+        border-color: var(--theme-border);
+        color: var(--theme-text);
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--theme-border) 80%, transparent);
+    }
+
+    #project_status_edition .status-editor__confirm:focus-visible {
+        outline: 2px solid color-mix(in srgb, var(--theme-accent) 35%, var(--theme-border));
+        outline-offset: 2px;
+    }
 
 
 
@@ -255,17 +377,24 @@
 
 
         .status-type-list-container{
-
             min-height: unset;
-            margin-right: 0rem;
-
         }
 
         .status-type-list-container .category-title {
-
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
+    }
+
+    @media screen and (max-width: 992px) {
+        #project_status_edition .status-editor__footer {
+            flex-direction: column;
+        }
+
+        #project_status_edition .status-editor__actions {
+            min-width: unset;
+            justify-content: flex-end;
+        }
     }
 
 </style>

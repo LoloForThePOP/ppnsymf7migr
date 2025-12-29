@@ -5,9 +5,11 @@ namespace App\Controller\ProjectPresentation;
 use App\Service\AssessPPScoreService;
 use App\Service\LiveSavePP;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -18,7 +20,8 @@ class LiveSaveController extends AbstractController
     public function ajaxPPLiveSave(
         LiveSavePP $liveSave,
         AssessPPScoreService $scoreService,
-        Request $request
+        Request $request,
+        #[Autowire(service: 'limiter.live_save_user')] RateLimiterFactory $liveSaveLimiter,
     ): JsonResponse {
         if (!$request->isXmlHttpRequest()) {
             return $this->json(['error' => 'Requête invalide.'], Response::HTTP_BAD_REQUEST);
@@ -26,6 +29,12 @@ class LiveSaveController extends AbstractController
 
         if (!$this->isCsrfTokenValid('live_save_pp', (string) $request->request->get('_token'))) {
             return $this->json(['error' => 'Jeton CSRF invalide.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $userKey = $this->getUser()?->getUserIdentifier() ?? (string) $request->getClientIp();
+        $limit = $liveSaveLimiter->create($userKey)->consume(1);
+        if (!$limit->isAccepted()) {
+            return $this->json(['error' => 'Trop de requêtes. Veuillez réessayer plus tard.'], Response::HTTP_TOO_MANY_REQUESTS);
         }
 
         // Keep malformed payloads out early to avoid propagating undefined indexes later.

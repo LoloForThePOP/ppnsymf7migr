@@ -93,21 +93,44 @@ class ImageCandidateFetcher
 
     private function fetchHtml(string $url): ?string
     {
-        if (!$this->urlSafetyChecker->isAllowed($url)) {
-            return null;
-        }
+        $currentUrl = $url;
 
-        try {
-            $response = $this->httpClient->request('GET', $url, [
-                'timeout' => 10,
-                'max_redirects' => 3,
-                'headers' => [
-                    /* 'User-Agent' => 'ProponImageBot/1.0 (+https://propon.org)',*/
-                    'User-Agent' => 'TestImageBot/1.0 (+localhost)',
-                ],
-            ]);
+        for ($i = 0; $i <= 3; $i++) {
+            if (!$this->urlSafetyChecker->isAllowed($currentUrl)) {
+                return null;
+            }
+
+            try {
+                $response = $this->httpClient->request('GET', $currentUrl, [
+                    'timeout' => 10,
+                    'max_redirects' => 0,
+                    'headers' => [
+                        /* 'User-Agent' => 'ProponImageBot/1.0 (+https://propon.org)',*/
+                        'User-Agent' => 'TestImageBot/1.0 (+localhost)',
+                    ],
+                ]);
+            } catch (TransportExceptionInterface) {
+                return null;
+            }
 
             $status = $response->getStatusCode();
+            if ($status >= 300 && $status < 400) {
+                $headers = $response->getHeaders(false);
+                $location = $headers['location'][0] ?? null;
+                if (!is_string($location) || $location === '') {
+                    return null;
+                }
+
+                $base = parse_url($currentUrl) ?: false;
+                $resolved = $this->resolveUrl($location, $base);
+                if ($resolved === null) {
+                    return null;
+                }
+
+                $currentUrl = $resolved;
+                continue;
+            }
+
             if ($status < 200 || $status >= 300) {
                 return null;
             }
@@ -118,9 +141,9 @@ class ImageCandidateFetcher
             }
 
             return $response->getContent(false);
-        } catch (TransportExceptionInterface) {
-            return null;
         }
+
+        return null;
     }
 
     /**

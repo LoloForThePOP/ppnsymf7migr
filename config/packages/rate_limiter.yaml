@@ -1,5 +1,33 @@
 framework:
     rate_limiter:
+        comment_create_user:
+            policy: 'sliding_window'
+            limit: 20
+            interval: '10 minutes'
+        comment_create_ip:
+            policy: 'sliding_window'
+            limit: 60
+            interval: '10 minutes'
+        follow_toggle_user:
+            policy: 'sliding_window'
+            limit: 120
+            interval: '1 minute'
+        like_toggle_user:
+            policy: 'sliding_window'
+            limit: 120
+            interval: '1 minute'
+        live_save_user:
+            policy: 'sliding_window'
+            limit: 600
+            interval: '1 minute'
+        article_image_upload_user:
+            policy: 'sliding_window'
+            limit: 20
+            interval: '1 hour'
+        article_image_upload_ip:
+            policy: 'sliding_window'
+            limit: 60
+            interval: '1 hour'
         verify_email_resend_ip:
             policy: 'sliding_window'
             limit: 10

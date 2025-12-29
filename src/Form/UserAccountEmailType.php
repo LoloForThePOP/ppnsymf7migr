@@ -2,10 +2,7 @@
 
 namespace App\Form;
 
-use Assert\Email;
-use Assert\Length;
 use App\Entity\User;
-use Assert\NotBlank;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -23,9 +20,9 @@ class UserAccountEmailType extends AbstractType
                 'label' => 'Votre adresse e-mail',
                 'attr' => ['placeholder' => 'Écrire ici'],
                 'constraints' => [
-                    new Assert\NotBlank(['message' => 'L\'adresse e-mail ne peut être vide.']),
-                    new Assert\Email(['message' => 'Veuillez entrer une adresse e-mail valide.']),
-                    new Assert\Length(['max' => 180]),
+                    new Assert\NotBlank(message: 'L\'adresse e-mail ne peut être vide.'),
+                    new Assert\Email(message: 'Veuillez entrer une adresse e-mail valide.'),
+                    new Assert\Length(max: 180),
                 ],
             ])
         ;

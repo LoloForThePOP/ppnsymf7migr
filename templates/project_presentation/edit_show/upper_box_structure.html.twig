@@ -112,6 +112,14 @@
         
                     </div>
 
+                    {% if userPresenter %}
+
+                        <div class="d-none d-md-block">
+                            {% include 'project_presentation/edit_show/statuses/edit_button.html.twig' %}
+                        </div>
+
+                    {% endif %}
+
                     {# Goal Display #}
         
                     <div class="">
@@ -153,19 +161,25 @@
             
             {# Project status or progression Edition Icon - only Small Screens #}
             <div class="mt-3">
-            
-                {% include 'project_presentation/edit_show/statuses/edit_button.html.twig' %}
 
                 {{ _self.EditPresentationThumbnail(presentation.stringId) }}
-                
+
             </div>
+
+            {% if userPresenter %}
+
+                <div class="mt-3">
+                    {% include 'project_presentation/edit_show/statuses/edit_button.html.twig' %}
+                </div>
+
+            {% endif %}
             
         </div>
 
 
         {# Project comments, likes, share - only Small Screens #}
 
-        <div class="d-flex justify-content-center mt-0 mt-lg-2 d-lg-none">
+        <div class="pp-consultation-mode d-flex justify-content-center mt-0 mt-lg-2 d-lg-none">
         
             <div class="d-flex justify-content-center align-items-center">
             
@@ -203,16 +217,8 @@
 
     {# Right column (only >= lg screens) #}
 
-    <div class="right-col-md container col-lg-3 d-none d-lg-flex flex-column">
+    <div class="right-col-md container col-lg-3 d-none d-lg-flex flex-column pp-consultation-mode">
         
-        {# Project status or progression icon in edition mode #}
-
-        {% if userPresenter %}
-
-            {% include 'project_presentation/edit_show/statuses/edit_button.html.twig' %}
-
-       {% endif %} 
-
         {# Project Likes & Share button #}
 
         <div class="d-flex align-items-center px-2 pt-2 pb-0 pt-lg-0 pb-lg-3 mb-lg-3" style="border: none; border-bottom: 1px solid #ddddb1;">
@@ -270,11 +276,11 @@
 
 <style>
 
-    {# In Edition Mode we reduce left col width because their is a news form proxy in the upper box #}
+    {# In Edition Mode we keep left col full width because the right column is hidden #}
 
     .in-edition-mode .left-col-md {
 
-        width: 50%;
+        width: 100%;
     }
 
     .middle-col-md{

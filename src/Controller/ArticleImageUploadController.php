@@ -8,10 +8,12 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 
 /**
  * Lightweight endpoint used by TinyMCE to upload inline images for articles.
@@ -19,7 +21,13 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 class ArticleImageUploadController extends AbstractController
 {
     #[Route('/articles/upload-image', name: 'upload_image', methods: ['POST'])]
-    public function __invoke(Request $request, Filesystem $fs, SessionInterface $session): Response
+    public function __invoke(
+        Request $request,
+        Filesystem $fs,
+        SessionInterface $session,
+        #[Autowire(service: 'limiter.article_image_upload_user')] RateLimiterFactory $userLimiter,
+        #[Autowire(service: 'limiter.article_image_upload_ip')] RateLimiterFactory $ipLimiter,
+    ): Response
     {
         if (!$this->isGranted('ROLE_USER')) {
             throw new AccessDeniedHttpException();
@@ -27,6 +35,18 @@ class ArticleImageUploadController extends AbstractController
 
         if (!$this->isCsrfTokenValid('tinymce_image_upload', (string) $request->request->get('_token'))) {
             return new JsonResponse(['message' => 'CSRF Denied'], Response::HTTP_FORBIDDEN);
+        }
+
+        $userKey = $this->getUser()?->getUserIdentifier() ?? (string) $request->getClientIp();
+        $userLimit = $userLimiter->create($userKey)->consume(1);
+        if (!$userLimit->isAccepted()) {
+            return new JsonResponse(['message' => 'Trop de requêtes. Veuillez réessayer plus tard.'], Response::HTTP_TOO_MANY_REQUESTS);
+        }
+
+        $ipKey = $request->getClientIp() ?? 'unknown';
+        $ipLimit = $ipLimiter->create($ipKey)->consume(1);
+        if (!$ipLimit->isAccepted()) {
+            return new JsonResponse(['message' => 'Trop de requêtes. Veuillez réessayer plus tard.'], Response::HTTP_TOO_MANY_REQUESTS);
         }
 
         // Basic same-origin guard for TinyMCE uploads

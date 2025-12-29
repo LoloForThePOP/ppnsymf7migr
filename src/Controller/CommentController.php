@@ -13,10 +13,12 @@ use App\Repository\CommentRepository;
 use App\Repository\NewsRepository;
 use App\Repository\PPBaseRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class CommentController extends AbstractController
@@ -28,6 +30,8 @@ class CommentController extends AbstractController
         EntityManagerInterface $manager,
         PPBaseRepository $ppRepo,
         NewsRepository $newsRepo,
+        #[Autowire(service: 'limiter.comment_create_user')] RateLimiterFactory $commentUserLimiter,
+        #[Autowire(service: 'limiter.comment_create_ip')] RateLimiterFactory $commentIpLimiter,
         CommentService $commentService,
         NotificationService $notificationService
     ): Response
@@ -40,6 +44,24 @@ class CommentController extends AbstractController
                 return new JsonResponse(
                     ['error' => 'Jeton CSRF invalide.'],
                     Response::HTTP_FORBIDDEN,
+                );
+            }
+
+            $userKey = $this->getUser()?->getUserIdentifier() ?? (string) $request->getClientIp();
+            $userLimit = $commentUserLimiter->create($userKey)->consume(1);
+            if (!$userLimit->isAccepted()) {
+                return new JsonResponse(
+                    ['error' => 'Trop de requêtes. Veuillez réessayer plus tard.'],
+                    Response::HTTP_TOO_MANY_REQUESTS
+                );
+            }
+
+            $ipKey = $request->getClientIp() ?? 'unknown';
+            $ipLimit = $commentIpLimiter->create($ipKey)->consume(1);
+            if (!$ipLimit->isAccepted()) {
+                return new JsonResponse(
+                    ['error' => 'Trop de requêtes. Veuillez réessayer plus tard.'],
+                    Response::HTTP_TOO_MANY_REQUESTS
                 );
             }
 

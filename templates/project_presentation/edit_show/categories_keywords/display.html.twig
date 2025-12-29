@@ -4,17 +4,11 @@
 
     <div id="pp-categories-keywords" class="edit-hoverable-item text-left d-inline" >
 
-        {% if userPresenter %}
-            <button class="btn btn-sm btn-outline-secondary align-middle pp-edition-mode" type="button" data-bs-toggle="modal" data-bs-target="#categoriesKeywordsModal">
-                Modifier les catégories/mots-clés
-            </button>
-        {% endif %}
-
         {% if hasKeywords %}
 
             <!-- Project Keywords Display -->
 
-            <span id="pp-keywords" class="pp-consultation-mode">
+            <span id="pp-keywords">
 
                 {% if hasKeywords %}
                     
@@ -45,7 +39,7 @@
 
         {% if countCategories > 0 %}
 
-            <div id="pp-categories" class="pp-consultation-mode">
+            <div id="pp-categories">
 
                 <div id="categories-dropdown" data-bs-toggle="dropdown" aria-expanded="false" class="" type="button">
 
@@ -133,7 +127,7 @@
         {% if userPresenter %} {# Edit Project Categories & Keywords covering link#}
  
         
-            <a class="pp-edition-mode coverable-link" href="#" data-bs-toggle="modal" data-bs-target="#categoriesKeywordsModal"></a> 
+            <a class="pp-edition-mode coverable-link" href="#" data-bs-toggle="modal" data-bs-target="#categoriesKeywordsModal" aria-label="Modifier les catégories et mots-clés"></a> 
         {% endif %}
 
     </div>

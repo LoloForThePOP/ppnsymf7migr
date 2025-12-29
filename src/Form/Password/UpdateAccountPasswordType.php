@@ -34,15 +34,13 @@ final class UpdateAccountPasswordType extends AbstractType
                         'autocomplete' => 'new-password',
                     ],
                     'constraints' => [
-                        new NotBlank([
-                            'message' => 'Ce champ ne peut être vide',
-                        ]),
-                        new Length([
-                            'min' => 8,
-                            'max' => 250,
-                            'minMessage' => 'Votre mot de passe doit comporter au moins {{ limit }} caractères.',
-                            'maxMessage' => 'Votre mot de passe ne peut pas dépasser {{ limit }} caractères.',
-                        ]),
+                        new NotBlank(message: 'Ce champ ne peut être vide'),
+                        new Length(
+                            min: 8,
+                            max: 250,
+                            minMessage: 'Votre mot de passe doit comporter au moins {{ limit }} caractères.',
+                            maxMessage: 'Votre mot de passe ne peut pas dépasser {{ limit }} caractères.'
+                        ),
                     ],
                 ],
                 'second_options' => [

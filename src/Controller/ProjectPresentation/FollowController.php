@@ -6,11 +6,13 @@ use App\Entity\Follow;
 use App\Entity\PPBase;
 use App\Repository\FollowRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -25,7 +27,8 @@ class FollowController extends AbstractController
         Request $request,
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         EntityManagerInterface $manager,
-        FollowRepository $followRepo
+        FollowRepository $followRepo,
+        #[Autowire(service: 'limiter.follow_toggle_user')] RateLimiterFactory $followLimiter,
     ): JsonResponse {
 
         $user = $this->getUser();
@@ -42,6 +45,13 @@ class FollowController extends AbstractController
             return new JsonResponse([
                 'error' => 'Invalid CSRF token',
             ], Response::HTTP_FORBIDDEN);
+        }
+
+        $limit = $followLimiter->create($user->getUserIdentifier())->consume(1);
+        if (!$limit->isAccepted()) {
+            return new JsonResponse([
+                'error' => 'Trop de requêtes. Veuillez réessayer plus tard.',
+            ], Response::HTTP_TOO_MANY_REQUESTS);
         }
 
         // Check follow status

@@ -63,20 +63,6 @@
             });
         }
 
-        function setupGlobalToggle() {
-            if (!$ppContainer.length || $ppContainer.children(".pp-struct-expand-toggle-container").length) {
-                return;
-            }
-
-            var $toggleContainer = $('<div class="pp-struct-expand-toggle-container"><button type="button" class="pp-struct-expand-toggle" aria-pressed="false">Tout afficher</button></div>');
-            var $upperBox = $ppContainer.children(".pp-upper-box").first();
-
-            if ($upperBox.length) {
-                $toggleContainer.insertAfter($upperBox);
-            } else {
-                $ppContainer.prepend($toggleContainer);
-            }
-        }
 
         function getDefaultExpanded($container) {
             var defaultExpanded = $container.data("ppDefaultExpanded");
@@ -102,22 +88,6 @@
             }
         }
 
-        function updateGlobalToggleState() {
-            var $toggleButton = $(".pp-struct-expand-toggle");
-            var $containers = $(".pp-container .pp-struct-container").has(".pp-struct-toggle");
-
-            if (!$toggleButton.length || !$containers.length) {
-                return;
-            }
-
-            var expandedCount = $containers.filter(".is-expanded").length;
-            var allExpanded = expandedCount === $containers.length;
-
-            $toggleButton
-                .toggleClass("is-all-expanded", allExpanded)
-                .attr("aria-pressed", allExpanded ? "true" : "false")
-                .text(allExpanded ? "Réduire tout" : "Tout afficher");
-        }
 
         function applyStructCollapseState(isEditMode, forceExpanded) {
             $(".pp-container .pp-struct-container").each(function() {
@@ -140,11 +110,9 @@
                 setStructExpanded($container, shouldExpand);
             });
 
-            updateGlobalToggleState();
         }
 
         setupStructCollapse();
-        setupGlobalToggle();
         applyStructCollapseState($ppContainer.hasClass("in-edition-mode"));
 
         $(document).on("click", ".pp-struct-toggle", function(e) {
@@ -158,20 +126,6 @@
             var isExpanded = !$container.hasClass("is-expanded");
 
             setStructExpanded($container, isExpanded);
-            updateGlobalToggleState();
-        });
-
-        $(document).on("click", ".pp-struct-expand-toggle", function(e) {
-            if (!$ppContainer.hasClass("in-edition-mode")) {
-                return;
-            }
-
-            e.preventDefault();
-
-            var $containers = $(".pp-container .pp-struct-container").has(".pp-struct-toggle");
-            var allExpanded = $containers.length && $containers.filter(".is-expanded").length === $containers.length;
-
-            applyStructCollapseState(true, !allExpanded);
         });
 
             

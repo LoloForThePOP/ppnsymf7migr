@@ -4,12 +4,14 @@ namespace App\Controller\Admin;
 
 use App\Service\WebpageContentExtractor;
 use App\Service\NormalizedProjectPersister;
+use App\Service\UrlSafetyChecker;
 use OpenAI;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/project/harvest-urls', name: 'admin_project_harvest_urls', methods: ['GET', 'POST'])]
@@ -21,6 +23,7 @@ final class UrlHarvestController extends AbstractController
         HttpClientInterface $httpClient,
         WebpageContentExtractor $extractor,
         NormalizedProjectPersister $persister,
+        UrlSafetyChecker $urlSafetyChecker,
         string $appNormalizeHtmlPromptPath,
         string $appScraperModel,
         int $defaultCreatorId
@@ -42,11 +45,11 @@ final class UrlHarvestController extends AbstractController
                 foreach ($urls as $url) {
                     $entry = ['url' => $url];
                     try {
-                        $response = $httpClient->request('GET', $url, ['timeout' => 10]);
-                        if (200 !== $response->getStatusCode()) {
-                            throw new \RuntimeException(sprintf('Status HTTP %d', $response->getStatusCode()));
+                        $fetch = $this->fetchHtmlWithSafeRedirects($httpClient, $urlSafetyChecker, $url);
+                        if ($fetch['error'] !== null) {
+                            throw new \RuntimeException($fetch['error']);
                         }
-                        $html = $response->getContent();
+                        $html = $fetch['html'] ?? '';
                         $extracted = $extractor->extract($html);
 
                         $userContent = "URL: {$url}\n\n### TEXT\n{$extracted['text']}\n\n### LINKS\n" . implode("\n", $extracted['links']) . "\n\n### IMAGES\n" . implode("\n", $extracted['images']);
@@ -86,5 +89,92 @@ final class UrlHarvestController extends AbstractController
             'persist' => $persist,
             'results' => $results,
         ]);
+    }
+
+    /**
+     * @return array{html: ?string, error: ?string}
+     */
+    private function fetchHtmlWithSafeRedirects(
+        HttpClientInterface $httpClient,
+        UrlSafetyChecker $urlSafetyChecker,
+        string $url,
+        int $maxRedirects = 3
+    ): array {
+        $currentUrl = $url;
+
+        for ($i = 0; $i <= $maxRedirects; $i++) {
+            if (!$urlSafetyChecker->isAllowed($currentUrl)) {
+                return ['html' => null, 'error' => 'URL non autorisée.'];
+            }
+
+            try {
+                $response = $httpClient->request('GET', $currentUrl, [
+                    'timeout' => 10,
+                    'max_redirects' => 0,
+                ]);
+            } catch (TransportExceptionInterface) {
+                return ['html' => null, 'error' => 'Erreur réseau.'];
+            }
+
+            $status = $response->getStatusCode();
+            if ($status >= 300 && $status < 400) {
+                $headers = $response->getHeaders(false);
+                $location = $headers['location'][0] ?? null;
+                if (!is_string($location) || $location === '') {
+                    return ['html' => null, 'error' => 'Redirection invalide.'];
+                }
+
+                $resolved = $this->resolveRedirectUrl($location, $currentUrl);
+                if ($resolved === null) {
+                    return ['html' => null, 'error' => 'URL de redirection invalide.'];
+                }
+
+                $currentUrl = $resolved;
+                continue;
+            }
+
+            if ($status !== 200) {
+                return ['html' => null, 'error' => sprintf('Status HTTP %d', $status)];
+            }
+
+            return ['html' => $response->getContent(false), 'error' => null];
+        }
+
+        return ['html' => null, 'error' => 'Trop de redirections.'];
+    }
+
+    private function resolveRedirectUrl(string $location, string $baseUrl): ?string
+    {
+        $location = trim($location);
+        if ($location === '') {
+            return null;
+        }
+
+        if (preg_match('#^https?://#i', $location)) {
+            return $location;
+        }
+
+        $base = parse_url($baseUrl);
+        if ($base === false || empty($base['host'])) {
+            return null;
+        }
+
+        if (str_starts_with($location, '//')) {
+            $scheme = $base['scheme'] ?? 'https';
+            return $scheme . ':' . $location;
+        }
+
+        $scheme = $base['scheme'] ?? 'https';
+        $host = $base['host'];
+        $port = isset($base['port']) ? ':' . $base['port'] : '';
+
+        if (str_starts_with($location, '/')) {
+            return sprintf('%s://%s%s%s', $scheme, $host, $port, $location);
+        }
+
+        $path = $base['path'] ?? '/';
+        $dir = rtrim(dirname($path), '/\\');
+
+        return sprintf('%s://%s%s/%s', $scheme, $host, $port, ltrim($dir . '/' . $location, '/'));
     }
 }
