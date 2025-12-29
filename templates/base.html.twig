@@ -240,6 +240,7 @@
         <link href="/css/app.css" rel="stylesheet"> {# General stylesheet for Propon #}
         <link href="/css/search_overlay.css" rel="stylesheet">
         <link href="/css/tinymce_theme.css" rel="stylesheet">
+        <link href="/css/product_tour.css" rel="stylesheet">
 
         {% block stylesheets %}{% endblock %}
 
@@ -256,6 +257,7 @@
         {# Misc js functions like detect if user device is tiny, detect if user is offline... #}
         {# Defines tinyScreen boolean js variable #}
         <script src="/js/misc.js"></script>
+        <script src="/js/product_tour.js" defer></script>
 
 
         {# Cookies and tracking #}
@@ -412,6 +414,29 @@
                         {% block body %}{% endblock %}
                                     
                     </div>
+
+                    {% block product_tour %}{% endblock %}
+
+                    {% if showThemeSelector|default(false) %}
+                        {% set themeTourSteps = [
+                            {
+                                target: '[data-tour=\"theme-selector\"]',
+                                title: 'Personnalisez votre experience',
+                                body: 'Essayez les themes Propon pour adapter l\'interface a votre style.'
+                            }
+                        ] %}
+
+                        {% set themeTour = {
+                            id: 'theme-selector-intro',
+                            version: 'v1',
+                            storage: 'auto',
+                            okLabel: 'Ok',
+                            finishLabel: 'Terminer',
+                            steps: themeTourSteps
+                        } %}
+
+                        {% include "_partials/product_tour.html.twig" with { tour: themeTour } %}
+                    {% endif %}
                     
                 </div>
 

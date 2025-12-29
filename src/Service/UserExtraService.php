@@ -25,6 +25,7 @@ class UserExtraService
         'timezone'          => 'Europe/Paris',   // string
         'dashboard_layout'  => 'default',        // string
         'last_seen_at'      => null,             // \DateTimeInterface|null
+        'product_tours'     => [],               // array<string, string>
     ];
 
     /**
@@ -38,6 +39,7 @@ class UserExtraService
         'timezone'          => 'string',
         'dashboard_layout'  => 'string',
         'last_seen_at'      => 'datetime',
+        'product_tours'     => 'array',
     ];
 
     // -------------------------------------------------------------
@@ -133,6 +135,7 @@ class UserExtraService
             'int'      => is_int($value),
             'float'    => is_float($value),
             'datetime' => $value === null || $value instanceof \DateTimeInterface,
+            'array'    => is_array($value),
             default    => true,
         };
 

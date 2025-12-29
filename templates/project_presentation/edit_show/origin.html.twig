@@ -403,6 +403,34 @@
 
 {% endblock %}
 
+{% block product_tour %}
+    {% if userPresenter %}
+        {% set tourSteps = [
+            {
+                target: '[data-tour="pp-hero"]',
+                title: 'Bienvenue dans l\'edition',
+                body: 'Ici vous modifiez le titre, l\'objectif et le statut du projet. Cliquez directement sur les elements pour les mettre a jour.'
+            },
+            {
+                target: '#pp-switch-edit-consult-mode',
+                title: 'Basculer les modes',
+                body: 'Ce bouton permet d\'alterner entre la modification et la consultation pour verifier le rendu public.'
+            }
+        ] %}
+
+        {% set productTour = {
+            id: 'pp-edit-intro',
+            version: 'v1',
+            storage: 'auto',
+            okLabel: 'Ok',
+            finishLabel: 'Terminer',
+            steps: tourSteps
+        } %}
+
+        {% include "_partials/product_tour.html.twig" with { tour: productTour } %}
+    {% endif %}
+{% endblock %}
+
 {% block javascripts %}
 
     {% include 'project_presentation/edit_show/statuses/javascripts.html.twig' %}

@@ -1,0 +1,27 @@
+{% if tour is defined and tour.steps is defined and tour.steps|length > 0 %}
+    {% set tourId = tour.id|default('tour') %}
+    {% set tourVersion = tour.version|default('v1') %}
+    {% set tourStorage = tour.storage|default('auto') %}
+    {% set okLabel = tour.okLabel|default('Ok') %}
+    {% set finishLabel = tour.finishLabel|default('Terminer') %}
+    {% set isAuthenticated = app.user ? true : false %}
+    {% set storedTours = (app.user and app.user.profile and app.user.profile.extra is iterable) ? (app.user.profile.extra.product_tours|default({})) : {} %}
+    {% set storedVersion = (storedTours is iterable and storedTours[tourId] is defined) ? storedTours[tourId] : null %}
+    {% set serverSeen = isAuthenticated and storedVersion == tourVersion %}
+
+    <div
+        class="js-product-tour"
+        data-tour-id="{{ tourId }}"
+        data-tour-version="{{ tourVersion }}"
+        data-tour-storage="{{ tourStorage }}"
+        data-tour-auth="{{ isAuthenticated ? '1' : '0' }}"
+        data-tour-seen="{{ serverSeen ? '1' : '0' }}"
+        data-tour-ok-label="{{ okLabel }}"
+        data-tour-finish-label="{{ finishLabel }}"
+        {% if isAuthenticated %}
+            data-tour-update-url="{{ path('user_product_tour_update') }}"
+            data-tour-csrf-token="{{ csrf_token('user_product_tour_update') }}"
+        {% endif %}
+        data-tour-steps="{{ tour.steps|json_encode|e('html_attr') }}"
+    ></div>
+{% endif %}
