@@ -5,6 +5,7 @@ namespace App\Controller\ProjectPresentation;
 use App\Entity\PPBase;
 use App\Service\CacheThumbnailService;
 use App\Service\FormHandlerService;
+use App\Service\AssessPPScoreService;
 use App\Form\ProjectPresentation\LogoType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,6 +27,7 @@ final class AddLogoController extends AbstractController
         Request $request,
         FormHandlerService $handler,
         CacheThumbnailService $cacheThumbnailService,
+        AssessPPScoreService $scoreService,
     ): Response {
 
         $this->denyAccessUnlessGranted('edit', $presentation);
@@ -48,6 +50,7 @@ final class AddLogoController extends AbstractController
 
         }
 
+        $scoreService->scoreUpdate($presentation);
         $handler->handle($form, null, persist: false);
         $cacheThumbnailService->updateThumbnail($presentation, true);
 

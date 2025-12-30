@@ -5,6 +5,7 @@ namespace App\Controller\ProjectPresentation;
 use App\Entity\Follow;
 use App\Entity\PPBase;
 use App\Repository\FollowRepository;
+use App\Service\AssessPPScoreService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +29,7 @@ class FollowController extends AbstractController
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         EntityManagerInterface $manager,
         FollowRepository $followRepo,
+        AssessPPScoreService $scoreService,
         #[Autowire(service: 'limiter.follow_toggle_user')] RateLimiterFactory $followLimiter,
     ): JsonResponse {
 
@@ -62,7 +64,9 @@ class FollowController extends AbstractController
 
         if ($existingFollow) {
             // Unfollow
+            $presentation->removeFollower($existingFollow);
             $manager->remove($existingFollow);
+            $scoreService->scoreUpdate($presentation);
             $manager->flush();
 
             return new JsonResponse([
@@ -75,10 +79,11 @@ class FollowController extends AbstractController
 
         // Follow
         $follow = (new Follow())
-            ->setUser($user)
-            ->setProjectPresentation($presentation);
+            ->setUser($user);
 
+        $presentation->addFollower($follow);
         $manager->persist($follow);
+        $scoreService->scoreUpdate($presentation);
         $manager->flush();
 
         return new JsonResponse([

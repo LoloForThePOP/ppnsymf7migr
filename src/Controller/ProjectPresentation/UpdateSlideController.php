@@ -5,6 +5,7 @@ namespace App\Controller\ProjectPresentation;
 use App\Entity\Slide;
 use App\Entity\PPBase;
 use App\Enum\SlideType;
+use App\Service\AssessPPScoreService;
 use App\Service\CacheThumbnailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -68,7 +69,8 @@ class UpdateSlideController extends AbstractController
         #[MapEntity(mapping: ['id_slide' => 'id'])] Slide $slide,
         Request $request,
         EntityManagerInterface $manager,
-        CacheThumbnailService $cacheThumbnailService
+        CacheThumbnailService $cacheThumbnailService,
+        AssessPPScoreService $scoreService,
     ): Response {
         $this->denyAccessUnlessGranted('edit', $presentation);
         $this->assertSlideOwnership($presentation, $slide);
@@ -77,6 +79,7 @@ class UpdateSlideController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $scoreService->scoreUpdate($presentation);
             $manager->flush();
             $cacheThumbnailService->updateThumbnail($presentation, true);
 
@@ -105,7 +108,8 @@ class UpdateSlideController extends AbstractController
         #[MapEntity(mapping: ['id_slide' => 'id'])] Slide $slide,
         Request $request,
         EntityManagerInterface $manager,
-        CacheThumbnailService $cacheThumbnailService
+        CacheThumbnailService $cacheThumbnailService,
+        AssessPPScoreService $scoreService,
     ): Response {
         $this->denyAccessUnlessGranted('edit', $pp);
         $this->assertSlideOwnership($pp, $slide);
@@ -122,6 +126,7 @@ class UpdateSlideController extends AbstractController
 
             // to do: remove if the form is mapped correctly $slide->setYoutubeUrl($form->get('address')->getData());
 
+            $scoreService->scoreUpdate($pp);
             $manager->flush();
             $cacheThumbnailService->updateThumbnail($pp, true);
 

@@ -5,6 +5,7 @@ namespace App\Controller\ProjectPresentation;
 use App\Entity\Slide;
 use App\Entity\PPBase;
 use App\Enum\SlideType;
+use App\Service\AssessPPScoreService;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\ProjectPresentation\ImageSlideType;
 use App\Service\CacheThumbnailService;
@@ -28,6 +29,7 @@ final class AddImageSlideController extends AbstractController
         Request $request,
         EntityManagerInterface $manager,
         CacheThumbnailService $cacheThumbnailService,
+        AssessPPScoreService $scoreService,
     ): Response {
         $this->denyAccessUnlessGranted('edit', $presentation);
 
@@ -50,6 +52,7 @@ final class AddImageSlideController extends AbstractController
 
         $imageSlide->setPosition($presentation->getSlides()->count());
         $presentation->addSlide($imageSlide);
+        $scoreService->scoreUpdate($presentation);
 
         $manager->persist($imageSlide);
         $manager->flush();

@@ -5,6 +5,7 @@ namespace App\Controller\ProjectPresentation;
 use App\Entity\Slide;
 use App\Entity\PPBase;
 use App\Enum\SlideType;
+use App\Service\AssessPPScoreService;
 use App\Service\CacheThumbnailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,6 +30,7 @@ final class AddVideoSlideController extends AbstractController
         Request $request,
         EntityManagerInterface $manager,
         CacheThumbnailService $cacheThumbnailService,
+        AssessPPScoreService $scoreService,
     ): Response {
         $this->denyAccessUnlessGranted('edit', $presentation);
 
@@ -49,13 +51,12 @@ final class AddVideoSlideController extends AbstractController
 
         $videoSlide->setPosition($presentation->getSlides()->count());
         $presentation->addSlide($videoSlide);
+        $scoreService->scoreUpdate($presentation);
 
         $manager->persist($videoSlide);
         $manager->flush();
 
         $cacheThumbnailService->updateThumbnail($presentation, true);
-
-        // TODO integrate AssessQuality services once ready.
 
         $this->addFlash('success', "✅ Image ajoutée");
 

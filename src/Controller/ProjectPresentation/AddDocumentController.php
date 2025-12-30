@@ -5,6 +5,7 @@ namespace App\Controller\ProjectPresentation;
 use App\Entity\Document;
 use App\Entity\PPBase;
 use App\Form\ProjectPresentation\DocumentType;
+use App\Service\AssessPPScoreService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,7 +21,8 @@ class AddDocumentController extends AbstractController
     public function __invoke(
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         Request $request,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        AssessPPScoreService $scoreService,
     ): Response {
         $document = new Document();
         $form = $this->createForm(DocumentType::class, $document);
@@ -37,6 +39,7 @@ class AddDocumentController extends AbstractController
             $document->setPosition($maxPos + 1);
 
             $em->persist($document);
+            $scoreService->scoreUpdate($presentation);
             $em->flush();
 
             $this->addFlash('success', 'Document ajouté.');

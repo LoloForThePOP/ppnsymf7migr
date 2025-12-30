@@ -48,14 +48,13 @@
 
                             <p class="pt-2"><span class="share-accent">Ou copiez son adresse et partagez-là 👇</span></p>
 
-                            {# "Copy link" do not work on mobile so we hide copyable textarea on mobile and we use a simple div instead
+                            {# Check real usage: "Copy link" didn't work on mobile.
 
                             to do: check on mobile if still relevant
 
                             <div class="mb-3">{{ absolute_url(path('edit_show_project_presentation', {"stringId": presentation.stringId})) }}</div> #}
 
                             {# Filled copyable textarea #}
-                            {# to do: remove if not usefull: "displayed for > medium screens" #}
 
                             <textarea id="presentationAbsoluteURL"
                                       class=""

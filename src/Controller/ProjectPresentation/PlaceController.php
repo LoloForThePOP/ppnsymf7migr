@@ -6,6 +6,7 @@ use App\Entity\Place;
 use App\Entity\PPBase;
 use App\Repository\PlaceRepository;
 use App\Entity\Embeddables\GeoPoint;
+use App\Service\AssessPPScoreService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,7 +21,8 @@ class PlaceController extends AbstractController
     public function ajaxNewPlace(
         Request $request,
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        AssessPPScoreService $scoreService,
     ): JsonResponse {
         $this->denyAccessUnlessGranted('edit', $presentation);
 
@@ -55,6 +57,7 @@ class PlaceController extends AbstractController
 
         $presentation->addPlace($newPlace);
         $entityManager->persist($newPlace);
+        $scoreService->scoreUpdate($presentation);
         $entityManager->flush();
 
         return $this->json([
@@ -68,7 +71,8 @@ class PlaceController extends AbstractController
         Request $request,
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         EntityManagerInterface $entityManager,
-        PlaceRepository $placeRepository
+        PlaceRepository $placeRepository,
+        AssessPPScoreService $scoreService,
     ): JsonResponse {
         $this->denyAccessUnlessGranted('edit', $presentation);
 
@@ -92,6 +96,7 @@ class PlaceController extends AbstractController
 
         $presentation->removePlace($place);
         $entityManager->remove($place);
+        $scoreService->scoreUpdate($presentation);
         $entityManager->flush();
 
         return $this->json([

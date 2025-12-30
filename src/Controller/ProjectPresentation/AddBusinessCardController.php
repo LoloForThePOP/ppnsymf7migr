@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Form\ProjectPresentation\BusinessCardType;
 use App\Entity\Embeddables\PPBase\OtherComponentsModels\BusinessCardComponent;
+use App\Service\AssessPPScoreService;
 
 final class AddBusinessCardController extends AbstractController
 {
@@ -25,6 +26,7 @@ final class AddBusinessCardController extends AbstractController
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         Request $request,
         EntityManagerInterface $em,
+        AssessPPScoreService $scoreService,
     ): Response {
         $this->denyAccessUnlessGranted('edit', $presentation);
 
@@ -46,6 +48,7 @@ final class AddBusinessCardController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $presentation->getOtherComponents()->addComponent('business_cards', $businessCard);
+            $scoreService->scoreUpdate($presentation);
             $em->flush();
         }
 

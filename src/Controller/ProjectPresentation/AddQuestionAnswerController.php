@@ -11,6 +11,7 @@ use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use App\Form\ProjectPresentation\QuestionAnswerType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Entity\Embeddables\PPBase\OtherComponentsModels\QuestionAnswerComponent;
+use App\Service\AssessPPScoreService;
 
 final class AddQuestionAnswerController extends AbstractController
 {
@@ -25,6 +26,7 @@ public function addQuestionAnswer(
     #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
     Request $request,
     EntityManagerInterface $em,
+    AssessPPScoreService $scoreService,
 ): Response {
 
     $this->denyAccessUnlessGranted('edit', $presentation);
@@ -54,6 +56,7 @@ public function addQuestionAnswer(
 
         $presentation->getOtherComponents()->addComponent('questions_answers', $questionAnswer);
 
+        $scoreService->scoreUpdate($presentation);
         $em->flush();
 
     }

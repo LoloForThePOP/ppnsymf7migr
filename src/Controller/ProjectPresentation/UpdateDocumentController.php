@@ -4,6 +4,7 @@ namespace App\Controller\ProjectPresentation;
 
 use App\Entity\Document;
 use App\Form\ProjectPresentation\DocumentType;
+use App\Service\AssessPPScoreService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,7 +18,8 @@ class UpdateDocumentController extends AbstractController
     public function __invoke(
         Document $document,
         Request $request,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        AssessPPScoreService $scoreService,
     ): Response {
         $presentation = $document->getProjectPresentation();
         if (!$presentation) {
@@ -31,6 +33,7 @@ class UpdateDocumentController extends AbstractController
 
         if ($form->isSubmitted()) {
             if ($form->isValid()) {
+                $scoreService->scoreUpdate($presentation);
                 $em->flush();
                 $this->addFlash('success', 'Document mis à jour.');
             } else {

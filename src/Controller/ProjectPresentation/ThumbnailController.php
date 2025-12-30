@@ -4,6 +4,7 @@ namespace App\Controller\ProjectPresentation;
 
 use App\Entity\PPBase;
 use App\Service\CacheThumbnailService;
+use App\Service\AssessPPScoreService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,7 +20,8 @@ final class ThumbnailController extends AbstractController
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         Request $request,
         EntityManagerInterface $manager,
-        CacheThumbnailService $cacheThumbnail
+        CacheThumbnailService $cacheThumbnail,
+        AssessPPScoreService $scoreService,
     ): Response
     {
           $this->denyAccessUnlessGranted('edit', $presentation);
@@ -30,6 +32,7 @@ final class ThumbnailController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()){
                              
+            $scoreService->scoreUpdate($presentation);
             $manager->flush();
 
             $cacheThumbnail->updateThumbnail($presentation);

@@ -5,6 +5,7 @@ namespace App\Controller\ProjectPresentation;
 use App\Entity\Like;
 use App\Entity\PPBase;
 use App\Repository\LikeRepository;
+use App\Service\AssessPPScoreService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +29,7 @@ class LikeController extends AbstractController
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         EntityManagerInterface $manager,
         LikeRepository $likeRepo,
+        AssessPPScoreService $scoreService,
         #[Autowire(service: 'limiter.like_toggle_user')] RateLimiterFactory $likeLimiter,
     ): JsonResponse {
 
@@ -62,7 +64,9 @@ class LikeController extends AbstractController
 
         if ($existingLike) {
             // Unlike
+            $presentation->removeLike($existingLike);
             $manager->remove($existingLike);
+            $scoreService->scoreUpdate($presentation);
             $manager->flush();
 
             return new JsonResponse([
@@ -76,10 +80,11 @@ class LikeController extends AbstractController
 
         // Like
         $like = (new Like())
-            ->setUser($user)
-            ->setProjectPresentation($presentation);
+            ->setUser($user);
 
+        $presentation->addLike($like);
         $manager->persist($like);
+        $scoreService->scoreUpdate($presentation);
         $manager->flush();
 
         return new JsonResponse([

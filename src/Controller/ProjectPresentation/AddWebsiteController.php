@@ -12,6 +12,7 @@ use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Service\AssessPPScoreService;
 
 final class AddWebsiteController extends AbstractController
 {
@@ -27,6 +28,7 @@ public function addWebsite(
     Request $request,
     EntityManagerInterface $em,
     WebsiteProcessingService $websiteProcessingService,
+    AssessPPScoreService $scoreService,
 ): Response {
 
     $this->denyAccessUnlessGranted('edit', $presentation);
@@ -57,6 +59,7 @@ public function addWebsite(
 
         $presentation->getOtherComponents()->addComponent('websites', $website);
 
+        $scoreService->scoreUpdate($presentation);
         $em->flush();
 
     }

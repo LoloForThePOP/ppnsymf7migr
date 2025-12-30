@@ -1,5 +1,6 @@
 .news-card {
     position: relative;
+    width: 100%;
     max-width: 430px;
     min-height: 320px;
     max-height: 444px;
@@ -9,6 +10,7 @@
     overflow-x: hidden;
     border: 1px solid #b7babe;
     border-radius: 5px;
+    box-sizing: border-box;
 }
 
 .news-card .upper-box{
@@ -132,6 +134,7 @@ html[data-theme-variant="custom"] .news-card .carousel-control-next {
     border: 1px solid var(--theme-border);
     border-radius: 14px;
     background-color: var(--theme-surface);
+    box-sizing: border-box;
 }
 
 .news-comments-shell .commentForm {
@@ -143,6 +146,21 @@ html[data-theme-variant="custom"] .news-card .carousel-control-next {
     height: 40px !important;
     padding: 7px 10px !important;
     border-radius: 14px;
+}
+
+.news-comments-shell .commentForm .d-flex {
+    max-height: 0;
+    margin-top: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease, opacity 0.2s ease, margin-top 0.2s ease;
+}
+
+.news-comments-shell .commentForm:focus-within .d-flex,
+.news-comments-shell .commentForm.is-filled .d-flex {
+    max-height: 56px;
+    margin-top: 6px;
+    opacity: 1;
 }
 
 .news-comments-trigger {
@@ -160,6 +178,11 @@ html[data-theme-variant="custom"] .news-card .carousel-control-next {
     color: var(--theme-accent);
     text-decoration: underline;
     text-underline-offset: 3px;
+}
+
+.news-comments-count {
+    color: var(--theme-text-muted);
+    font-weight: 600;
 }
 
 .news-comments-drawer {
@@ -324,19 +347,5 @@ body.news-comments-open {
     .news-comments-shell .commentForm:focus-within textarea,
     .news-comments-shell .commentForm.is-filled textarea {
         height: 84px !important;
-    }
-
-    .news-comments-shell .commentForm button[type="submit"] {
-        opacity: 0;
-        pointer-events: none;
-        transform: translateY(-4px);
-        transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-
-    .news-comments-shell .commentForm:focus-within button[type="submit"],
-    .news-comments-shell .commentForm.is-filled button[type="submit"] {
-        opacity: 1;
-        pointer-events: auto;
-        transform: translateY(0);
     }
 }

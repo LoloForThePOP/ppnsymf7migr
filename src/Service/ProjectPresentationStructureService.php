@@ -222,11 +222,10 @@ class ProjectPresentationStructureService
 
     private function afterStructureChange(string $scope, PPBase $presentation): void
     {
-        if ($scope !== 'slides') {
-            return;
-        }
-
-        $this->cacheThumbnail->updateThumbnail($presentation, true);
         $this->scoreService->scoreUpdate($presentation);
+
+        if ($scope === 'slides') {
+            $this->cacheThumbnail->updateThumbnail($presentation, true);
+        }
     }
 }

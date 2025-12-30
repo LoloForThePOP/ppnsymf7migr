@@ -5,6 +5,7 @@ namespace App\Controller\ProjectPresentation;
 use App\Entity\News;
 use App\Entity\PPBase;
 use App\Form\NewsType;
+use App\Service\AssessPPScoreService;
 use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -27,6 +28,7 @@ final class CreateNewsController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         NotificationService $notificationService,
+        AssessPPScoreService $scoreService,
     ): Response {
         $news = new News();
         $form = $this->createForm(NewsType::class, $news);
@@ -55,6 +57,7 @@ final class CreateNewsController extends AbstractController
         $presentation->addNews($news);
 
         $em->persist($news);
+        $scoreService->scoreUpdate($presentation);
         $em->flush();
 
         $notificationService->notifyNewsCreated($news);

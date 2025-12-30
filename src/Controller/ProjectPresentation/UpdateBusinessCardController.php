@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use App\Service\AssessPPScoreService;
 
 final class UpdateBusinessCardController extends AbstractController
 {
@@ -25,6 +26,7 @@ final class UpdateBusinessCardController extends AbstractController
         string $id,
         Request $request,
         EntityManagerInterface $em,
+        AssessPPScoreService $scoreService,
     ): Response {
         $this->denyAccessUnlessGranted('edit', $presentation);
 
@@ -42,6 +44,7 @@ final class UpdateBusinessCardController extends AbstractController
         if ($form->isSubmitted()) {
             if ($form->isValid()) {
                 $presentation->getOtherComponents()->updateComponent('business_cards', $component);
+                $scoreService->scoreUpdate($presentation);
                 $em->flush();
                 $this->addFlash('success', 'Carte de visite mise à jour.');
             } else {

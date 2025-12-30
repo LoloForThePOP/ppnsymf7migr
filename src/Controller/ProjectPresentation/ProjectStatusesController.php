@@ -4,6 +4,7 @@ namespace App\Controller\ProjectPresentation;
 
 use App\Entity\PPBase;
 use App\Enum\ProjectStatuses;
+use App\Service\AssessPPScoreService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -19,7 +20,8 @@ class ProjectStatusesController extends AbstractController
     public function update(
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $project,
         Request $request,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        AssessPPScoreService $scoreService,
     ): JsonResponse {
 
         // Parse JSON payload from JS
@@ -46,6 +48,7 @@ class ProjectStatusesController extends AbstractController
 
         // Update the project entity
         $project->setStatuses($validStatuses);
+        $scoreService->scoreUpdate($project);
         $em->flush();
 
         return new JsonResponse([

@@ -4,6 +4,7 @@ namespace App\Controller\ProjectPresentation;
 
 use App\Entity\PPBase;
 use App\Form\ProjectPresentation\CategoriesKeywordsType;
+use App\Service\AssessPPScoreService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,12 +20,14 @@ class UpdateCategoriesKeywordsController extends AbstractController
     public function __invoke(
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         Request $request,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        AssessPPScoreService $scoreService,
     ): Response {
         $form = $this->createForm(CategoriesKeywordsType::class, $presentation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $scoreService->scoreUpdate($presentation);
             $em->flush();
             $this->addFlash('success', 'Catégories et mots-clés mis à jour.');
         } elseif ($form->isSubmitted()) {

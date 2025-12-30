@@ -6,6 +6,7 @@ use App\Entity\PPBase;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\ProjectPresentation\LogoType;
 use App\Service\CacheThumbnailService;
+use App\Service\AssessPPScoreService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -22,6 +23,7 @@ final class UpdateLogoController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         CacheThumbnailService $cacheThumbnailService,
+        AssessPPScoreService $scoreService,
     ): Response
     {
 
@@ -31,6 +33,7 @@ final class UpdateLogoController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
+            $scoreService->scoreUpdate($presentation);
             $em->flush();
             $cacheThumbnailService->updateThumbnail($presentation, true);
                        
