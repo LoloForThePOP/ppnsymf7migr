@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Supprimer la présentation{% endblock %}
+
+{% block body %}
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <h2 class="mb-3 text-danger">Supprimer la présentation</h2>
+                <p class="text-muted">
+                    Cette action est définitive. Pour confirmer la suppression, tapez
+                    <strong>confirmer</strong> puis validez.
+                </p>
+
+                <form method="post" class="mt-4">
+                    <input type="hidden" name="_token" value="{{ csrf_token('pp_delete_presentation' ~ presentation.stringId) }}">
+
+                    <div class="mb-3">
+                        <label for="pp-delete-confirmation" class="form-label">Confirmer la suppression</label>
+                        <input
+                            id="pp-delete-confirmation"
+                            type="text"
+                            name="confirmation"
+                            class="form-control"
+                            placeholder="confirmer"
+                            required
+                            autocomplete="off"
+                        />
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="submit" class="btn btn-danger">Supprimer définitivement</button>
+                        <a class="btn btn-outline-secondary" href="{{ path('edit_show_project_presentation', {'stringId': presentation.stringId}) }}">
+                            Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

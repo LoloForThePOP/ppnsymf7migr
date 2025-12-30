@@ -33,6 +33,33 @@
         $(".commentForm").after(replyForm);
         $(".replyCommentForm").hide();
 
+        var movePresentationCommentForm = function () {
+            var $ppContainer = $(".pp-container");
+            if ($ppContainer.length === 0) {
+                return;
+            }
+
+            var isEditionMode = $ppContainer.hasClass("in-edition-mode");
+
+            $("[data-comment-form-wrapper]").each(function () {
+                var key = $(this).data("comment-form-wrapper");
+                if (!key) {
+                    return;
+                }
+                var targetSlot = '[data-comment-form-slot="' + key + '"][data-slot="' + (isEditionMode ? "modal" : "inline") + '"]';
+                var $slot = $(targetSlot).first();
+                if ($slot.length) {
+                    $(this).appendTo($slot);
+                }
+            });
+        };
+
+        movePresentationCommentForm();
+
+        $("#pp-switch-edit-consult-mode").on("click", function () {
+            setTimeout(movePresentationCommentForm, 0);
+        });
+
         // when user click on reply to a comment button, we're placing the reply comment form where appropriate
         $(".replyCommentButton ").on( "click", function( event ){
 

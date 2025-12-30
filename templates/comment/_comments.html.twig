@@ -15,8 +15,32 @@ To use this template, we need access to those variables :
 
 {% set manageAllowed = commentedEntityType == 'projectPresentation' and (userPresenter | default(false) or userAdmin | default(false)) %}
 {% set manageModalId = 'manage-comments-modal-' ~ commentedEntityType ~ '-' ~ commentedEntityId %}
+{% set commentFormKey = manageAllowed ? 'comment-form-' ~ commentedEntityType ~ '-' ~ commentedEntityId : '' %}
 
-<div class="commentSectionHeader d-flex align-items-center justify-content-between mb-3">
+{% if manageAllowed %}
+    <div class="pp-edition-mode pp-comments-compact">
+        <div class="pp-struct-title-container">
+            <h3 class="pp-struct-title">
+                <span
+                    class="pp-struct-icon"
+                    style="--pp-struct-icon-url: url('{{ asset('dialog.svg', 'misc') }}');"
+                    role="img"
+                    aria-label="Commentaires"
+                ></span>
+                <span class="me-2">Gérer les commentaires</span>
+            </h3>
+        </div>
+        <button
+            type="button"
+            class="pp-comments-overlay"
+            data-bs-toggle="modal"
+            data-bs-target="#{{ manageModalId }}"
+            aria-label="Gérer les commentaires"
+        ></button>
+    </div>
+{% endif %}
+
+<div class="commentSectionHeader d-flex align-items-center justify-content-between mb-3 pp-consultation-mode">
 
     <h3 class="commentSectionTitle mb-0">{{countCommentedEntityComments}} Commentaire{% if countCommentedEntityComments > 1 %}s{% endif %} </h3>
 
@@ -43,6 +67,8 @@ To use this template, we need access to those variables :
 
         {% block modalBody %}
             {% import 'comment/_macro.html.twig' as commentMacros %}
+
+            <div class="mb-3" data-comment-form-slot="{{ commentFormKey }}" data-slot="modal"></div>
 
             {% if countCommentedEntityComments == 0 %}
 
@@ -102,7 +128,25 @@ To use this template, we need access to those variables :
 
 {% endif %}
 
-{{ commentMacros.commentForm(commentedEntityType, commentedEntityId) }}
+{% if manageAllowed %}
+
+    <div class="pp-consultation-mode">
+
+        <div data-comment-form-slot="{{ commentFormKey }}" data-slot="inline">
+
+            <div class="comment-form-wrapper" data-comment-form-wrapper="{{ commentFormKey }}">
+
+                {{ commentMacros.commentForm(commentedEntityType, commentedEntityId) }}
+
+            </div>
+
+        </div>
+
+{% else %}
+
+    {{ commentMacros.commentForm(commentedEntityType, commentedEntityId) }}
+
+{% endif %}
 
 {# Comments display loop #}
 
@@ -142,3 +186,7 @@ To use this template, we need access to those variables :
     {% endif %}
 
 {% endfor %}
+
+{% if manageAllowed %}
+    </div>
+{% endif %}

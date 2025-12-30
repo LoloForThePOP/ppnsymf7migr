@@ -1,0 +1,100 @@
+{% embed "utilities/modal_skeleton.html.twig" with {
+    modal_id: "pp-settings-modal",
+    modal_size: "modal-dialog-centered"
+} %}
+
+    {% block modalTitle %}
+        <h5 class="modal-title d-flex align-items-center gap-2">
+            <img src="{{ asset('settings.svg', 'pp_wysiwyg') }}" alt="réglages" width="18" height="18">
+            Réglages
+        </h5>
+    {% endblock %}
+
+    {% block modalBody %}
+        <div class="pp-settings-section">
+            <div class="pp-settings-row">
+                <div>
+                    <h6 class="mb-1">Publier la présentation</h6>
+                    <div class="text-muted small">Visible publiquement lorsque activé.</div>
+                </div>
+
+                <form method="post" action="{{ path('pp_update_publish_status', {'stringId': presentation.stringId}) }}" class="pp-settings-publish-form">
+                    <input type="hidden" name="_token" value="{{ csrf_token('pp_publish_toggle' ~ presentation.stringId) }}">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="small text-muted">Non</span>
+                        <input
+                            id="pp-publish-toggle-{{ presentation.id }}"
+                            type="checkbox"
+                            class="toggle-switch"
+                            name="published"
+                            value="1"
+                            {% if presentation.isPublished %}checked{% endif %}
+                        />
+                        <label class="toggle-switch-label" for="pp-publish-toggle-{{ presentation.id }}">Publier</label>
+                        <span class="small text-muted">Oui</span>
+                    </div>
+                </form>
+            </div>
+
+            <div class="pp-settings-row">
+                <div>
+                    <h6 class="mb-1 text-danger">Supprimer la présentation</h6>
+                    <div class="text-muted small">Suppression définitive après confirmation.</div>
+                </div>
+
+                <a class="btn btn-danger" href="{{ path('pp_delete_presentation', {'stringId': presentation.stringId}) }}">
+                    Supprimer la présentation
+                </a>
+            </div>
+        </div>
+
+        <script>
+            (function () {
+                var toggle = document.getElementById('pp-publish-toggle-{{ presentation.id }}');
+                if (!toggle) {
+                    return;
+                }
+                var form = toggle.closest('form');
+                if (!form) {
+                    return;
+                }
+                toggle.addEventListener('change', function () {
+                    form.submit();
+                });
+            })();
+        </script>
+    {% endblock %}
+
+    {% block modalFooter %}
+        <div class="modal-footer">
+            <button type="button" class="btn btn-go-back me-2" data-bs-dismiss="modal">Retour</button>
+        </div>
+    {% endblock %}
+
+{% endembed %}
+
+<style>
+    #pp-settings-modal .modal-body {
+        padding: 20px 24px;
+    }
+
+    .pp-settings-section {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .pp-settings-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 0;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    .pp-settings-row:last-child {
+        border-bottom: none;
+    }
+</style>

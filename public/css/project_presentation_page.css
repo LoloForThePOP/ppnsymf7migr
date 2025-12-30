@@ -217,6 +217,10 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-cont
     filter: brightness(0) saturate(100%) var(--theme-icon-filter);
 }
 
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .pp-container.in-edition-mode .edit-places-btn img {
+    filter: brightness(0) saturate(100%) var(--theme-icon-filter-sky);
+}
+
 
 /* Switch some links behaviors between edition and consultation mode  */
 

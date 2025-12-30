@@ -20,6 +20,65 @@
     display: initial;
 }
 
+.pp-settings-struct-wrapper {
+    display: none;
+}
+
+.in-edition-mode .pp-settings-struct-wrapper {
+    display: block;
+}
+
+.pp-settings-struct-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+}
+
+.pp-settings-struct-container .pp-struct-title-container {
+    margin: 0;
+}
+
+.pp-settings-overlay {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.in-edition-mode .pp-settings-struct-container:hover {
+    background-color: #fafafa;
+    border-color: #e6e6ea;
+}
+
+.pp-comments-compact {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    width: 100%;
+    text-align: center;
+}
+
+.pp-comments-compact .pp-struct-title-container {
+    margin: 0;
+}
+
+.pp-comments-overlay {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.in-edition-mode #comments-struct-container:hover {
+    background-color: #fafafa;
+    border-color: #e6e6ea;
+}
+
 /* Keep edition-mode buttons aligned when default display is overridden */
 .in-edition-mode .pp-edition-mode.plus-btn,
 .in-edition-mode .pp-edition-mode.pp-info-tooltip {
@@ -165,6 +224,10 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info
     filter: brightness(0) saturate(100%) var(--theme-icon-filter);
 }
 
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .pp-info-tooltip-icon {
+    filter: brightness(0) saturate(100%) var(--theme-icon-filter-sky);
+}
+
 .pp-info-tooltip-popover {
     max-width: 360px;
     background-color: var(--theme-surface);
@@ -218,6 +281,10 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info
 
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .show-delete-items-buttons img {
     filter: brightness(0) saturate(100%) var(--theme-icon-filter);
+}
+
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .show-delete-items-buttons img {
+    filter: brightness(0) saturate(100%) var(--theme-icon-filter-sky);
 }
 
 

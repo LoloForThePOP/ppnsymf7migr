@@ -106,6 +106,8 @@
 
         {% include "project_presentation/edit_show/business_cards/add.html.twig" %}
 
+        {% include "project_presentation/edit_show/settings_modal.html.twig" %}
+
         {% set newsFormProxy %} {# Proxy News Form : when user clicks on it, we open the full news creation form #}
                         
             <input class="proxy-news-input" data-pp-id="{{presentation.id}}" type="text" placeholder="Donner des nouvelles">
@@ -356,6 +358,41 @@
                     </div>
                 
                 </div>
+
+                {% if userPresenter %}
+                    <div class="col-lg-6 pp-struct-container-wrapper pp-settings-struct-wrapper">
+
+                        <div id="settings-struct-container" class="pp-struct-container pp-settings-struct-container is-expanded" data-pp-default-expanded="true" data-pp-collapse="disabled">
+
+                            <div class="pp-struct-title-container">
+
+                                <h3 class="pp-struct-title">
+
+                                    <span
+                                        class="pp-struct-icon"
+                                        style="--pp-struct-icon-url: url('{{ asset('settings.svg', 'pp_wysiwyg') }}');"
+                                        role="img"
+                                        aria-label="Réglages"
+                                    ></span>
+
+                                    <span class="me-2">Réglages</span>
+
+                                </h3>
+
+                            </div>
+
+                            <button
+                                type="button"
+                                class="pp-settings-overlay"
+                                data-bs-toggle="modal"
+                                data-bs-target="#pp-settings-modal"
+                                aria-label="Ouvrir les réglages"
+                            ></button>
+
+                        </div>
+                    
+                    </div>
+                {% endif %}
 
 
             </div>

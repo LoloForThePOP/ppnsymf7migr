@@ -287,6 +287,7 @@ a{
     --theme-contact-icon-filter: var(--theme-icon-filter-vegetation);
     --pp-card-bg: #ffffff;
     --pp-card-border: #c2edd2;
+    --pp-card-radius: 18px;
     --pp-card-shadow: 0 12px 24px rgba(47, 184, 91, 0.18);
     --pp-title-color: #1f8f43;
     --pp-icon-filter: var(--theme-icon-filter);
