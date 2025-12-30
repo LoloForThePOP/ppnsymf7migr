@@ -32,7 +32,17 @@
 
                     {% set newsTextContent = news.textContent %}
 
-                    {% include "project_presentation/edit_show/news/card.html.twig" %}
+                    <div class="news-slide" data-news-id="{{ news.id }}">
+
+                        {% include "project_presentation/edit_show/news/card.html.twig" %}
+
+                        {% include "comment/_news_comments_inline.html.twig" with {
+                            commentedEntityType: "news",
+                            commentedEntityId: news.id,
+                            commentedEntityComments: news.comments
+                        } %}
+
+                    </div>
 
                 {% endfor %}  
 
@@ -66,14 +76,14 @@
                             return;
                         }
                         let i;
-                        let slides = document.getElementsByClassName("news-card");
+                        let slides = document.getElementsByClassName("news-slide");
                         
                         if (n > slides.length) {slideIndexNews = 1}
                         if (n < 1) {slideIndexNews = slides.length}
                         for (i = 0; i < slides.length; i++) {
                             slides[i].style.display = "none";
                         }
-                        slides[slideIndexNews-1].style.display = "block";
+                        slides[slideIndexNews-1].style.display = "flex";
                         } 
                         
                         
@@ -87,17 +97,17 @@
 
                     {# initialize news cards slider #}
 
-                    .news-card{
+                    .news-slide{
                         display: none;
                     }
 
-                    .news-card:first-of-type{
-                        display: block;
+                    .news-slide:first-of-type{
+                        display: flex;
                     }
 
                     {# end of initialize news cards slider #}
 
-                    .news-card{
+                    .news-slide{
                         margin-bottom: 30px;
                     }
 
@@ -165,7 +175,7 @@
 
                     @media screen and (max-width: 580px) {
 
-                        .news-card{
+                        .news-slide{
                             margin-bottom: 10px;
                         }
 
@@ -198,10 +208,122 @@
                     })
                 </script>
 
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var drawer = document.getElementById('news-comments-drawer');
+                        var backdrop = document.querySelector('.news-comments-backdrop');
+                        if (!drawer || !backdrop) {
+                            return;
+                        }
+
+                        var panel = drawer.querySelector('.news-comments-panel');
+                        var body = drawer.querySelector('.news-comments-body');
+                        var title = drawer.querySelector('.news-comments-title');
+                        var closeBtn = drawer.querySelector('.news-comments-close');
+
+                        var isOpen = function () {
+                            return drawer.classList.contains('is-open');
+                        };
+
+                        var openDrawer = function () {
+                            drawer.classList.add('is-open');
+                            backdrop.classList.add('is-open');
+                            document.body.classList.add('news-comments-open');
+                            drawer.setAttribute('aria-hidden', 'false');
+                        };
+
+                        var closeDrawer = function () {
+                            drawer.classList.remove('is-open');
+                            backdrop.classList.remove('is-open');
+                            document.body.classList.remove('news-comments-open');
+                            drawer.setAttribute('aria-hidden', 'true');
+                        };
+
+                        var renderLoading = function () {
+                            body.innerHTML = '<div class="news-comments-loading">Chargement…</div>';
+                        };
+
+                        var renderError = function () {
+                            body.innerHTML = '<div class="text-muted">Impossible de charger les commentaires.</div>';
+                        };
+
+                        var loadComments = function (url, count) {
+                            if (!url) {
+                                renderError();
+                                return;
+                            }
+
+                            renderLoading();
+
+                            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                                .then(function (response) {
+                                    if (!response.ok) {
+                                        throw new Error('Bad response');
+                                    }
+                                    return response.json();
+                                })
+                                .then(function (data) {
+                                    body.innerHTML = data.html || '';
+                                    if (typeof data.count !== 'undefined' && title) {
+                                        title.textContent = 'Commentaires (' + data.count + ')';
+                                    } else if (typeof count !== 'undefined' && title) {
+                                        title.textContent = 'Commentaires (' + count + ')';
+                                    }
+                                })
+                                .catch(function () {
+                                    renderError();
+                                });
+                        };
+
+                        document.addEventListener('click', function (event) {
+                            var trigger = event.target.closest('.news-comments-trigger');
+                            if (!trigger) {
+                                return;
+                            }
+                            event.preventDefault();
+                            var url = trigger.getAttribute('data-comments-url');
+                            var count = trigger.getAttribute('data-comments-count');
+                            var newsId = trigger.getAttribute('data-news-id');
+                            if (newsId) {
+                                drawer.setAttribute('data-news-id', newsId);
+                            }
+                            openDrawer();
+                            loadComments(url, count);
+                        });
+
+                        closeBtn.addEventListener('click', function () {
+                            closeDrawer();
+                        });
+
+                        backdrop.addEventListener('click', function () {
+                            closeDrawer();
+                        });
+
+                        document.addEventListener('keydown', function (event) {
+                            if (event.key === 'Escape' && isOpen()) {
+                                closeDrawer();
+                            }
+                        });
+                    });
+                </script>
+
             {% endif %}
 
 
         </div>
+
+        <div id="news-comments-drawer" class="news-comments-drawer" aria-hidden="true">
+            <div class="news-comments-panel" role="dialog" aria-modal="true" aria-label="Commentaires">
+                <div class="news-comments-header">
+                    <span class="news-comments-title">Commentaires</span>
+                    <button type="button" class="news-comments-close" aria-label="Fermer les commentaires">&times;</button>
+                </div>
+                <div class="news-comments-body">
+                    <div class="news-comments-loading">Chargement…</div>
+                </div>
+            </div>
+        </div>
+        <div class="news-comments-backdrop" data-news-comments-backdrop></div>
 
         <style>
         
@@ -225,11 +347,15 @@
                     display: none;
                 }
 
-                .news-card {
+                .news-slide {
                     display: block;
                     flex: 0 0 82%;
                     scroll-snap-align: start;
                     scroll-snap-stop: always;
+                }
+
+                .news-slide .news-card {
+                    width: 100%;
                 }
 
             }

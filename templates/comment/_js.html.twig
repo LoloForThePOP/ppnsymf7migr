@@ -29,9 +29,12 @@
         const commentCsrfToken = "{{ csrf_token('comment_mutation') }}";
 
         // creating a reply comment form (in addition to the create new parent comment form)
-        var replyForm = $(".commentForm:first").clone().addClass("replyCommentForm");
-        $(".commentForm").after(replyForm);
-        $(".replyCommentForm").hide();
+        var $baseForm = $(".commentForm:first");
+        if ($baseForm.length) {
+            var replyForm = $baseForm.clone().addClass("replyCommentForm");
+            $baseForm.after(replyForm);
+            $(".replyCommentForm").hide();
+        }
 
         var movePresentationCommentForm = function () {
             var $ppContainer = $(".pp-container");
@@ -61,7 +64,7 @@
         });
 
         // when user click on reply to a comment button, we're placing the reply comment form where appropriate
-        $(".replyCommentButton ").on( "click", function( event ){
+        $(document).on("click", ".replyCommentButton", function( event ){
 
             $(".replyCommentForm").hide();
 
@@ -81,8 +84,7 @@
         });
 
         // Change send button state when input changed
-
-        $('.commentForm textarea').on('input propertychange', function() {
+        $(document).on('input propertychange', '.commentForm textarea', function() {
 
             var $form = $(this).closest('.commentForm');
             var hasContent = this.value.trim().length > 0;
@@ -103,8 +105,7 @@
         
 
         // submitting a comment   
-    
-        $(".commentForm ").on( "submit", function( event ){
+        $(document).on("submit", ".commentForm", function( event ){
 
             event.preventDefault();
 
@@ -153,11 +154,21 @@
                 $(".loader").remove();
                 console.log(data);
 
-                $t.hide(); // hidding comment form
+                $t.hide(); // hiding comment form
 
                 $t.after([
                     { newCommentContent: commentContent, newCommentUrl: data.newCommentEditionUrl },
                 ].map(newCommentPattern)); // we hydrate javascript new comment pattern
+
+                if (commentedEntityType === 'news') {
+                    var $trigger = $('.news-comments-trigger[data-news-id="' + commentedEntityId + '"]');
+                    if ($trigger.length) {
+                        var count = parseInt($trigger.attr('data-comments-count'), 10) || 0;
+                        count += 1;
+                        $trigger.attr('data-comments-count', count);
+                        $('.news-comments-count', $trigger).text(count);
+                    }
+                }
 
               },  
   
@@ -180,7 +191,7 @@
 
         // Remove a Comment
 
-        $('.js-remove-comment').on('click', function (){
+        $(document).on('click', '.js-remove-comment', function (){
 
             var commentId = $(this).attr("data-comment-id");
 

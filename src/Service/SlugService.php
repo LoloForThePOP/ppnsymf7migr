@@ -37,6 +37,18 @@ final class SlugService
 
         $repository = $this->em->getRepository($entity::class);
         $baseSlug = strtolower($this->slugger->slug($baseString)->toString());
+        if ($baseSlug === '') {
+            return;
+        }
+
+        $maxLength = $this->getSlugMaxLength($entity, $fieldName);
+        if ($maxLength !== null) {
+            $baseSlug = $this->truncateSlug($baseSlug, $maxLength);
+        }
+
+        if ($baseSlug === '') {
+            return;
+        }
         $slug = $baseSlug;
         $counter = 1;
 
@@ -46,7 +58,14 @@ final class SlugService
         }
 
         while ($this->slugExists($repository, $fieldName, $slug, $entity->getId() ?? null)) {
-            $slug = sprintf('%s-%d', $baseSlug, $counter++);
+            $suffix = '-' . $counter++;
+            if ($maxLength !== null) {
+                $availableLength = $maxLength - strlen($suffix);
+                $availableLength = max(0, $availableLength);
+                $slug = $this->truncateSlug($baseSlug, $availableLength) . $suffix;
+            } else {
+                $slug = $baseSlug . $suffix;
+            }
         }
 
         $setter = 'set' . ucfirst($fieldName);
@@ -64,6 +83,36 @@ final class SlugService
             // Once a human-friendly slug is generated, mark it as non-random to prevent silent changes later.
             $entity->getExtra()->setIsRandomizedStringId(false);
         }
+    }
+
+    private function getSlugMaxLength(object $entity, string $fieldName): ?int
+    {
+        if ($entity instanceof PPBase && $fieldName === 'stringId') {
+            return 190;
+        }
+
+        if ($entity instanceof User && $fieldName === 'usernameSlug') {
+            return 120;
+        }
+
+        if ($entity instanceof Article && $fieldName === 'slug') {
+            return 255;
+        }
+
+        return null;
+    }
+
+    private function truncateSlug(string $slug, int $maxLength): string
+    {
+        if ($maxLength <= 0) {
+            return '';
+        }
+
+        if (strlen($slug) <= $maxLength) {
+            return $slug;
+        }
+
+        return rtrim(substr($slug, 0, $maxLength), '-');
     }
 
     private function getSlugSource(object $entity): array

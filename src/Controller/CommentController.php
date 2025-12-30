@@ -219,6 +219,29 @@ class CommentController extends AbstractController
         
     }
 
+    #[Route('/comment/news/{id}/list', name: 'ajax_news_comments', methods: ['GET'])]
+    public function ajaxNewsComments(Request $request, NewsRepository $newsRepo, int $id): Response
+    {
+        $news = $newsRepo->find($id);
+        if ($news === null) {
+            return new JsonResponse(
+                ['error' => 'Actualité introuvable.'],
+                Response::HTTP_NOT_FOUND,
+            );
+        }
+
+        $html = $this->renderView('comment/_comments_list.html.twig', [
+            'commentedEntityType' => 'news',
+            'commentedEntityId' => $news->getId(),
+            'commentedEntityComments' => $news->getComments(),
+        ]);
+
+        return new JsonResponse([
+            'html' => $html,
+            'count' => $news->getComments()->count(),
+        ]);
+    }
+
     #[Route('/comment/update/{id}', name: 'update_comment', methods: ['GET', 'POST'])]
     public function updateComment(Request $request, EntityManagerInterface $manager, Comment $comment):response
     {

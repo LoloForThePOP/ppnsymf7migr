@@ -1,0 +1,47 @@
+{#
+Renders a comment thread list without form or header.
+Requires:
+  - commentedEntityType
+  - commentedEntityId
+  - commentedEntityComments
+#}
+
+{% import 'comment/_macro.html.twig' as commentMacros %}
+
+{% set countCommentedEntityComments = commentedEntityComments | length %}
+
+{% if countCommentedEntityComments == 0 %}
+
+    <p class="text-muted mb-0">Aucun commentaire pour le moment.</p>
+
+{% else %}
+
+    {% for comment in commentedEntityComments | reverse %}
+
+        {% if comment.getParent is null %} {# we display only parent comments (and then its potential child) #}
+
+            <article class="threadContainer">
+
+                {{ commentMacros.oneCommentContainer(commentedEntityType, commentedEntityId, comment, comment.id) }}
+
+                {% if comment.replies | length > 0 %}
+
+                    <div class="commentRepliesContainer">
+
+                        {% for subComment in comment.replies %}
+
+                            {{ commentMacros.oneCommentContainer(commentedEntityType, commentedEntityId, subComment, comment.id) }}
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+            </article>
+
+        {% endif %}
+
+    {% endfor %}
+
+{% endif %}

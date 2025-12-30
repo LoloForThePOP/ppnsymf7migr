@@ -153,10 +153,4 @@
 
     <button type="button" data-structure="news" class="js-delete-element delete-button pp-edition-mode btn" data-id="{{news.id}}">&times</button>
 
-       {# comments #}
-
-        {% include "comment/_comments.html.twig" with {commentedEntityType: "news", commentedEntityId: news.id, commentedEntityComments: news.comments } %}
-
-        {# End of comments #}
-    
 </div>

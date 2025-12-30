@@ -1,0 +1,29 @@
+{#
+Inline comment form + trigger for news comments.
+Requires:
+  - commentedEntityType ("news")
+  - commentedEntityId
+  - commentedEntityComments
+#}
+
+{% import 'comment/_macro.html.twig' as commentMacros %}
+
+{% set countCommentedEntityComments = commentedEntityComments | length %}
+
+<div class="news-comments-shell" data-news-id="{{ commentedEntityId }}">
+
+    <button
+        type="button"
+        class="news-comments-trigger"
+        data-news-id="{{ commentedEntityId }}"
+        data-comments-url="{{ path('ajax_news_comments', {'id': commentedEntityId}) }}"
+        data-comments-count="{{ countCommentedEntityComments }}"
+    >
+        Commentaires (<span class="news-comments-count">{{ countCommentedEntityComments }}</span>)
+    </button>
+
+    <div class="news-comment-form">
+        {{ commentMacros.commentForm(commentedEntityType, commentedEntityId) }}
+    </div>
+
+</div>

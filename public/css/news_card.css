@@ -115,6 +115,133 @@ html[data-theme-variant="custom"] .news-card .carousel-control-next {
     background-color: var(--theme-accent);
 }
 
+.news-slide {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 430px;
+    margin: 0 auto;
+}
+
+.news-comments-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--theme-border);
+    border-radius: 14px;
+    background-color: var(--theme-surface);
+}
+
+.news-comments-shell .commentForm {
+    max-width: 100%;
+    margin-bottom: 0;
+}
+
+.news-comments-shell .commentForm textarea {
+    height: 40px !important;
+    padding: 7px 10px !important;
+    border-radius: 14px;
+}
+
+.news-comments-trigger {
+    align-self: flex-start;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--theme-text);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.news-comments-trigger:hover,
+.news-comments-trigger:focus {
+    color: var(--theme-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.news-comments-drawer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1045;
+}
+
+.news-comments-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: min(420px, 92vw);
+    background-color: var(--theme-surface);
+    border-left: 1px solid var(--theme-border);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-comments-drawer.is-open .news-comments-panel {
+    transform: translateX(0);
+}
+
+.news-comments-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--theme-border);
+    background-color: var(--theme-surface-alt);
+}
+
+.news-comments-title {
+    font-weight: 700;
+    color: var(--theme-title);
+}
+
+.news-comments-close {
+    border: 1px solid var(--theme-border);
+    background-color: var(--theme-surface);
+    color: var(--theme-text);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    line-height: 1;
+}
+
+.news-comments-body {
+    padding: 12px 16px 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.news-comments-loading {
+    color: var(--theme-text-muted);
+}
+
+.news-comments-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 1040;
+}
+
+.news-comments-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body.news-comments-open {
+    overflow: hidden;
+}
+
 
 
 
@@ -145,6 +272,10 @@ html[data-theme-variant="custom"] .news-card .carousel-control-next {
         margin: 0 auto 10px auto;
     }
 
+    .news-slide {
+        margin: 0;
+    }
+
     .news-card .other-media-container img {
 
         height: unset;
@@ -154,4 +285,58 @@ html[data-theme-variant="custom"] .news-card .carousel-control-next {
         display: none;
     }
 
+    .news-comments-trigger {
+        width: 100%;
+        text-align: center;
+    }
+
+    .news-comments-panel {
+        width: 100%;
+        height: min(70vh, 520px);
+        top: auto;
+        bottom: 0;
+        border-left: 0;
+        border-top: 1px solid var(--theme-border);
+        border-radius: 16px 16px 0 0;
+        transform: translateY(100%);
+    }
+
+    .news-comments-drawer.is-open .news-comments-panel {
+        transform: translateY(0);
+    }
+
+}
+
+@media screen and (min-width: 992px) {
+    .news-slide {
+        gap: 16px;
+    }
+
+    .news-comments-shell {
+        gap: 10px;
+    }
+
+    .news-comments-shell .commentForm textarea {
+        height: 40px !important;
+        transition: height 0.2s ease;
+    }
+
+    .news-comments-shell .commentForm:focus-within textarea,
+    .news-comments-shell .commentForm.is-filled textarea {
+        height: 84px !important;
+    }
+
+    .news-comments-shell .commentForm button[type="submit"] {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-4px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .news-comments-shell .commentForm:focus-within button[type="submit"],
+    .news-comments-shell .commentForm.is-filled button[type="submit"] {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
 }
