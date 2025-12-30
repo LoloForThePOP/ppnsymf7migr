@@ -171,16 +171,9 @@ class CreateController extends AbstractController
                 $slide->setType(SlideType::IMAGE);
                 $presentation->addSlide($slide);
 
-                // VichUploader handles moving the file
-                if ($slide->getImageFile()) {
-                   // to do $this->imageResizer->edit($slide); 
-                }
-                
-                // checked: check if file name is manage by Vitch and manage it as unique.
-                // to do: check if thumbnail is updated
-                // to do: check if image is resized
+                // VichUploader handles moving the file and image resizing.
 
-                $this->cacheThumbnail->updateThumbnail($presentation);
+                $this->cacheThumbnail->updateThumbnail($presentation, true);
 
                 $this->em->persist($slide);
                 

@@ -41,7 +41,7 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(302);
         self::assertStringContainsString(
-            sprintf('/%s#websites-struct-container', $presentation->getStringId()),
+            sprintf('/%s#slideshow-struct-container', $presentation->getStringId()),
             (string) $client->getResponse()->headers->get('Location')
         );
 
@@ -52,6 +52,52 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         self::assertInstanceOf(Slide::class, $slide);
         self::assertSame(SlideType::IMAGE, $slide->getType());
         self::assertNotEmpty($slide->getImagePath());
+    }
+
+    public function testAddImageSlideResizesLargeImage(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/add-image-slide', $presentation->getStringId()),
+            ['image_slide' => ['caption' => '', 'licence' => '', '_token' => $token]],
+            ['image_slide' => ['imageFile' => ['file' => $this->createUploadedLargeImage(3000, 2000)]]]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertCount(1, $presentation->getSlides());
+
+        $slide = $presentation->getSlides()->first();
+        self::assertInstanceOf(Slide::class, $slide);
+        self::assertNotEmpty($slide->getImagePath());
+
+        $slidePath = sprintf(
+            '%s/public/media/uploads/pp/slides/%s',
+            (string) $client->getContainer()->getParameter('kernel.project_dir'),
+            $slide->getImagePath()
+        );
+        self::assertFileExists($slidePath);
+
+        $imageSize = getimagesize($slidePath);
+        self::assertNotFalse($imageSize);
+        if ($imageSize !== false) {
+            self::assertLessThanOrEqual(1920, $imageSize[0]);
+            self::assertLessThanOrEqual(1080, $imageSize[1]);
+        }
+
+        if (is_file($slidePath)) {
+            unlink($slidePath);
+        }
     }
 
     public function testAddImageSlideRejectsMissingFile(): void
@@ -96,7 +142,7 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(302);
         self::assertStringContainsString(
-            sprintf('/%s#questionsAnswers-struct-container', $presentation->getStringId()),
+            sprintf('/%s#slideshow-struct-container', $presentation->getStringId()),
             (string) $client->getResponse()->headers->get('Location')
         );
 
@@ -152,7 +198,7 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(302);
         self::assertStringContainsString(
-            sprintf('/%s#businessCards-struct-container', $presentation->getStringId()),
+            sprintf('/%s#documents-struct-container', $presentation->getStringId()),
             (string) $client->getResponse()->headers->get('Location')
         );
 
@@ -186,7 +232,7 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(302);
         self::assertStringContainsString(
-            sprintf('/%s#logo-struct-container', $presentation->getStringId()),
+            sprintf('/%s#news-struct-container', $presentation->getStringId()),
             (string) $client->getResponse()->headers->get('Location')
         );
 
@@ -423,6 +469,7 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
 
         $presentation = $this->fetchPresentation($client, $presentation->getStringId());
         self::assertNotEmpty($presentation->getLogo());
+        self::assertNotEmpty($presentation->getExtra()->getCacheThumbnailUrl());
 
         $logoPath = sprintf(
             '%s/public/media/uploads/pp/logos/%s',
@@ -430,6 +477,48 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
             $presentation->getLogo()
         );
         self::assertFileExists($logoPath);
+
+        if (is_file($logoPath)) {
+            unlink($logoPath);
+        }
+    }
+
+    public function testAddLogoResizesLargeImage(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/add-logo', $presentation->getStringId()),
+            ['logo' => ['_token' => $token]],
+            ['logo' => ['logoFile' => ['file' => $this->createUploadedLargeImage(2000, 2000)]]]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertNotEmpty($presentation->getLogo());
+
+        $logoPath = sprintf(
+            '%s/public/media/uploads/pp/logos/%s',
+            (string) $client->getContainer()->getParameter('kernel.project_dir'),
+            $presentation->getLogo()
+        );
+        self::assertFileExists($logoPath);
+
+        $imageSize = getimagesize($logoPath);
+        self::assertNotFalse($imageSize);
+        if ($imageSize !== false) {
+            self::assertLessThanOrEqual(1400, $imageSize[0]);
+            self::assertLessThanOrEqual(1400, $imageSize[1]);
+        }
 
         if (is_file($logoPath)) {
             unlink($logoPath);
@@ -1067,6 +1156,7 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         $updatedSlide = $presentation->getSlides()->first();
         self::assertNotEmpty($updatedSlide?->getImagePath());
         self::assertSame('Nouvelle legende', $updatedSlide?->getCaption());
+        self::assertNotEmpty($presentation->getExtra()->getCacheThumbnailUrl());
     }
 
     public function testUpdateVideoSlideUpdatesUrl(): void
@@ -1741,6 +1831,33 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         file_put_contents($path, $png ?: '');
 
         return new UploadedFile($path, 'slide.png', 'image/png', null, true);
+    }
+
+    private function createUploadedLargeImage(int $width, int $height): UploadedFile
+    {
+        $path = tempnam(sys_get_temp_dir(), 'pp_large_');
+
+        if (class_exists(\Imagick::class)) {
+            $image = new \Imagick();
+            $image->newImage($width, $height, new \ImagickPixel('white'));
+            $image->setImageFormat('png');
+            $image->writeImage($path);
+            $image->clear();
+            $image->destroy();
+        } elseif (function_exists('imagecreatetruecolor')) {
+            $image = imagecreatetruecolor($width, $height);
+            $white = imagecolorallocate($image, 255, 255, 255);
+            imagefill($image, 0, 0, $white);
+            imagepng($image, $path);
+            imagedestroy($image);
+        } else {
+            if (is_file($path)) {
+                unlink($path);
+            }
+            $this->markTestSkipped('Image extension not available for generating large images.');
+        }
+
+        return new UploadedFile($path, 'large.png', 'image/png', null, true);
     }
 
     private function createUploadedDocument(): UploadedFile

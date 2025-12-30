@@ -5,6 +5,7 @@ namespace App\Controller\ProjectPresentation;
 use App\Entity\Slide;
 use App\Entity\PPBase;
 use App\Enum\SlideType;
+use App\Service\CacheThumbnailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -66,7 +67,8 @@ class UpdateSlideController extends AbstractController
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         #[MapEntity(mapping: ['id_slide' => 'id'])] Slide $slide,
         Request $request,
-        EntityManagerInterface $manager
+        EntityManagerInterface $manager,
+        CacheThumbnailService $cacheThumbnailService
     ): Response {
         $this->denyAccessUnlessGranted('edit', $presentation);
         $this->assertSlideOwnership($presentation, $slide);
@@ -75,11 +77,8 @@ class UpdateSlideController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            //to do: resize image
-            //to do: cache thumbnail
-
             $manager->flush();
+            $cacheThumbnailService->updateThumbnail($presentation, true);
 
             $this->addFlash('success', "✅ Modification effectuée");
 
@@ -105,7 +104,8 @@ class UpdateSlideController extends AbstractController
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $pp,
         #[MapEntity(mapping: ['id_slide' => 'id'])] Slide $slide,
         Request $request,
-        EntityManagerInterface $manager
+        EntityManagerInterface $manager,
+        CacheThumbnailService $cacheThumbnailService
     ): Response {
         $this->denyAccessUnlessGranted('edit', $pp);
         $this->assertSlideOwnership($pp, $slide);
@@ -123,6 +123,7 @@ class UpdateSlideController extends AbstractController
             // to do: remove if the form is mapped correctly $slide->setYoutubeUrl($form->get('address')->getData());
 
             $manager->flush();
+            $cacheThumbnailService->updateThumbnail($pp, true);
 
             $this->addFlash('success', "✅ Modification effectuée");
 

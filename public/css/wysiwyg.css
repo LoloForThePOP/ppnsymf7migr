@@ -47,9 +47,11 @@
     cursor: pointer;
 }
 
-.in-edition-mode .pp-settings-struct-container:hover {
-    background-color: #fafafa;
-    border-color: #e6e6ea;
+.in-edition-mode .pp-settings-struct-container:hover,
+.in-edition-mode #comments-struct-container:hover,
+.in-edition-mode .pp-comments-compact:hover {
+    background-color: var(--theme-surface-alt);
+    border-color: var(--theme-border);
 }
 
 .pp-comments-compact {
@@ -74,10 +76,17 @@
     cursor: pointer;
 }
 
-.in-edition-mode #comments-struct-container:hover {
-    background-color: #fafafa;
-    border-color: #e6e6ea;
+.in-edition-mode #comments-struct-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
 }
+
+.in-edition-mode #comments-struct-container .pp-comments-compact {
+    min-height: 0;
+}
+
 
 /* Keep edition-mode buttons aligned when default display is overridden */
 .in-edition-mode .pp-edition-mode.plus-btn,

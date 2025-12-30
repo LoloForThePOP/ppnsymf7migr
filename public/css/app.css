@@ -112,12 +112,12 @@ a{
     --theme-font-heading: 'Space Grotesk', sans-serif;
     --theme-accent: #38bdf8;
     --theme-accent-contrast: #0b0f16;
-    --theme-border: #283344;
+    --theme-border: #38475c;
     --theme-title: #f8fafc;
     --theme-btn-close-filter: invert(1);
     --theme-icon-filter: invert(88%) sepia(9%) saturate(330%) hue-rotate(175deg) brightness(96%) contrast(90%);
     --pp-card-bg: #131a25;
-    --pp-card-border: #1f2a3a;
+    --pp-card-border: #2a3a52;
     --pp-card-shadow: 0 14px 30px rgba(8, 12, 18, 0.6);
     --pp-title-color: #f8fafc;
     --pp-icon-filter: var(--theme-icon-filter);
@@ -315,7 +315,7 @@ a{
 :root[data-theme="pink-lady"] {
     --theme-bg: #fff3f7;
     --theme-surface: #ffffff;
-    --theme-surface-alt: #ffe6f0;
+    --theme-surface-alt: #fff2f7;
     --theme-text: #4a1f2f;
     --theme-text-muted: #8b4b63;
     --theme-font-body: 'Quicksand', sans-serif;
@@ -326,7 +326,8 @@ a{
     --theme-title: #4a1f2f;
     --pp-card-bg: #fff7fa;
     --pp-card-border: #f5c2d4;
-    --pp-card-shadow: 0 12px 24px rgba(236, 72, 153, 0.18);
+    --pp-card-radius: 18px;
+    --pp-card-shadow: 0 12px 24px rgba(236, 72, 153, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.7);
     --pp-title-color: #be185d;
 }
 
@@ -639,6 +640,26 @@ html[data-theme-variant="custom"] .btn-outline-primary:focus,
 html[data-theme-variant="custom"] .btn-outline-primary:active {
     background-color: var(--theme-accent);
     color: var(--theme-accent-contrast);
+}
+
+html[data-theme-variant="custom"][data-theme="pink-lady"] .btn-primary:hover,
+html[data-theme-variant="custom"][data-theme="pink-lady"] .btn-primary:focus,
+html[data-theme-variant="custom"][data-theme="pink-lady"] .btn-primary:active,
+html[data-theme-variant="custom"][data-theme="pink-lady"] .btn-validate:hover,
+html[data-theme-variant="custom"][data-theme="pink-lady"] .btn-validate:focus,
+html[data-theme-variant="custom"][data-theme="pink-lady"] .btn-validate:active {
+    background-color: color-mix(in srgb, var(--theme-accent) 80%, var(--theme-surface));
+    border-color: color-mix(in srgb, var(--theme-accent) 80%, var(--theme-surface));
+    color: var(--theme-accent-contrast);
+    filter: none;
+}
+
+html[data-theme-variant="custom"][data-theme="pink-lady"] .btn-outline-primary:hover,
+html[data-theme-variant="custom"][data-theme="pink-lady"] .btn-outline-primary:focus,
+html[data-theme-variant="custom"][data-theme="pink-lady"] .btn-outline-primary:active {
+    background-color: color-mix(in srgb, var(--theme-accent) 25%, var(--theme-surface));
+    border-color: color-mix(in srgb, var(--theme-accent) 55%, var(--theme-surface));
+    color: var(--theme-accent);
 }
 
 html[data-theme-variant="custom"] .btn-secondary {

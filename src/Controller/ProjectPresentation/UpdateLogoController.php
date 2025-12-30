@@ -5,6 +5,7 @@ namespace App\Controller\ProjectPresentation;
 use App\Entity\PPBase;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\ProjectPresentation\LogoType;
+use App\Service\CacheThumbnailService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,6 +21,7 @@ final class UpdateLogoController extends AbstractController
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         Request $request,
         EntityManagerInterface $em,
+        CacheThumbnailService $cacheThumbnailService,
     ): Response
     {
 
@@ -30,9 +32,7 @@ final class UpdateLogoController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
 
             $em->flush();
-            
-            //to do: image resize
-            //to do: cache thumbnail
+            $cacheThumbnailService->updateThumbnail($presentation, true);
                        
 
             $this->addFlash(

@@ -1,145 +1,218 @@
-
-{# to do: review the whole file 
-
-Not good: was before manage_component_skeleton (handeled reordering): {% embed "project_presentation/edit_show/skeletons/update_element.html.twig" %}#}
+{% extends 'base.html.twig' %}
 
 {% block title %}Images et Vidéos{% endblock %}
 
+{% block body %}
+    <div class="edit-structure-container container col-md-10 col-lg-8">
 
-{% block mainContentTitle %}Pour modifier l'ordre des images et vidéos, utilisez le glisser-déposer (= drag and drop){% endblock %}
-
-{% block collapsibleMoreInfo %} {% endblock %}
-
-
-
-{% block mainContent %}
-
-    <!-- Slides list displayed in a grid -->
-
-    <div class="container p-0 mb-3">
-
-        <div
-            id="elements-list"
-            data-structure="slides"
-            class="js-elements-list row col-lg-8 m-0"
-        >
-
-            {% if presentation.slides | length > 0 %}
-
-                {% for slide in presentation.slides %}
-
-                <!-- Thumbnail Container -->
-
-                <div id="{{slide.id}}"
-
-                    class="js-sortable-element">
-
-                    {% if slide.isImage() %}
-
-                        {# edit link #}
-
-                        <a href="{{path('update_image_slide', {'stringId': presentation.stringId, 'presentation': presentation, 'id_slide' : slide.id })}}" class="text-body text-decoration-none">
-
-                            {# thumbnail #}
-
-                            <img src="{{ vich_uploader_asset(slide) }}" alt="{{slide.file}}" height="" width="100%">
-
-                        </a>
-
-                    {% elseif slide.isVideo() and slide.youtubeVideoId %}
-
-                    {# edit link #}
-
-                        <a href="{{path('update_youtube_slide', {'stringId': presentation.stringId, 'presentation': presentation, 'id_slide' : slide.id })}}" class="text-body text-decoration-none">
-
-                            {# youtube thumbnail #}
-
-                            <img src="https://img.youtube.com/vi/{{slide.youtubeVideoId}}/mqdefault.jpg" alt="image miniature d'une video" height="" width="100%">
-
-                            {# red circle (= video icon stamp) #}
-
-                            <span class="position-absolute rounded-circle bg-danger p-2" style="bottom:3px; left:3px;"> </span>
-
-                        </a>
-
-                    {% endif %}
-
-                    <!-- Remove Slide button (a red cross on each slide) -->
-
-                    <button
-                        type="button"
-                        class="js-delete-element position-absolute btn btn-sm btn-danger sharp"
-                        data-structure="slides"
-                        data-id="{{slide.id}}"
-                        style="top:0; right:0;"
-                    ><span class="fw-bold">&times;</span></button>
-
-                </div>
-
-                {% endfor %}
-
-            {% endif %}
-
+        <div class="main-title-container">
+            <h4 class="main-title">
+                Pour modifier l'ordre des images et vidéos, utilisez le glisser-déposer (= drag and drop)
+            </h4>
         </div>
 
+        <div class="main-content-container">
+
+            <div
+                id="slides-reorder-list"
+                data-structure="slides"
+                class="js-elements-list row g-3"
+            >
+                {% if presentation.slides | length > 0 %}
+                    {% for slide in presentation.slides %}
+                        <div id="{{ slide.id }}" class="js-sortable-element col-6 col-md-4">
+                            <div class="slide-reorder-card">
+                                {% if slide.isImage() %}
+                                    <img src="{{ vich_uploader_asset(slide) }}" alt="image de la présentation">
+                                {% elseif slide.isVideo() and slide.youtubeVideoId %}
+                                    <img src="https://img.youtube.com/vi/{{ slide.youtubeVideoId }}/mqdefault.jpg" alt="miniature vidéo">
+                                    <span class="video-stamp" aria-hidden="true"></span>
+                                {% endif %}
+
+                                <button
+                                    type="button"
+                                    class="js-delete-element delete-button btn btn-sm btn-danger sharp"
+                                    data-structure="slides"
+                                    data-id="{{ slide.id }}"
+                                    aria-label="Supprimer cette diapositive"
+                                ><span class="fw-bold">&times;</span></button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted js-empty-message mb-0">Aucune image ou vidéo pour le moment.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="action-buttons-container text-center">
+            <a
+                class="text-decoration-none text-white"
+                href="{{ path('edit_show_project_presentation', {'stringId': presentation.stringId}) }}#slideshow-struct-container"
+            >
+                <button type="button" class="btn btn-lg btn-go-back mb-2">Retour</button>
+            </a>
+        </div>
     </div>
 
+    <style>
+        .edit-structure-container {
+            padding-top: 60px !important;
+            padding-bottom: 60px;
+            padding-left: 35px;
+        }
 
+        .edit-structure-container .main-title-container {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .edit-structure-container .main-title {
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .main-content-container {
+            margin-bottom: 46px;
+        }
+
+        .slide-reorder-card {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #c7c7d6;
+            border-radius: 8px;
+            background-color: #fafafa;
+            overflow: hidden;
+            min-height: 110px;
+        }
+
+        .slide-reorder-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        .slide-reorder-card .delete-button {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+        }
+
+        .slide-reorder-card .video-stamp {
+            position: absolute;
+            bottom: 6px;
+            left: 6px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: #e74c3c;
+        }
+
+        @media (max-width: 576px) {
+            .edit-structure-container {
+                padding: 35px 10px !important;
+            }
+        }
+    </style>
 {% endblock %}
 
+{% block javascripts %}
+    <script src="/js/sortable/sortable.min.js"></script>
+    <script src="/js/sortable/jquery-sortable.js"></script>
 
-    {% block seeResultAnchor %}slideshow-struct-container{% endblock %}
+    <script>
+        $(document).ready(function () {
+            var reorderEndpoint = "{{ path('pp_structure_reorder', {'stringId': presentation.stringId}) }}";
+            var deleteEndpoint = "{{ path('pp_structure_delete', {'stringId': presentation.stringId}) }}";
+            var csrfToken = "{{ csrf_token('pp_structure_mutation') }}";
 
-    {% block specificStyles %}
-
-        <style>
-
-            .js-sortable-element{
-
-                position: relative;
-
-                display:flex;
-                align-items: center;
-                justify-content: center;
-
-
-                width:130px;
-                height:123px;
-
-                overflow:hidden;
-
-                padding:12px;
-
-                margin: 8px 16px 8px 0;
-
-                border: 5px solid  #3f5cff;
-                border-radius: 4px;
+            function displayFeedback(message, type) {
+                var htmlClass = "fixed-flash alert alert-" + type;
+                $('#flash-messages').addClass(htmlClass).text(message).fadeIn(200).delay(2500).fadeOut(600);
             }
 
+            function ajaxMutation(url, payload) {
+                return $.ajax({
+                    url: url,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: $.extend({ _token: csrfToken }, payload),
+                    async: true,
+                });
+            }
 
+            function ajaxErrorHandler(xhr) {
+                var message = "Une erreur est survenue";
+                if (xhr && xhr.responseJSON && xhr.responseJSON.error) {
+                    message = xhr.responseJSON.error;
+                }
+                displayFeedback(message, "danger");
+            }
 
-                 
-            @media (max-width: 576px) {
+            function collectOrderedIds($list) {
+                var ids = [];
+                $list.find('.js-sortable-element').each(function () {
+                    ids.push($(this).attr('id'));
+                });
+                return ids;
+            }
 
-                .js-sortable-element{
-                    margin-right: 13px;
+            function updateEmptyState() {
+                var $list = $('#slides-reorder-list');
+                var hasItems = $list.find('.js-sortable-element').length > 0;
+                if (hasItems) {
+                    $list.find('.js-empty-message').remove();
+                    return;
+                }
+                if (!$list.find('.js-empty-message').length) {
+                    $list.append('<p class="text-muted js-empty-message mb-0">Aucune image ou vidéo pour le moment.</p>');
+                }
+            }
+
+            $('#slides-reorder-list').sortable({
+                animation: 150,
+                ghostClass: 'blue-background-class',
+                onEnd: function () {
+                    var orderedIds = collectOrderedIds($('#slides-reorder-list'));
+                    ajaxMutation(reorderEndpoint, {
+                        scope: 'slides',
+                        orderedIds: orderedIds
+                    }).fail(ajaxErrorHandler);
+                }
+            });
+
+            $(document).on('click', '.js-delete-element', function (event) {
+                event.preventDefault();
+
+                var $trigger = $(this);
+                var idElement = $trigger.data('id');
+
+                if (typeof idElement === 'undefined') {
+                    return;
                 }
 
-            }
+                if (!confirm("Confimez-vous enlever cet élément ?")) {
+                    return;
+                }
 
+                var originalHtml = $trigger.html();
+                $trigger.html('<div class="loader"></div>');
 
-
-
-        </style>
-
-    {% endblock %}
-
-
-    {% block specificJavascripts %}
-
-
-    {% endblock %}
-
-
-
-    {% endembed %}
+                ajaxMutation(deleteEndpoint, {
+                    scope: 'slides',
+                    id: idElement.toString()
+                }).done(function () {
+                    $('#' + idElement).remove();
+                    updateEmptyState();
+                }).fail(ajaxErrorHandler).always(function () {
+                    $trigger.html(originalHtml);
+                });
+            });
+        });
+    </script>
+{% endblock %}

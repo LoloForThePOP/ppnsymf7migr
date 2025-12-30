@@ -3,6 +3,7 @@
 namespace App\Controller\ProjectPresentation;
 
 use App\Entity\PPBase;
+use App\Service\CacheThumbnailService;
 use App\Service\FormHandlerService;
 use App\Form\ProjectPresentation\LogoType;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,6 +25,7 @@ final class AddLogoController extends AbstractController
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         Request $request,
         FormHandlerService $handler,
+        CacheThumbnailService $cacheThumbnailService,
     ): Response {
 
         $this->denyAccessUnlessGranted('edit', $presentation);
@@ -46,10 +48,8 @@ final class AddLogoController extends AbstractController
 
         }
 
-        // to do: resize image
-        // to do: cache thumbnail
-
         $handler->handle($form, null, persist: false);
+        $cacheThumbnailService->updateThumbnail($presentation, true);
 
 
         // Redirect to editor page
