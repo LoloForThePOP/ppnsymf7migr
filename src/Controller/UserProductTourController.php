@@ -48,6 +48,11 @@ final class UserProductTourController extends AbstractController
         $existing[$tour] = $version;
 
         $userExtraService->set($profile, 'product_tours', $existing);
+        $visits = $userExtraService->get($profile, 'product_tour_visits', []);
+        if (is_array($visits) && array_key_exists($tour, $visits)) {
+            unset($visits[$tour]);
+            $userExtraService->set($profile, 'product_tour_visits', $visits);
+        }
         $em->flush();
 
         return new JsonResponse(['success' => true, 'tour' => $tour, 'version' => $version]);

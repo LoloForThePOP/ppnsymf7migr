@@ -23,6 +23,9 @@
     {% set options = defaults|merge(opts) %}
     {% set imageUrl = options.image %}
     {% set ariaLabel = presentation.title ?? presentation.goal %}
+    {% set isAdminSession = is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN') %}
+    {% set showEnrich = options.fetchImagesLink and not isAdminSession %}
+    {% set showDelete = options.deleteLink is defined and options.deleteLink and not isAdminSession %}
 
     <article class="project-card position-relative text-reset">
         {% if options.link %}
@@ -34,22 +37,24 @@
             ></a>
         {% endif %}
 
-        <div class="image-container">
-        {% if imageUrl %}
-            <img src="{{ imageUrl }}" alt="{{ ariaLabel }}" loading="lazy">
-        {% else %}
-            <div class="h-100 w-100 d-flex align-items-center justify-content-center bg-light text-muted rounded">
-                <small>{{ options.fallbackImageText }}</small>
+        {% if not isAdminSession %}
+            <div class="image-container">
+            {% if imageUrl %}
+                <img src="{{ imageUrl }}" alt="{{ ariaLabel }}" loading="lazy">
+            {% else %}
+                <div class="h-100 w-100 d-flex align-items-center justify-content-center bg-light text-muted rounded">
+                    <small>{{ options.fallbackImageText }}</small>
+                </div>
+            {% endif %}
             </div>
         {% endif %}
-        </div>
 
-        {% if options.fetchImagesLink or (options.deleteLink is defined and options.deleteLink) %}
+        {% if showEnrich or showDelete %}
             <div class="admin-actions position-absolute top-0 end-0 p-2 d-flex gap-1" style="z-index: 50;">
-                {% if options.fetchImagesLink %}
+                {% if showEnrich %}
                     <a class="btn btn-outline-primary btn-sm" href="{{ options.fetchImagesLink }}">Enrichir</a>
                 {% endif %}
-                {% if options.deleteLink is defined and options.deleteLink %}
+                {% if showDelete %}
                     <form method="post" action="{{ options.deleteLink }}" onsubmit="return confirm('Supprimer définitivement ce projet ?');">
                         <button type="submit" class="btn btn-outline-danger btn-sm">Supprimer</button>
                     </form>

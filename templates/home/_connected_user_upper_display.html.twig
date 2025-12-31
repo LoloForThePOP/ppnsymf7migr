@@ -5,8 +5,8 @@
         <div class="card-body">
             <div class="connected-hero-top">
                 <div>
-                    <h1 class="connected-title">Bon retour {{ app.user.username }}</h1>
-                    <p class="connected-subtitle">Reprenez vos projets, publiez vos avancées et gagnez en visibilité.</p>
+                    <h1 class="connected-title">Bonjour <span class="connected-username">{{ app.user.username }}</span></h1>
+                    <p class="connected-subtitle">Présentez vos projets, publiez vos avancées et gagnez en visibilité.</p>
                 </div>
                 <div class="connected-actions">
                     <a class="btn btn-primary" href="{{ path('create_project_presentation') }}">Présenter un projet</a>
@@ -66,11 +66,8 @@
                 <div class="connected-resume">
                     <div>
                         <div class="connected-resume-title">Démarrer</div>
-                        <div class="connected-resume-name">Vous n'avez pas encore de projet sur Propon.</div>
-                        <div class="connected-resume-meta">Commencez par créer votre première page.</div>
-                    </div>
-                    <div class="connected-resume-actions">
-                        <a class="btn btn-primary btn-sm" href="{{ path('create_project_presentation') }}">Présenter un projet</a>
+                        <div class="connected-resume-name">Vous n'avez pas encore de projet présenté sur Propon.</div>
+                        <div class="connected-resume-meta">Vous pouvez créer une page de projet.</div>
                     </div>
                 </div>
             {% endif %}

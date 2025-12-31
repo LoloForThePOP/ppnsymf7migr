@@ -19,6 +19,7 @@ use App\Form\ProjectPresentation\BusinessCardType;
 use App\Form\ProjectPresentation\QuestionAnswerType;
 use App\Form\ProjectPresentation\TextDescriptionType;
 use App\Form\ProjectPresentation\CategoriesKeywordsType;
+use App\Service\ProductTourService;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -36,13 +37,32 @@ class EditShowController extends AbstractController
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         Request $request,
         EntityManagerInterface $em,
+        ProductTourService $productTourService,
     ): Response
     {
+        $showThemeSelectorTour = $productTourService->shouldShowAfterVisits(
+            $request,
+            $this->getUser(),
+            ProductTourService::TOUR_THEME_SELECTOR,
+            'v1',
+            2,
+        );
 
         if ($this->isGranted('edit', $presentation)) {
+            $showPPEditIntroTour = $productTourService->shouldShowAfterVisits(
+                $request,
+                $this->getUser(),
+                ProductTourService::TOUR_PP_EDIT_INTRO,
+                'v1',
+                1,
+            );
+
             return $this->render(
                 'project_presentation/edit_show/origin.html.twig',
-                $this->buildEditShowContext($presentation)
+                $this->buildEditShowContext($presentation, [
+                    'showThemeSelectorTour' => $showThemeSelectorTour,
+                    'showPPEditIntroTour' => $showPPEditIntroTour,
+                ])
             );
         }
 
@@ -50,17 +70,22 @@ class EditShowController extends AbstractController
         $session = $request->getSession();
         $viewed = $session->get('pp_viewed_ids', []);
         $id = $presentation->getId();
+        $needsFlush = false;
         if ($id !== null && !in_array($id, $viewed, true)) {
             $presentation->getExtra()->incrementViews();
-            $em->flush();
+            $needsFlush = true;
             $viewed[] = $id;
             $session->set('pp_viewed_ids', $viewed);
+        }
+        if ($needsFlush) {
+            $em->flush();
         }
 
         return $this->render('project_presentation/edit_show/origin.html.twig', [
             'presentation' => $presentation,
             'userPresenter' => false, //flaging whether user can edit presentation
             'userAdmin' => $this->isGranted('ROLE_ADMIN'), //flagging whether user is an admin
+            'showThemeSelectorTour' => $showThemeSelectorTour,
         ]);
 
     }

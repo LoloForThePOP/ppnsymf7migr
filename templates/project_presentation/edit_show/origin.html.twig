@@ -441,7 +441,7 @@
 {% endblock %}
 
 {% block product_tour %}
-    {% if userPresenter %}
+    {% if userPresenter and showPPEditIntroTour|default(false) %}
         {% set tourSteps = [
             {
                 target: '[data-tour="pp-hero"]',

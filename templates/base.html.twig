@@ -417,11 +417,11 @@
 
                     {% block product_tour %}{% endblock %}
 
-                    {% if showThemeSelector|default(false) %}
+                    {% if showThemeSelector|default(false) and showThemeSelectorTour|default(false) %}
                         {% set themeTourSteps = [
                             {
                                 target: '[data-tour=\"theme-selector\"]',
-                                title: 'Personnalisez votre experience',
+                                title: 'Personnalisez votre experience !',
                                 body: 'Essayez les themes Propon pour adapter l\'interface a votre style.'
                             }
                         ] %}

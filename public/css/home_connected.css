@@ -22,6 +22,14 @@
     color: var(--theme-title);
 }
 
+.connected-title .connected-username {
+    color: var(--theme-accent);
+}
+
+html[data-theme-variant="classic"] .connected-title .connected-username {
+    color: var(--propon-logo-primary);
+}
+
 .connected-subtitle {
     margin-bottom: 0;
     color: var(--theme-text-muted);
@@ -31,6 +39,10 @@
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+}
+
+.connected-actions .btn-primary {
+    border-radius: 10px;
 }
 
 .connected-resume {

@@ -24,6 +24,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: space-evenly;
+    gap: 18px;
 
 }
 
@@ -63,6 +64,7 @@ html[data-theme-variant="custom"] .collection-title {
         justify-content: unset;
         flex-wrap: nowrap;
         overflow-x: auto;
+        gap: 12px;
     }
 
     .collection-container > * {
