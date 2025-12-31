@@ -281,7 +281,7 @@ html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope
 
 /* Delete Item Buttons */
 
-.show-delete-items-buttons { /* to do: rename without misleading semantic (delete items is better, and replace show-delete by js-show-delete...) */
+.show-delete-items-buttons {
 	border-radius: 6px;
 	padding-right: 7px;
 	border: 1px solid #e3e2e2;

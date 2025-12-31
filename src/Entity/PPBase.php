@@ -30,7 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PPBaseRepository::class)]
 #[ORM\Table]
-#[ORM\UniqueConstraint(name: 'uniq_pp_ing_source_url', columns: ['ing_source_url'])]
+#[ORM\UniqueConstraint(name: 'uniq_pp_ing_source_url_hash', columns: ['ing_source_url_hash'])]
 #[ORM\HasLifecycleCallbacks]
 #[Vich\Uploadable]
 class PPBase

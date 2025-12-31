@@ -124,8 +124,6 @@ class UpdateSlideController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            // to do: remove if the form is mapped correctly $slide->setYoutubeUrl($form->get('address')->getData());
-
             $scoreService->scoreUpdate($pp);
             $manager->flush();
             $cacheThumbnailService->updateThumbnail($pp, true);

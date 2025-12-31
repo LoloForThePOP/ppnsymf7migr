@@ -11,6 +11,9 @@ class IngestionMetadata
     #[ORM\Column(length: 2048, nullable: true)]
     private ?string $sourceUrl = null;
 
+    #[ORM\Column(type: 'binary', length: 32, nullable: true)]
+    private ?string $sourceUrlHash = null;
+
     // Organization as read from the source (kept separate from any linked profile)
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $sourceOrganizationName = null;
@@ -42,8 +45,21 @@ class IngestionMetadata
 
     public function setSourceUrl(?string $sourceUrl): self
     {
-        $this->sourceUrl = $sourceUrl;
+        $sourceUrl = $sourceUrl !== null ? trim($sourceUrl) : null;
+        $this->sourceUrl = $sourceUrl === '' ? null : $sourceUrl;
+
+        if ($this->sourceUrl === null) {
+            $this->sourceUrlHash = null;
+        } else {
+            $this->sourceUrlHash = hash('sha256', $this->sourceUrl, true);
+        }
+
         return $this;
+    }
+
+    public function getSourceUrlHash(): ?string
+    {
+        return $this->sourceUrlHash;
     }
 
     public function getSourceOrganizationName(): ?string
