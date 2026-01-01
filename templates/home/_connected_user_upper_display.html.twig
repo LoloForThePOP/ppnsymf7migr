@@ -56,7 +56,7 @@
                             <div class="proxy-news-creation-container connected-news-proxy">
                                 <input class="proxy-news-input" data-pp-id="{{ continuePresentation.id }}" type="text" placeholder="Donner des nouvelles">
                                 <div class="fake-send-button">
-                                    <img src="{{ asset('send_message.svg', 'misc')}}" alt="paper plane icon">
+                                    <img class="icon-strong" src="{{ asset('send_message.svg', 'misc')}}" alt="paper plane icon">
                                 </div>
                             </div>
                         </div>
@@ -140,7 +140,7 @@
     </div>
 
     {% if creatorPresentations|length > 0 %}
-        {{ project_collection('Vos projets récents', creatorPresentations, 'connected-collection', 'hide-335', '', creatorPresentationStats) }}
+        {{ project_collection('Vos projets récents', creatorPresentations, 'connected-collection recent-projects', 'hide-335', '', creatorPresentationStats) }}
     {% endif %}
 
     {% if recommendedPresentations|length > 0 %}

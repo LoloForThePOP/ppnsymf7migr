@@ -22,7 +22,7 @@ window.onload = function() {
       var el = document.createElement("a");
       el.innerHTML = "Afficher +";
       el.setAttribute("type", "button");
-      el.setAttribute("class", "read-more sm-display-none");
+      el.setAttribute("class", "read-more read-more--hidden");
       el.setAttribute("src", "#");
       
       insertAfter(allOSB[i], el);
@@ -55,7 +55,7 @@ function updateReadMore() {
         }
         allOSB[i].nextElementSibling.className = "read-more btn btn-primary btn-sm mt-2";
       } else {
-        allOSB[i].nextElementSibling.className = "read-more sm-display-none";
+        allOSB[i].nextElementSibling.className = "read-more read-more--hidden";
       }
     }
   }

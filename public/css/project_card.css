@@ -4,7 +4,7 @@
     display: inline-block;
     position: relative;
     width: 300px;
-    height: 314px;
+    height: 340px;
     overflow: hidden;
     border: 1px solid rgb(227, 221, 211);
     border-radius: 4px;
@@ -153,7 +153,7 @@ html[data-theme-variant="custom"] .collection-container .other-info-container {
 @media screen and (max-width: 810px) {
     .project-card {
         width: 210px;
-        height: 230px;
+        height: 250px;
         padding-top: 0;
         margin-right: 10px;
         margin-bottom: unset;
@@ -171,7 +171,7 @@ html[data-theme-variant="custom"] .collection-container .other-info-container {
 
 @media screen and (max-width: 580px) {
     .project-card {
-        height: 230px;
+        height: 250px;
     }
 
     .project-card .goal {

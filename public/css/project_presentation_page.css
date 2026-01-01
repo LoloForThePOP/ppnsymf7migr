@@ -488,7 +488,7 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-uppe
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-upper-box .commentIcon,
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-upper-box .upper-box-page-info-icon,
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .fake-send-button img {
-    filter: brightness(0) saturate(100%) var(--theme-icon-filter);
+    filter: brightness(0) saturate(100%) var(--icon-filter, var(--theme-icon-filter));
 }
 
 html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] #misc-struct-container .share-presentation-button img,

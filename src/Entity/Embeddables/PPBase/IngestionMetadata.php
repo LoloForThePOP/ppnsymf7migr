@@ -11,7 +11,9 @@ class IngestionMetadata
     #[ORM\Column(length: 2048, nullable: true)]
     private ?string $sourceUrl = null;
 
-    #[ORM\Column(type: 'binary', length: 32, nullable: true)]
+    // Fixed-length SHA-256 hex hash of the source URL for fast dedup/indexing.
+    // Hex string keeps storage/ORM handling simple vs. binary blobs.
+    #[ORM\Column(length: 64, nullable: true)]
     private ?string $sourceUrlHash = null;
 
     // Organization as read from the source (kept separate from any linked profile)
@@ -51,7 +53,7 @@ class IngestionMetadata
         if ($this->sourceUrl === null) {
             $this->sourceUrlHash = null;
         } else {
-            $this->sourceUrlHash = hash('sha256', $this->sourceUrl, true);
+            $this->sourceUrlHash = hash('sha256', $this->sourceUrl);
         }
 
         return $this;

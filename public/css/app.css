@@ -47,6 +47,7 @@ a{
     --theme-border: #e5e7eb;
     --theme-title: #0f172a;
     --theme-icon-filter: invert(55%) sepia(60%) saturate(316%) hue-rotate(118deg) brightness(87%) contrast(78%);
+    --theme-icon-filter-strong: var(--theme-icon-filter);
     --theme-contact-icon-filter: var(--theme-icon-filter);
     --theme-font-body: 'Lato', sans-serif;
     --theme-font-heading: 'Lato', sans-serif;
@@ -284,6 +285,7 @@ a{
     --theme-icon-filter: invert(85%) sepia(49%) saturate(586%) hue-rotate(357deg) brightness(103%) contrast(103%);
     --theme-icon-filter-vegetation: invert(46%) sepia(93%) saturate(720%) hue-rotate(88deg) brightness(96%) contrast(94%);
     --theme-icon-filter-sky: invert(55%) sepia(74%) saturate(538%) hue-rotate(169deg) brightness(93%) contrast(92%);
+    --theme-icon-filter-strong: var(--theme-icon-filter-sky);
     --theme-contact-icon-filter: var(--theme-icon-filter-vegetation);
     --pp-card-bg: #ffffff;
     --pp-card-border: #c2edd2;
@@ -500,7 +502,21 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] header .
 }
 
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] header .navbar .navbar-icon {
-    filter: var(--theme-icon-filter);
+    filter: var(--icon-filter, var(--theme-icon-filter));
+}
+
+/* Use on icons that need higher contrast (relies on --theme-icon-filter-strong). */
+.icon-strong {
+    --icon-filter: var(--theme-icon-filter-strong);
+}
+
+/* Theme helpers for consistent title text and icon filtering. */
+.theme-title-text {
+    color: var(--theme-title);
+}
+
+.icon-themed {
+    filter: brightness(0) saturate(100%) var(--icon-filter, var(--theme-icon-filter));
 }
 
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] header .navbar .navbar-icon.bg-white {

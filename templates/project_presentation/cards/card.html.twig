@@ -37,17 +37,15 @@
             ></a>
         {% endif %}
 
-        {% if not isAdminSession %}
-            <div class="image-container">
-            {% if imageUrl %}
-                <img src="{{ imageUrl }}" alt="{{ ariaLabel }}" loading="lazy">
-            {% else %}
-                <div class="h-100 w-100 d-flex align-items-center justify-content-center bg-light text-muted rounded">
-                    <small>{{ options.fallbackImageText }}</small>
-                </div>
-            {% endif %}
+        <div class="image-container">
+        {% if imageUrl %}
+            <img src="{{ imageUrl }}" alt="{{ ariaLabel }}" loading="lazy">
+        {% else %}
+            <div class="h-100 w-100 d-flex align-items-center justify-content-center bg-light text-muted rounded">
+                <small>{{ options.fallbackImageText }}</small>
             </div>
         {% endif %}
+        </div>
 
         {% if showEnrich or showDelete %}
             <div class="admin-actions position-absolute top-0 end-0 p-2 d-flex gap-1" style="z-index: 50;">
@@ -65,9 +63,10 @@
         <div class="goal-container">
             {% set goalText = presentation.goal|default('') %}
             <div class="goal">{{ goalText ? goalText|truncate(81) : '' }}</div> 
-            {# {% if presentation.title %}
-                <div class="title">{{ presentation.title }}</div>
-            {% endif %}#}
+            {% if presentation.title %}
+                {% set titleText = presentation.title %}
+                <div class="title">{{ titleText ? titleText|truncate(60) : '' }}</div>
+            {% endif %}
         </div>
 
         {# {% if options.showKeywords and presentation.keywords %}

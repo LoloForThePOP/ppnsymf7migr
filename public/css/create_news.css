@@ -101,7 +101,7 @@ html[data-theme-variant="custom"] .fake-send-button {
 }
 
 html[data-theme-variant="custom"] .fake-send-button img {
-    filter: brightness(0) saturate(100%) var(--theme-icon-filter);
+    filter: brightness(0) saturate(100%) var(--icon-filter, var(--theme-icon-filter));
 }
 
 html[data-theme-variant="custom"] .news-form-struct-title {
