@@ -2,32 +2,32 @@
 
 namespace App\Controller\Admin;
 
-use App\Repository\UserRepository;
 use App\Service\ScraperIngestionService;
 use App\Service\ScraperPersistenceService;
-use App\Repository\PPBaseRepository;
+use App\Service\ScraperUserResolver;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Security\Voter\ScraperAccessVoter;
 
 #[Route('/admin/harvest/run', name: 'admin_harvest_run', methods: ['POST'])]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted(ScraperAccessVoter::ATTRIBUTE)]
 class HarvestRunController extends AbstractController
 {
     public function __invoke(
         Request $request,
         ScraperIngestionService $ingestion,
         ScraperPersistenceService $persistence,
-        UserRepository $users,
-        PPBaseRepository $projects,
-        int $defaultCreatorId
+        ScraperUserResolver $scraperUserResolver
     ): Response {
-        $creator = $users->find($defaultCreatorId);
+        $creator = $scraperUserResolver->resolve();
         if (!$creator) {
-            $this->addFlash('warning', 'Créateur par défaut introuvable.');
+            $this->addFlash('warning', sprintf(
+                'Compte "%s" introuvable ou multiple.',
+                $scraperUserResolver->getRole()
+            ));
             return $this->redirectToRoute('admin_harvest');
         }
 

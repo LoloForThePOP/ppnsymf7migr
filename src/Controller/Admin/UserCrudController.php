@@ -12,7 +12,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[IsGranted('ROLE_ADMIN')]
 class UserCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
@@ -39,6 +41,7 @@ class UserCrudController extends AbstractCrudController
                 ->setChoices([
                     'Utilisateur' => 'ROLE_USER',
                     'Admin' => 'ROLE_ADMIN',
+                    'Scraper' => 'ROLE_SCRAPER',
                 ])
                 ->allowMultipleChoices();
         } else {

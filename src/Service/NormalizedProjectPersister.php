@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Category;
 use App\Entity\PPBase;
 use App\Entity\Slide;
+use App\Entity\User;
 use App\Enum\SlideType;
 use App\Entity\Embeddables\PPBase\OtherComponentsModels\QuestionAnswerComponent;
 use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
@@ -28,10 +29,10 @@ class NormalizedProjectPersister
      *
      * @param array<string,mixed> $payload
      */
-    public function persist(array $payload, int $creatorId): PPBase
+    public function persist(array $payload, User $creator): PPBase
     {
         $pp = new PPBase();
-        $pp->setCreator($this->em->getRepository(\App\Entity\User::class)->find($creatorId));
+        $pp->setCreator($creator);
         $pp->setTitle($payload['title'] ?? null);
         $pp->setGoal($payload['goal'] ?? '');
         $pp->setTextDescription($payload['description_html'] ?? null);

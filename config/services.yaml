@@ -16,8 +16,7 @@ parameters:
     # not implemented yet: app.email.newsletter: newsletter@propon.org
     app.scraping_from_llm_api.prompt_path: '%kernel.project_dir%/prompts/scraping_from_llm_api_query.txt'
     app.scraper.model: 'gpt-4o-mini' # use a stronger model to reduce hallucinations
-    app.scraper.creator_id: 91         # ID du compte "bot" (définir ici)
-    app.scraper.creator_username: ProjectPresenter   # ou username du compte "bot" (optionnel)
+    app.scraper.creator_role: 'ROLE_SCRAPER'         # Bot account role (stable attribution, distinct from the logged-in operator)
     app.normalize_text.prompt_path: '%kernel.project_dir%/prompts/normalize_project_from_text.txt'
     app.normalize_html.prompt_path: '%kernel.project_dir%/prompts/normalize_project_from_html.txt'
 
@@ -28,8 +27,7 @@ services:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         bind:
-            $defaultCreatorId: '%app.scraper.creator_id%'
-            $defaultCreatorUsername: '%app.scraper.creator_username%'
+            $scraperUserRole: '%app.scraper.creator_role%'
             $appNormalizeTextPromptPath: '%app.normalize_text.prompt_path%'
             $appNormalizeHtmlPromptPath: '%app.normalize_html.prompt_path%'
             $appScraperModel: '%app.scraper.model%'

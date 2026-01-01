@@ -6,6 +6,7 @@ enum CategoryList: string
 {
 
     case SOFTWARE = 'software';
+    case TECHNOLOGY = 'technology';
     case SCIENCE = 'science';
     case INFORM = 'inform';
     case HUMANE = 'humane'; 
@@ -36,6 +37,7 @@ enum CategoryList: string
     {
         return match ($this) {
             self::SOFTWARE      => 'Informatique, Codage, Internet',
+            self::TECHNOLOGY    => 'Technologie, Ingénierie, Robotique',
             self::SCIENCE       => 'Science, Recherche',
             self::INFORM        => 'Informer, Éduquer, Apprendre',
             self::HUMANE        => 'Vivre Ensemble, Humanitaire',
@@ -97,7 +99,6 @@ enum CategoryList: string
 
 
 }
-
 
 
 

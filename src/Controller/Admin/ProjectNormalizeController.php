@@ -9,6 +9,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Service\NormalizedProjectPersister;
+use App\Service\ScraperUserResolver;
+use App\Security\Voter\ScraperAccessVoter;
 
 class ProjectNormalizeController extends AbstractController
 {
@@ -16,19 +18,31 @@ class ProjectNormalizeController extends AbstractController
      * Admin controller to normalize project data from raw text using AI.
      */
     #[Route('/admin/project/normalize', name: 'admin_project_normalize', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(ScraperAccessVoter::ATTRIBUTE)]
     public function __invoke(
         Request $request,
         string $appNormalizeTextPromptPath,
         string $appScraperModel,
         NormalizedProjectPersister $persister,
-        int $defaultCreatorId
+        ScraperUserResolver $scraperUserResolver
     ): Response {
         $raw = trim((string) $request->request->get('raw_text', ''));
         $persist = (bool) $request->request->get('persist', false);
         $result = null;
         $error = null;
         $created = null;
+        $creator = null;
+
+        if ($persist) {
+            $creator = $scraperUserResolver->resolve();
+            if (!$creator) {
+                $this->addFlash('warning', sprintf(
+                    'Compte "%s" introuvable ou multiple. Persistance désactivée.',
+                    $scraperUserResolver->getRole()
+                ));
+                $persist = false;
+            }
+        }
 
         if ($raw !== '' && $request->isMethod('POST')) {
             try {
@@ -49,9 +63,9 @@ class ProjectNormalizeController extends AbstractController
 
                 $result = $response->choices[0]->message->content ?? '';
 
-                if ($persist && $result) {
+                if ($persist && $result && $creator) {
                     $data = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
-                    $created = $persister->persist($data, $defaultCreatorId);
+                    $created = $persister->persist($data, $creator);
                 }
             } catch (\Throwable $e) {
                 $error = $e->getMessage();

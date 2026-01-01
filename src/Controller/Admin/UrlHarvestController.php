@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Service\WebpageContentExtractor;
 use App\Service\NormalizedProjectPersister;
 use App\Service\UrlSafetyChecker;
+use App\Service\ScraperUserResolver;
 use OpenAI;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,9 +14,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Security\Voter\ScraperAccessVoter;
 
 #[Route('/admin/project/harvest-urls', name: 'admin_project_harvest_urls', methods: ['GET', 'POST'])]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted(ScraperAccessVoter::ATTRIBUTE)]
 final class UrlHarvestController extends AbstractController
 {
     public function __invoke(
@@ -24,13 +26,25 @@ final class UrlHarvestController extends AbstractController
         WebpageContentExtractor $extractor,
         NormalizedProjectPersister $persister,
         UrlSafetyChecker $urlSafetyChecker,
+        ScraperUserResolver $scraperUserResolver,
         string $appNormalizeHtmlPromptPath,
-        string $appScraperModel,
-        int $defaultCreatorId
+        string $appScraperModel
     ): Response {
         $urlsText = trim((string) $request->request->get('urls', ''));
         $persist = (bool) $request->request->get('persist', false);
         $results = [];
+        $creator = null;
+
+        if ($persist) {
+            $creator = $scraperUserResolver->resolve();
+            if (!$creator) {
+                $this->addFlash('warning', sprintf(
+                    'Compte "%s" introuvable ou multiple. Persistance désactivée.',
+                    $scraperUserResolver->getRole()
+                ));
+                $persist = false;
+            }
+        }
 
         if ($urlsText !== '' && $request->isMethod('POST')) {
             $urls = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $urlsText))));
@@ -67,9 +81,9 @@ final class UrlHarvestController extends AbstractController
                         $entry['raw'] = $content;
                         $created = null;
 
-                        if ($persist && $content) {
+                        if ($persist && $content && $creator) {
                             $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-                            $created = $persister->persist($data, $defaultCreatorId);
+                            $created = $persister->persist($data, $creator);
                         }
 
                         if ($created) {

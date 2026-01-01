@@ -11,9 +11,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Security\Voter\ScraperAccessVoter;
 
-#[IsGranted('ROLE_ADMIN')]
 #[AdminDashboard(routePath: '/admin', routeName: 'admin')]
 class DashboardController extends AbstractDashboardController
 {
@@ -39,8 +38,12 @@ class DashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linktoDashboard('📊 Dashboard', 'fa fa-home');
-        yield MenuItem::linkToRoute('✨ Outils de collecte', 'fa fa-magic', 'admin_harvest');
-        yield MenuItem::linkToCrud('📁 Projets', 'fa fa-folder-open', PPBase::class);
-        yield MenuItem::linkToCrud('👥 Utilisateurs', 'fa fa-user', User::class);
+        if ($this->isGranted(ScraperAccessVoter::ATTRIBUTE)) {
+            yield MenuItem::linkToRoute('✨ Outils de collecte', 'fa fa-magic', 'admin_harvest');
+        }
+        if ($this->isGranted('ROLE_ADMIN')) {
+            yield MenuItem::linkToCrud('📁 Projets', 'fa fa-folder-open', PPBase::class);
+            yield MenuItem::linkToCrud('👥 Utilisateurs', 'fa fa-user', User::class);
+        }
     }
 }

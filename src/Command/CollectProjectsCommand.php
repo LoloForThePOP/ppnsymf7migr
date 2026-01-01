@@ -2,9 +2,9 @@
 
 namespace App\Command;
 
-use App\Repository\UserRepository;
 use App\Service\ScraperIngestionService;
 use App\Service\ScraperPersistenceService;
+use App\Service\ScraperUserResolver;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,9 +21,7 @@ class CollectProjectsCommand extends Command
     public function __construct(
         private readonly ScraperIngestionService $scraperIngestionService,
         private readonly ScraperPersistenceService $scraperPersistenceService,
-        private readonly UserRepository $userRepository,
-        private readonly ?int $defaultCreatorId = null,
-        private readonly ?string $defaultCreatorUsername = null,
+        private readonly ScraperUserResolver $scraperUserResolver,
     ) {
         parent::__construct();
     }
@@ -32,8 +30,7 @@ class CollectProjectsCommand extends Command
     {
         $this
             ->addOption('persist', null, InputOption::VALUE_NONE, 'Persister les projets en base')
-            ->addOption('creator-id', null, InputOption::VALUE_REQUIRED, 'ID de l’utilisateur créateur (prioritaire si fourni)')
-            ->addOption('creator-username', null, InputOption::VALUE_REQUIRED, 'Username de l’utilisateur créateur (utilisé si id absent)');
+            ->addOption('creator-role', null, InputOption::VALUE_REQUIRED, 'Rôle du compte "bot" (ex: ROLE_SCRAPER)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -64,12 +61,11 @@ class CollectProjectsCommand extends Command
 
         if ($input->getOption('persist')) {
             $creator = $this->resolveCreator(
-                $input->getOption('creator-id'),
-                $input->getOption('creator-username')
+                $input->getOption('creator-role')
             );
 
             if (!$creator) {
-                $io->error('Créateur introuvable. Fournissez --creator-id/--creator-username ou configurez app.scraper.creator_id/creator_username.');
+                $io->error('Créateur introuvable. Fournissez --creator-role ou configurez app.scraper.creator_role.');
                 return Command::INVALID;
             }
 
@@ -88,31 +84,14 @@ class CollectProjectsCommand extends Command
                 }
             }
         } else {
-            $io->note('Mode aperçu : utilisez --persist --creator-id=<id> pour enregistrer (slides/places non gérés dans cette passe).');
+            $io->note('Mode aperçu : utilisez --persist --creator-role=ROLE_SCRAPER pour enregistrer (slides/places non gérés dans cette passe).');
         }
 
         return Command::SUCCESS;
     }
 
-    private function resolveCreator(?string $idOption, ?string $usernameOption): ?\App\Entity\User
+    private function resolveCreator(?string $roleOption): ?\App\Entity\User
     {
-        // Priority: CLI id > CLI username > default id > default username
-        if ($idOption) {
-            return $this->userRepository->find($idOption);
-        }
-
-        if ($usernameOption) {
-            return $this->userRepository->findOneBy(['username' => $usernameOption]);
-        }
-
-        if ($this->defaultCreatorId) {
-            return $this->userRepository->find($this->defaultCreatorId);
-        }
-
-        if ($this->defaultCreatorUsername) {
-            return $this->userRepository->findOneBy(['username' => $this->defaultCreatorUsername]);
-        }
-
-        return null;
+        return $this->scraperUserResolver->resolve($roleOption);
     }
 }
