@@ -62,7 +62,7 @@
 
         {% if created %}
             <div class="alert alert-success mt-3">
-                Projet créé : <a href="{{ path('edit_show_project_presentation', {'stringId': created.stringId}) }}">{{ created.title ?? created.goal }}</a>
+                Projet créé : <a href="{{ path('edit_show_project_presentation', {'stringId': created.stringId}) }}" target="_blank" rel="noopener noreferrer">{{ created.title ?? created.goal }}</a>
             </div>
         {% endif %}
     </div>

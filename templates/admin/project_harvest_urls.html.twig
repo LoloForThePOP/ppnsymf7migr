@@ -34,7 +34,7 @@
                                     {% elseif item.created is defined and item.created %}
                                         <div class="text-success small">
                                             Créé :
-                                            <a href="{{ path('edit_show_project_presentation', {'stringId': item.created.stringId}) }}">
+                                            <a href="{{ path('edit_show_project_presentation', {'stringId': item.created.stringId}) }}" target="_blank" rel="noopener noreferrer">
                                                 {{ item.created.title ?? item.created.goal }}
                                             </a>
                                         </div>

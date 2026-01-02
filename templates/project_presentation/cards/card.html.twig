@@ -62,7 +62,7 @@
 
         <div class="goal-container">
             {% set goalText = presentation.goal|default('') %}
-            <div class="goal">{{ goalText ? goalText|truncate(81) : '' }}</div> 
+            <div class="goal">{{ goalText ? goalText|truncate(67) : '' }}</div> 
             {% if presentation.title %}
                 {% set titleText = presentation.title %}
                 <div class="title">{{ titleText ? titleText|truncate(60) : '' }}</div>

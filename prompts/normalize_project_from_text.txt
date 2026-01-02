@@ -25,7 +25,7 @@ Contraintes :
 - image_urls : ne garder que les URLs explicites présentes dans le texte fourni (aucune invention). Dédupliquer. Pas de data URI.
 - images : si des légendes sont associées aux images (ex. liste numérotée de légendes après les URLs), renvoie un tableau d’objets aligné dans l’ordre d’apparition avec url + caption (caption peut être null si absente). Ne jamais inventer de légende. Sinon, renvoyer [].
 - videos : extraire uniquement les URLs YouTube explicites présentes (aucune invention), dédupliquer. Si des légendes sont associées (ex : titre ou phrase avant/après le lien), inclure dans caption (sinon null). Sinon, renvoyer [].
-- websites : extraire les liens officiels / réseaux sociaux explicites présents dans le texte (aucune invention). Pour chaque lien, fournir un titre court (ex : "Site officiel", "YouTube", "LinkedIn", ou le texte fourni autour du lien). Dédupliquer les URLs. Nettoyer les URL (retirer les paramètres UTM). Si rien, renvoyer [].
+- websites : extraire les liens officiels et réseaux sociaux présents dans le texte (aucune invention). Pour chaque lien, fournir un titre court (ex : "Site officiel", "Page YouTube", "Page LinkedIn", ou le texte fourni autour du lien). Nettoyer les URL (retirer les paramètres UTM). Ne pas utiliser plusieurs URL d'un même site web. Si rien, renvoyer [].
 - keywords : 3 à 5 mots-clés courts issus du texte. Pas d’invention ; si rien de pertinent, renvoyer [].
 - categories : 1 à 3 valeurs parmi la liste autorisée ci-dessus ; si rien ne correspond, mettre ["services"]. La catégorie "restore" concerne des restaurations de monuments ou autres objets du patrimoine.
 - source_url : URL http(s) explicite si présente dans le texte, sinon null.
