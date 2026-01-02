@@ -229,13 +229,6 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info
     border-color: var(--theme-accent);
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info-tooltip-icon {
-    filter: brightness(0) saturate(100%) var(--theme-icon-filter);
-}
-
-html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .pp-info-tooltip-icon {
-    filter: brightness(0) saturate(100%) var(--theme-icon-filter-sky);
-}
 
 .pp-info-tooltip-popover {
     max-width: 360px;
@@ -288,13 +281,6 @@ html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope
 	margin-bottom: 5px;
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .show-delete-items-buttons img {
-    filter: brightness(0) saturate(100%) var(--theme-icon-filter);
-}
-
-html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .show-delete-items-buttons img {
-    filter: brightness(0) saturate(100%) var(--theme-icon-filter-sky);
-}
 
 
 .delete-button { /* See if still used */

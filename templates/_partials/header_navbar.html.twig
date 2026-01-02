@@ -2,7 +2,7 @@
 
 <header>
 
-  <nav class="navbar navbar-expand-md fixed-top navbar-light bg-white" style="border-bottom: 2px solid var(--theme-accent);">
+  <nav class="navbar navbar-expand-md fixed-top navbar-light theme-surface" style="border-bottom: 2px solid var(--theme-accent);">
 
     <div class="container-fluid ps-3 ps-md-5">
 
@@ -35,7 +35,7 @@
 
         <li class="nav-item fs-5 me-3 d-none d-md-inline">
 
-          <a class="nav-link text-body" href="{{ path("index_articles")}}">Articles</a>
+          <a class="nav-link" href="{{ path("index_articles")}}">Articles</a>
 
         </li>
 
@@ -95,7 +95,7 @@
               <a href="{{path ('user_manage_messages')}}">
 
                 <button type="button" class="btn btn-success rounded">
-                  Messages <span class="badge bg-warning text-body">{{unreadMessagesCount}}</span>
+                  Messages <span class="badge bg-warning">{{unreadMessagesCount}}</span>
                 </button>
 
               </a>
@@ -113,7 +113,7 @@
               <a href="{{path ('user_manage_messages')}}">
 
                 <button type="button" class="btn btn-sm btn-success rounded me-2">
-                  Messages <span class="badge bg-warning text-body">{{unreadMessagesCount}}</span>
+                  Messages <span class="badge bg-warning">{{unreadMessagesCount}}</span>
                 </button>
 
               </a>
@@ -130,7 +130,7 @@
         
         <li class="nav-item d-md-none">
           <button class="btn btn-link p-0" type="button" data-search-trigger aria-label="Rechercher">
-            <img id="search_icon_small_screens" class="navbar-icon" src="{{ asset('search.svg', 'misc')}}" alt="search icon" style="height:26px;">
+            <img id="search_icon_small_screens" class="navbar-icon icon-themed" src="{{ asset('search.svg', 'misc')}}" alt="search icon" style="height:26px;">
           </button>
         </li>
 
@@ -173,7 +173,7 @@
 
         {% if app.user %}
 
-          <div class="bg-white">
+          <div class="theme-surface">
 
             {# Displaying user pseudo #}
 
@@ -250,7 +250,7 @@
       
       {# Tiny screens only: button to trigger hide menu / show menu #}
 
-      <button class="btn text-body navbar-toggler" data-bs-target="#navbarSMToggle" aria-controls="navbarSMToggle" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="btn navbar-toggler" data-bs-target="#navbarSMToggle" aria-controls="navbarSMToggle" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Toggle navigation">
 
         <span class="navbar-toggler-icon"></span>
 
@@ -288,7 +288,7 @@
 
               <a href="{{path ('admin')}}">
 
-                <img class="navbar-icon icon-strong px-1 py-1 mt-1 rounded" src="{{ asset('key.svg', 'misc')}}" alt="key icon" style="height:32px;">
+                <img class="navbar-icon icon-themed icon-strong px-1 py-1 mt-1 rounded" src="{{ asset('key.svg', 'misc')}}" alt="key icon" style="height:32px;">
 
               </a>
 

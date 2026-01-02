@@ -56,7 +56,7 @@
                             <div class="proxy-news-creation-container connected-news-proxy">
                                 <input class="proxy-news-input" data-pp-id="{{ continuePresentation.id }}" type="text" placeholder="Donner des nouvelles">
                                 <div class="fake-send-button">
-                                    <img class="icon-strong" src="{{ asset('send_message.svg', 'misc')}}" alt="paper plane icon">
+                                    <img class="icon-themed icon-strong" src="{{ asset('send_message.svg', 'misc')}}" alt="paper plane icon">
                                 </div>
                             </div>
                         </div>
@@ -78,9 +78,9 @@
     {% if continuePresentation and addNewsForm %}
         <div class="news-form-struct homepage-news-form" data-pp-id="{{ continuePresentation.id }}" style="display:none;">
             <h4 class="news-form-struct-title">
-                <img class="news-icon me-1" src="{{ asset('news.svg', 'misc')}}" alt="news icon (a radio wave)" width="22" height="22" style="transform: scaleX(-1);">
+                <img class="news-icon icon-themed me-1" src="{{ asset('news.svg', 'misc')}}" alt="news icon (a radio wave)" width="22" height="22" style="transform: scaleX(-1);">
                 Partager des Nouvelles
-                <img class="news-icon ms-1" src="{{ asset('news.svg', 'misc')}}" alt="news icon (a radio wave)" width="22" height="22">
+                <img class="news-icon icon-themed ms-1" src="{{ asset('news.svg', 'misc')}}" alt="news icon (a radio wave)" width="22" height="22">
             </h4>
             {% include "project_presentation/edit_show/news/add.html.twig" %}
         </div>

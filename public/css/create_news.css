@@ -100,16 +100,8 @@ html[data-theme-variant="custom"] .fake-send-button {
     border-color: var(--theme-accent);
 }
 
-html[data-theme-variant="custom"] .fake-send-button img {
-    filter: brightness(0) saturate(100%) var(--icon-filter, var(--theme-icon-filter));
-}
-
 html[data-theme-variant="custom"] .news-form-struct-title {
     color: var(--theme-title);
-}
-
-html[data-theme-variant="custom"] .news-form-struct-title .news-icon {
-    filter: brightness(0) saturate(100%) var(--theme-icon-filter);
 }
 
 html[data-theme-variant="custom"] .news-form-container form button[type="submit"] {
@@ -128,10 +120,6 @@ html[data-theme-variant="custom"] .news-form-container .images-icons-captions-co
 
 html[data-theme-variant="custom"] .news-form-container .images-icons-captions-container .add-image-label {
     color: var(--theme-text);
-}
-
-html[data-theme-variant="custom"] .news-form-container .upload-image-icon-news {
-    filter: brightness(0) saturate(100%) var(--theme-icon-filter);
 }
 
 html[data-theme-variant="custom"] .news-form-container .upload-image-icon-news:hover {

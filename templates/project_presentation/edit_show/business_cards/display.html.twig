@@ -28,7 +28,7 @@
             {# Email #}
 
             <div class="d-inline-block">
-                <img class="contact-card-icon" src="{{ asset('email.svg', 'business_card')}}" height="32" width="32" alt="email icon">
+                <img class="contact-card-icon icon-themed" src="{{ asset('email.svg', 'business_card')}}" height="32" width="32" alt="email icon">
             </div>
 
             <div class="d-inline-block ps-1">
@@ -47,7 +47,7 @@
 
                     {% if not editionMode %}
                     
-                        <a href="#" class="cryptedmail text-decoration-none text-body" 
+                        <a href="#" class="cryptedmail text-decoration-none" 
                         data-name="{{ bc.email1|split('@')[0] }}"
                         data-domaintld="{{ bc.email1|split('@')[1] }}"
                         onclick="window.location.href = 'mailto:' + this.dataset.name + '@' + this.dataset.domaintld; return false;">
@@ -66,7 +66,7 @@
 
                     {% if not editionMode %}
 
-                        <a href="#" class="cryptedmail text-decoration-none text-body" 
+                        <a href="#" class="cryptedmail text-decoration-none" 
                             data-name="{{ bc.email2|split('@')[0] }}"
                             data-domaintld="{{ conbctact.email2|split('@')[1] }}"
                             onclick="window.location.href = 'mailto:' + this.dataset.name + '@' + this.dataset.domaintld; return false;">
@@ -96,7 +96,7 @@
         <div class="d-flex mb-2"> 
 
             <div class="d-inline-block">
-                <img class="contact-card-icon" src="{{ asset('telephone.svg', 'business_card') }}" height="27" width="27" alt="telephone icon">
+                <img class="contact-card-icon icon-themed" src="{{ asset('telephone.svg', 'business_card') }}" height="27" width="27" alt="telephone icon">
             </div>
 
             <div class="d-inline-block ps-1">
@@ -105,7 +105,7 @@
 
                     {% if not editionMode %}
                 
-                        <a class="text-decoration-none text-body" href="tel:{{bc.tel1}}">
+                        <a class="text-decoration-none" href="tel:{{bc.tel1}}">
                             
                             {{bc.tel1}}
                         
@@ -125,7 +125,7 @@
 
                     {% if not editionMode %}
             
-                        <a class="text-decoration-none text-body" href="tel:{{bc.tel2}}">
+                        <a class="text-decoration-none" href="tel:{{bc.tel2}}">
                             
                             {{bc.tel2}}
 
@@ -153,7 +153,7 @@
         <div class="d-flex mb-2">
 
             <div class="d-inline-block">
-                <img class="contact-card-icon" src="{{ asset('website.svg', 'business_card')}}" height="27" width="27" alt="website icon">
+                <img class="contact-card-icon icon-themed" src="{{ asset('website.svg', 'business_card')}}" height="27" width="27" alt="website icon">
             </div>
 
             <div class="d-inline-block ps-1">
@@ -164,7 +164,7 @@
 
                 {% if not editionMode and safeWebsite1 %}
                 
-                    <a class="text-decoration-none text-body"
+                    <a class="text-decoration-none"
                     href="{{ safeWebsite1 }}" target="_blank" rel="noopener noreferrer">
 
                 {% endif %}
@@ -195,7 +195,7 @@
         
             <div class="d-inline-block">
 
-                <img class="contact-card-icon" src="{{ asset('address.svg', 'business_card')}}" height="27" width="27" alt="address icon">
+                <img class="contact-card-icon icon-themed" src="{{ asset('address.svg', 'business_card')}}" height="27" width="27" alt="address icon">
             
             </div> 
         

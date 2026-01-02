@@ -64,6 +64,16 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] form[nam
     filter: brightness(0) saturate(100%) var(--theme-contact-icon-filter);
 }
 
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .bc-content-wrapper,
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .bc-content-wrapper a {
+    color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .bc-content-wrapper a:hover,
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .bc-content-wrapper a:focus {
+    color: var(--theme-accent);
+}
+
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #add_business_card_form_modal .form-control,
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #add_business_card_form_modal textarea {
     background-color: var(--theme-surface-alt);

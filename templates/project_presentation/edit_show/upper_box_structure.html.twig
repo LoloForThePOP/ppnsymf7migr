@@ -3,11 +3,11 @@
 
 {% macro commentsIcon(countComments) %}
     
-    <a class="text-body" href="#comments-struct-container">
+    <a href="#comments-struct-container">
 
         <div class="d-flex align-items-center lh-1">
             
-            <img class="commentIcon me-2" src="{{ asset('dialog.svg', 'misc')}}" alt="an icon representing a dialog">
+            <img class="commentIcon icon-themed icon-strong me-2" src="{{ asset('dialog.svg', 'misc')}}" alt="an icon representing a dialog">
 
             <span class="">{{countComments}}</span> 
         
@@ -24,7 +24,7 @@
 
 {% macro threeDotsMoreInfo(pageInfo) %}
     
-    <img id="" class="upper-box-page-info-icon cursor-pointer" src="{{ asset('three_dots.svg', 'misc')}}" alt="three dots icon" width="25" height="25" data-bs-toggle="dropdown" aria-expanded="false" type="button">
+    <img id="" class="upper-box-page-info-icon icon-themed icon-strong cursor-pointer" src="{{ asset('three_dots.svg', 'misc')}}" alt="three dots icon" width="25" height="25" data-bs-toggle="dropdown" aria-expanded="false" type="button">
 
     {# Dropdown Content #}
 
@@ -41,7 +41,7 @@
     
     <a href="#" class="d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#pp-share" >
 
-        <img class="shareIcon" src="{{ asset('share_light.svg', 'misc')}}" alt="share icon" width="22" height="22">
+        <img class="shareIcon icon-themed icon-strong" src="{{ asset('share_light.svg', 'misc')}}" alt="share icon" width="22" height="22">
     
     </a>
     

@@ -165,9 +165,9 @@
 {% elseif userPresenter %} {# placeholder when no keywords and no category #}
 
     <div class="d-flex align-items-center gap-2">
-        <a class="pp-edition-mode text-decoration-none ps-md-0 text-body" href="#" data-bs-toggle="modal" data-bs-target="#categoriesKeywordsModal">
+        <a class="pp-edition-mode text-decoration-none ps-md-0" href="#" data-bs-toggle="modal" data-bs-target="#categoriesKeywordsModal">
             <div id="categories-keywords-placeholder" class="">
-                <img class="keywordsIcon img-fluid mb-1 me-1" src="{{ asset('hashtag.svg', 'pp_wysiwyg') }}" height="25" width="25" alt="add keywords icon" >
+                <img class="keywordsIcon icon-themed img-fluid mb-1 me-1" src="{{ asset('hashtag.svg', 'pp_wysiwyg') }}" height="25" width="25" alt="add keywords icon" >
                 <span class="">Catégories<span class="d-none d-md-inline"> & Mots-clés</span></span>
             </div>
         </a>

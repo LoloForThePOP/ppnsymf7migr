@@ -77,7 +77,7 @@
 }
 
 .static-manifesto .cta-search-icon {
-    filter: var(--manifesto-icon-filter);
+    --icon-filter: var(--manifesto-icon-filter);
 }
 
 .static-manifesto .cta-item-text {

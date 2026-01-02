@@ -207,14 +207,6 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .edit-sl
         border-color: var(--theme-accent);
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .edit-slide-button img {
-        filter: brightness(0) saturate(100%) var(--theme-icon-filter);
-}
-
-html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .edit-slide-button img {
-        filter: brightness(0) saturate(100%) var(--theme-icon-filter-sky);
-}
-
 
     /* Specific display when only one slide */
         

@@ -13,7 +13,7 @@
                 data-bs-toggle="modal"
                 data-bs-target="#managePlacesModal"
             >
-                <img class="edit-icon" src="{{ asset('edit.svg', 'pp_wysiwyg')}}" height="17" width="17" alt="edit icon" >
+                <img class="edit-icon icon-themed icon-strong" src="{{ asset('edit.svg', 'pp_wysiwyg')}}" height="17" width="17" alt="edit icon" >
             </button>
 
             {% if countPlaces == 0 %}
@@ -28,7 +28,7 @@
                     data-bs-content="{{ "Si votre projet est relié à des villes ou d'autres lieux (régions, pays, etc.), signalez-les ici."| e('html_attr') }}"
                     aria-label="Si votre projet est relié à des villes ou d'autres lieux (régions; pays; etc.), signalez-les ici."
                 >
-                    <img class="pp-info-tooltip-icon" src="{{ asset('info-non-circled.svg', 'misc') }}" alt="" aria-hidden="true">
+                    <img class="pp-info-tooltip-icon icon-themed icon-strong" src="{{ asset('info-non-circled.svg', 'misc') }}" alt="" aria-hidden="true">
                 </button>
 
             {% endif %}
