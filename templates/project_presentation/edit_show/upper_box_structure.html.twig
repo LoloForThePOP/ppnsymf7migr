@@ -3,7 +3,7 @@
 
 {% macro commentsIcon(countComments) %}
     
-    <a href="#comments-struct-container">
+    <a class="d-inline-flex align-items-center" href="#comments-struct-container">
 
         <div class="d-flex align-items-center lh-1">
             
@@ -175,19 +175,19 @@
 
         {# Project comments, likes, share - only Small Screens #}
 
-        <div class="pp-consultation-mode d-flex justify-content-center mt-0 mt-lg-2 d-lg-none">
+        <div class="pp-consultation-mode d-flex justify-content-center align-items-center mt-0 mt-lg-2 d-lg-none">
         
             <div class="d-flex justify-content-center align-items-center">
             
-                <div class="me-3">{{ _self.commentsIcon(countComments) }}</div>
+                <div class="d-flex align-items-center me-3">{{ _self.commentsIcon(countComments) }}</div>
 
-                <div class="me-3">{% include 'project_presentation/edit_show/like_button.html.twig' %}</div>
+                <div class="d-flex align-items-center me-3">{% include 'project_presentation/edit_show/like_button.html.twig' %}</div>
             
                 {{ shareIcon }}
             
             </div>
 
-            <div class="pp-consultation-mode ms-4">
+            <div class="pp-consultation-mode d-flex align-items-center ms-4">
             
                 {% include 'project_presentation/edit_show/follow_button.html.twig' %}
 

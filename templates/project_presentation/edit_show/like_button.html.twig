@@ -29,9 +29,8 @@
 {% else %} {# Logged In User; they can like / unlike a project presentation #}
 
     <a 
-    
         href="#"
-        class="js-ajax-like-pp d-inline-block"
+        class="js-ajax-like-pp d-inline-flex align-items-center"
         data-url="{{ path('ajax_like_pp', { stringId: presentation.stringId }) }}"
         data-token="{{ csrf_token('like' ~ presentation.stringId) }}"
         

@@ -54,6 +54,9 @@ final class SlugService
 
         $getter = 'get' . ucfirst($fieldName);
         if (method_exists($entity, $getter) && $entity->$getter() === $slug) {
+            if ($entity instanceof PPBase && $entity->getExtra()->isRandomizedStringId()) {
+                $entity->getExtra()->setIsRandomizedStringId(false);
+            }
             return;
         }
 
@@ -122,8 +125,10 @@ final class SlugService
         }
 
         if ($entity instanceof PPBase) {
-            // Do not regenerate slugs for published projects when the slug has been finalized.
-            if ($entity->getStringId() && !$entity->getExtra()->isRandomizedStringId() && $entity->isPublished()) {
+            // PPBase: allow exactly one promotion from randomized stringId to a title slug,
+            // then keep the URL stable even if the title changes later.
+            // Do not regenerate slugs once the slug has been finalized.
+            if ($entity->getStringId() && !$entity->getExtra()->isRandomizedStringId()) {
                 return ['', null];
             }
 

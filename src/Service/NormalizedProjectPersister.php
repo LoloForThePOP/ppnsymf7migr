@@ -49,6 +49,7 @@ class NormalizedProjectPersister
 
         // Images as slides (with optional captions)
         $logoUrl = (!empty($payload['logo_url']) && is_string($payload['logo_url'])) ? $payload['logo_url'] : null;
+        $thumbnailUrl = (!empty($payload['thumbnail_url']) && is_string($payload['thumbnail_url'])) ? $payload['thumbnail_url'] : null;
         $imagesPayload = [];
         if (!empty($payload['images']) && is_array($payload['images'])) {
             $imagesPayload = $payload['images'];
@@ -65,6 +66,12 @@ class NormalizedProjectPersister
         // Logo
         if ($logoUrl) {
             $this->attachLogo($pp, $logoUrl);
+        }
+
+        // Dedicated thumbnail (custom thumbnail takes precedence in cache)
+        if ($thumbnailUrl) {
+            $this->attachCustomThumbnail($pp, $thumbnailUrl);
+            $imagesPayload = $this->filterImagesPayload($imagesPayload, $thumbnailUrl);
         }
         
         $this->attachVideos($pp, $payload['videos'] ?? []);
@@ -234,6 +241,14 @@ class NormalizedProjectPersister
         }
     }
 
+    private function attachCustomThumbnail(PPBase $pp, string $url): void
+    {
+        $file = $this->downloader->download($url);
+        if ($file) {
+            $pp->setCustomThumbnailFile($file);
+        }
+    }
+
     private function attachQuestions(PPBase $pp, array $qa): void
     {
         $qa = array_slice($qa, 0, 4);
@@ -284,6 +299,29 @@ class NormalizedProjectPersister
             }
         }
         $pp->setOtherComponents($oc);
+    }
+
+    /**
+     * @param array<int, mixed> $images
+     *
+     * @return array<int, mixed>
+     */
+    private function filterImagesPayload(array $images, string $skipUrl): array
+    {
+        $filtered = [];
+        foreach ($images as $entry) {
+            if (is_array($entry)) {
+                $url = $entry['url'] ?? null;
+                if ($url === $skipUrl) {
+                    continue;
+                }
+            } elseif ($entry === $skipUrl) {
+                continue;
+            }
+            $filtered[] = $entry;
+        }
+
+        return $filtered;
     }
 
 }
