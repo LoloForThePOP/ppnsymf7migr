@@ -27,6 +27,6 @@ Contraintes :
 - videos : extraire uniquement les URLs YouTube explicites présentes (aucune invention), dédupliquer. Si des légendes sont associées (ex : titre ou phrase avant/après le lien), inclure dans caption (sinon null). Sinon, renvoyer [].
 - websites : extraire les liens officiels et réseaux sociaux présents dans le texte (aucune invention). Pour chaque lien, fournir un titre court (ex : "Site officiel", "Page YouTube", "Page LinkedIn", ou le texte fourni autour du lien). Nettoyer les URL (retirer les paramètres UTM). Ne pas utiliser plusieurs URL d'un même site web. Si rien, renvoyer [].
 - keywords : 3 à 5 mots-clés courts issus du texte. Pas d’invention ; si rien de pertinent, renvoyer [].
-- categories : 1 à 3 valeurs parmi la liste autorisée ci-dessus ; si rien ne correspond, mettre ["services"]. La catégorie "restore" concerne des restaurations de monuments ou autres objets du patrimoine.
+- categories : 1 à 3 valeurs parmi la liste autorisée ci-dessus. La catégorie "restore" concerne des restaurations de monuments ou autres objets du patrimoine. La catégorie "material" correspond à la fabrication d'objets physiques de toute sorte.
 - source_url : URL http(s) explicite si présente dans le texte, sinon null.
 - Pas d’autre texte hors du JSON. Retourne uniquement le JSON valide UTF-8.

@@ -2,7 +2,11 @@
 {# Case a logo is set, we display the logo and we cover it with a link to update it on click #}
 {% if not presentation.logo is empty %}
 
-    <img id="pp-logo" class="img-fluid" src="{{ vich_uploader_asset(presentation, 'logoFile') | imagine_filter('logo')}}" alt="Logo du Projet">
+    <div class="pp-logo-plate">
+        <div class="pp-logo-chip">
+            <img id="pp-logo" class="img-fluid" src="{{ vich_uploader_asset(presentation, 'logoFile') | imagine_filter('logo')}}" alt="Logo du Projet">
+        </div>
+    </div>
 
     {% if userPresenter %}
         <a class="pp-edition-mode coverable-link" href="{{ path('update_project_presentation_logo', {'stringId': presentation.stringId}) }}"></a>
@@ -29,10 +33,35 @@
 
 <style>
 
+    .pp-logo-plate{
+        padding: 6px;
+        border-radius: 10px;
+        background-color: color-mix(in srgb, var(--theme-surface) 80%, #ffffff);
+        border: 1px solid color-mix(in srgb, var(--theme-border) 70%, #ffffff);
+    }
+
+    .pp-logo-chip{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px;
+        border-radius: 8px;
+    }
+
     #pp-logo{
-        
-        margin-bottom: 0.5rem;
-        border-radius: 4px;
+        display: block;
+        margin: 0;
+        border-radius: 6px;
+    }
+
+    html[data-theme-variant="custom"][data-theme="dark"] .pp-logo-chip,
+    html[data-theme-variant="custom"][data-theme="neon"] .pp-logo-chip,
+    html[data-theme-variant="custom"][data-theme="cyberpunk"] .pp-logo-chip,
+    html[data-theme-variant="custom"][data-theme="matrix"] .pp-logo-chip,
+    html[data-theme-variant="custom"][data-theme="luxury-black"] .pp-logo-chip,
+    html[data-theme-variant="custom"][data-theme="deep-ocean"] .pp-logo-chip {
+        background-color: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.08);
     }
 
     .pp-logo-container .edit-icon-position{
@@ -84,6 +113,16 @@
 
 
     @media screen and (max-width: 580px) {
+
+        .pp-logo-plate{
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .pp-logo-chip{
+            padding: 4px;
+            border-radius: 6px;
+        }
 
         #pp-logo{
             border-radius: 4px;

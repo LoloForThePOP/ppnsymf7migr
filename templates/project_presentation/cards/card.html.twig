@@ -37,7 +37,7 @@
             ></a>
         {% endif %}
 
-        <div class="image-container">
+        <div class="image-container{{ imageUrl ? ' has-image' : '' }}">
         {% if imageUrl %}
             <img src="{{ imageUrl }}" alt="{{ ariaLabel }}" loading="lazy">
         {% else %}

@@ -39,16 +39,23 @@
     line-height: 1.2em;
 }
 
-.image-container {
+.project-card .image-container {
     height: 195px;
     padding: 10px;
     margin-bottom: 4px;
 }
 
-.image-container img {
+.project-card .image-container.has-image {
+    background-color: var(--theme-surface-alt);
+    border-radius: 8px;
+    box-shadow: 0 0 0 1px var(--theme-border) inset;
+}
+
+.project-card .image-container img {
+    display: block;
     width: 100%;
     height: 100%;
-    border-radius: 4px;
+    border-radius: 6px;
     object-fit: cover;
 }
 
@@ -163,7 +170,7 @@ html[data-theme-variant="custom"] .collection-container .other-info-container {
         line-height: 1.12;
     }
 
-    .image-container {
+    .project-card .image-container {
         height: 140px;
         margin-bottom: 0;
     }
