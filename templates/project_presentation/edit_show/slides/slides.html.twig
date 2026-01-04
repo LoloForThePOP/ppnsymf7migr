@@ -77,10 +77,6 @@
 					margin-bottom: 7px;
 					font-weight: bold;
 					cursor: pointer;
-					color: #2f3a5a;
-				}
-
-				html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .slideshow-container .text-placeholder {
 					color: var(--theme-text);
 				}
 			
@@ -173,12 +169,12 @@
 
 		.img-zoom-lens {
 			position: absolute;
-			border: 1px solid #d4d4d4;
+			border: 1px solid var(--theme-border);
 			/*set the size of the lens:*/
 			width: 80px;
 			height: 80px;
 			z-index: 2;
-			background-color: #6d6dff;
+			background-color: color-mix(in srgb, var(--theme-accent) 70%, var(--theme-surface));
 			opacity: 0; /* Make lens invisible at initialisation */
 			border-radius: 8px;
 		}
@@ -192,7 +188,7 @@
 			top: 0;
 			bottom: 0;
 			margin: auto;
-			border: 1px solid #d4d4d4;
+			border: 1px solid var(--theme-border);
 			border-radius: 4px;
 			z-index: 2;
 			margin-left: -10000px; /* display result only when cursor is moving (we set margin-left : auto when appropriate in js) */

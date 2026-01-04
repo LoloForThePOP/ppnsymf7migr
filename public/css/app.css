@@ -61,7 +61,11 @@ a{
     --pp-card-radius: 0.25rem;
     --pp-card-shadow: 0 0 0 rgba(0, 0, 0, 0);
     --pp-title-color: #1e3a8a;
+    --pp-card-goal-color: var(--theme-accent);
     --pp-icon-filter: var(--theme-icon-filter);
+    --pp-struct-icon-color: var(--theme-accent);
+    --pp-accent-secondary: var(--theme-accent);
+    --pp-tags-color: var(--theme-accent);
     --propon-logo-primary: #007300;
     --propon-logo-secondary: #5dad3e;
 }
@@ -83,6 +87,10 @@ a{
     --pp-card-border: #dee2e6;
     --pp-card-shadow: 0 0 0 rgba(0, 0, 0, 0);
     --pp-title-color: navy;
+    --pp-card-goal-color: #45429a;
+    --pp-struct-icon-color: #50988b;
+    --pp-accent-secondary: #81a7ff;
+    --pp-tags-color: #065fd4;
 }
 
 :root[data-theme="mint"] {
@@ -263,6 +271,7 @@ a{
     --pp-card-shadow: 0 12px 24px rgba(85, 211, 235, 0.24);
     --pp-title-color: #00b092;
     --pp-icon-filter: var(--theme-icon-filter);
+    --propon-logo-secondary: var(--theme-title);
     --theme-button-weight: 600;
 }
 
@@ -526,6 +535,13 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] header .
     color: var(--theme-text);
 }
 
+.theme-panel {
+    background-color: var(--theme-surface-alt);
+    border: 1px solid var(--theme-border);
+    color: var(--theme-text);
+    border-radius: 12px;
+}
+
 .theme-surface {
     background-color: var(--theme-surface);
     color: var(--theme-text);
@@ -575,6 +591,10 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] header .
 
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] header .propon-logo .propon-logo-secondary {
     opacity: 0.7;
+}
+
+html[data-theme-variant="custom"][data-theme="sunny-beach"] body[data-theme-scope="presentation"] header .propon-logo {
+    --propon-logo-secondary: var(--theme-title);
 }
 
 html[data-theme-variant="custom"][data-theme="retro-game"] .propon-logo {

@@ -44,8 +44,8 @@
 
 
 .slide-content-licence {
-	background: rgba(0,0,0,.7);
-	color: #ccc;
+	background: color-mix(in srgb, var(--theme-text) 35%, transparent);
+	color: var(--theme-text-muted);
 	display: inline-block;
 	font-size: 11px;
 	font-family: helvetica;
@@ -73,10 +73,10 @@
 
     border-radius: 50%;
     font-size: 20px;
-    color: #fff !important;
+    color: var(--theme-text) !important;
     line-height: 50px;
     text-align: center;
-    background-color: rgba(160, 160, 160, 0.3);
+    background-color: color-mix(in srgb, var(--theme-text) 20%, transparent);
 
     z-index: 30; /* keep above coverable links */
 }
@@ -104,7 +104,7 @@
     left:3px;
     padding: 0.5rem;
     border-radius: 50%;
-    background-color: #dc3545;
+    background-color: var(--bs-danger, #dc3545);
 }
 
 
@@ -113,7 +113,7 @@
 /* On hover, add a black background color with a little bit see-through */
 .prev:hover,
 .next:hover {
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: color-mix(in srgb, var(--theme-text) 45%, transparent);
 }
 
 .nav-buttons {
@@ -195,8 +195,8 @@
         width: 30px;
         height: 30px;
         border-radius: 50%;
-        background-color: #e2f6e1;
-        border: 1px solid #79be81;
+        background-color: var(--theme-surface-alt);
+        border: 1px solid var(--theme-accent);
         padding: 0;
         padding-top: 6px;
         line-height: 1;
@@ -312,10 +312,10 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .edit-sl
         padding: 1px 2px;
 
         font-size: 13px;
-        color:white;
+        color: var(--theme-text);
         text-shadow: 3px 3px 3px rgba(0,0,0,0.5);
 
-        background-color: rgba(0,0,0,0.3);
+        background-color: color-mix(in srgb, var(--theme-text) 20%, transparent);
             
     }
 

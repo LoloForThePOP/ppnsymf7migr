@@ -12,8 +12,8 @@
 
             const buildTinyMceContentStyle = function (padding) {
                 const rootStyles = getComputedStyle(document.documentElement);
-                const themeSurface = rootStyles.getPropertyValue('--theme-surface').trim() || '#ffffff';
-                const themeText = rootStyles.getPropertyValue('--theme-text').trim() || '#1f2937';
+                const themeSurface = rootStyles.getPropertyValue('--theme-surface').trim() || getComputedStyle(document.body).backgroundColor;
+                const themeText = rootStyles.getPropertyValue('--theme-text').trim() || getComputedStyle(document.body).color;
                 const themeFont = rootStyles.getPropertyValue('--theme-font-body').trim() || 'Lato, sans-serif';
                 const safePadding = padding || '0 15px';
 

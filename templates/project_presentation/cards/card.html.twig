@@ -77,7 +77,7 @@
             <div class="other-info-container">
                 <div class="stats">
                     <span class="stat-chunk">
-                        <img class="pp-card-icon" src="{{ asset('thumb_up_dark.svg', 'misc')}}" alt="thumb-up icon">
+                        <img class="pp-card-icon" src="{{ asset('thumb_up.svg', 'misc')}}" alt="thumb-up icon">
                         {% set likes = options.likesCount is not null ? options.likesCount : presentation.likes|default([])|length %}
                         {{ likes }}
                     </span>

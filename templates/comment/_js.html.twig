@@ -96,7 +96,10 @@
                 return;
             }
 
-            var buttonColor = hasContent ? "#ddf5c4" : "#ecf0f1";
+            var rootStyles = getComputedStyle(document.documentElement);
+            var idleColor = rootStyles.getPropertyValue('--theme-surface-alt').trim() || getComputedStyle(document.body).backgroundColor;
+            var activeColor = rootStyles.getPropertyValue('--theme-accent').trim() || getComputedStyle(document.body).color;
+            var buttonColor = hasContent ? activeColor : idleColor;
             $("button", $form).css('background-color', buttonColor);
 
         });

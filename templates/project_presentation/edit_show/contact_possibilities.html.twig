@@ -72,7 +72,7 @@
 
                     <div id="managePrivateMessagesCard" class="privateMessagesCard pm-activation-box bc-outer pp-edition-mode disabled">
 
-                        <h6 class="" style="font-weight: bold; font-size: 19px; text-align:center; color: #263c7d">Activer les messages privés</h6>
+                        <h6 class="pm-title">Activer les messages privés</h6>
     
                         <div class="d-flex justify-content-center">
     
@@ -119,24 +119,24 @@
                 font-weight: bold;
                 font-size: 18px;
                 width: 100%;
-                background-color: rgb(245, 245, 252);
-                color: rgb(25, 24, 16);
+                background-color: var(--theme-surface);
+                color: var(--theme-text);
                 border-radius: 4px;
-                border: 1px solid #c3bff8;
+                border: 1px solid var(--theme-border);
                 
             }
 
 
             #createPrivateMessageCard:hover{
-                background-color: #f3f3fd;
+                background-color: var(--theme-surface-alt);
             }
 
             .pm-1{
-                background-color: rgb(227, 255, 227);
+                background-color: color-mix(in srgb, var(--theme-accent) 18%, var(--theme-surface));
             }
 
             .pm-{
-                background-color: rgb(251, 198, 198);
+                background-color: color-mix(in srgb, var(--theme-accent) 8%, var(--theme-surface));
             }
 
             #managePrivateMessagesCard {
@@ -148,6 +148,13 @@
                 font-weight: bold;
                 text-align: center;
                 font-size: 18px;
+            }
+
+            .pm-title{
+                font-weight: bold;
+                font-size: 19px;
+                text-align:center;
+                color: var(--theme-title);
             }
 
 

@@ -3,7 +3,7 @@
 
 body {
 
-  background-color: #F5F5F5;
+  background-color: var(--theme-bg);
 }
 
 
@@ -18,7 +18,7 @@ body {
 
 .messages-container {
   padding:0;
-  background-color: #FFF; 
+  background-color: var(--theme-surface); 
   box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
   height: 76vh;
   
@@ -35,17 +35,17 @@ body {
 	height: 76vh;
 	overflow: hidden;
 	overflow-y: auto;
-	background-color: #ffffff;
+	background-color: var(--theme-surface);
 	display: inline-block;
-	border-right: 2px solid #cecee6;
+	border-right: 2px solid var(--theme-border);
 }
 
 
 .discussions .discussion {
   width: 100%;
   height: 100px;
-  background-color: #FAFAFA;
-  border-bottom: solid 1px #E0E0E0;
+  background-color: var(--theme-surface-alt);
+  border-bottom: solid 1px var(--theme-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,12 +62,12 @@ body {
 
 .discussions .discussion:hover {
   
-  background-color: #e3e5ff;
+  background-color: color-mix(in srgb, var(--theme-accent) 14%, var(--theme-surface));
   
 }
 
 .discussions .message-active {
-  background-color: rgb(233, 230, 255);
+  background-color: color-mix(in srgb, var(--theme-accent) 18%, var(--theme-surface));
 }
 
 .desc-contact {
@@ -83,7 +83,7 @@ body {
   margin: 0 0 6px 0;
   font-family:'Montserrat', sans-serif;
   font-size: 17px;
-  color:#515151;
+  color: var(--theme-text);
   line-height: normal;
   padding-right: 15px;
 }
@@ -94,7 +94,7 @@ body {
   font-family:'Montserrat', sans-serif;
   font-size: 17px;
   line-height: normal;
-  color:#515151;
+  color: var(--theme-text);
 }
 
 .timer {
@@ -104,9 +104,9 @@ body {
   font-size: 11px;
   padding: 3px 8px;
   margin: 0;
-  color: rgb(107, 107, 107);
-  background-color: #FFF;
-  border: 1px solid #E5E5E5;
+  color: var(--theme-text-muted);
+  background-color: var(--theme-surface);
+  border: 1px solid var(--theme-border);
   border-radius: 15px;
 }
 
@@ -117,16 +117,16 @@ body {
 }
 
 .header-chat {
-	background-color: #FFF;
+	background-color: var(--theme-surface);
 	height: 51px;
 	display: flex;
 	align-items: center;
-	border-bottom: 2px solid #cdcde3;
+	border-bottom: 2px solid var(--theme-border);
 }
 
 .chat .header-chat .icon {
   margin-left: 30px;
-  color:#515151;
+  color: var(--theme-text);
   font-size: 14pt;
 }
 
@@ -135,7 +135,7 @@ body {
   text-transform: uppercase;
   font-family:'Montserrat', sans-serif;
   font-size: 13pt;
-  color:#515151;
+  color: var(--theme-title);
 }
 
 
@@ -156,7 +156,7 @@ body {
 
 .chat .messages-chat .text {
   margin: 0;
-  background-color: #f6f6f6;
+  background-color: var(--theme-surface-alt);
   padding: 15px;
   border-radius: 12px;
 }
@@ -167,7 +167,7 @@ body {
 
 .time {
   font-size: 10px;
-  color:#616161;
+  color: var(--theme-text-muted);
   margin-bottom:10px;
   margin-left: 5px;
 }
@@ -189,14 +189,14 @@ body {
 }
 
 .response .text {
-  background-color: #e3effd !important;
+  background-color: color-mix(in srgb, var(--theme-accent) 18%, var(--theme-surface)) !important;
 }
 
 .footer-chat {
 	width: 100%;
 	height: 20vh;
 	background-color: transparent;
-	border-top: 2px solid #cecee6;
+	border-top: 2px solid var(--theme-border);
 }
 
 .footer-chat form {
@@ -212,7 +212,9 @@ body {
   max-width: 500px;
   display: inline-block;
   resize: none;
-  border: 2px solid #cecee6;
+  border: 2px solid var(--theme-border);
+  background-color: var(--theme-surface);
+  color: var(--theme-text);
 }
 
 .footer-chat form .validation-button {
@@ -220,12 +222,12 @@ body {
 	width: 60px;
 	height: 60px;
 	border-radius: 50px;
-	border: 2px solid #b5b5c9;
+	border: 2px solid var(--theme-border);
 }
 
 .chat .footer-chat .send {
-  color:#fff;
-  background-color: #4f6ebd;
+  color: var(--theme-accent-contrast);
+  background-color: var(--theme-accent);
   position: absolute;
   right: 50px;
   padding: 12px 12px 12px 12px;
@@ -234,7 +236,7 @@ body {
 }
 
 .write-message {
-  border: 1px solid blue;
+  border: 1px solid var(--theme-accent);
   width: 80%;
   height: 50px;
   margin-left: 20px;
@@ -242,18 +244,18 @@ body {
 }
 
 .footer-chat *::-webkit-input-placeholder {
-  color: #C0C0C0;
+  color: var(--theme-text-muted);
   font-size: 13pt;
 }
 
 .footer-chat input *::-moz-placeholder {
-  color: #C0C0C0;
+  color: var(--theme-text-muted);
   font-size: 13pt;
   margin-left:5px;
 }
 
 .footer-chat input *:-ms-input-placeholder {
-  color: #C0C0C0;
+  color: var(--theme-text-muted);
   font-size: 13pt;
 }
 

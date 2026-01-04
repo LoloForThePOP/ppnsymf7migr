@@ -5,12 +5,12 @@
     max-width: 100%;
     padding: 18px;
     margin-bottom: 22px;
-    border: 1px solid rgb(171, 173, 190);
+    border: 1px solid var(--theme-border);
     border-radius: 4px;
 }
 
 .bc-content-wrapper{
-    border-left: 3px solid #e0ddfe;
+    border-left: 3px solid var(--theme-accent);
     padding-left: 10px;
 }
 
@@ -119,7 +119,7 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #add_bus
     .bc-outer{
 
         padding: 12px;
-        border: 1px solid rgb(215, 216, 220);
+        border: 1px solid var(--theme-border);
 
     }
     

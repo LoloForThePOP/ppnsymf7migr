@@ -8,7 +8,7 @@
     margin: 0 auto 0 auto;
     overflow-y: auto;
     overflow-x: hidden;
-    border: 1px solid #b7babe;
+    border: 1px solid var(--theme-border);
     border-radius: 5px;
     box-sizing: border-box;
 }
@@ -50,8 +50,8 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    color: white;
-    background-color: #5b5b5b;
+    color: var(--theme-accent-contrast);
+    background-color: var(--theme-accent);
     border-radius: 10px;
     font-size: 11px;
     padding: 2px 7px;
@@ -60,7 +60,7 @@
 
 .news-card time{
     font-size: 14px;
-    color: #666;
+    color: var(--theme-text-muted);
 }
 
 .news-card .hideContent {
@@ -86,8 +86,8 @@
     
     padding-left: 7px;
     padding-right: 12px;
-    background-color: white;
-    color: #0d6efd;
+    background-color: var(--theme-surface);
+    color: var(--theme-accent);
     cursor: pointer;
     
 }
@@ -274,7 +274,7 @@ body.news-comments-open {
         width: 45px;
         height: 45px;
         margin-top: 20%;
-        background-color: #4b702c;
+        background-color: var(--theme-accent);
         border-radius: 50px;
     }
     

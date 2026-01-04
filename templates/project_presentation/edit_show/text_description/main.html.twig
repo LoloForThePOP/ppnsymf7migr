@@ -143,7 +143,7 @@
             }
 
             .edit-text-highlight{
-                background-color: blue;
+                background-color: color-mix(in srgb, var(--theme-accent) 35%, var(--theme-surface));
             }
                     
             .long-text button.collapsed:after {
@@ -187,29 +187,17 @@
 
             #text_description .pp-text-toggle-btn {
                 background-color: transparent;
-                border-color: #3b82f6;
-                color: #2563eb;
+                border-color: var(--pp-accent-secondary);
+                color: var(--pp-accent-secondary);
                 padding-top: 2px;
                 padding-bottom: 2px;
             }
 
             #text_description .pp-text-toggle-btn:hover,
             #text_description .pp-text-toggle-btn:focus {
-                background-color: #eff6ff;
-                border-color: #2563eb;
-                color: #1d4ed8;
-            }
-
-            html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #text_description .pp-text-toggle-btn {
-                background-color: transparent;
-                border-color: var(--theme-accent);
-                color: var(--theme-accent);
-            }
-
-            html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #text_description .pp-text-toggle-btn:hover,
-            html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #text_description .pp-text-toggle-btn:focus {
                 background-color: var(--theme-surface-alt);
-                color: var(--theme-accent);
+                border-color: var(--pp-accent-secondary);
+                color: var(--pp-accent-secondary);
             }
 
             #text-descr-live-edition-container.live-edit-session {

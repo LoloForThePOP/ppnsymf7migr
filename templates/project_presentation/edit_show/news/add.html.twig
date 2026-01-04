@@ -77,8 +77,8 @@
         //Rich textarea editor configuration
         const buildTinyMceContentStyle = function (padding) {
             const rootStyles = getComputedStyle(document.documentElement);
-            const themeSurface = rootStyles.getPropertyValue('--theme-surface').trim() || '#ffffff';
-            const themeText = rootStyles.getPropertyValue('--theme-text').trim() || '#1f2937';
+            const themeSurface = rootStyles.getPropertyValue('--theme-surface').trim() || getComputedStyle(document.body).backgroundColor;
+            const themeText = rootStyles.getPropertyValue('--theme-text').trim() || getComputedStyle(document.body).color;
             const themeFont = rootStyles.getPropertyValue('--theme-font-body').trim() || 'Lato, sans-serif';
             const safePadding = padding || '0 15px';
 
@@ -110,21 +110,16 @@
 
         // Change send button color when textarea changed
 
-        $('.news-form-container textarea').bind('input propertychange', function() {
+        var $newsContainer = $('.news-form-container');
+        var $newsTextarea = $newsContainer.find('textarea');
+        var updateSubmitState = function () {
+            $newsContainer.toggleClass('has-content', this.value.trim().length > 0);
+        };
 
-            var buttonColor;
-
-            if(this.value.length){
-
-                buttonColor = "#ddf5c4";
-               
-            }
-
-            else{ buttonColor = "#ecf0f1";}
-
-            $(".news-form-container button[type=submit]").css('background-color', buttonColor);
-
-        });
+        $newsTextarea.on('input propertychange', updateSubmitState);
+        if ($newsTextarea.length) {
+            updateSubmitState.call($newsTextarea[0]);
+        }
 
         // Check if (image) file input has a file
         // If so we change image icon appearence & make a caption input appear
@@ -159,8 +154,16 @@
 	width: 60px;
 	height: 60px;
 	border-radius: 50px;
-	border: 1px solid #79be81;
-}   
+	border: 1px solid var(--theme-border);
+    background-color: var(--theme-surface-alt);
+    color: var(--theme-text);
+}
+
+.news-form-container.has-content form button[type="submit"] {
+    background-color: color-mix(in srgb, var(--theme-accent) 24%, var(--theme-surface));
+    border-color: var(--theme-accent);
+    color: var(--theme-accent);
+}
 
 .news-form-container .not-textarea-container{
 
@@ -178,15 +181,15 @@
 .news-form-container .images-icons-captions-container .chunk {
 	display: flex;
 	padding: 10px;
-	border: 1px solid #cacadb;
+	border: 1px solid var(--theme-border);
 	border-radius: 50px;
 	margin-bottom: 12px;
     cursor: pointer;
-    background-color: white;
+    background-color: var(--theme-surface);
 }
 
 .news-form-container .images-icons-captions-container .chunk:hover{
-	background-color: #f5f9f5;
+	background-color: color-mix(in srgb, var(--theme-accent) 12%, var(--theme-surface));
 }
 
 .news-form-container .images-icons-captions-container .chunk:last-of-type {
@@ -204,7 +207,7 @@
 
 .news-form-container .upload-image-icon-news:hover {
 
-    background-color: #b9beff;
+    background-color: color-mix(in srgb, var(--theme-accent) 18%, var(--theme-surface));
     
 }
 

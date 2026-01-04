@@ -123,7 +123,8 @@
 
                     .newsSliderControls .item:hover{
 
-                        background-color: rgba(211, 253, 214, 0.8);
+                        background-color: color-mix(in srgb, var(--theme-accent) 20%, var(--theme-surface));
+                        border-color: var(--theme-accent);
 
                     }
 
@@ -136,20 +137,21 @@
                         text-align: center;
                         font-size: 20px;
                         border-radius: 50%;
-                        color: white;
+                        color: var(--theme-accent);
                         text-decoration: none;
                         cursor: pointer;  
                         font-weight: bold;  
                         transition: 0.6s ease;
                         user-select: none;
-                        background-color: #e2f6e1;
+                        background-color: var(--theme-surface-alt);
+                        border: 1px solid var(--theme-border);
 
                     }
 
                     .newsSliderControls .item .left-chevron, .newsSliderControls .item .right-chevron{
 
                         padding-bottom: 5px;
-                        color: #83b5ff;
+                        color: currentColor;
                         display: inline-block;
 
 

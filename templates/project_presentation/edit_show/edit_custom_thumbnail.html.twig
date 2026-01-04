@@ -19,32 +19,43 @@
             <div class="mb-5 text-center">
 
                 <h5 class="fw-bold mb-3">Vignette actuelle</h5>
+
+                <div class="thumbnail-status">
+                    <div class="thumbnail-current">
+                        {% if presentation.getExtra.getCacheThumbnailUrl is not empty %}
+
+                            <img class="thumbnail" src="{{ presentation.getExtra.getCacheThumbnailUrl }}" alt="Presentation Thumbnail">
                     
-                {% if presentation.getExtra.getCacheThumbnailUrl is not empty %}
-
-                    <img class="thumbnail" src="{{ presentation.getExtra.getCacheThumbnailUrl }}" alt="Presentation Thumbnail">
-            
-                {% else %} {# no cached thumbnail : default avatar #}
+                        {% else %} {# no cached thumbnail : default avatar #}
 
 
-                    {% set defaultThumbnailBG = ['#884394', '#3f51b5', '#009688', '#42a346', '#ff9800', '#2d66ba', '#a58f4f', '#129d90', '#428392', '#263b78', '#878273', '#705c20', '#d24040', '#c1944e'] %}
+                            <div class="avatar-square-rounded avatar-80 mx-auto thumbnail-fallback">
+                                
+                                <span class="avatar-initial avatar-initial-80">
 
-                    <div class="avatar-square-rounded avatar-80 mx-auto" style="background-color: {{ random (defaultThumbnailBG) }} !important;" >
-                        
-                        <span class="avatar-initial avatar-initial-80">
+                                {{ presentation.goal | slice (0,1) | upper }}
 
-                        {{ presentation.goal | slice (0,1) | upper }}
+                                </span>
 
-                        </span>
+                            </div>       
 
-                    </div>       
+                        {% endif %}
+                    </div>
 
-                {% endif %}
+                    <div class="thumbnail-preview-wrapper is-hidden" aria-live="polite">
+                        <div class="thumbnail-preview-label">Aperçu nouvelle vignette</div>
+                        <div class="thumbnail-preview">
+                            <img class="thumbnail-preview__image" alt="Aperçu de la vignette sélectionnée">
+                        </div>
+                    </div>
+                </div>
 
             </div>
             
+            {% set inputId = form.customThumbnailFile.vars.id %}
+
             <div class="fw-bold mb-3 h5 text-center"> 
-                Pour modifier la vignette cliquez ci-dessous.
+                Pour modifier la vignette cliquez ou déposez ci-dessous
             </div>
 
             <div class="">
@@ -53,10 +64,19 @@
 
             </div>
             
-            <div class="mt-2">
-                
-                {{ form_widget(form.customThumbnailFile) }}
+            <div class="thumbnail-uploader mt-3">
+                <label class="thumbnail-dropzone" for="{{ inputId }}" tabindex="0" role="button" aria-controls="{{ inputId }}">
+                    <span class="thumbnail-dropzone__icon">🖼️</span>
+                    <span class="thumbnail-dropzone__title">Déposer une image</span>
+                    <span class="thumbnail-dropzone__hint">ou cliquer pour sélectionner un fichier</span>
+                    <span class="thumbnail-dropzone__meta">PNG, JPG, WEBP, AVIF — max 10 MB</span>
+                </label>
 
+                {{ form_widget(form.customThumbnailFile, {
+                    attr: {
+                        class: 'thumbnail-input js-thumbnail-input'
+                    }
+                }) }}
             </div>
             
         </div>
@@ -77,6 +97,119 @@
                 max-height: 300px;
 
             }
+
+            .thumbnail-status{
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-items: flex-start;
+                gap: 24px;
+            }
+
+            .thumbnail-current,
+            .thumbnail-preview-wrapper{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .thumbnail-preview-wrapper.is-hidden{
+                display: none;
+            }
+
+            .thumbnail-preview-label{
+                font-weight: 600;
+                color: var(--theme-text-muted);
+            }
+
+            .thumbnail-uploader{
+                display: grid;
+                gap: 16px;
+                justify-items: center;
+            }
+
+            .thumbnail-dropzone{
+                width: min(420px, 100%);
+                min-height: 200px;
+                border: 2px dashed var(--theme-border);
+                border-radius: 16px;
+                background-color: var(--theme-surface-alt);
+                color: var(--theme-text);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                text-align: center;
+                cursor: pointer;
+                transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .thumbnail-dropzone:focus-visible{
+                outline: 2px solid var(--theme-accent);
+                outline-offset: 4px;
+            }
+
+            .thumbnail-dropzone.is-dragover{
+                border-color: var(--theme-accent);
+                background-color: color-mix(in srgb, var(--theme-accent) 14%, var(--theme-surface));
+                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+            }
+
+            .thumbnail-dropzone__icon{
+                font-size: 26px;
+            }
+
+            .thumbnail-dropzone__title{
+                font-weight: 700;
+                font-size: 18px;
+            }
+
+            .thumbnail-dropzone__hint{
+                font-size: 14px;
+                color: var(--theme-text-muted);
+            }
+
+            .thumbnail-dropzone__meta{
+                font-size: 12px;
+                color: var(--theme-text-muted);
+            }
+
+            .thumbnail-preview{
+                width: min(300px, 100%);
+                aspect-ratio: 1 / 1;
+                max-height: 300px;
+                border-radius: 16px;
+                border: 1px solid var(--theme-border);
+                background-color: var(--theme-surface);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .thumbnail-preview__image{
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: none;
+            }
+
+            .thumbnail-preview__image.is-visible{
+                display: block;
+            }
+
+            .thumbnail-input{
+                display: none;
+            }
+
+            .thumbnail-fallback{
+                background-color: color-mix(in srgb, var(--theme-accent) 25%, var(--theme-surface));
+                border: 1px solid var(--theme-border);
+                color: var(--theme-title);
+            }
             
             @media screen and (max-width: 580px) {
 
@@ -89,6 +222,73 @@
             }
 
         </style>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const input = document.querySelector('.js-thumbnail-input');
+                const dropzone = document.querySelector('.thumbnail-dropzone');
+                const previewWrapper = document.querySelector('.thumbnail-preview-wrapper');
+                const previewImage = previewWrapper?.querySelector('.thumbnail-preview__image');
+
+                if (!input || !dropzone || !previewImage || !previewWrapper) {
+                    return;
+                }
+
+                const showPreview = (file) => {
+                    if (!file) {
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        previewImage.src = event.target?.result || '';
+                        previewImage.classList.add('is-visible');
+                        previewWrapper.classList.remove('is-hidden');
+                    };
+                    reader.readAsDataURL(file);
+                };
+
+                input.addEventListener('change', () => {
+                    const file = input.files && input.files[0];
+                    showPreview(file);
+                });
+
+                dropzone.addEventListener('click', () => {
+                    input.click();
+                });
+
+                dropzone.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        input.click();
+                    }
+                });
+
+                ['dragenter', 'dragover'].forEach((eventName) => {
+                    dropzone.addEventListener(eventName, (event) => {
+                        event.preventDefault();
+                        dropzone.classList.add('is-dragover');
+                    });
+                });
+
+                ['dragleave', 'drop'].forEach((eventName) => {
+                    dropzone.addEventListener(eventName, () => {
+                        dropzone.classList.remove('is-dragover');
+                    });
+                });
+
+                dropzone.addEventListener('drop', (event) => {
+                    event.preventDefault();
+                    const files = event.dataTransfer?.files;
+                    if (!files || files.length === 0) {
+                        return;
+                    }
+                    const dt = new DataTransfer();
+                    Array.from(files).forEach((file) => dt.items.add(file));
+                    input.files = dt.files;
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+            });
+        </script>
         
 
     {% endblock %}
@@ -119,5 +319,3 @@
     {% endblock %}
 
 {% endembed %}
-
-

@@ -157,14 +157,14 @@
                 }
                 
                 .question-container:hover {
-                    background-color: #f5f5ff;
+                    background-color: color-mix(in srgb, var(--pp-accent-secondary) 12%, var(--theme-surface));
                 }
             
                 .question {
 
                     display: inline-block; 
 
-                    border-left: 3px solid var(--theme-accent, #bebef8);
+                    border-left: 3px solid var(--pp-accent-secondary);
                     padding-left: 8px;
             
                     font-size: 1.15em;
@@ -220,7 +220,7 @@
 
                 #questionsAnswers .date{
                     margin-top: 2px;
-                    color: #44494e;
+                    color: var(--theme-text-muted);
                     
                 }
                 
@@ -359,7 +359,7 @@
 
                     .faq-suggestions-title {
                         font-weight: bold;
-                        color: #7373ba;
+                        color: var(--theme-accent);
                         margin-bottom: 10px;
                         text-align: center;
                     }
@@ -375,11 +375,11 @@
                         margin-bottom: 4px;
                         border-radius: 4px;
                         cursor: pointer;
-                        border: 1px solid #c8c9e0;
+                        border: 1px solid var(--theme-border);
                     }
 
                     .faq-suggestions-container .suggestion:hover {
-                        background-color: #f2f2ff;
+                        background-color: var(--theme-surface-alt);
                     }
                 
                 </style>    

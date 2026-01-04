@@ -120,9 +120,12 @@ html[data-theme-variant="custom"] .project-card .keywords {
     color: var(--theme-accent);
 }
 
-html[data-theme-variant="custom"][data-theme="sunny-beach"] .project-card .goal,
+html[data-theme-variant="custom"][data-theme="sunny-beach"] .project-card .goal {
+    color: color-mix(in srgb, var(--theme-accent) 70%, var(--theme-text));
+}
+
 html[data-theme-variant="custom"][data-theme="sunny-beach"] .project-card .keywords {
-    color: var(--pp-title-color);
+    color: var(--theme-text-muted);
 }
 
 html[data-theme-variant="custom"][data-theme="retro-game"] .project-card .goal,

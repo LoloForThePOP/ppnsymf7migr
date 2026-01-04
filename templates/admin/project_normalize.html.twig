@@ -10,7 +10,7 @@
             <div class="alert alert-danger">{{ error }}</div>
         {% endif %}
 
-        <form method="post" action="{{ path('admin_project_normalize') }}">
+        <form id="normalize-form" method="post" action="{{ path('admin_project_normalize') }}">
             <div class="mb-3">
                 <label for="raw_text" class="form-label">Coller le contenu brut (FR/EN)</label>
                 <textarea id="raw_text" name="raw_text" class="form-control" rows="12" placeholder="Coller ici le texte non normalisé">{{ raw }}</textarea>
@@ -37,4 +37,32 @@
             </div>
         {% endif %}
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('normalize-form');
+            const persist = document.getElementById('persist');
+            if (!form || !persist) {
+                return;
+            }
+
+            form.addEventListener('submit', () => {
+                if (persist.checked) {
+                    window.open('about:blank', 'pp-normalize-result');
+                }
+            });
+        });
+    </script>
+
+    {% if created and persist %}
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const target = window.open('', 'pp-normalize-result');
+                if (target) {
+                    target.location = '{{ path('edit_show_project_presentation', {'stringId': created.stringId}) }}';
+                    target.focus();
+                }
+            });
+        </script>
+    {% endif %}
 {% endblock %}

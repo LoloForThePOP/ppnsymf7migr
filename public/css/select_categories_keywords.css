@@ -16,14 +16,15 @@
     line-height: 1.4em !important;
     font-weight: 700;
     
-    border: 1px solid black !important;
+    border: 1px solid var(--theme-border) !important;
     border-radius: 4px;
-    background-color: white;
+    background-color: var(--theme-surface);
+    color: var(--theme-text);
     cursor: pointer;
 }
 
 .cat-button:hover{
-    background-color:rgb(234, 245, 255);
+    background-color: var(--theme-surface-alt);
 }
 
 .cat-button .category-icon{
@@ -33,7 +34,8 @@
 
 /* La selection de la classe parente Permet un Override du Hover */
 #cat-grid .selectedCategory, #cat-grid .selectedCategory:hover {
-    background-color: yellow !important;
+    background-color: var(--theme-accent) !important;
+    color: var(--theme-accent-contrast);
 }
 
 .bt-left-col{
@@ -118,9 +120,9 @@
     height: 35px;
     margin: 0;
     padding: 10px;
-    background: #fff;
-    border: 1px solid black;
-    color: #727272;
+    background: var(--theme-surface);
+    border: 1px solid var(--theme-border);
+    color: var(--theme-text);
     font-size: 18px;
     transition: background 0.4s ease-in-out 0s;
 }
@@ -130,7 +132,8 @@
     display: inline-block;
     margin-right: 15px;
     margin-bottom: 15px;
-    background-color: #e1e1e1;
+    background-color: var(--theme-surface-alt);
+    color: var(--theme-text);
     cursor: pointer;
     
 }
@@ -150,9 +153,9 @@
 
 .remove-keyword{
 
-    color: white;
+    color: #fff;
     font-weight: bold;
-    background-color: red;
+    background-color: var(--bs-danger, #dc3545);
     padding: 0 5px;
     position: absolute;
     right:0;

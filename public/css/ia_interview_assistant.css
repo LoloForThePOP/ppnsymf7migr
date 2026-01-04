@@ -7,7 +7,7 @@ body {
 
 
 #main-ui form {
-  background-color: #ffffff;
+  background-color: var(--theme-surface);
   padding: 2rem;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -21,7 +21,7 @@ body {
 #main-ui label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--theme-text);
   font-weight: bold;
 }
 
@@ -29,9 +29,11 @@ body {
 #main-ui textarea {
   width: 100%;
   padding: 0.5rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--theme-border);
   border-radius: 5px;
   font-size: 1rem;
+  background-color: var(--theme-surface);
+  color: var(--theme-text);
 }
 
 #main-ui textarea {
@@ -44,7 +46,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #227422;
+  color: var(--theme-accent);
 }
 
 #main-ui .assistant-advice {
@@ -55,7 +57,7 @@ body {
 
 #main-ui .assistant-advice-label{
   text-align: center;
-  color: #5c5cae;
+  color: var(--theme-title);
   font-weight: bold;
 }
 
@@ -68,9 +70,9 @@ body {
 #main-ui button {
 
   padding: 0.75rem 1.5rem;
-  border: 2px solid #d2d5e4;
-  background-color: rgb(251, 254, 255);
-  color: rgb(72, 72, 72);
+  border: 2px solid var(--theme-border);
+  background-color: var(--theme-surface);
+  color: var(--theme-text);
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
@@ -86,7 +88,7 @@ body {
 }
 
 #main-ui button:hover {
-  background-color: #ededf2;
+  background-color: var(--theme-surface-alt);
 }
 
 
@@ -101,7 +103,7 @@ body {
 
 /* Styles for "Learn More" button */
 .learn-more {
-  color: #0073e6;
+  color: var(--theme-accent);
   cursor: pointer;
 }
 

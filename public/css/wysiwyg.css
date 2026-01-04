@@ -98,7 +98,7 @@
 
 .in-edition-mode .edit-hoverable-item:hover {
     cursor: pointer;
-    background-color: #e0ecff;
+    background-color: color-mix(in srgb, var(--theme-accent) 12%, var(--theme-surface));
     border-radius: 6px;
 }
 
@@ -147,8 +147,8 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .in-edit
 	border-radius: 50%;
 	text-align: center;
 	line-height: 110%;
-	background-color: #e2f6e1;
-    border: 1px solid #b0d7b5;
+	background-color: var(--theme-surface-alt);
+    border: 1px solid var(--theme-accent);
 }
 
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .plus-btn {
@@ -195,8 +195,8 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .plus-bt
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    border: 1px solid #b0d7b5;
-    background-color: #e2f6e1;
+    border: 1px solid var(--theme-accent);
+    background-color: var(--theme-surface-alt);
     color: inherit;
     line-height: 0;
     font-size: 0;
@@ -206,8 +206,8 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .plus-bt
 
 .pp-info-tooltip:hover,
 .pp-info-tooltip:focus {
-    background-color: #ffffff;
-    border-color: #7fb587;
+    background-color: var(--theme-surface);
+    border-color: var(--theme-accent);
 }
 
 .pp-info-tooltip-icon {
@@ -277,7 +277,7 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info
 .show-delete-items-buttons {
 	border-radius: 6px;
 	padding-right: 7px;
-	border: 1px solid #e3e2e2;
+	border: 1px solid var(--theme-border);
 	margin-bottom: 5px;
 }
 
@@ -294,7 +294,7 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info
 	padding: 0;
 	line-height: 0;
 	border-radius: 2px;
-    background-color: #dc3545 !important;
+    background-color: var(--bs-danger, #dc3545) !important;
     color: white !important;
     z-index: 20;
     transition: visibility 0s, opacity 2s linear;
@@ -310,8 +310,8 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info
 
 .delete-button:hover{
     color: #fff;
-    background-color: #bb2d3b !important;
-    border-color: #b02a37 !important;
+    background-color: color-mix(in srgb, var(--bs-danger, #dc3545) 85%, #000) !important;
+    border-color: color-mix(in srgb, var(--bs-danger, #dc3545) 70%, #000) !important;
 }
 
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .delete-button {
@@ -334,12 +334,12 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .delete-
     z-index: 10; /* Make sure it does not overlap */
     border: none; 
     outline: none; /* Remove outline */
-    background-color: #d6f0ca; 
+    background-color: var(--theme-surface-alt);
     
     cursor: pointer; 
     padding: 16px; 
     border-radius: 50%;
-    border: 1px solid #56af56;
+    border: 1px solid var(--theme-accent);
     
 }
 
@@ -368,7 +368,7 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .delete-
     margin-bottom: 10px;
     margin-top: 10px;
 
-    border: 1px solid #dee2e6 !important;
+    border: 1px solid var(--theme-border) !important;
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
     border-radius: 4px;
 
@@ -398,7 +398,7 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .delete-
 }
 
 .menu-button:hover {
-	background-color: #fdfbf3;
+	background-color: var(--theme-surface-alt);
     transition: 0.3s;
 }
 
@@ -411,7 +411,7 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .delete-
 
 [contenteditable=true]:empty:before{ /* Allow to insert Placeholders in Content Editables thanks to a data-text attributes*/
     content: attr(data-text);
-    color: rgb(203, 209, 214);
+    color: var(--theme-text-muted);
     cursor: text;
 }
 
@@ -514,7 +514,7 @@ textarea:focus, input:focus{
     justify-content: center;
     padding: 16px 48px 24px 48px;
     margin-bottom: 48px;
-    border : 1px solid grey;
+    border : 1px solid var(--theme-border);
 
 }
 

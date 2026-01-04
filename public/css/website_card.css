@@ -11,21 +11,21 @@
 
     margin-bottom: 20px; 
 
-    border: 1px solid #bedbf8;
-    background-color: #fbfcff;
+    border: 1px solid var(--theme-border);
+    background-color: var(--theme-surface);
     
     border-radius: 3px;
 
 }
 
 .pp-website-card:hover, .pp-website-card:hover a{
-    background-color:rgb(243, 247, 255) !important;
+    background-color: var(--theme-surface-alt) !important;
 }
 
 .pp-website-card a {
 
     text-decoration: none;
-    color: black;
+    color: var(--theme-text);
     width: 100%; /* otherwise size of icon column and url column will vary */
 
 }
@@ -55,7 +55,7 @@
     display: inline-block;
     width: 40px;
     height: 40px;
-    background-color: #065fd4;
+    background-color: var(--pp-accent-secondary);
     -webkit-mask-image: var(--website-logo-url);
     mask-image: var(--website-logo-url);
     -webkit-mask-repeat: no-repeat;
@@ -93,7 +93,7 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .website
 }
 
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .website-logo-icon {
-    background-color: var(--theme-accent);
+    background-color: var(--pp-accent-secondary);
 }
 
 html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .website-logo-icon {
@@ -140,7 +140,7 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .default
         max-width: 100%;
         margin:0;
         margin-bottom: 9px;
-        border: 1px solid #d4e7fa;
+        border: 1px solid var(--theme-border);
     }
 
     .websiteDescription {

@@ -77,6 +77,7 @@ class ProjectNormalizeController extends AbstractController
             'result' => $result,
             'error' => $error,
             'created' => $created,
+            'persist' => $persist,
         ]);
     }
 }

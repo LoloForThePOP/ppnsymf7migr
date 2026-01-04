@@ -21,7 +21,7 @@ Use these classes to keep SVG icons aligned with the active theme and avoid per-
 
 ```html
 <img class="icon-themed" src="{{ asset('search.svg', 'misc') }}" alt="search icon">
-<img class="icon-themed icon-strong" src="{{ asset('share_light.svg', 'misc') }}" alt="share icon">
+<img class="icon-themed icon-strong" src="{{ asset('share.svg', 'misc') }}" alt="share icon">
 ```
 
 ## Theme control

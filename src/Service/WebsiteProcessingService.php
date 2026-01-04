@@ -24,6 +24,7 @@ class WebsiteProcessingService
         "itch.io",
         "gamejolt.com",
         "wikipedia.org",
+        "fondation-patrimoine.org",
     ];
 
     private const FALLBACK_ICONS = [

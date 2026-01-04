@@ -9,7 +9,7 @@
             
             <img class="commentIcon icon-themed icon-strong me-2" src="{{ asset('dialog.svg', 'misc')}}" alt="an icon representing a dialog">
 
-            <span class="">{{countComments}}</span> 
+            <span class="comment-count">{{countComments}}</span> 
         
         </div>
     
@@ -41,7 +41,7 @@
     
     <a href="#" class="d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#pp-share" >
 
-        <img class="shareIcon icon-themed icon-strong" src="{{ asset('share_light.svg', 'misc')}}" alt="share icon" width="22" height="22">
+        <img class="shareIcon icon-themed icon-strong" src="{{ asset('share.svg', 'misc')}}" alt="share icon" width="22" height="22">
     
     </a>
     
@@ -217,7 +217,7 @@
         
         {# Project Likes & Share button #}
 
-        <div class="d-flex align-items-center px-2 pt-2 pb-0 pt-lg-0 pb-lg-3 mb-lg-3" style="border: none; border-bottom: 1px solid #ddddb1;">
+        <div class="pp-upper-actions-row d-flex align-items-center px-2 pt-2 pb-0 pt-lg-0 pb-lg-3 mb-lg-3">
         
             <span class="me-3">{% include 'project_presentation/edit_show/like_button.html.twig' %}</span>
 
@@ -244,11 +244,15 @@
 
             }
 
+            .pp-upper-actions-row{
+                border-bottom: 1px solid var(--theme-border);
+            }
+
             .in-consultation-mode .right-col-md .edit-third-row{
 
                 margin-bottom: 1rem;
                 border: none; 
-                border-bottom: 1px solid #ddddb1;
+                border-bottom: 1px solid var(--theme-border);
 
             }
         
@@ -282,14 +286,14 @@
     .middle-col-md{
         justify-content: center;
         align-items: center;
-        border-left: 1px solid rgb(204, 204, 161);
+        border-left: 1px solid var(--theme-border);
     }
 
     .right-col-md{
         display: flex;
         justify-content: space-evenly;
         padding-left: 10px;
-        border-left: 1px solid rgb(204, 204, 161);
+        border-left: 1px solid var(--theme-border);
     }
 
     .pp-placeholder-container {
@@ -327,6 +331,10 @@
 
         width: 22px;
 
+    }
+
+    .comment-count{
+        color: var(--theme-text);
     }
 
     .pp-upper-box .followed-display .text{
