@@ -1,0 +1,183 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}OpenAI Responses{% endblock %}
+
+{% block body %}
+    <div class="container my-4">
+        <h1 class="h4 mb-3">OpenAI Responses</h1>
+        <p class="text-muted small">Responses API with optional web search and reasoning effort.</p>
+
+        <form id="openai-responses-form" method="post" action="{{ path('admin_openai_responses_run') }}">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="model" class="form-label">Model</label>
+                    <input id="model" name="model" class="form-control" value="{{ defaultModel }}">
+                </div>
+                <div class="col-md-6">
+                    <label for="reasoning_effort" class="form-label">Reasoning effort</label>
+                    <select id="reasoning_effort" name="reasoning_effort" class="form-select">
+                        <option value="">Default</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3 mt-3">
+                <label for="instructions" class="form-label">Instructions (system)</label>
+                <textarea id="instructions" name="instructions" class="form-control" rows="3" placeholder="Optional system prompt">{{ defaultInstructions }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="input" class="form-label">Input</label>
+                <textarea id="input" name="input" class="form-control" rows="10" placeholder="Type your prompt here"></textarea>
+            </div>
+
+            <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="web_search" name="web_search" value="1" checked>
+                    <label class="form-check-label" for="web_search">Enable web search tool</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="include_raw" name="include_raw" value="1">
+                    <label class="form-check-label" for="include_raw">Include raw response JSON</label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="response-run-btn">
+                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                <span class="btn-text">Run</span>
+            </button>
+        </form>
+
+        <div id="response-status" class="mt-3"></div>
+        <div id="response-meta" class="text-muted small mt-2"></div>
+
+        <div id="response-output" class="mt-3 d-none">
+            <h2 class="h6">Output</h2>
+            <pre class="theme-pre p-3 rounded" id="response-text" style="white-space: pre-wrap;"></pre>
+        </div>
+
+        <div id="response-reasoning" class="mt-3 d-none">
+            <h2 class="h6">Reasoning summary</h2>
+            <pre class="theme-pre p-3 rounded" id="response-reasoning-text" style="white-space: pre-wrap;"></pre>
+        </div>
+
+        <div id="response-raw" class="mt-3 d-none">
+            <h2 class="h6">Raw response</h2>
+            <pre class="theme-pre p-3 rounded" id="response-raw-text" style="white-space: pre-wrap;"></pre>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('openai-responses-form');
+            const statusEl = document.getElementById('response-status');
+            const metaEl = document.getElementById('response-meta');
+            const outputWrap = document.getElementById('response-output');
+            const outputEl = document.getElementById('response-text');
+            const reasoningWrap = document.getElementById('response-reasoning');
+            const reasoningEl = document.getElementById('response-reasoning-text');
+            const rawWrap = document.getElementById('response-raw');
+            const rawEl = document.getElementById('response-raw-text');
+            const runBtn = document.getElementById('response-run-btn');
+
+            if (!form || !statusEl || !outputWrap || !outputEl || !runBtn) {
+                return;
+            }
+
+            const spinner = runBtn.querySelector('.spinner-border');
+            const btnText = runBtn.querySelector('.btn-text');
+
+            const setStatus = (message, kind) => {
+                statusEl.textContent = '';
+                if (!message) {
+                    return;
+                }
+                const wrapper = document.createElement('div');
+                wrapper.className = `alert alert-${kind}`;
+                wrapper.textContent = message;
+                statusEl.appendChild(wrapper);
+            };
+
+            const setLoading = (isLoading) => {
+                if (isLoading) {
+                    runBtn.setAttribute('disabled', 'disabled');
+                } else {
+                    runBtn.removeAttribute('disabled');
+                }
+                if (spinner) {
+                    spinner.classList.toggle('d-none', !isLoading);
+                }
+                if (btnText) {
+                    btnText.textContent = isLoading ? 'Running...' : 'Run';
+                }
+            };
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                setStatus('', '');
+                if (metaEl) {
+                    metaEl.textContent = '';
+                }
+                if (reasoningWrap) {
+                    reasoningWrap.classList.add('d-none');
+                }
+                if (rawWrap) {
+                    rawWrap.classList.add('d-none');
+                }
+                outputWrap.classList.add('d-none');
+                outputEl.textContent = '';
+                if (reasoningEl) {
+                    reasoningEl.textContent = '';
+                }
+                if (rawEl) {
+                    rawEl.textContent = '';
+                }
+                setLoading(true);
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: new FormData(form),
+                    });
+                    const payload = await response.json().catch(() => ({}));
+
+                    if (!response.ok) {
+                        setStatus(payload.error || `Request failed (${response.status}).`, 'danger');
+                        return;
+                    }
+
+                    const outputText = payload.output_text || '';
+                    outputEl.textContent = outputText;
+                    outputWrap.classList.remove('d-none');
+
+                    if (Array.isArray(payload.reasoning_summary) && payload.reasoning_summary.length > 0 && reasoningWrap && reasoningEl) {
+                        reasoningEl.textContent = payload.reasoning_summary.join('\n\n');
+                        reasoningWrap.classList.remove('d-none');
+                    }
+
+                    if (payload.raw && rawWrap && rawEl) {
+                        rawEl.textContent = JSON.stringify(payload.raw, null, 2);
+                        rawWrap.classList.remove('d-none');
+                    }
+
+                    if (payload.usage && metaEl) {
+                        const usage = payload.usage;
+                        metaEl.textContent = `Tokens: in ${usage.input_tokens} / out ${usage.output_tokens} / total ${usage.total_tokens}`;
+                    }
+
+                    if (!outputText && (!payload.reasoning_summary || payload.reasoning_summary.length === 0)) {
+                        setStatus('No output returned.', 'warning');
+                    }
+                } catch (error) {
+                    setStatus('Request failed due to a network error.', 'danger');
+                } finally {
+                    setLoading(false);
+                }
+            });
+        });
+    </script>
+{% endblock %}

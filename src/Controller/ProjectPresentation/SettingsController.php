@@ -48,6 +48,44 @@ final class SettingsController extends AbstractController
         ]);
     }
 
+    #[Route('/projects/{stringId}/settings/validation', name: 'pp_update_admin_validation', methods: ['POST'])]
+    public function updateAdminValidation(
+        #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
+        Request $request,
+        EntityManagerInterface $em,
+    ): Response {
+        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $token = (string) $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('pp_admin_validation_toggle' . $presentation->getStringId(), $token)) {
+            $this->addFlash('danger', 'Le jeton CSRF est invalide.');
+
+            return $this->redirectToRoute('edit_show_project_presentation', [
+                'stringId' => $presentation->getStringId(),
+            ]);
+        }
+
+        $shouldValidate = $request->request->has('validated');
+        $presentation->setIsAdminValidated($shouldValidate);
+        $em->flush();
+
+        $this->addFlash(
+            'success',
+            $shouldValidate ? '✅ Présentation validée.' : '✅ Présentation invalidée.'
+        );
+
+        $referer = $request->headers->get('referer');
+        if ($referer) {
+            return $this->redirect($referer);
+        }
+
+        return $this->redirectToRoute('edit_show_project_presentation', [
+            'stringId' => $presentation->getStringId(),
+        ]);
+    }
+
     #[Route('/projects/{stringId}/delete', name: 'pp_delete_presentation', methods: ['GET', 'POST'])]
     public function deletePresentation(
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,

@@ -45,5 +45,8 @@ class DashboardController extends AbstractDashboardController
             yield MenuItem::linkToCrud('📁 Projets', 'fa fa-folder-open', PPBase::class);
             yield MenuItem::linkToCrud('👥 Utilisateurs', 'fa fa-user', User::class);
         }
+        if ($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_SUPER_ADMIN')) {
+            yield MenuItem::linkToRoute('🧐 À vérifier', 'fa fa-check-circle', 'admin_presentations_to_review');
+        }
     }
 }

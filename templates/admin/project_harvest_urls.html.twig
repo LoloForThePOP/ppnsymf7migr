@@ -8,6 +8,11 @@
 
         <form method="post" action="{{ path('admin_project_harvest_urls') }}">
             <div class="mb-3">
+                <label for="prompt_extra" class="form-label">Complément de prompt</label>
+                <textarea id="prompt_extra" name="prompt_extra" class="form-control" rows="3" placeholder="Optionnel : instructions supplémentaires pour la normalisation">{{ promptExtra }}</textarea>
+                <div class="form-text">Ajouté au prompt standard avant l’envoi.</div>
+            </div>
+            <div class="mb-3">
                 <label for="urls" class="form-label">Collez des URLs (une par ligne, max 10)</label>
                 <textarea id="urls" name="urls" class="form-control" rows="8" placeholder="https://exemple.com/page-a&#10;https://exemple.com/page-b">{{ urls }}</textarea>
             </div>

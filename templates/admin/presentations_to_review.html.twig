@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}À vérifier{% endblock %}
+
+{% block body %}
+    <div class="container my-4">
+        <h1 class="h4 mb-3">À vérifier</h1>
+
+        {% if presentations is empty %}
+            <div class="alert alert-success">Aucune présentation en attente.</div>
+        {% else %}
+            <div class="list-group">
+                {% for presentation in presentations %}
+                    <a class="list-group-item list-group-item-action" href="{{ path('edit_show_project_presentation', {'stringId': presentation.stringId}) }}" target="_blank" rel="noopener noreferrer">
+                        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                            <div>
+                                <div class="fw-bold">
+                                    {{ presentation.title ? presentation.title : presentation.goal }}
+                                </div>
+                                <div class="text-muted small">
+                                    Créé le {{ presentation.createdAt ? presentation.createdAt|date('Y-m-d') : 'n/a' }}
+                                    {% if presentation.creator %}
+                                        par {{ presentation.creator.username }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="small text-muted">Ouvrir</div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

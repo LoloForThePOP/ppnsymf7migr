@@ -31,6 +31,7 @@ final class UrlHarvestController extends AbstractController
         string $appScraperModel
     ): Response {
         $urlsText = trim((string) $request->request->get('urls', ''));
+        $promptExtra = trim((string) $request->request->get('prompt_extra', ''));
         $persist = (bool) $request->request->get('persist', false);
         $results = [];
         $creator = null;
@@ -54,6 +55,9 @@ final class UrlHarvestController extends AbstractController
             if ($prompt === false) {
                 $results[] = ['url' => null, 'error' => 'Prompt introuvable.'];
             } else {
+                if ($promptExtra !== '') {
+                    $prompt = rtrim($prompt) . "\n\n" . $promptExtra;
+                }
                 $client = OpenAI::client($_ENV['OPENAI_API_KEY'] ?? '');
 
                 foreach ($urls as $url) {
@@ -100,6 +104,7 @@ final class UrlHarvestController extends AbstractController
 
         return $this->render('admin/project_harvest_urls.html.twig', [
             'urls' => $urlsText,
+            'promptExtra' => $promptExtra,
             'persist' => $persist,
             'results' => $results,
         ]);

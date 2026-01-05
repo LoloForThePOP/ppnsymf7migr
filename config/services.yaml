@@ -19,6 +19,7 @@ parameters:
     app.scraper.creator_role: 'ROLE_SCRAPER'         # Bot account role (stable attribution, distinct from the logged-in operator)
     app.normalize_text.prompt_path: '%kernel.project_dir%/prompts/normalize_project_from_text.txt'
     app.normalize_html.prompt_path: '%kernel.project_dir%/prompts/normalize_project_from_html.txt'
+    app.normalize_prompt.prompt_path: '%kernel.project_dir%/prompts/normalize_project_from_prompt.txt'
 
     
 services:
@@ -30,6 +31,7 @@ services:
             $scraperUserRole: '%app.scraper.creator_role%'
             $appNormalizeTextPromptPath: '%app.normalize_text.prompt_path%'
             $appNormalizeHtmlPromptPath: '%app.normalize_html.prompt_path%'
+            $appNormalizePromptPath: '%app.normalize_prompt.prompt_path%'
             $appScraperModel: '%app.scraper.model%'
 
     # makes classes in src/ available to be used as services
