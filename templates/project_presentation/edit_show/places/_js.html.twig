@@ -178,6 +178,36 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', waitForGooglePlaces);
+    function bindPlacesModalAutofocus() {
+        var modal = document.getElementById('managePlacesModal');
+        var input = document.getElementById('autocomplete');
+        if (!modal || !input) {
+            return;
+        }
+
+        modal.addEventListener('shown.bs.modal', function (event) {
+            if (!event.relatedTarget) {
+                return;
+            }
+            setTimeout(function () {
+                if (!document.body.contains(input)) {
+                    return;
+                }
+                var active = document.activeElement;
+                if (active && modal.contains(active) && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) {
+                    return;
+                }
+                input.focus();
+                if (typeof input.select === 'function') {
+                    input.select();
+                }
+            }, 120);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        waitForGooglePlaces();
+        bindPlacesModalAutofocus();
+    });
 
 </script>

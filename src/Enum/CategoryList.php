@@ -42,7 +42,7 @@ enum CategoryList: string
             self::INFORM        => 'Informer, Éduquer, Apprendre',
             self::HUMANE        => 'Vivre Ensemble, Humanitaire',
             self::ANIMALS       => 'Animaux',
-            self::MATERIAL      => 'Fabriquer, Construire',
+            self::MATERIAL      => 'Fabrication d\'objet, Construire',
             self::RESTORE       => 'Restaurer, Rénover, Recycler',
             self::TRANSPORT     => 'Transporter',
             self::ENVIRONMENT   => 'Environnement',
