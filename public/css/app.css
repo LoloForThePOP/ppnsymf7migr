@@ -1603,6 +1603,33 @@ label:active:after {
     background-color: #F4FBFF;
 }
 
+html[data-theme="classic"] .btn-validate{
+    background-color: #c8efb6;
+    border-color: #a7dc8d;
+    color: #1f2937;
+}
+
+html[data-theme="classic"] .btn-validate:hover,
+html[data-theme="classic"] .btn-validate:focus,
+html[data-theme="classic"] .btn-validate:active{
+    background-color: #b3e19b;
+    border-color: #9acc84;
+    color: #1f2937;
+}
+
+html[data-theme="classic"] .btn-go-back{
+    background-color: var(--theme-surface-alt);
+    border: 1px solid var(--theme-border);
+    color: var(--theme-text);
+}
+
+html[data-theme="classic"] .btn-go-back:hover,
+html[data-theme="classic"] .btn-go-back:focus,
+html[data-theme="classic"] .btn-go-back:active{
+    background-color: var(--theme-surface);
+    color: var(--theme-text);
+}
+
 /* Social connect buttons */
 
 .connect-btn {

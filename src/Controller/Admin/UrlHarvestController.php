@@ -88,6 +88,7 @@ final class UrlHarvestController extends AbstractController
                         if ($persist && $content && $creator) {
                             $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
                             $created = $persister->persist($data, $creator);
+                            $entry['places_debug'] = $persister->getLastPlaceDebug();
                         }
 
                         if ($created) {

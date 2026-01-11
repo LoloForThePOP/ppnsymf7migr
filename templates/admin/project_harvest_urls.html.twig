@@ -54,6 +54,45 @@
                                     <pre class="theme-pre p-2 rounded" style="white-space: pre-wrap;">{{ item.raw }}</pre>
                                 </details>
                             {% endif %}
+                            {% if item.places_debug is defined and item.places_debug %}
+                                <details class="mt-2">
+                                    <summary>Debug geocodage</summary>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Query</th>
+                                                    <th scope="col">Status</th>
+                                                    <th scope="col">Message</th>
+                                                    <th scope="col">Resolved</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for debug in item.places_debug %}
+                                                    <tr>
+                                                        <td class="small">{{ debug.query ?? 'n/a' }}</td>
+                                                        <td class="small">{{ debug.status ?? 'n/a' }}</td>
+                                                        <td class="small">{{ debug.message ?? '-' }}</td>
+                                                        <td class="small">
+                                                            {% if debug.resolved is defined and debug.resolved %}
+                                                                {{ debug.resolved.name ?? 'n/a' }}
+                                                                {% if debug.resolved.lat is defined and debug.resolved.lng is defined %}
+                                                                    ({{ debug.resolved.lat }}, {{ debug.resolved.lng }})
+                                                                {% endif %}
+                                                                {% if debug.resolved.type is defined and debug.resolved.type %}
+                                                                    [{{ debug.resolved.type }}]
+                                                                {% endif %}
+                                                            {% else %}
+                                                                -
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </details>
+                            {% endif %}
                         </div>
                     {% endfor %}
                 </div>

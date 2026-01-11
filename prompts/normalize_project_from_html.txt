@@ -18,6 +18,7 @@ Produit un JSON UTF-8 valide :
   "images": [{"url": "string", "caption": "string|null"}],
   "videos": [{"url": "string", "caption": "string|null"}],
   "websites": [{"title": "string", "url": "string"}],
+  "places": [{"query": "string", "type": "locality|administrative_area_level_2|administrative_area_level_1|country|postal_code|sublocality_level_1|route|street_number|generic"}],
   "keywords": ["string"],
   "categories": ["software|science|inform|humane|animals|material|restore|transport|environment|history|money|food|services|arts|entertainment|data|health|idea|space|crisis"],
   "source_url": "string|null"
@@ -26,13 +27,14 @@ Produit un JSON UTF-8 valide :
 Contraintes :
 - Langue : français.
 - description_html : 2 paragraphes, balisés avec <p>…</p>, sans autres balises. Adopter un ton neutre et descriptif sans utiliser de formulations marketing.
-- qa : 2 à 4 questions/réponses relativement courtes qui ne recoupent pas avec goal et pas avec description_html pour rendre le contenu digestible (en français).
+- qa : 2 à 4 questions / réponses relativement courtes pour rendre le contenu digestible (en français), ces questions / réponses ne doivent pas avoir de lien avec l'objectif du projet et pas de lien avec description_html.
 - logo_url : URL explicite d’un logo si un logo est présent dans TEXT/LINKS/IMAGES ; sinon null. Ne pas inventer. Si un logo est présent, ne pas l’inclure dans image_urls/images.
 - thumbnail_url : URL explicite d’une vignette/couverture si elle est indiquée comme telle dans TEXT/LINKS (ex. "thumbnail", "vignette", "image de couverture", "cover", "hero"). Ne pas inventer. Si une vignette est présente, ne pas l’inclure dans image_urls/images.
 - image_urls : ne garder que les URLs explicites présentes dans IMAGES (aucune invention). Dédupliquer. Pas de data URI. N’utiliser ce champ que si tu ne peux pas fournir images avec captions ; sinon laisser image_urls vide.
 - images : si des légendes sont associées aux images (ex. liste numérotée de légendes après les URLs), renvoie un tableau d’objets aligné dans l’ordre d’apparition avec url + caption (caption peut être null si absente). Ne jamais inventer de légende. Si tu fournis images, laisser image_urls vide. Sinon, renvoyer [].
 - videos : extraire uniquement les URLs YouTube explicites présentes (aucune invention), dédupliquer. Si des légendes sont associées (ex : titre ou phrase avant/après le lien), inclure dans caption (sinon null). Sinon, renvoyer [].
 - websites : extraire les liens officiels et réseaux sociaux présents dans LINKS (aucune invention). Pour chaque lien, fournir un titre court (ex : "Site web officiel", "Page YouTube", "Page LinkedIn", ou le texte fourni autour du lien). Nettoyer les URL (retirer les paramètres UTM).
+- places : 0 à 3 lieux maximum. Si une localisation est clairement mentionnée dans TEXT/LINKS (ville, département, région, pays), renvoyer un objet par lieu avec query (ex: "Orléans, Loiret, France") et un type (ex: locality, administrative_area_level_2, administrative_area_level_1, country). Ne pas inventer. Sinon, renvoyer [].
 - keywords : 3 à 5 mots-clés courts issus du texte. Pas d’invention ; si rien de pertinent, renvoyer [].
 - categories : 1 à 3 valeurs parmi la liste autorisée ci-dessus. La catégorie "restore" concerne des restaurations de batîments, de monuments ou restauration d'autres objets du patrimoine. La catégorie "material" correspond à la fabrication d'objets. La catégorie "history" inclue nettement les projets en rapport avec le patrimoine.
 - source_url : URL http(s) explicite si présente dans l’entrée (TEXT/LINKS), sinon null.

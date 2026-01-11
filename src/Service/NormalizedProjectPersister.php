@@ -4,8 +4,10 @@ namespace App\Service;
 
 use App\Entity\Category;
 use App\Entity\PPBase;
+use App\Entity\Place;
 use App\Entity\Slide;
 use App\Entity\User;
+use App\Entity\Embeddables\GeoPoint;
 use App\Enum\SlideType;
 use App\Entity\Embeddables\PPBase\OtherComponentsModels\QuestionAnswerComponent;
 use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
@@ -15,12 +17,18 @@ use Symfony\Component\String\Slugger\AsciiSlugger;
 
 class NormalizedProjectPersister
 {
+    /**
+     * @var array<int, array<string, mixed>>
+     */
+    private array $lastPlaceDebug = [];
+
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly CategoryRepository $categoryRepository,
         private readonly ImageDownloader $downloader,
         private readonly CacheThumbnailService $thumbnailService,
         private readonly WebsiteProcessingService $websiteProcessor,
+        private readonly PlaceNormalizationService $placeNormalizationService,
     ) {
     }
 
@@ -31,6 +39,8 @@ class NormalizedProjectPersister
      */
     public function persist(array $payload, User $creator): PPBase
     {
+        $this->lastPlaceDebug = [];
+
         $pp = new PPBase();
         $pp->setCreator($creator);
         $pp->setTitle($payload['title'] ?? null);
@@ -78,6 +88,7 @@ class NormalizedProjectPersister
         $this->attachImages($pp, $imagesPayload, $logoUrl);
         $this->attachWebsites($pp, $payload['websites'] ?? []);
         
+        $this->attachPlaces($pp, $payload['places'] ?? []);
 
         // Q&A as other components
         $this->attachQuestions($pp, $payload['qa'] ?? []);
@@ -98,6 +109,14 @@ class NormalizedProjectPersister
         $this->thumbnailService->updateThumbnail($pp, true);
 
         return $pp;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function getLastPlaceDebug(): array
+    {
+        return $this->lastPlaceDebug;
     }
 
     private function attachCategories(PPBase $pp, array $cats): void
@@ -206,6 +225,100 @@ class NormalizedProjectPersister
                 break;
             }
         }
+    }
+
+    private function attachPlaces(PPBase $pp, mixed $places): void
+    {
+        if (!is_array($places) || $places === []) {
+            return;
+        }
+
+        $result = $this->placeNormalizationService->normalizePlacesWithDebug($places, 3);
+        $normalizedPlaces = $result['places'];
+        $this->lastPlaceDebug = $result['debug'];
+
+        if ($normalizedPlaces === []) {
+            return;
+        }
+
+        $seen = [];
+        foreach ($pp->getPlaces() as $existing) {
+            if (!$existing instanceof Place) {
+                continue;
+            }
+            $seen[$this->placeFingerprintFromEntity($existing)] = true;
+        }
+
+        $position = $pp->getPlaces()->count();
+        foreach ($normalizedPlaces as $data) {
+            $fingerprint = $this->placeFingerprintFromData($data);
+            if (isset($seen[$fingerprint])) {
+                continue;
+            }
+
+            $lat = $data['lat'] ?? null;
+            $lng = $data['lng'] ?? null;
+            if (!is_float($lat) && !is_int($lat)) {
+                continue;
+            }
+            if (!is_float($lng) && !is_int($lng)) {
+                continue;
+            }
+
+            $place = (new Place())
+                ->setType((string) ($data['type'] ?? 'generic'))
+                ->setName($data['name'] ?? null)
+                ->setCountry($data['country'] ?? null)
+                ->setAdministrativeAreaLevel1($data['administrative_area_level_1'] ?? null)
+                ->setAdministrativeAreaLevel2($data['administrative_area_level_2'] ?? null)
+                ->setLocality($data['locality'] ?? null)
+                ->setSublocalityLevel1($data['sublocality_level_1'] ?? null)
+                ->setPostalCode($data['postal_code'] ?? null)
+                ->setGeoloc(new GeoPoint((float) $lat, (float) $lng))
+                ->setPosition($position++);
+
+            $pp->addPlace($place);
+            $this->em->persist($place);
+
+            $seen[$fingerprint] = true;
+        }
+    }
+
+    private function placeFingerprintFromEntity(Place $place): string
+    {
+        $geo = $place->getGeoloc();
+        $lat = $geo->getLatitude();
+        $lng = $geo->getLongitude();
+        if ($lat !== null && $lng !== null) {
+            return sprintf('geo:%s,%s', round($lat, 6), round($lng, 6));
+        }
+
+        $name = strtolower(trim((string) $place->getName()));
+        $locality = strtolower(trim((string) $place->getLocality()));
+        $country = strtolower(trim((string) $place->getCountry()));
+
+        return sprintf('text:%s|%s|%s', $name, $locality, $country);
+    }
+
+    private function placeFingerprintFromData(array $data): string
+    {
+        $lat = $data['lat'] ?? null;
+        $lng = $data['lng'] ?? null;
+        if (is_float($lat) || is_int($lat)) {
+            $lat = round((float) $lat, 6);
+        }
+        if (is_float($lng) || is_int($lng)) {
+            $lng = round((float) $lng, 6);
+        }
+        if ($lat !== null && $lng !== null) {
+            return sprintf('geo:%s,%s', $lat, $lng);
+        }
+
+        $name = strtolower(trim((string) ($data['name'] ?? '')));
+        $locality = strtolower(trim((string) ($data['locality'] ?? '')));
+        $country = strtolower(trim((string) ($data['country'] ?? '')));
+
+        return sprintf('text:%s|%s|%s', $name, $locality, $country);
     }
 
     /**
