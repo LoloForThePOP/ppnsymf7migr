@@ -68,7 +68,14 @@ final class UrlHarvestController extends AbstractController
                             throw new \RuntimeException($fetch['error']);
                         }
                         $html = $fetch['html'] ?? '';
-                        $extracted = $extractor->extract($html);
+                        $finalUrl = $fetch['final_url'] ?? $url;
+                        $entry['debug'] = [
+                            'final_url' => $finalUrl,
+                            'html_preview' => $this->truncateHtml($html),
+                        ];
+                        $extracted = $extractor->extract($html, $finalUrl);
+                        $entry['debug']['links'] = $extracted['links'] ?? [];
+                        $entry['debug']['images'] = $extracted['images'] ?? [];
 
                         $userContent = "URL: {$url}\n\n### TEXT\n{$extracted['text']}\n\n### LINKS\n" . implode("\n", $extracted['links']) . "\n\n### IMAGES\n" . implode("\n", $extracted['images']);
 
@@ -112,7 +119,7 @@ final class UrlHarvestController extends AbstractController
     }
 
     /**
-     * @return array{html: ?string, error: ?string}
+     * @return array{html: ?string, error: ?string, final_url: ?string}
      */
     private function fetchHtmlWithSafeRedirects(
         HttpClientInterface $httpClient,
@@ -124,7 +131,7 @@ final class UrlHarvestController extends AbstractController
 
         for ($i = 0; $i <= $maxRedirects; $i++) {
             if (!$urlSafetyChecker->isAllowed($currentUrl)) {
-                return ['html' => null, 'error' => 'URL non autorisée.'];
+                return ['html' => null, 'error' => 'URL non autorisée.', 'final_url' => $currentUrl];
             }
 
             try {
@@ -133,7 +140,7 @@ final class UrlHarvestController extends AbstractController
                     'max_redirects' => 0,
                 ]);
             } catch (TransportExceptionInterface) {
-                return ['html' => null, 'error' => 'Erreur réseau.'];
+                return ['html' => null, 'error' => 'Erreur réseau.', 'final_url' => $currentUrl];
             }
 
             $status = $response->getStatusCode();
@@ -141,12 +148,12 @@ final class UrlHarvestController extends AbstractController
                 $headers = $response->getHeaders(false);
                 $location = $headers['location'][0] ?? null;
                 if (!is_string($location) || $location === '') {
-                    return ['html' => null, 'error' => 'Redirection invalide.'];
+                    return ['html' => null, 'error' => 'Redirection invalide.', 'final_url' => $currentUrl];
                 }
 
                 $resolved = $this->resolveRedirectUrl($location, $currentUrl);
                 if ($resolved === null) {
-                    return ['html' => null, 'error' => 'URL de redirection invalide.'];
+                    return ['html' => null, 'error' => 'URL de redirection invalide.', 'final_url' => $currentUrl];
                 }
 
                 $currentUrl = $resolved;
@@ -154,13 +161,35 @@ final class UrlHarvestController extends AbstractController
             }
 
             if ($status !== 200) {
-                return ['html' => null, 'error' => sprintf('Status HTTP %d', $status)];
+                return ['html' => null, 'error' => sprintf('Status HTTP %d', $status), 'final_url' => $currentUrl];
             }
 
-            return ['html' => $response->getContent(false), 'error' => null];
+                return [
+                    'html' => $response->getContent(false),
+                    'error' => null,
+                    'final_url' => $currentUrl,
+                ];
         }
 
-        return ['html' => null, 'error' => 'Trop de redirections.'];
+        return ['html' => null, 'error' => 'Trop de redirections.', 'final_url' => $currentUrl];
+    }
+
+    private function truncateHtml(string $html, int $maxLength = 100000): string
+    {
+        $html = $this->stripLargeBlocks($html);
+        if (strlen($html) <= $maxLength) {
+            return $html;
+        }
+
+        return substr($html, 0, $maxLength) . "\n<!-- HTML truncated -->";
+    }
+
+    private function stripLargeBlocks(string $html): string
+    {
+        $html = preg_replace('#<script\\b[^>]*>.*?</script>#is', '', $html) ?? $html;
+        $html = preg_replace('#<style\\b[^>]*>.*?</style>#is', '', $html) ?? $html;
+
+        return $html;
     }
 
     private function resolveRedirectUrl(string $location, string $baseUrl): ?string

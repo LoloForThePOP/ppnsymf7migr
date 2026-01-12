@@ -19,7 +19,7 @@ class WebpageContentExtractor
         $crawler->filter('script, style')->each(fn(Crawler $node) => $node->getNode(0)?->parentNode?->removeChild($node->getNode(0)));
 
         $textParts = [];
-        $crawler->filter('h1, h2, h3, h4, p, li')->each(function (Crawler $node) use (&$textParts) {
+        $crawler->filter('h1, h2, h3, h4, h5, h6, p, li, dt, dd, address')->each(function (Crawler $node) use (&$textParts) {
             $text = trim($node->text());
             if ($text !== '') {
                 $textParts[] = $text;
@@ -31,27 +31,143 @@ class WebpageContentExtractor
 
         $crawler->filter('a[href]')->each(function (Crawler $node) use (&$links) {
             $href = trim($node->attr('href') ?? '');
-            if ($href !== '' && preg_match('#^https?://#i', $href)) {
+            if ($href === '') {
+                return;
+            }
+            if (preg_match('#^https?://#i', $href) || str_starts_with(strtolower($href), 'mailto:')) {
                 $links[] = $href;
             }
         });
 
-        $crawler->filter('img[src]')->each(function (Crawler $node) use (&$images, $baseUrl) {
+        // Meta images (og/twitter)
+        $crawler->filter('meta[property="og:image"], meta[property="og:image:url"], meta[name="twitter:image"], meta[name="twitter:image:src"], meta[itemprop="image"]')
+            ->each(function (Crawler $node) use (&$images, $baseUrl) {
+                $content = trim($node->attr('content') ?? '');
+                $this->addImageUrl($images, $content, $baseUrl);
+            });
+
+        // Icons (favicon, apple touch icon)
+        $crawler->filter('link[rel~="icon"], link[rel="apple-touch-icon"], link[rel="mask-icon"]')
+            ->each(function (Crawler $node) use (&$images, $baseUrl) {
+                $href = trim($node->attr('href') ?? '');
+                $this->addImageUrl($images, $href, $baseUrl);
+            });
+
+        // Img sources (src, data-src, srcset, data-srcset)
+        $crawler->filter('img')->each(function (Crawler $node) use (&$images, $baseUrl) {
             $src = trim($node->attr('src') ?? '');
-            $url = $this->resolveUrl($src, $baseUrl);
-            if ($url) {
-                $images[] = $url;
+            $this->addImageUrl($images, $src, $baseUrl);
+
+            $dataSrc = trim($node->attr('data-src') ?? '');
+            $this->addImageUrl($images, $dataSrc, $baseUrl);
+
+            $srcset = $node->attr('srcset');
+            foreach ($this->parseSrcset($srcset) as $candidate) {
+                $this->addImageUrl($images, $candidate, $baseUrl);
+            }
+
+            $dataSrcset = $node->attr('data-srcset');
+            foreach ($this->parseSrcset($dataSrcset) as $candidate) {
+                $this->addImageUrl($images, $candidate, $baseUrl);
+            }
+        });
+
+        // Picture source srcset
+        $crawler->filter('source')->each(function (Crawler $node) use (&$images, $baseUrl) {
+            $srcset = $node->attr('srcset');
+            foreach ($this->parseSrcset($srcset) as $candidate) {
+                $this->addImageUrl($images, $candidate, $baseUrl);
+            }
+            $dataSrcset = $node->attr('data-srcset');
+            foreach ($this->parseSrcset($dataSrcset) as $candidate) {
+                $this->addImageUrl($images, $candidate, $baseUrl);
+            }
+        });
+
+        // Inline background-image URLs
+        $crawler->filter('[style]')->each(function (Crawler $node) use (&$images, $baseUrl) {
+            $style = $node->attr('style') ?? '';
+            foreach ($this->parseBackgroundImages($style) as $candidate) {
+                $this->addImageUrl($images, $candidate, $baseUrl);
             }
         });
 
         $links = array_values(array_unique(array_slice($links, 0, 30)));
-        $images = array_values(array_unique(array_slice($images, 0, 25)));
+        $images = array_values(array_unique(array_slice($images, 0, 40)));
 
         return [
             'text' => implode("\n", array_slice($textParts, 0, 80)),
             'links' => $links,
             'images' => $images,
         ];
+    }
+
+    /**
+     * @param array<int, string> $images
+     */
+    private function addImageUrl(array &$images, ?string $candidate, ?string $baseUrl): void
+    {
+        if (!is_string($candidate)) {
+            return;
+        }
+        $candidate = trim($candidate);
+        if ($candidate === '' || str_starts_with($candidate, 'data:')) {
+            return;
+        }
+
+        $url = $this->resolveUrl($candidate, $baseUrl);
+        if ($url) {
+            $images[] = $url;
+        }
+    }
+
+    /**
+     * @return string[]
+     */
+    private function parseSrcset(?string $value): array
+    {
+        if (!is_string($value)) {
+            return [];
+        }
+
+        $value = trim($value);
+        if ($value === '') {
+            return [];
+        }
+
+        $candidates = [];
+        foreach (preg_split('/\s*,\s*/', $value) as $entry) {
+            $parts = preg_split('/\s+/', trim($entry));
+            if (!empty($parts[0])) {
+                $candidates[] = $parts[0];
+            }
+        }
+
+        return $candidates;
+    }
+
+    /**
+     * @return string[]
+     */
+    private function parseBackgroundImages(string $style): array
+    {
+        if ($style === '') {
+            return [];
+        }
+
+        if (!preg_match_all('/url\\(([^)]+)\\)/i', $style, $matches)) {
+            return [];
+        }
+
+        $urls = [];
+        foreach ($matches[1] as $candidate) {
+            $candidate = trim($candidate, " \t\n\r\0\x0B\"'");
+            if ($candidate !== '') {
+                $urls[] = $candidate;
+            }
+        }
+
+        return $urls;
     }
 
     private function normalizeHost(?string $url): ?string

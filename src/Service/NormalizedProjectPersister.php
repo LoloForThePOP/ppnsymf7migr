@@ -11,6 +11,7 @@ use App\Entity\Embeddables\GeoPoint;
 use App\Enum\SlideType;
 use App\Entity\Embeddables\PPBase\OtherComponentsModels\QuestionAnswerComponent;
 use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
+use App\Entity\Embeddables\PPBase\OtherComponentsModels\BusinessCardComponent;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\String\Slugger\AsciiSlugger;
@@ -48,6 +49,8 @@ class NormalizedProjectPersister
         $pp->setTextDescription($payload['description_html'] ?? null);
         $pp->setOriginLanguage('fr');
 
+        $mediaBaseName = $this->buildMediaBaseName($payload);
+
         // Ingestion metadata
         $ing = $pp->getIngestion();
         $ing->setSourceUrl($payload['source_url'] ?? null);
@@ -75,18 +78,19 @@ class NormalizedProjectPersister
         }
         // Logo
         if ($logoUrl) {
-            $this->attachLogo($pp, $logoUrl);
+            $this->attachLogo($pp, $logoUrl, $mediaBaseName);
         }
 
         // Dedicated thumbnail (custom thumbnail takes precedence in cache)
         if ($thumbnailUrl) {
-            $this->attachCustomThumbnail($pp, $thumbnailUrl);
+            $this->attachCustomThumbnail($pp, $thumbnailUrl, $mediaBaseName);
             $imagesPayload = $this->filterImagesPayload($imagesPayload, $thumbnailUrl);
         }
         
         $this->attachVideos($pp, $payload['videos'] ?? []);
-        $this->attachImages($pp, $imagesPayload, $logoUrl);
+        $this->attachImages($pp, $imagesPayload, $logoUrl, $mediaBaseName);
         $this->attachWebsites($pp, $payload['websites'] ?? []);
+        $this->attachBusinessCards($pp, $payload['business_cards'] ?? []);
         
         $this->attachPlaces($pp, $payload['places'] ?? []);
 
@@ -174,10 +178,11 @@ class NormalizedProjectPersister
         }
     }
 
-    private function attachImages(PPBase $pp, array $images, ?string $logoUrl = null): void
+    private function attachImages(PPBase $pp, array $images, ?string $logoUrl = null, ?string $mediaBaseName = null): void
     {
         $maxSlides = 3;
         $seen = [];
+        $slideIndex = 1;
         foreach ($images as $entry) {
             $url = null;
             $caption = null;
@@ -205,7 +210,8 @@ class NormalizedProjectPersister
             if ($pp->getSlides()->count() >= 8) {
                 break;
             }
-            $file = $this->downloader->download($url);
+            $preferredName = $mediaBaseName ? sprintf('image-slide-%s-%d', $mediaBaseName, $slideIndex) : null;
+            $file = $this->downloader->download($url, $preferredName);
             if (!$file) {
                 continue;
             }
@@ -221,6 +227,7 @@ class NormalizedProjectPersister
             $slide->setProjectPresentation($pp);
             $pp->addSlide($slide);
 
+            $slideIndex++;
             if (count($seen) >= $maxSlides) {
                 break;
             }
@@ -346,17 +353,17 @@ class NormalizedProjectPersister
         return null;
     }
 
-    private function attachLogo(PPBase $pp, string $url): void
+    private function attachLogo(PPBase $pp, string $url, string $mediaBaseName): void
     {
-        $file = $this->downloader->download($url);
+        $file = $this->downloader->download($url, sprintf('logo-used-for-project-%s', $mediaBaseName));
         if ($file) {
             $pp->setLogoFile($file);
         }
     }
 
-    private function attachCustomThumbnail(PPBase $pp, string $url): void
+    private function attachCustomThumbnail(PPBase $pp, string $url, string $mediaBaseName): void
     {
-        $file = $this->downloader->download($url);
+        $file = $this->downloader->download($url, sprintf('thumb-used-for-project-%s', $mediaBaseName));
         if ($file) {
             $pp->setCustomThumbnailFile($file);
         }
@@ -414,6 +421,46 @@ class NormalizedProjectPersister
         $pp->setOtherComponents($oc);
     }
 
+    private function attachBusinessCards(PPBase $pp, array $cards): void
+    {
+        $cards = array_slice($cards, 0, 2);
+        if ($cards === []) {
+            return;
+        }
+
+        $oc = $pp->getOtherComponents();
+        foreach ($cards as $entry) {
+            if (!is_array($entry)) {
+                continue;
+            }
+
+            $title = $this->stringValue($entry['title'] ?? null);
+            $email1 = $this->stringValue($entry['email1'] ?? null);
+            $tel1 = $this->stringValue($entry['tel1'] ?? null);
+            $website1 = $this->stringValue($entry['website1'] ?? null);
+            $website2 = $this->stringValue($entry['website2'] ?? null);
+            $postalMail = $this->stringValue($entry['postalMail'] ?? null);
+            $remarks = $this->stringValue($entry['remarks'] ?? null);
+
+            if ($title === null && $email1 === null && $tel1 === null && $website1 === null && $website2 === null && $postalMail === null && $remarks === null) {
+                continue;
+            }
+
+            $component = BusinessCardComponent::createNew();
+            $component->setTitle($title);
+            $component->setEmail1($email1);
+            $component->setTel1($tel1);
+            $component->setWebsite1($website1);
+            $component->setWebsite2($website2);
+            $component->setPostalMail($postalMail);
+            $component->setRemarks($remarks);
+
+            $oc->addComponent('business_cards', $component);
+        }
+
+        $pp->setOtherComponents($oc);
+    }
+
     /**
      * @param array<int, mixed> $images
      *
@@ -437,4 +484,42 @@ class NormalizedProjectPersister
         return $filtered;
     }
 
+    private function stringValue(mixed $value): ?string
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value);
+
+        return $value === '' ? null : $value;
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function buildMediaBaseName(array $payload): string
+    {
+        $raw = $payload['title'] ?? null;
+        if (!is_string($raw) || trim($raw) === '') {
+            $raw = $payload['goal'] ?? null;
+        }
+        if (!is_string($raw) || trim($raw) === '') {
+            $raw = 'projet';
+        }
+
+        $slugger = new AsciiSlugger();
+        $slug = strtolower((string) $slugger->slug($raw));
+        $slug = trim($slug, '-');
+
+        if ($slug === '') {
+            $slug = 'projet';
+        }
+
+        if (strlen($slug) > 60) {
+            $slug = rtrim(substr($slug, 0, 60), '-');
+        }
+
+        return $slug === '' ? 'projet' : $slug;
+    }
 }

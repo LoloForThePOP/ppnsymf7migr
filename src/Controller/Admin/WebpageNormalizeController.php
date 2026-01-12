@@ -30,6 +30,7 @@ class WebpageNormalizeController extends AbstractController
         string $appScraperModel
     ): Response {
         $rawHtml = trim((string) $request->request->get('raw_html', ''));
+        $promptExtra = trim((string) $request->request->get('prompt_extra', ''));
         $result = null;
         $error = null;
         $created = null;
@@ -61,6 +62,9 @@ class WebpageNormalizeController extends AbstractController
                 if ($prompt === false) {
                     throw new \RuntimeException('Prompt introuvable.');
                 }
+                if ($promptExtra !== '') {
+                    $prompt = rtrim($prompt) . "\n\n" . $promptExtra;
+                }
 
                 $client = OpenAI::client($_ENV['OPENAI_API_KEY'] ?? '');
                 $response = $client->chat()->create([
@@ -85,10 +89,12 @@ class WebpageNormalizeController extends AbstractController
 
         return $this->render('admin/project_normalize_html.html.twig', [
             'rawHtml' => $rawHtml,
+            'promptExtra' => $promptExtra,
             'extracted' => $extracted,
             'result' => $result,
             'error' => $error,
             'created' => $created,
+            'persist' => $persist,
         ]);
     }
 }

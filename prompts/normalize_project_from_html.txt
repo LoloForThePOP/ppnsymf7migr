@@ -26,10 +26,10 @@ Produit un JSON UTF-8 valide :
 
 Contraintes :
 - Langue : français.
-- description_html : 2 paragraphes, balisés avec <p>…</p>, sans autres balises. Adopter un ton neutre et descriptif sans utiliser de formulations marketing.
-- qa : 2 à 4 questions / réponses relativement courtes pour rendre le contenu digestible (en français), ces questions / réponses ne doivent pas avoir de lien avec l'objectif du projet et pas de lien avec description_html.
+- description_html : 2 paragraphes si possible, un seul sinon, balisés avec <p>…</p>, sans autres balises. Adopter un ton neutre et descriptif sans utiliser de formulations marketing. Ne pas inventer.
+- qa : 2 à 4 questions / réponses relativement courtes pour rendre le contenu digestible (en français), ne pas rappeler l'objectif du projet (goal) dans ces questions / réponses, ne pas rappeler description_html dans ces questions / réponses.
 - logo_url : URL explicite d’un logo si un logo est présent dans TEXT/LINKS/IMAGES ; sinon null. Ne pas inventer. Si un logo est présent, ne pas l’inclure dans image_urls/images.
-- thumbnail_url : URL explicite d’une vignette/couverture si elle est indiquée comme telle dans TEXT/LINKS (ex. "thumbnail", "vignette", "image de couverture", "cover", "hero"). Ne pas inventer. Si une vignette est présente, ne pas l’inclure dans image_urls/images.
+- thumbnail_url : URL explicite d’une vignette/couverture si elle est indiquée comme telle dans TEXT/LINKS (ex. "thumbnail", "vignette", "image de couverture", "cover", "hero"). Ne pas inventer.
 - image_urls : ne garder que les URLs explicites présentes dans IMAGES (aucune invention). Dédupliquer. Pas de data URI. N’utiliser ce champ que si tu ne peux pas fournir images avec captions ; sinon laisser image_urls vide.
 - images : si des légendes sont associées aux images (ex. liste numérotée de légendes après les URLs), renvoie un tableau d’objets aligné dans l’ordre d’apparition avec url + caption (caption peut être null si absente). Ne jamais inventer de légende. Si tu fournis images, laisser image_urls vide. Sinon, renvoyer [].
 - videos : extraire uniquement les URLs YouTube explicites présentes (aucune invention), dédupliquer. Si des légendes sont associées (ex : titre ou phrase avant/après le lien), inclure dans caption (sinon null). Sinon, renvoyer [].

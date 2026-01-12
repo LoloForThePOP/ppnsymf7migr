@@ -12,11 +12,16 @@
 
         <form method="post" action="{{ path('admin_project_normalize_html') }}">
             <div class="mb-3">
+                <label for="prompt_extra" class="form-label">Complément de prompt</label>
+                <textarea id="prompt_extra" name="prompt_extra" class="form-control" rows="8" placeholder="Optionnel : instructions supplémentaires pour la normalisation">{{ promptExtra }}</textarea>
+                <div class="form-text">Ajouté au prompt standard avant l’envoi.</div>
+            </div>
+            <div class="mb-3">
                 <label for="raw_html" class="form-label">Coller le code HTML de la page</label>
                 <textarea id="raw_html" name="raw_html" class="form-control" rows="12" placeholder="&lt;html&gt;...">{{ rawHtml }}</textarea>
             </div>
             <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" value="1" id="persist" name="persist">
+                <input class="form-check-input" type="checkbox" value="1" id="persist" name="persist" {% if persist %}checked{% endif %}>
                 <label class="form-check-label" for="persist">
                     Persister immédiatement (slides téléchargées si image_urls)
                 </label>

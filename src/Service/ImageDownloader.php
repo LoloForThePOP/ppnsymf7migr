@@ -18,7 +18,7 @@ class ImageDownloader
     /**
      * Download an image and wrap it as UploadedFile, with basic validation.
      */
-    public function download(string $url): ?UploadedFile
+    public function download(string $url, ?string $preferredBaseName = null): ?UploadedFile
     {
         if (!filter_var($url, FILTER_VALIDATE_URL)) {
             return null;
@@ -58,14 +58,29 @@ class ImageDownloader
 
             file_put_contents($tmpPath, $content);
 
-            $originalName = basename(parse_url($url, PHP_URL_PATH) ?: 'image');
+            $originalName = basename(parse_url($url, PHP_URL_PATH) ?: '');
             if ($originalName === '' || $originalName === '/') {
                 $originalName = 'image';
             }
 
+            $extension = $this->extensionFromContentType($contentType)
+                ?? pathinfo($originalName, PATHINFO_EXTENSION);
+            $extension = ltrim((string) $extension, '.');
+
+            $baseName = $preferredBaseName !== null ? $this->sanitizeBaseName($preferredBaseName) : '';
+            if ($baseName === '') {
+                $baseName = pathinfo($originalName, PATHINFO_FILENAME) ?: 'image';
+            }
+
+            if ($extension === '') {
+                $extension = 'jpg';
+            }
+
+            $finalName = $baseName . '.' . $extension;
+
             return new UploadedFile(
                 $tmpPath,
-                $originalName,
+                $finalName,
                 $contentType ?: null,
                 null,
                 true
@@ -145,5 +160,33 @@ class ImageDownloader
         $dir = rtrim(dirname($path), '/\\');
 
         return sprintf('%s://%s%s/%s', $scheme, $host, $port, ltrim($dir . '/' . $location, '/'));
+    }
+
+    private function extensionFromContentType(string $contentType): ?string
+    {
+        $contentType = strtolower(trim(explode(';', $contentType)[0] ?? ''));
+        return match ($contentType) {
+            'image/jpeg', 'image/pjpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            'image/svg+xml' => 'svg',
+            'image/avif' => 'avif',
+            default => null,
+        };
+    }
+
+    private function sanitizeBaseName(string $name): string
+    {
+        $name = trim($name);
+        if ($name === '') {
+            return '';
+        }
+
+        $name = pathinfo($name, PATHINFO_FILENAME);
+        $name = preg_replace('/[^A-Za-z0-9._-]+/', '-', $name) ?? '';
+        $name = trim($name, '-');
+
+        return $name;
     }
 }
