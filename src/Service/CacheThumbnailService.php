@@ -10,6 +10,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Vich\UploaderBundle\Templating\Helper\UploaderHelper;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Handles creation, refresh and cleanup of cached thumbnails for project presentations.
@@ -60,7 +61,13 @@ class CacheThumbnailService
             // Remote source (e.g. YouTube thumb) → use directly
             $newUrl = $sourcePath;
         } else {
-            $newUrl = $this->cacheManager->getBrowserPath($sourcePath, self::FILTER);
+            $newUrl = $this->cacheManager->generateUrl(
+                $sourcePath,
+                self::FILTER,
+                [],
+                null,
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
         }
 
         // If changed or forced refresh → remove old cache and update
@@ -121,10 +128,15 @@ class CacheThumbnailService
 
         try {
             // 1️⃣ Ask LiipImagine to remove its cache (works for all resolvers)
-            $this->cacheManager->remove($cachedUrl, self::FILTER);
+            $sourcePath = $this->extractSourcePathFromCacheUrl($cachedUrl);
+            if ($sourcePath === null) {
+                return;
+            }
+
+            $this->cacheManager->remove($sourcePath, self::FILTER);
 
             // 2️⃣ If local resolver (web_path), also remove physical file if it exists
-            $path = $this->getLocalCachePath($cachedUrl);
+            $path = $this->getLocalCachePathForSource($sourcePath);
             if ($path && $this->filesystem->exists($path)) {
                 $this->filesystem->remove($path);
             }
@@ -143,25 +155,58 @@ class CacheThumbnailService
             return;
         }
 
-        $path = $this->getLocalCachePath($cachedUrl);
+        $sourcePath = $this->extractSourcePathFromCacheUrl($cachedUrl);
+        if ($sourcePath === null) {
+            return;
+        }
+
+        $path = $this->getLocalCachePathForSource($sourcePath);
         if ($path && !$this->filesystem->exists($path)) {
             // File missing → safe to clear the Liip cache entry too
-            $this->cacheManager->remove($cachedUrl, self::FILTER);
+            $this->cacheManager->remove($sourcePath, self::FILTER);
         }
     }
 
     /**
-     * Resolves a browser URL to its local filesystem path
-     * (works only with the default web_path resolver).
+     * Resolves a browser URL to its original source path if it is a Liip cache URL.
      */
-    private function getLocalCachePath(string $browserUrl): ?string
+    private function extractSourcePathFromCacheUrl(string $cachedUrl): ?string
     {
-        $path = parse_url($browserUrl, PHP_URL_PATH);
+        $path = parse_url($cachedUrl, PHP_URL_PATH);
         if (!$path) {
             return null;
         }
 
-        $localPath = $this->projectDir . '/public' . $path;
-        return $this->filesystem->exists($localPath) ? $localPath : null;
+        $resolvePrefix = '/media/cache/resolve/' . self::FILTER . '/';
+        $cachePrefix = '/media/cache/' . self::FILTER . '/';
+
+        $pos = strpos($path, $resolvePrefix);
+        if ($pos !== false) {
+            return substr($path, $pos + strlen($resolvePrefix));
+        }
+
+        $pos = strpos($path, $cachePrefix);
+        if ($pos !== false) {
+            return substr($path, $pos + strlen($cachePrefix));
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolves a source path to its local filesystem cached path
+     * (works only with the default web_path resolver).
+     */
+    private function getLocalCachePathForSource(string $sourcePath): ?string
+    {
+        $sanitized = str_replace('://', '---', ltrim($sourcePath, '/'));
+        $localPath = sprintf(
+            '%s/public/media/cache/%s/%s',
+            $this->projectDir,
+            self::FILTER,
+            $sanitized
+        );
+
+        return $localPath;
     }
 }

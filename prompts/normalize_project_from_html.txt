@@ -27,7 +27,7 @@ Produit un JSON UTF-8 valide :
 Contraintes :
 - Langue : français.
 - description_html : 2 paragraphes si possible, un seul sinon, balisés avec <p>…</p>, sans autres balises. Adopter un ton neutre et descriptif sans utiliser de formulations marketing. Ne pas inventer.
-- qa : 2 à 4 questions / réponses relativement courtes pour rendre le contenu digestible (en français), ne pas rappeler l'objectif du projet (goal) dans ces questions / réponses, ne pas rappeler description_html dans ces questions / réponses.
+- qa : 2 à 4 questions / réponses relativement courtes pour rendre le contenu digestible (en français), ne pas parler directement de l'objectif du projet (goal) dans ces question / answer, ne pas se répéter, ne pas parler de choses déjà dites dans description_html, ne pas parler de positions géographiques / lieux dans qa.
 - logo_url : URL explicite d’un logo si un logo est présent dans TEXT/LINKS/IMAGES ; sinon null. Ne pas inventer. Si un logo est présent, ne pas l’inclure dans image_urls/images.
 - thumbnail_url : URL explicite d’une vignette/couverture si elle est indiquée comme telle dans TEXT/LINKS (ex. "thumbnail", "vignette", "image de couverture", "cover", "hero"). Ne pas inventer.
 - image_urls : ne garder que les URLs explicites présentes dans IMAGES (aucune invention). Dédupliquer. Pas de data URI. N’utiliser ce champ que si tu ne peux pas fournir images avec captions ; sinon laisser image_urls vide.

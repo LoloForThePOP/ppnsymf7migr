@@ -44,6 +44,8 @@ a{
     --theme-text-muted: #64748b;
     --theme-accent: orange;
     --theme-accent-contrast: #ffffff;
+    --theme-accent-warm: var(--theme-accent);
+    --theme-accent-static: var(--theme-accent);
     --theme-border: #e5e7eb;
     --theme-title: #0f172a;
     --theme-icon-filter: invert(55%) sepia(60%) saturate(316%) hue-rotate(118deg) brightness(87%) contrast(78%);
@@ -76,8 +78,10 @@ a{
     --theme-surface-alt: #f8fafc;
     --theme-text: #1f2937;
     --theme-text-muted: #64748b;
-    --theme-accent: orange;
-    --theme-accent-contrast: #ffffff;
+    --theme-accent: green;
+    --theme-accent-contrast: #0b0f16;
+    --theme-accent-warm: #ffa500;
+    --theme-accent-static: #3f8f5b;
     --theme-border: #e5e7eb;
     --theme-title: #0f172a;
     --theme-icon-filter: invert(55%) sepia(60%) saturate(316%) hue-rotate(118deg) brightness(87%) contrast(78%);
@@ -445,7 +449,7 @@ html[data-theme-variant="custom"][data-theme="retro-game"] img.pp-theme-icon[src
 }
 
 header .navbar {
-    border-bottom-color: var(--theme-accent) !important;
+    border-bottom-color: var(--theme-accent-warm, var(--theme-accent)) !important;
 }
 
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] header .navbar {

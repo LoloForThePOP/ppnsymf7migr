@@ -64,6 +64,7 @@ html[data-theme-variant="custom"] #createPPModal.create-pp-modal .propon-logo .p
 }
 
 #createPPModal.create-pp-modal .box-progress-bar {
+    margin-top: -3px;
     margin-bottom: 50px;
 }
 

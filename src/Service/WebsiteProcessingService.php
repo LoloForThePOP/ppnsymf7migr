@@ -25,6 +25,7 @@ class WebsiteProcessingService
         "gamejolt.com",
         "wikipedia.org",
         "fondation-patrimoine.org",
+        "jeveuxaider.gouv.fr",
     ];
 
     private const FALLBACK_ICONS = [
@@ -68,7 +69,7 @@ class WebsiteProcessingService
     private function extractBaseIconName(string $host): string
     {
         return preg_replace(
-            '/\.(com|info|net|io|us|gg|org|me|co\.uk|ca|mobi)$/i',
+            '/\.(com|info|net|io|us|gg|org|me|co\.uk|ca|mobi|gouv\.fr)$/i',
             '',
             $host
         );
