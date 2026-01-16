@@ -7,9 +7,8 @@
     height: 340px;
     overflow: hidden;
     border: 1px solid rgb(227, 221, 211);
-    border-radius: 4px;
+    border-radius: 10px;
     margin-bottom: 15px;
-    padding-top: 7px;
 }
 
 .project-card:hover {
@@ -18,7 +17,7 @@
 
 .project-card .goal {
     color: #45429a;
-    margin-bottom: 4px;
+    margin-bottom: 0;
     font-size: 17px;
     font-weight: bold;
     line-height: 1.2em;
@@ -33,6 +32,10 @@
     color: #2C3E50;
 }
 
+.project-card .goal-container .title {
+    padding-top: 6px;
+}
+
 .project-card .keywords {
     font-size: 15px;
     font-weight: bold;
@@ -42,13 +45,22 @@
 .project-card .image-container {
     height: 195px;
     padding: 10px;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .project-card .image-container.has-image {
+    background-color: transparent;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid var(--theme-border);
+}
+
+html[data-theme-variant="custom"][data-theme="dark"] .project-card .image-container.has-image,
+html[data-theme-variant="custom"][data-theme="neon"] .project-card .image-container.has-image,
+html[data-theme-variant="custom"][data-theme="cyberpunk"] .project-card .image-container.has-image,
+html[data-theme-variant="custom"][data-theme="matrix"] .project-card .image-container.has-image,
+html[data-theme-variant="custom"][data-theme="luxury-black"] .project-card .image-container.has-image,
+html[data-theme-variant="custom"][data-theme="deep-ocean"] .project-card .image-container.has-image {
     background-color: var(--theme-surface-alt);
-    border-radius: 8px;
-    box-shadow: 0 0 0 1px var(--theme-border) inset;
 }
 
 .project-card .image-container img {
@@ -59,9 +71,57 @@
     object-fit: cover;
 }
 
+.project-card .image-container img[src*="/pp/logos/"] {
+    object-fit: contain;
+    width: auto;
+    height: auto;
+    max-width: 80%;
+    max-height: 100%;
+    margin: 0 auto;
+    padding: 6px;
+    border-radius: 8px;
+    border: 1px solid var(--pp-logo-chip-border, var(--theme-border, #e3ddd3));
+    background-color: var(--pp-logo-chip-bg, var(--theme-surface, #ffffff));
+    box-sizing: border-box;
+}
+
+@supports selector(.image-container:has(img)) {
+    .project-card .image-container:has(img[src*="/pp/logos/"]) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        height: 187px;
+        margin: 8px 10px 8px;
+        padding: 6px;
+        border: 1px solid var(--theme-border, #e3ddd3);
+        border-radius: 10px;
+        background-color: color-mix(in srgb, var(--theme-surface) 70%, var(--theme-bg, #ffffff));
+    }
+
+    html[data-theme-variant="custom"][data-theme="dark"] .project-card .image-container:has(img[src*="/pp/logos/"]),
+    html[data-theme-variant="custom"][data-theme="neon"] .project-card .image-container:has(img[src*="/pp/logos/"]),
+    html[data-theme-variant="custom"][data-theme="cyberpunk"] .project-card .image-container:has(img[src*="/pp/logos/"]),
+    html[data-theme-variant="custom"][data-theme="matrix"] .project-card .image-container:has(img[src*="/pp/logos/"]),
+    html[data-theme-variant="custom"][data-theme="luxury-black"] .project-card .image-container:has(img[src*="/pp/logos/"]),
+    html[data-theme-variant="custom"][data-theme="deep-ocean"] .project-card .image-container:has(img[src*="/pp/logos/"]) {
+        --pp-logo-chip-bg: color-mix(in srgb, var(--theme-text) 92%, var(--theme-surface));
+        --pp-logo-chip-border: color-mix(in srgb, var(--theme-text) 50%, var(--theme-border));
+        background-color: var(--theme-surface-alt);
+    }
+}
+
 .goal-container {
-    padding: 0 10px;
+    margin: 0 10px 8px;
+    padding: 8px 10px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 88px;
+    border: 1px solid var(--theme-border, #e3ddd3);
+    border-radius: 8px;
+    background: var(--theme-surface, #ffffff);
 }
 
 .collection-container .other-info-container {
@@ -176,6 +236,14 @@ html[data-theme-variant="custom"] .collection-container .other-info-container {
     .project-card .image-container {
         height: 140px;
         margin-bottom: 0;
+    }
+
+    @supports selector(.image-container:has(img)) {
+        .project-card .image-container:has(img[src*="/pp/logos/"]) {
+            height: 128px;
+            margin: 6px 8px;
+            padding: 6px;
+        }
     }
 }
 

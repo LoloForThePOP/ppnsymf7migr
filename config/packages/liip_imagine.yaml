@@ -59,6 +59,7 @@ liip_imagine:
         standard_thumbnail_md_test:
 
             quality: 80
+            cache: format_extension
 
             filters:
                 thumbnail: { size: [410, 410], mode: inset, allow_upscale: false }

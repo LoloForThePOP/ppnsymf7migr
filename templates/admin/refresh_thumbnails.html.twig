@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rafraîchissement des vignettes{% endblock %}
+
+{% block body %}
+    <div class="container my-4">
+        <h1 class="h4 mb-3">Rafraîchissement des vignettes</h1>
+
+        <div class="alert alert-info">
+            Traités: {{ processed }} | Total: {{ total }} | Progression: {{ nextOffset }}/{{ total }}
+        </div>
+
+        {% if hasMore %}
+            <form method="post" action="{{ path('admin_thumbnails_refresh') }}">
+                <input type="hidden" name="offset" value="{{ nextOffset }}">
+                <input type="hidden" name="limit" value="{{ limit }}">
+                <button type="submit" class="btn btn-primary">Continuer</button>
+            </form>
+        {% else %}
+            <div class="alert alert-success mb-3">Terminé.</div>
+        {% endif %}
+
+        <a class="btn btn-secondary mt-3" href="{{ path('admin_harvest') }}">Retour</a>
+    </div>
+{% endblock %}

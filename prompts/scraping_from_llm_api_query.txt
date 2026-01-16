@@ -9,7 +9,7 @@ Format de sortie (JSON, rien d’autre) :
     "goal": "string",
     "description": "string",
     "categories": [
-      "software|science|inform|humane|animals|material|restore|transport|environment|history|money|food|services|arts|entertainment|data|health|idea|space|crisis"
+      "software|electronics|science|inform|humane|animals|fabrication|construction|restore|transport|environment|history|money|food|services|arts|entertainment|data|health|idea|space|crisis"
     ],
     "source_url": "string",
 

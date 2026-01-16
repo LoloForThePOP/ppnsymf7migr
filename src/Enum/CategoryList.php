@@ -6,12 +6,11 @@ enum CategoryList: string
 {
 
     case SOFTWARE = 'software';
-    case TECHNOLOGY = 'technology';
+    case ELECTRONICS = 'electronics';
     case SCIENCE = 'science';
     case INFORM = 'inform';
     case HUMANE = 'humane'; 
     case ANIMALS = 'animals';
-    case MATERIAL = 'material';
     case RESTORE = 'restore';
     case TRANSPORT = 'transport';
     case ENVIRONMENT = 'environment';
@@ -26,6 +25,8 @@ enum CategoryList: string
     case IDEA = 'idea';
     case SPACE = 'space';
     case CRISIS = 'crisis';
+    case FABRICATION = 'fabrication';
+    case CONSTRUCTION = 'construction';
 
 
 
@@ -37,12 +38,11 @@ enum CategoryList: string
     {
         return match ($this) {
             self::SOFTWARE      => 'Informatique, Codage, Internet',
-            self::TECHNOLOGY    => 'Technologie, Ingénierie, Robotique',
+            self::ELECTRONICS   => 'Électronique',
             self::SCIENCE       => 'Science, Recherche',
             self::INFORM        => 'Informer, Éduquer, Apprendre',
             self::HUMANE        => 'Vivre Ensemble, Humanitaire',
             self::ANIMALS       => 'Animaux',
-            self::MATERIAL      => 'Fabrication d\'objet, Construire',
             self::RESTORE       => 'Restaurer, Rénover, Recycler',
             self::TRANSPORT     => 'Transporter',
             self::ENVIRONMENT   => 'Environnement',
@@ -57,6 +57,8 @@ enum CategoryList: string
             self::IDEA          => 'Idées, Politique',
             self::SPACE         => 'Air et Espace',
             self::CRISIS        => 'Crise',
+            self::FABRICATION   => 'Fabrication d\'objet',
+            self::CONSTRUCTION  => 'Construction et travaux',
         };
     }
 
@@ -99,7 +101,3 @@ enum CategoryList: string
 
 
 }
-
-
-
-

@@ -8,6 +8,8 @@ use App\Enum\SlideType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
+use Liip\ImagineBundle\Imagine\Data\DataManager;
+use Liip\ImagineBundle\Imagine\Filter\FilterManager;
 use Vich\UploaderBundle\Templating\Helper\UploaderHelper;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -32,6 +34,8 @@ class CacheThumbnailService
         private readonly EntityManagerInterface $em,
         private readonly UploaderHelper $uploaderHelper,
         private readonly CacheManager $cacheManager,
+        private readonly DataManager $dataManager,
+        private readonly FilterManager $filterManager,
         private readonly Filesystem $filesystem,
         #[Autowire(param: 'kernel.project_dir')]
         private readonly string $projectDir,
@@ -45,6 +49,7 @@ class CacheThumbnailService
     {
         $extra = $project->getExtra();
         $currentUrl = $extra->getCacheThumbnailUrl();
+        $removedOldCache = false;
 
         $sourcePath = $this->determineSourceImage($project);
 
@@ -56,23 +61,24 @@ class CacheThumbnailService
             return;
         }
 
+        if ($forceRefresh && $currentUrl) {
+            $this->removeCachedThumbnail($currentUrl);
+            $removedOldCache = true;
+        }
+
         // Case 2 — generate (or fetch) a new cached URL
         if (str_starts_with($sourcePath, 'http://') || str_starts_with($sourcePath, 'https://')) {
             // Remote source (e.g. YouTube thumb) → use directly
             $newUrl = $sourcePath;
         } else {
-            $newUrl = $this->cacheManager->generateUrl(
-                $sourcePath,
-                self::FILTER,
-                [],
-                null,
-                UrlGeneratorInterface::ABSOLUTE_URL
-            );
+            $newUrl = $this->resolveCachedUrl($sourcePath);
         }
 
         // If changed or forced refresh → remove old cache and update
         if ($forceRefresh || $newUrl !== $currentUrl) {
-            $this->removeCachedThumbnail($currentUrl);
+            if (!$removedOldCache && $newUrl !== $currentUrl) {
+                $this->removeCachedThumbnail($currentUrl);
+            }
             $extra->setCacheThumbnailUrl($newUrl);
         }
 
@@ -80,6 +86,32 @@ class CacheThumbnailService
         $this->cleanupOrphanCache($newUrl);
 
         $this->em->flush();
+    }
+
+    /**
+     * Ensures the cached file exists, then returns the direct cached URL.
+     */
+    private function resolveCachedUrl(string $sourcePath): string
+    {
+        $relativePath = ltrim($sourcePath, '/');
+
+        try {
+            if (!$this->cacheManager->isStored($relativePath, self::FILTER)) {
+                $binary = $this->dataManager->find(self::FILTER, $relativePath);
+                $filteredBinary = $this->filterManager->applyFilter($binary, self::FILTER);
+                $this->cacheManager->store($filteredBinary, $relativePath, self::FILTER);
+            }
+
+            return $this->cacheManager->resolve($relativePath, self::FILTER);
+        } catch (\Throwable $e) {
+            return $this->cacheManager->generateUrl(
+                $sourcePath,
+                self::FILTER,
+                [],
+                null,
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
+        }
     }
 
     /**

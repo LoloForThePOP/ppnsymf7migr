@@ -17,9 +17,9 @@ class ScraperIngestionService
     private Client $client;
 
     private const ALLOWED_CATEGORIES = [
-        'software', 'science', 'inform', 'humane', 'animals', 'material', 'restore',
-        'transport', 'environment', 'history', 'money', 'food', 'services', 'arts',
-        'entertainment', 'data', 'health', 'idea', 'space', 'crisis',
+        'software', 'electronics', 'science', 'inform', 'humane', 'animals', 'fabrication', 'construction',
+        'restore', 'transport', 'environment', 'history', 'money', 'food', 'services',
+        'arts', 'entertainment', 'data', 'health', 'idea', 'space', 'crisis',
     ];
 
     public function __construct(

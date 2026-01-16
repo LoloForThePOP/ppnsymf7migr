@@ -46,3 +46,11 @@ services:
         arguments:
             $defaultFrom: '%app.email.noreply%'
             $defaultContact: '%app.email.contact%'
+
+    app.imagine.cache.resolver.format_extension:
+        class: Liip\ImagineBundle\Imagine\Cache\Resolver\FormatExtensionResolver
+        arguments:
+            - '@liip_imagine.cache.resolver.default'
+            - '@liip_imagine.filter.configuration'
+        tags:
+            - { name: 'liip_imagine.cache.resolver', resolver: 'format_extension' }
