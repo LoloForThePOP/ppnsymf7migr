@@ -116,6 +116,16 @@ class PPBase
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $textDescription = null;
 
+    // Crowdfunding campaign metadata (end date + status)
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $fundingEndAt = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $fundingStatus = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $fundingPlatform = null;
+
     // Other components are Project Presentation websites, faq, business cards, and can be extended in the future.
 
     #[ORM\Embedded(class: OtherComponents::class)]
@@ -393,6 +403,41 @@ class PPBase
     public function setTextDescription(?string $textDescription): self
     {
         $this->textDescription = $textDescription;
+        return $this;
+    }
+
+    public function getFundingEndAt(): ?\DateTimeInterface
+    {
+        return $this->fundingEndAt;
+    }
+
+    public function setFundingEndAt(?\DateTimeInterface $fundingEndAt): self
+    {
+        $this->fundingEndAt = $fundingEndAt;
+        return $this;
+    }
+
+    public function getFundingStatus(): ?string
+    {
+        return $this->fundingStatus;
+    }
+
+    public function setFundingStatus(?string $fundingStatus): self
+    {
+        $fundingStatus = $fundingStatus !== null ? trim($fundingStatus) : null;
+        $this->fundingStatus = $fundingStatus === '' ? null : $fundingStatus;
+        return $this;
+    }
+
+    public function getFundingPlatform(): ?string
+    {
+        return $this->fundingPlatform;
+    }
+
+    public function setFundingPlatform(?string $fundingPlatform): self
+    {
+        $fundingPlatform = $fundingPlatform !== null ? trim($fundingPlatform) : null;
+        $this->fundingPlatform = $fundingPlatform === '' ? null : $fundingPlatform;
         return $this;
     }
 

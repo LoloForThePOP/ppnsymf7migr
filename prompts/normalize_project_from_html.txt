@@ -19,6 +19,9 @@ Produit un JSON UTF-8 valide :
   "videos": [{"url": "string", "caption": "string|null"}],
   "websites": [{"title": "string", "url": "string"}],
   "places": [{"query": "string", "type": "locality|administrative_area_level_2|administrative_area_level_1|country|postal_code|sublocality_level_1|route|street_number|generic"}],
+  "funding_end_at": "string|null",
+  "funding_status": "ongoing|success|failed|cancelled|ended|null",
+  "funding_platform": "string|null",
   "keywords": ["string"],
   "categories": ["software|electronics|science|inform|humane|animals|fabrication|construction|restore|transport|environment|history|money|food|services|arts|entertainment|data|health|idea|space|crisis"],
   "source_url": "string|null"
@@ -35,6 +38,9 @@ Contraintes :
 - videos : extraire uniquement les URLs YouTube explicites présentes (aucune invention), dédupliquer. Si des légendes sont associées (ex : titre ou phrase avant/après le lien), inclure dans caption (sinon null). Sinon, renvoyer [].
 - websites : extraire les liens officiels et réseaux sociaux présents dans LINKS (aucune invention). Pour chaque lien, fournir un titre court (ex : "Site web officiel", "Page YouTube", "Page LinkedIn", ou le texte fourni autour du lien). Nettoyer les URL (retirer les paramètres UTM).
 - places : 0 à 3 lieux maximum. Si une localisation est clairement mentionnée dans TEXT/LINKS (ville, département, région, pays), renvoyer un objet par lieu avec query (ex: "Orléans, Loiret, France") et un type (ex: locality, administrative_area_level_2, administrative_area_level_1, country). Ne pas inventer. Sinon, renvoyer [].
+- funding_end_at : date de fin de collecte/campagne si elle est explicitement donnée dans TEXT/LINKS (format ISO 8601), sinon null. Ne pas déduire.
+- funding_status : état explicite de la collecte/campagne (valeurs autorisées : ongoing, success, failed, cancelled, ended). Sinon null. Ne pas inventer.
+- funding_platform : plateforme de collecte si explicitement mentionnée (ex : "Ulule"), sinon null.
 - keywords : 3 à 5 mots-clés courts issus du texte. Pas d’invention ; si rien de pertinent, renvoyer [].
 - categories : 1 à 3 valeurs parmi la liste autorisée ci-dessus. La catégorie "electronics" concerne l'électronique et le hardware. La catégorie "fabrication" correspond à la fabrication d'objets. La catégorie "construction" concerne les chantiers, bâtiments et travaux. La catégorie "restore" concerne des restaurations de bâtiments, de monuments ou restauration d'autres objets du patrimoine. La catégorie "history" inclue nettement les projets en rapport avec le patrimoine.
 - source_url : URL http(s) explicite si présente dans l’entrée (TEXT/LINKS), sinon null.

@@ -6,7 +6,7 @@
     <div class="container my-4">
         <h1 class="h4 mb-3">Ulule — Importer des projets</h1>
 
-        <form method="post" action="{{ path('admin_ulule_import') }}">
+        <form id="ulule-import-form" method="post" action="{{ path('admin_ulule_import') }}">
             <div class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label" for="lang">Langue</label>
@@ -62,10 +62,6 @@
                         <div class="form-text">Ajouté au prompt standard avant l’envoi.</div>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="exclude_funded" name="exclude_funded" value="1" {% if excludeFunded %}checked{% endif %}>
-                        <label class="form-check-label" for="exclude_funded">Exclure les projets déjà financés</label>
-                    </div>
-                    <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="include_video" name="include_video" value="1" {% if includeVideo %}checked{% endif %}>
                         <label class="form-check-label" for="include_video">Inclure la vidéo</label>
                     </div>
@@ -82,8 +78,21 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary mt-3">Lancer l’import</button>
+            <button id="ulule-submit" type="submit" class="btn btn-primary mt-3">Lancer l’import</button>
         </form>
+
+        <div id="ulule-progress" class="mt-4 d-none">
+            <h2 class="h6">Progression</h2>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <div class="progress flex-grow-1" style="height: 8px;">
+                    <div id="ulule-progress-bar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+                </div>
+                <span id="ulule-progress-text" class="small text-muted">Prêt.</span>
+                <button id="ulule-stop" type="button" class="btn btn-sm btn-outline-secondary">Stop</button>
+            </div>
+            <div id="ulule-progress-summary" class="d-flex flex-wrap gap-2 mb-3"></div>
+            <div id="ulule-progress-results" class="list-group"></div>
+        </div>
 
         {% if results %}
             <div class="mt-4">
@@ -158,4 +167,299 @@
             </div>
         {% endif %}
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('ulule-import-form');
+            if (!form) {
+                return;
+            }
+
+            const submitBtn = document.getElementById('ulule-submit');
+            const progressWrap = document.getElementById('ulule-progress');
+            const progressBar = document.getElementById('ulule-progress-bar');
+            const progressText = document.getElementById('ulule-progress-text');
+            const progressSummary = document.getElementById('ulule-progress-summary');
+            const progressResults = document.getElementById('ulule-progress-results');
+            const stopBtn = document.getElementById('ulule-stop');
+
+            let abortController = null;
+            let running = false;
+
+            const summaryKeys = [
+                ['total', 'Total', 'bg-secondary'],
+                ['created', 'Créés', 'bg-success'],
+                ['normalized', 'Normalisés', 'bg-info text-dark'],
+                ['duplicates', 'Doublons', 'bg-warning text-dark'],
+                ['insufficient', 'Insuffisants', 'bg-warning text-dark'],
+                ['skipped', 'Ignorés', 'bg-secondary'],
+                ['errors', 'Erreurs', 'bg-danger'],
+            ];
+
+            const setRunningState = (isRunning) => {
+                running = isRunning;
+                if (submitBtn) {
+                    submitBtn.disabled = isRunning;
+                }
+                if (stopBtn) {
+                    stopBtn.disabled = !isRunning;
+                }
+            };
+
+            setRunningState(false);
+
+            const renderSummary = (summary) => {
+                progressSummary.innerHTML = '';
+                summaryKeys.forEach(([key, label, klass]) => {
+                    const badge = document.createElement('span');
+                    badge.className = `badge ${klass}`;
+                    badge.textContent = `${label}: ${summary[key] ?? 0}`;
+                    progressSummary.appendChild(badge);
+                });
+            };
+
+            const appendLine = (parent, text, className = 'small text-muted') => {
+                const line = document.createElement('div');
+                line.className = className;
+                line.textContent = text;
+                parent.appendChild(line);
+            };
+
+            const appendResult = (item) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'list-group-item';
+
+                if (item.error) {
+                    appendLine(wrapper, `Erreur : ${item.error}`, 'text-danger small');
+                }
+
+                const header = document.createElement('div');
+                header.className = 'd-flex justify-content-between';
+
+                const left = document.createElement('div');
+                const title = document.createElement('div');
+                title.className = 'fw-bold';
+                const nameText = item.name || 'Projet Ulule';
+                title.textContent = nameText;
+                if (item.id) {
+                    const idSpan = document.createElement('span');
+                    idSpan.className = 'text-muted ms-1';
+                    idSpan.textContent = `#${item.id}`;
+                    title.appendChild(idSpan);
+                }
+                left.appendChild(title);
+
+                if (item.url) {
+                    const urlLine = document.createElement('div');
+                    urlLine.className = 'small';
+                    const link = document.createElement('a');
+                    link.href = item.url;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    link.textContent = item.url;
+                    urlLine.appendChild(link);
+                    left.appendChild(urlLine);
+                }
+
+                if (item.status) {
+                    appendLine(left, `Statut : ${item.status}`);
+                }
+                if (item.reason) {
+                    appendLine(left, `Raison : ${item.reason}`);
+                }
+                if (typeof item.description_length === 'number') {
+                    const minLabel = typeof item.description_min === 'number' ? ` (min ${item.description_min})` : '';
+                    appendLine(left, `Description : ${item.description_length} caractères${minLabel}`);
+                }
+
+                header.appendChild(left);
+
+                if (item.created && item.created.url) {
+                    const created = document.createElement('div');
+                    created.className = 'text-success small';
+                    created.append('Créé : ');
+                    const createdLink = document.createElement('a');
+                    createdLink.href = item.created.url;
+                    createdLink.target = '_blank';
+                    createdLink.rel = 'noopener noreferrer';
+                    createdLink.textContent = item.created.title || item.created.goal || item.created.stringId || 'Voir';
+                    created.appendChild(createdLink);
+                    header.appendChild(created);
+                }
+
+                wrapper.appendChild(header);
+
+                if (item.input) {
+                    const details = document.createElement('details');
+                    details.className = 'mt-2';
+                    const summary = document.createElement('summary');
+                    summary.textContent = 'Voir le texte structuré';
+                    const pre = document.createElement('pre');
+                    pre.className = 'theme-pre p-2 rounded';
+                    pre.style.whiteSpace = 'pre-wrap';
+                    pre.textContent = item.input;
+                    details.appendChild(summary);
+                    details.appendChild(pre);
+                    wrapper.appendChild(details);
+                }
+
+                if (item.raw) {
+                    const details = document.createElement('details');
+                    details.className = 'mt-2';
+                    const summary = document.createElement('summary');
+                    summary.textContent = 'Voir le JSON brut';
+                    const pre = document.createElement('pre');
+                    pre.className = 'theme-pre p-2 rounded';
+                    pre.style.whiteSpace = 'pre-wrap';
+                    pre.textContent = item.raw;
+                    details.appendChild(summary);
+                    details.appendChild(pre);
+                    wrapper.appendChild(details);
+                }
+
+                progressResults.appendChild(wrapper);
+            };
+
+            const accumulateSummary = (target, delta) => {
+                summaryKeys.forEach(([key]) => {
+                    target[key] = (target[key] || 0) + (delta[key] || 0);
+                });
+            };
+
+            const updateProgress = (pageIndex, pageCount, currentPage, itemIndex, pageSize) => {
+                const ratio = pageSize > 0 ? (itemIndex + 1) / pageSize : 1;
+                const overall = Math.min(1, (pageIndex + ratio) / pageCount);
+                progressBar.style.width = `${Math.round(overall * 100)}%`;
+                if (pageSize > 0) {
+                    progressText.textContent = `Page ${currentPage} — Projet ${itemIndex + 1}/${pageSize}`;
+                } else {
+                    progressText.textContent = `Page ${currentPage} — Aucun projet`;
+                }
+            };
+
+            const fetchItem = async (currentPage, itemIndex) => {
+                const data = new FormData(form);
+                data.set('page_start', `${currentPage}`);
+                data.set('page_count', '1');
+                data.set('response_format', 'json');
+                data.set('item_offset', `${itemIndex}`);
+                data.set('item_limit', '1');
+                data.set('include_debug', '1');
+
+                abortController = new AbortController();
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: data,
+                    signal: abortController.signal,
+                });
+
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(payload.error || `Request failed (${response.status}).`);
+                }
+
+                return payload;
+            };
+
+            const handlePayload = (payload, summary) => {
+                if (payload.summary) {
+                    accumulateSummary(summary, payload.summary);
+                    renderSummary(summary);
+                }
+
+                if (Array.isArray(payload.results) && payload.results.length > 0) {
+                    payload.results.forEach((item) => appendResult(item));
+                }
+            };
+
+            const runProgressive = async () => {
+
+                const pageStart = parseInt(form.page_start?.value || '1', 10) || 1;
+                const pageCount = parseInt(form.page_count?.value || '1', 10) || 1;
+
+                progressWrap.classList.remove('d-none');
+                progressResults.innerHTML = '';
+                progressText.textContent = 'Démarrage...';
+                progressBar.style.width = '0%';
+
+                const summary = {
+                    total: 0,
+                    created: 0,
+                    normalized: 0,
+                    duplicates: 0,
+                    insufficient: 0,
+                    skipped: 0,
+                    errors: 0,
+                };
+                renderSummary(summary);
+                setRunningState(true);
+
+                for (let pageIndex = 0; pageIndex < pageCount; pageIndex += 1) {
+                    if (!running) {
+                        break;
+                    }
+                    const currentPage = pageStart + pageIndex;
+                    progressText.textContent = `Page ${currentPage} — Chargement...`;
+
+                    let pageSize = 0;
+                    try {
+                        progressText.textContent = `Page ${currentPage} — Projet 1/? (en cours)`;
+                        const firstPayload = await fetchItem(currentPage, 0);
+                        pageSize = parseInt(firstPayload.page_size || 0, 10) || 0;
+                        handlePayload(firstPayload, summary);
+
+                        if (pageSize === 0) {
+                            updateProgress(pageIndex, pageCount, currentPage, 0, 0);
+                            continue;
+                        }
+
+                        updateProgress(pageIndex, pageCount, currentPage, 0, pageSize);
+
+                        for (let itemIndex = 1; itemIndex < pageSize; itemIndex += 1) {
+                            if (!running) {
+                                break;
+                            }
+                            progressText.textContent = `Page ${currentPage} — Projet ${itemIndex + 1}/${pageSize} (en cours)`;
+                            const payload = await fetchItem(currentPage, itemIndex);
+                            handlePayload(payload, summary);
+                            updateProgress(pageIndex, pageCount, currentPage, itemIndex, pageSize);
+                        }
+                    } catch (error) {
+                        if (error && error.name === 'AbortError') {
+                            appendResult({ error: 'Interruption demandée.' });
+                            break;
+                        }
+                        appendResult({ error: error.message || 'Erreur réseau pendant la requête.' });
+                        summary.errors += 1;
+                        renderSummary(summary);
+                    }
+                }
+
+                progressBar.style.width = '100%';
+                progressText.textContent = running ? 'Terminé.' : 'Arrêté.';
+                setRunningState(false);
+                return true;
+            };
+
+            if (stopBtn) {
+                stopBtn.addEventListener('click', () => {
+                    if (abortController) {
+                        abortController.abort();
+                    }
+                    setRunningState(false);
+                    progressText.textContent = 'Arrêté.';
+                });
+            }
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                if (running) {
+                    return;
+                }
+                await runProgressive();
+            });
+        });
+    </script>
 {% endblock %}

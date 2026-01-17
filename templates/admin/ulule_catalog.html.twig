@@ -1,0 +1,445 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Suivi Ulule{% endblock %}
+
+{% block body %}
+    <div class="container my-4">
+        <h1 class="h4 mb-3">Ulule — Suivi des imports</h1>
+
+        <form id="ulule-catalog-form" method="post" action="{{ path('admin_ulule_catalog') }}">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label" for="lang">Langue</label>
+                    <input id="lang" name="lang" class="form-control" value="{{ lang }}" placeholder="fr">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="country">Pays</label>
+                    <input id="country" name="country" class="form-control" value="{{ country }}" placeholder="FR">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="status">Statut</label>
+                    <select id="status" name="status" class="form-select">
+                        <option value="currently" {% if status == 'currently' %}selected{% endif %}>En cours</option>
+                        <option value="ended" {% if status == 'ended' %}selected{% endif %}>Terminé</option>
+                        <option value="success" {% if status == 'success' %}selected{% endif %}>Réussi</option>
+                        <option value="all" {% if status == 'all' %}selected{% endif %}>Tous</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="sort">Tri</label>
+                    <select id="sort" name="sort" class="form-select">
+                        <option value="new" {% if sort == 'new' %}selected{% endif %}>Nouveaux</option>
+                        <option value="ending-soon" {% if sort == 'ending-soon' %}selected{% endif %}>Bientôt fini</option>
+                        <option value="popular" {% if sort == 'popular' %}selected{% endif %}>Populaire</option>
+                        <option value="amount" {% if sort == 'amount' %}selected{% endif %}>Montant</option>
+                        <option value="position" {% if sort == 'position' %}selected{% endif %}>Position</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="page_start">Page départ</label>
+                    <input id="page_start" name="page_start" type="number" class="form-control" min="1" value="{{ pageStart }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="page_count">Pages Ulule à charger</label>
+                    <input id="page_count" name="page_count" type="number" class="form-control" min="1" max="50" value="{{ pageCount }}">
+                    <div class="form-text">20 projets par page Ulule (ex: 10 pages = ~200 projets).</div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="min_description_length">Min. caractères description</label>
+                    <input id="min_description_length" name="min_description_length" type="number" class="form-control" min="0" value="{{ minDescriptionLength }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="extra_query">Qualifiers supplémentaires</label>
+                    <input id="extra_query" name="extra_query" class="form-control" value="{{ extraQuery }}" placeholder="tag_id:123">
+                </div>
+            </div>
+
+            <div class="row g-3 mt-2">
+                <div class="col-md-4">
+                    <label class="form-label" for="prompt_extra">Complément de prompt</label>
+                    <textarea id="prompt_extra" name="prompt_extra" class="form-control" rows="5" placeholder="Optionnel : instructions supplémentaires pour la normalisation">{{ promptExtra }}</textarea>
+                    <div class="form-text">Utilisé lors des imports manuels.</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="include_video" name="include_video" value="1" {% if includeVideo %}checked{% endif %}>
+                        <label class="form-check-label" for="include_video">Inclure la vidéo</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="include_secondary_images" name="include_secondary_images" value="1" {% if includeSecondaryImages %}checked{% endif %}>
+                        <label class="form-check-label" for="include_secondary_images">Inclure les images secondaires</label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="status_filter">Filtre d’état</label>
+                    <select id="status_filter" name="status_filter" class="form-select">
+                        <option value="pending" {% if statusFilter == 'pending' %}selected{% endif %}>À importer</option>
+                        <option value="imported" {% if statusFilter == 'imported' %}selected{% endif %}>Importés</option>
+                        <option value="skipped" {% if statusFilter == 'skipped' %}selected{% endif %}>Ignorés</option>
+                        <option value="failed" {% if statusFilter == 'failed' %}selected{% endif %}>Échoués</option>
+                        <option value="all" {% if statusFilter == 'all' %}selected{% endif %}>Tous</option>
+                    </select>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="eligible_only" name="eligible_only" value="1" {% if eligibleOnly %}checked{% endif %}>
+                        <label class="form-check-label" for="eligible_only">Afficher uniquement les projets éligibles</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 mt-3">
+                <button type="submit" class="btn btn-primary">Actualiser la liste</button>
+                <button type="button" class="btn btn-outline-primary" id="ulule-load-more">Charger 200 suivants</button>
+                <span class="small text-muted">Ajoute 10 pages Ulule de plus à la requête.</span>
+            </div>
+        </form>
+
+        {% if refreshSummary %}
+            <div class="alert alert-info mt-3">
+                Ulule rafraîchi : {{ refreshSummary.updated }} projets sur {{ refreshSummary.total }} ({{ refreshSummary.errors }} erreur{{ refreshSummary.errors > 1 ? 's' : '' }}).
+            </div>
+        {% endif %}
+
+        <div class="mt-4">
+            <h2 class="h6">Résumé</h2>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="badge bg-warning text-dark">À importer: {{ statusCounts.pending ?? 0 }}</span>
+                <span class="badge bg-success">Importés: {{ statusCounts.imported ?? 0 }}</span>
+                <span class="badge bg-secondary">Ignorés: {{ statusCounts.skipped ?? 0 }}</span>
+                <span class="badge bg-danger">Échoués: {{ statusCounts.failed ?? 0 }}</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Projet</th>
+                            <th scope="col">Ajout Ulule</th>
+                            <th scope="col">Données</th>
+                            <th scope="col">État</th>
+                            <th scope="col">Import</th>
+                            <th scope="col" class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                            {% set importStatus = item.importStatus ?? 'pending' %}
+                            {% set statusClass = {
+                                'pending': 'bg-warning text-dark',
+                                'imported': 'bg-success',
+                                'skipped': 'bg-secondary',
+                                'failed': 'bg-danger'
+                            }[importStatus]|default('bg-secondary') %}
+                            {% set eligible = (
+                                (importStatus != 'imported')
+                                and (importStatus != 'skipped')
+                                and (not excludeFunded or not item.goalRaised)
+                                and (item.isCancelled is not true)
+                                and (item.isOnline is not same as(false))
+                                and (item.descriptionLength is not null)
+                                and (item.descriptionLength >= minDescriptionLength)
+                            ) %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">
+                                        {{ item.name ?? 'Projet Ulule' }}
+                                        <span class="text-muted">#{{ item.ululeId }}</span>
+                                    </div>
+                                    {% if item.sourceUrl %}
+                                        <div class="small">
+                                            <a href="{{ item.sourceUrl }}" target="_blank" rel="noopener noreferrer">{{ item.sourceUrl }}</a>
+                                        </div>
+                                    {% endif %}
+                                    {% if item.subtitle %}
+                                        <div class="small text-muted">{{ item.subtitle }}</div>
+                                    {% endif %}
+                                </td>
+                                <td class="small text-muted">
+                                    {% if item.ululeCreatedAt %}
+                                        <div>{{ item.ululeCreatedAt|date('Y-m-d') }}</div>
+                                        <div class="small text-muted">{{ ululeCreatedLabels[item.ululeId] ?? '' }}</div>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="small text-muted">
+                                    <div>Langue : {{ item.lang ?? 'n/a' }} | Pays : {{ item.country ?? 'n/a' }}</div>
+                                    <div>Type : {{ item.type ?? 'n/a' }}</div>
+                                    <div>Vu : {{ lastSeenLabels[item.ululeId] ?? 'n/a' }}</div>
+                                    {% if lastImportedLabels[item.ululeId] is defined and lastImportedLabels[item.ululeId] %}
+                                        <div>Importé : {{ lastImportedLabels[item.ululeId] }}</div>
+                                    {% endif %}
+                                    <div>
+                                        Description :
+                                        {% if item.descriptionLength is not null %}
+                                            {{ item.descriptionLength }} caractères (min {{ minDescriptionLength }})
+                                        {% else %}
+                                            n/a
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        Financé : {{ item.goalRaised ? 'oui' : 'non' }}
+                                        | En ligne : {{ item.isOnline is same as(false) ? 'non' : 'oui' }}
+                                        | Annulé : {{ item.isCancelled ? 'oui' : 'non' }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge {{ statusClass }}">{{ importStatus }}</span>
+                                    {% if not eligible %}
+                                        <span class="badge bg-light text-muted">non éligible</span>
+                                    {% endif %}
+                                    {% if item.importStatusComment %}
+                                        <div class="small text-muted mt-1">{{ item.importStatusComment }}</div>
+                                    {% endif %}
+                                    {% if item.lastError %}
+                                        <div class="small text-danger mt-1">{{ item.lastError }}</div>
+                                    {% endif %}
+                                </td>
+                                <td class="small text-muted">
+                                    {% if item.importedStringId %}
+                                        <a href="{{ path('edit_show_project_presentation', {'stringId': item.importedStringId}) }}" target="_blank" rel="noopener noreferrer">
+                                            Voir la fiche
+                                        </a>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <button
+                                        type="submit"
+                                        class="btn btn-sm btn-primary"
+                                        form="ulule-catalog-form"
+                                        formmethod="post"
+                                        formaction="{{ path('admin_ulule_import_project', {'ululeId': item.ululeId}) }}"
+                                        {% if not eligible %}disabled{% endif %}
+                                    >
+                                        Importer
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-primary js-ulule-preview"
+                                        data-ulule-id="{{ item.ululeId }}"
+                                    >
+                                        Prévisualiser
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-success js-ulule-import-open"
+                                        data-ulule-id="{{ item.ululeId }}"
+                                        {% if not eligible %}disabled{% endif %}
+                                    >
+                                        Importer + ouvrir
+                                    </button>
+                                    <form method="post" action="{{ path('admin_ulule_catalog_status', {'ululeId': item.ululeId}) }}" class="d-inline">
+                                        <input type="hidden" name="status" value="skipped">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Ignorer</button>
+                                    </form>
+                                    <form method="post" action="{{ path('admin_ulule_catalog_status', {'ululeId': item.ululeId}) }}" class="d-inline">
+                                        <input type="hidden" name="status" value="pending">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Réinitialiser</button>
+                                    </form>
+                                    <div class="small text-muted js-ulule-import-status mt-1"></div>
+                                </td>
+                            </tr>
+                            <tr id="ulule-preview-row-{{ item.ululeId }}" class="d-none">
+                                <td colspan="5">
+                                    <div class="ulule-preview-content small"></div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-muted">Aucun projet trouvé.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('ulule-catalog-form');
+            if (!form) {
+                return;
+            }
+
+            const loadMoreBtn = document.getElementById('ulule-load-more');
+            const previewButtons = document.querySelectorAll('.js-ulule-preview');
+            const importButtons = document.querySelectorAll('.js-ulule-import-open');
+            const importUrlTemplate = `{{ path('admin_ulule_import_project', {'ululeId': 'ULULE_ID'}) }}`;
+
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', () => {
+                    const pageStartInput = form.querySelector('#page_start');
+                    const pageCountInput = form.querySelector('#page_count');
+                    if (!pageStartInput || !pageCountInput) {
+                        form.submit();
+                        return;
+                    }
+                    const pageStart = parseInt(pageStartInput.value || '1', 10) || 1;
+                    const pageCount = parseInt(pageCountInput.value || '50', 10) || 50;
+                    pageStartInput.value = `${pageStart + pageCount}`;
+                    form.submit();
+                });
+            }
+            previewButtons.forEach((button) => {
+                button.addEventListener('click', async () => {
+                    const ululeId = button.dataset.ululeId;
+                    if (!ululeId) {
+                        return;
+                    }
+                    const row = document.getElementById(`ulule-preview-row-${ululeId}`);
+                    if (!row) {
+                        return;
+                    }
+                    const content = row.querySelector('.ulule-preview-content');
+                    if (!content) {
+                        return;
+                    }
+
+                    if (!row.classList.contains('d-none') && row.dataset.loaded === '1') {
+                        row.classList.add('d-none');
+                        return;
+                    }
+
+                    row.classList.remove('d-none');
+                    if (row.dataset.loaded === '1') {
+                        return;
+                    }
+
+                    content.textContent = 'Chargement...';
+                    const data = new FormData(form);
+
+                    try {
+                        const response = await fetch(`{{ path('admin_ulule_import_project_preview', {'ululeId': 'ULULE_ID'}) }}`.replace('ULULE_ID', ululeId), {
+                            method: 'POST',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            body: data,
+                        });
+                        const payload = await response.json().catch(() => ({}));
+                        if (!response.ok) {
+                            content.textContent = payload.error || `Erreur (${response.status}).`;
+                            return;
+                        }
+
+                        content.innerHTML = '';
+
+                        const statusLine = document.createElement('div');
+                        statusLine.className = 'mb-2';
+                        const statusLabel = payload.status ? `Statut : ${payload.status}` : 'Statut : n/a';
+                        statusLine.textContent = statusLabel;
+                        content.appendChild(statusLine);
+
+                        if (payload.reason) {
+                            const reasonLine = document.createElement('div');
+                            reasonLine.className = 'mb-2 text-muted';
+                            reasonLine.textContent = `Raison : ${payload.reason}`;
+                            content.appendChild(reasonLine);
+                        }
+
+                        if (payload.error) {
+                            const errorLine = document.createElement('div');
+                            errorLine.className = 'mb-2 text-danger';
+                            errorLine.textContent = `Erreur : ${payload.error}`;
+                            content.appendChild(errorLine);
+                        }
+
+                        if (payload.input) {
+                            const details = document.createElement('details');
+                            details.className = 'mt-2';
+                            const summary = document.createElement('summary');
+                            summary.textContent = 'Voir le texte structuré';
+                            const pre = document.createElement('pre');
+                            pre.className = 'theme-pre p-2 rounded';
+                            pre.style.whiteSpace = 'pre-wrap';
+                            pre.textContent = payload.input;
+                            details.appendChild(summary);
+                            details.appendChild(pre);
+                            content.appendChild(details);
+                        }
+
+                        if (payload.raw) {
+                            const details = document.createElement('details');
+                            details.className = 'mt-2';
+                            const summary = document.createElement('summary');
+                            summary.textContent = 'Voir le JSON brut';
+                            const pre = document.createElement('pre');
+                            pre.className = 'theme-pre p-2 rounded';
+                            pre.style.whiteSpace = 'pre-wrap';
+                            pre.textContent = payload.raw;
+                            details.appendChild(summary);
+                            details.appendChild(pre);
+                            content.appendChild(details);
+                        }
+
+                        row.dataset.loaded = '1';
+                    } catch (error) {
+                        content.textContent = 'Erreur réseau pendant la prévisualisation.';
+                    }
+                });
+            });
+
+            importButtons.forEach((button) => {
+                button.addEventListener('click', async () => {
+                    const ululeId = button.dataset.ululeId;
+                    if (!ululeId) {
+                        return;
+                    }
+                    const statusEl = button.closest('td')?.querySelector('.js-ulule-import-status');
+                    if (statusEl) {
+                        statusEl.textContent = 'Import en cours...';
+                    }
+
+                    const targetWindow = window.open('about:blank', '_blank');
+                    const data = new FormData(form);
+
+                    button.disabled = true;
+                    try {
+                        const response = await fetch(importUrlTemplate.replace('ULULE_ID', ululeId), {
+                            method: 'POST',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            body: data,
+                        });
+                        const payload = await response.json().catch(() => ({}));
+                        if (!response.ok) {
+                            if (statusEl) {
+                                statusEl.textContent = payload.message || `Erreur (${response.status}).`;
+                            }
+                            if (targetWindow) {
+                                targetWindow.close();
+                            }
+                            return;
+                        }
+
+                        if (payload.created_url) {
+                            if (targetWindow) {
+                                targetWindow.location = payload.created_url;
+                            } else {
+                                window.open(payload.created_url, '_blank');
+                            }
+                            if (statusEl) {
+                                statusEl.textContent = payload.message || 'Import terminé.';
+                            }
+                        } else {
+                            if (targetWindow) {
+                                targetWindow.close();
+                            }
+                            if (statusEl) {
+                                statusEl.textContent = payload.message || 'Import terminé (sans lien).';
+                            }
+                        }
+                    } catch (error) {
+                        if (targetWindow) {
+                            targetWindow.close();
+                        }
+                        if (statusEl) {
+                            statusEl.textContent = 'Erreur réseau pendant l’import.';
+                        }
+                    } finally {
+                        button.disabled = false;
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

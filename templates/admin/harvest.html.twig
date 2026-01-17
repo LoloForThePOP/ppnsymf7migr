@@ -68,6 +68,15 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body d-flex flex-column">
+                        <h2 class="h6">📊 Suivi Ulule</h2>
+                        <p class="text-muted small">Suivre ce qui est importé, éligible ou ignoré.</p>
+                        <a class="btn btn-outline-primary mt-auto" href="{{ path('admin_ulule_catalog') }}">Ouvrir</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
                         <h2 class="h6">🧹 Rafraîchir les vignettes</h2>
                         <p class="text-muted small">Recrée les URLs de vignettes en cache pour éviter les liens /resolve.</p>
                         <form method="post" action="{{ path('admin_thumbnails_refresh') }}">

@@ -36,6 +36,65 @@
     
 {% endmacro %}
 
+{#
+    Crowdfunding summary row (3P upper box)
+    - Uses PPBase.funding_* fields (end_at/status/platform) and optional ingestion source_url.
+    - platform_icon() resolves a favicon slug (ex: "ulule") via PlatformIconResolver.
+    - Full flow + extension guide: docs/crowdfunding-section.md
+#}
+{% macro fundingInfo(presentation, extraClasses) %}
+    {% set fundingEndAt = presentation.fundingEndAt %}
+    {% set fundingStatus = presentation.fundingStatus %}
+    {% set fundingPlatform = presentation.fundingPlatform %}
+    {% set sourceUrl = presentation.ingestion ? presentation.ingestion.sourceUrl : null %}
+    {% set safeSourceUrl = sourceUrl|safe_href %}
+    {% set platformIcon = platform_icon(fundingPlatform, sourceUrl) %}
+    {% if fundingEndAt or fundingStatus or fundingPlatform %}
+        {% set isPast = fundingEndAt and fundingEndAt < date() %}
+        {% set statusLabels = {
+            ongoing: 'en cours',
+            success: 'réussie',
+            failed: 'échouée',
+            cancelled: 'annulée',
+            ended: 'terminée'
+        } %}
+        {% set statusText = fundingStatus ? (statusLabels[fundingStatus]|default(fundingStatus)) : null %}
+        {% if statusText is empty %}
+            {% set statusText = isPast ? 'terminée' : 'en cours' %}
+        {% endif %}
+        {% set dateText = null %}
+        {% if fundingEndAt %}
+            {% if isPast or statusText in ['réussie', 'échouée', 'annulée', 'terminée'] %}
+                {% set dateText = 'terminée le ' ~ fundingEndAt|date('d/m/Y') %}
+            {% else %}
+                {% set dateText = 'termine le ' ~ fundingEndAt|date('d/m/Y') %}
+            {% endif %}
+        {% endif %}
+        {% set platformLabel = '' %}
+        {% if fundingPlatform %}
+            {% if safeSourceUrl %}
+                {% set platformLabel = '<a class="pp-funding-link" href="' ~ safeSourceUrl ~ '" target="_blank" rel="noopener">(' ~ fundingPlatform ~ ')</a>' %}
+            {% else %}
+                {% set platformLabel = '(' ~ fundingPlatform ~ ')' %}
+            {% endif %}
+        {% endif %}
+        <div class="pp-funding-info {{ extraClasses|default('') }}">
+            {% if platformIcon %}
+                {% if safeSourceUrl %}
+                    <a class="pp-funding-link" href="{{ safeSourceUrl }}" target="_blank" rel="noopener" aria-label="{{ fundingPlatform ?: platformIcon }}">
+                        <span class="pp-funding-icon" style="--pp-platform-icon: url('{{ asset(platformIcon ~ '.png', 'popular_website_logo') }}');" role="img" aria-label="{{ fundingPlatform ?: platformIcon }} logo"></span>
+                    </a>
+                {% else %}
+                    <span class="pp-funding-icon" style="--pp-platform-icon: url('{{ asset(platformIcon ~ '.png', 'popular_website_logo') }}');" role="img" aria-label="{{ fundingPlatform ?: platformIcon }} logo"></span>
+                {% endif %}
+            {% endif %}
+            <span class="pp-funding-label">
+                Projet avec financement participatif{% if platformLabel %} {{ platformLabel|raw }}{% endif %} - collecte {{ statusText }}{% if dateText %} ({{ dateText }}){% endif %}
+            </span>
+        </div>
+    {% endif %}
+{% endmacro %}
+
 
 {% set shareIcon %}
     
@@ -142,6 +201,8 @@
 
                     </div>
 
+                    {{ _self.fundingInfo(presentation, 'd-none d-md-flex align-items-center mt-1') }}
+
 
 </div>
 
@@ -162,6 +223,8 @@
         <div class="upper-edition-box-container d-md-none">
 
             {% include 'project_presentation/edit_show/categories_keywords/display.html.twig' %}
+
+            {{ _self.fundingInfo(presentation, 'd-flex justify-content-center mt-2') }}
             
             {# Project status or progression Edition Icon - only Small Screens #}
             <div class="mt-3">
@@ -341,6 +404,42 @@
         margin-right: 4px;
         margin-bottom: 1px;
         margin-left: 1px;
+    }
+
+    .pp-funding-info{
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        font-size: 0.95rem;
+        color: var(--theme-text-muted);
+    }
+
+    .pp-funding-icon{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        background-color: var(--theme-surface);
+        background-image: var(--pp-platform-icon);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        flex: 0 0 auto;
+    }
+
+    .pp-funding-link{
+        display: inline-flex;
+        align-items: center;
+        color: var(--theme-accent);
+        color: color-mix(in srgb, var(--theme-accent) 70%, var(--theme-text-muted));
+        text-decoration: none;
+    }
+
+    .pp-funding-link:hover{
+        text-decoration: underline;
     }
 
         

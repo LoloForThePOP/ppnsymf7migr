@@ -882,6 +882,22 @@ html[data-theme-variant="custom"] .list-group-item {
     color: var(--theme-text);
 }
 
+html[data-theme-variant="custom"] .table {
+    color: var(--theme-text);
+    border-color: var(--theme-border);
+    --bs-table-striped-color: var(--theme-text);
+    --bs-table-striped-bg: color-mix(in srgb, var(--theme-surface-alt) 80%, var(--theme-border));
+    --bs-table-hover-color: var(--theme-text);
+    --bs-table-hover-bg: color-mix(in srgb, var(--theme-surface-alt) 70%, var(--theme-border));
+    --bs-table-active-color: var(--theme-text);
+    --bs-table-active-bg: color-mix(in srgb, var(--theme-surface-alt) 60%, var(--theme-border));
+}
+
+html[data-theme-variant="custom"] .text-muted,
+html[data-theme-variant="custom"] .form-text {
+    color: var(--theme-text-muted) !important;
+}
+
 html[data-theme-variant="custom"] .list-group-item-action:hover,
 html[data-theme-variant="custom"] .list-group-item-action:focus {
     background-color: var(--theme-surface-alt);

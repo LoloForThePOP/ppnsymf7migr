@@ -48,6 +48,16 @@ class NormalizedProjectPersister
         $pp->setGoal($payload['goal'] ?? '');
         $pp->setTextDescription($payload['description_html'] ?? null);
         $pp->setOriginLanguage('fr');
+        $fundingPayload = $payload['funding'] ?? null;
+        if (!is_array($fundingPayload)) {
+            $fundingPayload = [];
+        }
+        $fundingEndAt = $payload['funding_end_at'] ?? $payload['funding_end_date'] ?? $fundingPayload['end_at'] ?? $fundingPayload['end_date'] ?? null;
+        $fundingStatus = $payload['funding_status'] ?? $fundingPayload['status'] ?? null;
+        $fundingPlatform = $payload['funding_platform'] ?? $fundingPayload['platform'] ?? null;
+        $pp->setFundingEndAt($this->parseFundingEndAt($fundingEndAt));
+        $pp->setFundingStatus($this->normalizeFundingStatus($fundingStatus));
+        $pp->setFundingPlatform($this->stringValue($fundingPlatform));
 
         $mediaBaseName = $this->buildMediaBaseName($payload);
 
@@ -488,6 +498,51 @@ class NormalizedProjectPersister
         }
 
         return $filtered;
+    }
+
+    private function parseFundingEndAt(mixed $value): ?\DateTimeImmutable
+    {
+        if ($value instanceof \DateTimeInterface) {
+            return \DateTimeImmutable::createFromInterface($value);
+        }
+
+        if (is_int($value)) {
+            return (new \DateTimeImmutable())->setTimestamp($value);
+        }
+
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value);
+        if ($value === '') {
+            return null;
+        }
+
+        try {
+            return new \DateTimeImmutable($value);
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    private function normalizeFundingStatus(mixed $value): ?string
+    {
+        $status = $this->stringValue($value);
+        if ($status === null) {
+            return null;
+        }
+
+        $status = strtolower($status);
+
+        return match ($status) {
+            'success', 'succeeded', 'funded', 'goal_raised', 'reached', 'completed_success' => 'success',
+            'failed', 'failure', 'unsuccessful', 'not_funded', 'unfunded' => 'failed',
+            'cancelled', 'canceled' => 'cancelled',
+            'ongoing', 'in_progress', 'active', 'online', 'live', 'funding' => 'ongoing',
+            'ended', 'finished', 'closed' => 'ended',
+            default => $status,
+        };
     }
 
     private function stringValue(mixed $value): ?string
