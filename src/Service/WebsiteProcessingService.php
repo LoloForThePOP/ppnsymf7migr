@@ -26,6 +26,8 @@ class WebsiteProcessingService
         "wikipedia.org",
         "fondation-patrimoine.org",
         "jeveuxaider.gouv.fr",
+        "ulule.com",
+        "ulule.fr",
     ];
 
     private const FALLBACK_ICONS = [
@@ -53,8 +55,10 @@ class WebsiteProcessingService
         $host = preg_replace('/^(www\.|m\.)/i', '', $host);
 
         // assign icon
-        if (in_array($host, self::KNOWN_LOGOS, true)) {
-            $website->setIcon ($this->extractBaseIconName($host));
+        if ($this->isUluleHost($host)) {
+            $website->setIcon('ulule');
+        } elseif (in_array($host, self::KNOWN_LOGOS, true)) {
+            $website->setIcon($this->extractBaseIconName($host));
         } else {
             $website->setIcon($this->deterministicFallback($host));
         }
@@ -68,11 +72,23 @@ class WebsiteProcessingService
 
     private function extractBaseIconName(string $host): string
     {
+        if ($this->isUluleHost($host)) {
+            return 'ulule';
+        }
+
         return preg_replace(
             '/\.(com|info|net|io|us|gg|org|me|co\.uk|ca|mobi|gouv\.fr)$/i',
             '',
             $host
         );
+    }
+
+    private function isUluleHost(string $host): bool
+    {
+        return $host === 'ulule.com'
+            || $host === 'ulule.fr'
+            || str_ends_with($host, '.ulule.com')
+            || str_ends_with($host, '.ulule.fr');
     }
 
     private function deterministicFallback(string $host): string

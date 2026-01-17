@@ -186,10 +186,12 @@ class NormalizedProjectPersister
         foreach ($images as $entry) {
             $url = null;
             $caption = null;
+            $licence = null;
 
             if (is_array($entry)) {
                 $url = $entry['url'] ?? null;
                 $caption = $entry['caption'] ?? null;
+                $licence = $entry['licence'] ?? $entry['license'] ?? null;
             } else {
                 $url = $entry;
             }
@@ -223,6 +225,10 @@ class NormalizedProjectPersister
             if (is_string($caption)) {
                 $caption = trim($caption);
                 $slide->setCaption($caption === '' ? null : $caption);
+            }
+            $licence = $this->stringValue($licence);
+            if ($licence !== null) {
+                $slide->setLicence($licence);
             }
             $slide->setProjectPresentation($pp);
             $pp->addSlide($slide);

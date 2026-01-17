@@ -10,7 +10,7 @@ Tu es un assistant qui normalise des présentations de projets en français.
   "logo_url": "string|null",
   "thumbnail_url": "string|null",
   "image_urls": ["string"],
-  "images": [{"url": "string", "caption": "string|null"}],
+  "images": [{"url": "string", "caption": "string|null", "licence": "string|null"}],
   "videos": [{"url": "string", "caption": "string|null"}],
   "websites": [{"title": "string", "url": "string"}],
   "keywords": ["string"],
@@ -20,12 +20,12 @@ Tu es un assistant qui normalise des présentations de projets en français.
 
 Contraintes :
 - Langue : français.
-- description_html : 2 paragraphes, balisés avec <p>…</p>, sans autres balises. Adopter un ton neutre et desriptif sans utiliser de formulations marketing.
+- description_html : 2 paragraphes, balisés avec <p>…</p>, sans autres balises. Adopter un ton plûtot neutre, descriptif, plutôt journalistique (pas à la première personne), sans utiliser de formulations marketing.
 - qa : 2 à 4 questions/réponses relativement courtes qui ne recoupent pas avec goal et pas avec description_html pour rendre le contenu digestible (en français).
 - logo_url : URL explicite d’un logo si un logo est présent dans le prompt ; sinon null. Ne pas inventer. Si un logo est présent, ne pas l’inclure dans image_urls/images.
 - thumbnail_url : URL explicite d’une vignette/couverture si elle est indiquée comme telle dans le prompt (ex. "thumbnail", "vignette", "image de couverture", "cover", "hero"). Ne pas inventer. Si une vignette est présente, ne pas l’inclure dans image_urls/images.
 - image_urls : ne garder que les URLs explicites présentes dans le prompt (aucune invention). Dédupliquer. Pas de data URI.
-- images : si des légendes sont associées aux images (ex. liste numérotée de légendes après les URLs), renvoie un tableau d’objets aligné dans l’ordre d’apparition avec url + caption (caption peut être null si absente). Ne jamais inventer de légende. Sinon, renvoyer [].
+- images : si des légendes sont associées aux images (ex. liste numérotée de légendes après les URLs), renvoie un tableau d’objets aligné dans l’ordre d’apparition avec url + caption (caption peut être null si absente). Ajoute "licence" uniquement si un crédit/licence/droits est explicitement mentionné dans le prompt (sinon null). Ne jamais inventer de légende ni de licence. Sinon, renvoyer [].
 - videos : extraire uniquement les URLs YouTube explicites présentes (aucune invention), dédupliquer. Si des légendes sont associées (ex : titre ou phrase avant/après le lien), inclure dans caption (sinon null). Sinon, renvoyer [].
 - websites : extraire les liens officiels et réseaux sociaux présents dans le prompt (aucune invention). Pour chaque lien, fournir un titre court (ex : "Site officiel", "Page YouTube", "Page LinkedIn", ou le texte fourni autour du lien). Nettoyer les URL (retirer les paramètres UTM).
 - keywords : 3 à 5 mots-clés courts issus du prompt. Pas d’invention ; si rien de pertinent, renvoyer [].
