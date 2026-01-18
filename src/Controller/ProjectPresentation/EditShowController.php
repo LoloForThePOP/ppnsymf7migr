@@ -19,9 +19,11 @@ use App\Form\ProjectPresentation\BusinessCardType;
 use App\Form\ProjectPresentation\QuestionAnswerType;
 use App\Form\ProjectPresentation\TextDescriptionType;
 use App\Form\ProjectPresentation\CategoriesKeywordsType;
+use App\Service\PresentationEventLogger;
 use App\Service\ProductTourService;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Entity\PresentationEvent;
 
 class EditShowController extends AbstractController
 {
@@ -38,6 +40,7 @@ class EditShowController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         ProductTourService $productTourService,
+        PresentationEventLogger $eventLogger,
     ): Response
     {
         $showThemeSelectorTour = $productTourService->shouldShowAfterVisits(
@@ -73,6 +76,7 @@ class EditShowController extends AbstractController
         $needsFlush = false;
         if ($id !== null && !in_array($id, $viewed, true)) {
             $presentation->getExtra()->incrementViews();
+            $eventLogger->log($presentation, PresentationEvent::TYPE_VIEW);
             $needsFlush = true;
             $viewed[] = $id;
             $session->set('pp_viewed_ids', $viewed);

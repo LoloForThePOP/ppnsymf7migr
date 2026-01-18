@@ -38,6 +38,9 @@ class DashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linktoDashboard('📊 Dashboard', 'fa fa-home');
+        if ($this->isGranted('ROLE_ADMIN')) {
+            yield MenuItem::linkToRoute('📈 Monitoring', 'fa fa-chart-line', 'admin_monitoring');
+        }
         if ($this->isGranted(ScraperAccessVoter::ATTRIBUTE)) {
             yield MenuItem::linkToRoute('✨ Outils de collecte', 'fa fa-magic', 'admin_harvest');
         }

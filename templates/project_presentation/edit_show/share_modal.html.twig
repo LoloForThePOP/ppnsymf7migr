@@ -8,7 +8,7 @@
 
     {% block modalBody %}
 
-        <div class="share-whole-content">
+        <div class="share-whole-content" data-event-url="{{ path('pp_event', {'stringId': presentation.stringId}) }}">
 
             <div class="row">
 
@@ -124,6 +124,28 @@
 
 <script>
 
+    function logPresentationEvent(type, meta = {}) {
+        var container = document.querySelector('#pp-share .share-whole-content');
+        if (!container) {
+            return;
+        }
+        var url = container.dataset.eventUrl;
+        if (!url) {
+            return;
+        }
+        var payload = { type: type, meta: meta };
+        try {
+            navigator.sendBeacon(url, JSON.stringify(payload));
+        } catch (e) {
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                keepalive: true
+            }).catch(function () {});
+        }
+    }
+
     function copyToClipboard(elementId, feedbackId, feedbackMessage) {
 
         /* Get the text field */
@@ -142,7 +164,36 @@
         var feedback = document.getElementById(feedbackId);
         feedback.innerHTML = feedbackMessage;   
 
+        logPresentationEvent('share_copy');
     } 
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var shareModal = document.getElementById('pp-share');
+        if (shareModal) {
+            shareModal.addEventListener('shown.bs.modal', function () {
+                logPresentationEvent('share_open');
+            });
+        }
+
+        var shareKit = document.querySelector('#pp-share .a2a_kit');
+        if (shareKit) {
+            shareKit.addEventListener('click', function (event) {
+                var target = event.target.closest('a');
+                if (!target) {
+                    return;
+                }
+                var channel = null;
+                target.classList.forEach(function (klass) {
+                    if (klass.indexOf('a2a_button_') === 0) {
+                        channel = klass.replace('a2a_button_', '');
+                    }
+                });
+                if (channel) {
+                    logPresentationEvent('share_external', { channel: channel });
+                }
+            });
+        }
+    });
 
 </script>
 
