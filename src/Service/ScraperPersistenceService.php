@@ -61,6 +61,8 @@ class ScraperPersistenceService
                 $pp->setTextDescription($item['description'] ?? null);
                 $pp->setOriginLanguage($item['language'] ?? null);
 
+                $this->em->persist($pp);
+
                 // Ingestion metadata
                 $ing = $pp->getIngestion();
                 $ing->setSourceUrl($canonicalUrl);
@@ -77,7 +79,6 @@ class ScraperPersistenceService
                 // Websites / socials
                 $this->attachWebsites($pp, $item['websites'] ?? [], $item['website'] ?? null);
 
-                $this->em->persist($pp);
                 $created++;
                 $createdEntities[] = $pp;
             } catch (UniqueConstraintViolationException $e) {

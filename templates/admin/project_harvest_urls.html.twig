@@ -6,7 +6,160 @@
     <div class="container my-4">
         <h1 class="h4 mb-3">Collecter depuis une liste d’URLs</h1>
 
+        <div class="mb-4">
+            <h2 class="h6">Sources enregistrées</h2>
+            <p class="text-muted small mb-2">Placez vos fichiers dans <code>var/collect/url_lists/&lt;source&gt;/</code> (avec <code>urls.csv</code> et <code>prompt.txt</code>).</p>
+
+            {% if sources %}
+                <div class="list-group">
+                    {% for source in sources %}
+                        <a
+                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if selectedSource == source.name %}active{% endif %}"
+                            href="{{ path('admin_project_harvest_urls', {source: source.name}) }}"
+                        >
+                            <span class="fw-semibold">{{ source.name }}</span>
+                            <span class="d-flex gap-2">
+                                {% if source.has_urls %}
+                                    <span class="badge bg-light text-dark">urls</span>
+                                {% endif %}
+                                {% if source.has_prompt %}
+                                    <span class="badge bg-light text-dark">prompt</span>
+                                {% endif %}
+                            </span>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info mb-0">Aucune source détectée.</div>
+            {% endif %}
+        </div>
+
+        {% if selectedSource %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                        <h2 class="h6 mb-0">Source : {{ selectedSource }}</h2>
+                        {% if sourceSummary %}
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-secondary">Total {{ sourceSummary.total }}</span>
+                                <span class="badge bg-warning text-dark">En attente {{ sourceSummary.pending }}</span>
+                                <span class="badge bg-success">OK {{ sourceSummary.done }}</span>
+                                <span class="badge bg-info text-dark">Normalisé {{ sourceSummary.normalized }}</span>
+                                <span class="badge bg-danger">Erreur {{ sourceSummary.error }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if sourceError %}
+                        <div class="alert alert-danger">{{ sourceError }}</div>
+                    {% endif %}
+
+                    <form method="post" action="{{ path('admin_project_harvest_urls', {source: selectedSource}) }}" id="source-run-form">
+                        <input type="hidden" name="source" value="{{ selectedSource }}">
+                        <div class="row g-3">
+                            <div class="col-lg-6">
+                                <label for="source_prompt_extra" class="form-label">Complément de prompt (source)</label>
+                                <textarea id="source_prompt_extra" name="source_prompt_extra" class="form-control" rows="8">{{ sourcePrompt }}</textarea>
+                                <div class="form-text">Enregistré dans <code>prompt.txt</code>.</div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">Taille de file</span>
+                                    <input type="number" class="form-control" name="batch_size" min="1" max="50" value="{{ sourceBatchSize }}" id="source-batch-size">
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input type="hidden" name="persist_source" value="0">
+                                    <input class="form-check-input" type="checkbox" value="1" id="persist_source" name="persist_source" {% if persistSource %}checked{% endif %}>
+                                    <label class="form-check-label" for="persist_source">
+                                        Persister immédiatement (télécharge images/vidéos si présent)
+                                    </label>
+                                </div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="submit" name="action" value="save_source_prompt" class="btn btn-outline-secondary">Enregistrer le prompt</button>
+                                    <button type="submit" name="action" value="run_source" class="btn btn-primary">Traiter la file</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    {% if sourceEntries %}
+                        <div class="table-responsive mt-4">
+                            <table class="table table-sm align-middle mb-0" id="source-urls-table">
+                                <thead>
+                                    <tr>
+                                        <th>URL</th>
+                                        <th>Progression</th>
+                                        <th>Statut</th>
+                                        <th>Dernier run</th>
+                                        <th>Page créée</th>
+                                        <th>Erreur</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for entry in sourceEntries|slice(0, 200) %}
+                                        {% set status = entry.status|default('pending')|lower %}
+                                        {% set badgeClass = status == 'done' ? 'success' : (status == 'normalized' ? 'info text-dark' : (status == 'error' ? 'danger' : (status == 'pending' ? 'warning text-dark' : 'secondary'))) %}
+                                        <tr data-status="{{ status }}">
+                                            <td class="small"><a href="{{ entry.url }}" target="_blank" rel="noopener noreferrer">{{ entry.url }}</a></td>
+                                            <td class="small">
+                                                <span class="processing-indicator d-none align-items-center gap-1">
+                                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                    <span>processing</span>
+                                                </span>
+                                            </td>
+                                            <td><span class="badge bg-{{ badgeClass }}">{{ status }}</span></td>
+                                            <td class="small">{{ entry.last_run_at ?: '-' }}</td>
+                                            <td class="small">
+                                                {% if entry.created_url is defined and entry.created_url %}
+                                                    <a href="{{ entry.created_url }}" target="_blank" rel="noopener noreferrer">Ouvrir</a>
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                            <td class="small text-muted">{{ entry.error ?: '-' }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if sourceEntries|length > 200 %}
+                            <div class="small text-muted mt-2">Affichage limité à 200 URLs ({{ sourceEntries|length }} au total).</div>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if sourceResults %}
+                        <div class="mt-4">
+                            <h3 class="h6">Dernière exécution</h3>
+                            <div class="list-group">
+                                {% for item in sourceResults %}
+                                    <div class="list-group-item">
+                                        <div class="fw-bold">{{ item.url ?? 'n/a' }}</div>
+                                        {% if item.error is defined and item.error %}
+                                            <div class="text-danger small">Erreur : {{ item.error }}</div>
+                                        {% elseif item.created is defined and item.created %}
+                                            <div class="text-success small">
+                                                Créé :
+                                                <a href="{{ path('edit_show_project_presentation', {'stringId': item.created.stringId}) }}" target="_blank" rel="noopener noreferrer">
+                                                    {{ item.created.title ?? item.created.goal }}
+                                                </a>
+                                            </div>
+                                        {% else %}
+                                            <div class="text-muted small">Normalisation terminée (non persistée).</div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+        <hr class="my-4">
+
+        <h2 class="h6 mb-3">Collecte manuelle</h2>
         <form method="post" action="{{ path('admin_project_harvest_urls') }}">
+            <input type="hidden" name="action" value="manual">
             <div class="mb-3">
                 <label for="prompt_extra" class="form-label">Complément de prompt</label>
                 <textarea id="prompt_extra" name="prompt_extra" class="form-control" rows="8" placeholder="Optionnel : instructions supplémentaires pour la normalisation">{{ promptExtra }}</textarea>
@@ -127,4 +280,25 @@
             </div>
         {% endif %}
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('source-run-form');
+            if (!form) return;
+            form.addEventListener('submit', () => {
+                const batchInput = document.getElementById('source-batch-size');
+                const batchSize = batchInput ? parseInt(batchInput.value, 10) || 0 : 0;
+                if (batchSize <= 0) return;
+                const table = document.getElementById('source-urls-table');
+                if (!table) return;
+                const rows = Array.from(table.querySelectorAll('tbody tr[data-status="pending"], tbody tr[data-status="error"]'));
+                rows.slice(0, batchSize).forEach((row) => {
+                    const indicator = row.querySelector('.processing-indicator');
+                    if (indicator) {
+                        indicator.classList.remove('d-none');
+                        indicator.classList.add('d-inline-flex');
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}

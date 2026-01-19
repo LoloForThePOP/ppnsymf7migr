@@ -9,7 +9,7 @@ Format de sortie (JSON, rien d’autre) :
     "goal": "string",
     "description": "string",
     "categories": [
-      "software|electronics|science|inform|humane|animals|fabrication|construction|restore|transport|environment|history|money|food|services|arts|entertainment|data|health|idea|space|crisis"
+      "software|electronics|science|inform|humane|animals|fabrication|construction|restore|transport|environment|history|money|food|services|arts|entertainment|sports|data|health|idea|space|crisis"
     ],
     "source_url": "string",
 
@@ -21,5 +21,5 @@ Contraintes :
 - 2 projets maximum.
 - title et goal en français, goal en une phrase.
 - description : 2 à 3 paragraphes en français, séparés par des balises html de paragraphes p.
-- categories : 1 à 3 valeurs parmi la liste autorisée; si aucune ne colle, inclure "services". Pas de catégories inventées.
+- categories : 1 à 3 valeurs parmi la liste autorisée; si aucune ne colle, inclure "services". La catégorie "humane" couvre solidarité, vivre ensemble, inclusion sociale, aide humanitaire, insertion, lutte contre la précarité. Pas de catégories inventées.
 - source_url : URL http(s). Pas de vide, pas de texte hors JSON.

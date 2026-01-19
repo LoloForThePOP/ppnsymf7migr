@@ -25,7 +25,8 @@ Categories
 - food: agriculture, food production, food aid, nutrition.
 - services: services, matchmaking, marketplaces, assistance, support.
 - arts: culture, arts, creative works, exhibitions, performances.
-- entertainment: leisure, sports, games (non-software), recreation.
+- entertainment: leisure, games (non-software), recreation, pop-culture media.
+- sports: physical activity, sports clubs, training, competitions, events, sport equipment.
 - data: data organization, open data, mapping, datasets.
 - health: health care, medical devices, mental health, prevention.
 - idea: civic/politics, advocacy, policy, public debate.

@@ -14,12 +14,12 @@
             <form method="post" action="{{ path('admin_thumbnails_refresh') }}">
                 <input type="hidden" name="offset" value="{{ nextOffset }}">
                 <input type="hidden" name="limit" value="{{ limit }}">
-                <button type="submit" class="btn btn-primary">Continuer</button>
+                <button type="submit" class="btn btn-primary">{{ started ? 'Continuer' : 'Lancer' }}</button>
             </form>
         {% else %}
             <div class="alert alert-success mb-3">Terminé.</div>
         {% endif %}
 
-        <a class="btn btn-secondary mt-3" href="{{ path('admin_harvest') }}">Retour</a>
+        <a class="btn btn-secondary mt-3" href="{{ path('admin_misc') }}">Retour</a>
     </div>
 {% endblock %}

@@ -23,13 +23,14 @@ Produit un JSON UTF-8 valide :
   "funding_status": "ongoing|success|failed|cancelled|ended|null",
   "funding_platform": "string|null",
   "keywords": ["string"],
-  "categories": ["software|electronics|science|inform|humane|animals|fabrication|construction|restore|transport|environment|history|money|food|services|arts|entertainment|data|health|idea|space|crisis"],
+  "categories": ["software|electronics|science|inform|humane|animals|fabrication|construction|restore|transport|environment|history|money|food|services|arts|entertainment|sports|data|health|idea|space|crisis"],
   "source_url": "string|null"
 }
 
 Contraintes :
 - Langue : français.
-- description_html : 2 paragraphes si possible, un seul sinon, balisés avec <p>…</p>, sans autres balises. Adopter un ton plûtot neutre, descriptif, plutôt journalistique (pas à la première personne), sans utiliser de formulations marketing. Ne pas inventer.
+- title : formulation neutre et factuelle du titre, éviter les verbes et sujets pour le titre sauf si le titre est déjà formé et en contient explicitement, éviter les appels au soutien pour le titre.
+- description_html : 2 paragraphes si possible, un seul sinon, balisés avec <p>…</p>, sans autres balises. Adopter un ton plûtot neutre, descriptif, plutôt journalistique (pas à la première personne du singulier ou du pluriel), sans utiliser de formulations marketing. Si le texte source est à la première personne, réécrire systématiquement en troisième personne neutre ("le projet", "l'équipe", "l'association") et supprimer "je/nous/notre/mon". Ne pas inventer.
 - qa : 2 à 4 questions / réponses relativement courtes pour rendre le contenu digestible (en français), ne pas parler directement de l'objectif du projet (goal) dans ces question / answer, ne pas se répéter, ne pas parler de choses déjà dites dans description_html, ne pas parler de positions géographiques / lieux dans qa.
 - logo_url : URL explicite d’un logo si un logo est présent dans TEXT/LINKS/IMAGES ; sinon null. Ne pas inventer. Si un logo est présent, ne pas l’inclure dans image_urls/images.
 - thumbnail_url : URL explicite d’une vignette/couverture si elle est indiquée comme telle dans TEXT/LINKS (ex. "thumbnail", "vignette", "image de couverture", "cover", "hero"). Ne pas inventer.
@@ -42,7 +43,7 @@ Contraintes :
 - funding_status : état explicite de la collecte/campagne (valeurs autorisées : ongoing, success, failed, cancelled, ended). Sinon null. Ne pas inventer.
 - funding_platform : plateforme de collecte si explicitement mentionnée (ex : "Ulule"), sinon null.
 - keywords : 3 à 5 mots-clés courts issus du texte. Pas d’invention ; si rien de pertinent, renvoyer [].
-- categories : 1 à 3 valeurs parmi la liste autorisée ci-dessus. La catégorie "electronics" concerne l'électronique et le hardware. La catégorie "fabrication" correspond à la fabrication d'objets. La catégorie "construction" concerne les chantiers, bâtiments et travaux. La catégorie "restore" concerne des restaurations de bâtiments, de monuments ou restauration d'autres objets du patrimoine. La catégorie "history" inclue nettement les projets en rapport avec le patrimoine.
+- categories : 1 à 3 valeurs parmi la liste autorisée ci-dessus. La catégorie "electronics" concerne l'électronique et le hardware. La catégorie "humane" couvre solidarité, vivre ensemble, inclusion sociale, aide humanitaire, insertion, lutte contre la précarité. La catégorie "fabrication" correspond à la fabrication d'objets. La catégorie "construction" concerne les chantiers, bâtiments et travaux. La catégorie "restore" concerne des restaurations de bâtiments, de monuments ou restauration d'autres objets du patrimoine. La catégorie "history" inclue nettement les projets en rapport avec le patrimoine. La catégorie "arts" couvre arts et culture : livres/littérature, cinéma/film/documentaire, théâtre, musique, danse, arts visuels, expositions, spectacles, festivals culturels. La catégorie "entertainment" couvre loisirs et divertissement : jeux, gaming, e-sport, événements ludiques, podcasts/streaming, contenu pop-culture si l'objectif principal est le divertissement. La catégorie "sports" couvre activité physique, sport, clubs, entraînement, compétitions, événements sportifs, équipements de pratique.
 - source_url : URL http(s) explicite si présente dans l’entrée (TEXT/LINKS), sinon null.
 - Si une information n’est pas fournie, renvoyer null ou [] selon le champ.
 - Pas d’autre texte hors du JSON. Retourne uniquement le JSON valide UTF-8.

@@ -19,7 +19,7 @@ class UluleCatalogController extends AbstractController
 {
     private const PER_PAGE = 20;
     private const MAX_PAGES = 50;
-    private const DEFAULT_PROMPT_EXTRA = 'Ce complément de prompt définit des instructions hautement prioritaires par rapport aux précédentes : Pour chaque image remplit le champ licence avec "Copyright Ulule.fr"';
+    private const DEFAULT_PROMPT_EXTRA = 'Ce complément de prompt définit des instructions hautement prioritaires par rapport aux précédentes : Pour chaque image remplit le champ licence avec "Copyright Ulule.fr". N\'inclue pas la localisation (ville/commune/région/pays) dans les keywords, sauf si la localisation fait partie du titre du projet. Pour goal, évite toute sémantique de collecte/soutien/financement (ex: "soutenir", "collecter", "financer") et formule l\'objectif comme la réalisation concrète du projet (ex: "Produire…", "Réaliser…", "Créer…").';
 
     #[Route('/admin/ulule/catalog', name: 'admin_ulule_catalog', methods: ['GET', 'POST'])]
     public function __invoke(
@@ -53,7 +53,15 @@ class UluleCatalogController extends AbstractController
         }
 
         $statusFilter = trim((string) $input->get('status_filter', UluleProjectCatalog::STATUS_PENDING));
-        $eligibleOnly = $input->has('eligible_only') ? (bool) $input->get('eligible_only') : false;
+        $eligibleOnlyParam = $input->get('eligible_only');
+        if (is_array($eligibleOnlyParam)) {
+            $eligibleOnlyParam = end($eligibleOnlyParam);
+        }
+        if ($eligibleOnlyParam === null) {
+            $eligibleOnly = true;
+        } else {
+            $eligibleOnly = filter_var($eligibleOnlyParam, FILTER_VALIDATE_BOOLEAN);
+        }
 
         $refreshSummary = null;
         if ($request->isMethod('POST')) {

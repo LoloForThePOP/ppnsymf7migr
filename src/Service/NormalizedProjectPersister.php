@@ -67,12 +67,15 @@ class NormalizedProjectPersister
         $ing->setIngestedAt(new \DateTimeImmutable());
         $ing->setIngestionStatus('ok');
 
+        $this->em->persist($pp);
+
         // Categories
         $this->attachCategories($pp, $payload['categories'] ?? []);
 
         // Images as slides (with optional captions)
         $logoUrl = (!empty($payload['logo_url']) && is_string($payload['logo_url'])) ? $payload['logo_url'] : null;
         $thumbnailUrl = (!empty($payload['thumbnail_url']) && is_string($payload['thumbnail_url'])) ? $payload['thumbnail_url'] : null;
+        $keepThumbnailInSlides = !empty($payload['keep_thumbnail_in_slides']);
         $imagesPayload = [];
         if (!empty($payload['images']) && is_array($payload['images'])) {
             $imagesPayload = $payload['images'];
@@ -94,7 +97,9 @@ class NormalizedProjectPersister
         // Dedicated thumbnail (custom thumbnail takes precedence in cache)
         if ($thumbnailUrl) {
             $this->attachCustomThumbnail($pp, $thumbnailUrl, $mediaBaseName);
-            $imagesPayload = $this->filterImagesPayload($imagesPayload, $thumbnailUrl);
+            if (!$keepThumbnailInSlides) {
+                $imagesPayload = $this->filterImagesPayload($imagesPayload, $thumbnailUrl);
+            }
         }
         
         $this->attachVideos($pp, $payload['videos'] ?? []);
@@ -102,7 +107,8 @@ class NormalizedProjectPersister
         $this->attachWebsites($pp, $payload['websites'] ?? []);
         $this->attachBusinessCards($pp, $payload['business_cards'] ?? []);
         
-        $this->attachPlaces($pp, $payload['places'] ?? []);
+        $placesDefaultCountry = $this->stringValue($payload['places_default_country'] ?? null);
+        $this->attachPlaces($pp, $payload['places'] ?? [], $placesDefaultCountry);
 
         // Q&A as other components
         $this->attachQuestions($pp, $payload['qa'] ?? []);
@@ -116,7 +122,6 @@ class NormalizedProjectPersister
             $pp->setStringId(strtolower($slugger->slug($pp->getTitle())));
         }
 
-        $this->em->persist($pp);
         $this->em->flush();
 
         // Generate/update thumbnail (uses slide, custom thumb, or logo fallback)
@@ -250,13 +255,13 @@ class NormalizedProjectPersister
         }
     }
 
-    private function attachPlaces(PPBase $pp, mixed $places): void
+    private function attachPlaces(PPBase $pp, mixed $places, ?string $defaultCountry = null): void
     {
         if (!is_array($places) || $places === []) {
             return;
         }
 
-        $result = $this->placeNormalizationService->normalizePlacesWithDebug($places, 3);
+        $result = $this->placeNormalizationService->normalizePlacesWithDebug($places, 3, $defaultCountry);
         $normalizedPlaces = $result['places'];
         $this->lastPlaceDebug = $result['debug'];
 

@@ -21,295 +21,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 #[IsGranted(ScraperAccessVoter::ATTRIBUTE)]
 class UluleImportController extends AbstractController
 {
-    private const PER_PAGE = 20;
-    private const MAX_PAGES = 10;
     private const MAX_SECONDARY_IMAGES = 5;
-    private const DEFAULT_PROMPT_EXTRA = 'Ce complément de prompt définit des instructions hautement prioritaires par rapport aux précédentes : Pour chaque image remplit le champ licence avec "Copyright Ulule.fr"';
-
-    #[Route('/admin/ulule/import', name: 'admin_ulule_import', methods: ['GET', 'POST'])]
-    public function __invoke(
-        Request $request,
-        UluleApiClient $ululeApiClient,
-        NormalizedProjectPersister $persister,
-        ScraperUserResolver $scraperUserResolver,
-        EntityManagerInterface $em,
-        string $appNormalizeTextPromptPath,
-        string $appScraperModel
-    ): Response {
-        $responseFormat = trim((string) $request->request->get('response_format', ''));
-        $isJson = $responseFormat === 'json';
-        $lang = trim((string) $request->request->get('lang', 'fr'));
-        $country = trim((string) $request->request->get('country', 'FR'));
-        $status = trim((string) $request->request->get('status', 'currently'));
-        $sort = trim((string) $request->request->get('sort', 'new'));
-        $pageStart = max(1, (int) $request->request->get('page_start', 1));
-        $pageCount = max(1, (int) $request->request->get('page_count', 1));
-        $pageCount = min(self::MAX_PAGES, $pageCount);
-        $minDescriptionLength = max(0, (int) $request->request->get('min_description_length', 500));
-        $itemOffset = max(0, (int) $request->request->get('item_offset', 0));
-        $itemLimit = max(0, (int) $request->request->get('item_limit', 0));
-        $excludeFunded = $request->request->has('exclude_funded')
-            ? (bool) $request->request->get('exclude_funded')
-            : false;
-        $includeVideo = $request->request->has('include_video')
-            ? (bool) $request->request->get('include_video')
-            : true;
-        $includeSecondaryImages = $request->request->has('include_secondary_images')
-            ? (bool) $request->request->get('include_secondary_images')
-            : true;
-        $persist = (bool) $request->request->get('persist', false);
-        $extraQuery = trim((string) $request->request->get('extra_query', ''));
-        $promptExtra = trim((string) $request->request->get('prompt_extra', ''));
-        if ($promptExtra === '' && !$request->isMethod('POST')) {
-            $promptExtra = self::DEFAULT_PROMPT_EXTRA;
-        }
-        $includeDebug = (bool) $request->request->get('include_debug', false);
-
-        $pageSize = null;
-        $results = [];
-        $summary = [
-            'total' => 0,
-            'created' => 0,
-            'normalized' => 0,
-            'duplicates' => 0,
-            'insufficient' => 0,
-            'skipped' => 0,
-            'errors' => 0,
-        ];
-
-        $creator = null;
-        if ($persist) {
-            $creator = $scraperUserResolver->resolve();
-            if (!$creator) {
-                $this->addFlash('warning', sprintf(
-                    'Compte "%s" introuvable ou multiple. Persistance désactivée.',
-                    $scraperUserResolver->getRole()
-                ));
-                $persist = false;
-            }
-        }
-
-        if ($request->isMethod('POST')) {
-            if ($isJson) {
-                $pageCount = 1;
-            }
-
-            $prompt = file_get_contents($appNormalizeTextPromptPath);
-            if ($prompt === false) {
-                $results[] = ['error' => 'Prompt introuvable.'];
-            } else {
-                if ($promptExtra !== '') {
-                    $prompt = rtrim($prompt) . "\n\n" . $promptExtra;
-                }
-                $client = OpenAI::client($_ENV['OPENAI_API_KEY'] ?? '');
-                $queryString = $this->buildQueryString($lang, $country, $status, $sort, $extraQuery);
-
-                for ($page = 0; $page < $pageCount; $page++) {
-                    $offset = ($pageStart - 1 + $page) * self::PER_PAGE;
-                    try {
-                        $search = $ululeApiClient->searchProjects([
-                            'lang' => $lang,
-                            'limit' => self::PER_PAGE,
-                            'offset' => $offset,
-                            'q' => $queryString,
-                        ]);
-                    } catch (\Throwable $e) {
-                        $summary['errors']++;
-                        $results[] = [
-                            'error' => sprintf('Erreur search Ulule (page %d): %s', $pageStart + $page, $e->getMessage()),
-                        ];
-                        continue;
-                    }
-
-                    $projects = $search['projects'] ?? [];
-                    if ($pageSize === null && $isJson) {
-                        $pageSize = count($projects);
-                    }
-
-                    $projectCount = count($projects);
-                    $startIndex = min($itemOffset, $projectCount);
-                    $endIndex = $projectCount;
-                    if ($itemLimit > 0) {
-                        $endIndex = min($projectCount, $itemOffset + $itemLimit);
-                    }
-
-                    for ($index = $startIndex; $index < $endIndex; $index++) {
-                        $project = $projects[$index];
-                        $summary['total']++;
-                        $entry = $this->buildBaseResult($project, $lang);
-
-                        if (!$this->isProjectType($project)) {
-                            $entry['status'] = 'skipped';
-                            $entry['reason'] = 'type_non_project';
-                            $summary['skipped']++;
-                            $results[] = $entry;
-                            continue;
-                        }
-
-                        $projectId = $entry['id'] ?? null;
-                        if (!$projectId) {
-                            $entry['status'] = 'error';
-                            $entry['reason'] = 'missing_id';
-                            $summary['errors']++;
-                            $results[] = $entry;
-                            continue;
-                        }
-
-                        try {
-                            $detail = $ululeApiClient->getProject((int) $projectId, [
-                                'lang' => $lang,
-                            ]);
-                        } catch (\Throwable $e) {
-                            $entry['status'] = 'error';
-                            $entry['reason'] = 'detail_fetch_failed';
-                            $entry['error'] = $e->getMessage();
-                            $summary['errors']++;
-                            $results[] = $entry;
-                            continue;
-                        }
-
-                        if ($excludeFunded && ($detail['goal_raised'] ?? false)) {
-                            $entry['status'] = 'skipped';
-                            $entry['reason'] = 'already_funded';
-                            $summary['skipped']++;
-                            $results[] = $entry;
-                            continue;
-                        }
-
-                        if (($detail['is_cancelled'] ?? false) || !($detail['is_online'] ?? true)) {
-                            $entry['status'] = 'skipped';
-                            $entry['reason'] = 'offline_or_cancelled';
-                            $summary['skipped']++;
-                            $results[] = $entry;
-                            continue;
-                        }
-
-                        $fallbackLang = is_string($detail['lang'] ?? null) ? $detail['lang'] : null;
-                        $description = $this->extractDescription($detail, $lang, $fallbackLang);
-                        $descriptionLength = $this->plainTextLength($description);
-                        $entry['description_length'] = $descriptionLength;
-
-                        if ($minDescriptionLength > 0 && $descriptionLength < $minDescriptionLength) {
-                            $entry['status'] = 'insufficient';
-                            $entry['reason'] = 'description_too_short';
-                            $entry['description_min'] = $minDescriptionLength;
-                            $summary['insufficient']++;
-                            $results[] = $entry;
-                            continue;
-                        }
-
-                        $sourceUrl = $this->extractSourceUrl($detail, $project);
-                        $entry['source_url'] = $sourceUrl;
-                        if ($sourceUrl) {
-                            $entry['url'] = $sourceUrl;
-                        }
-
-                        if ($sourceUrl && $this->isDuplicateSourceUrl($em, $sourceUrl)) {
-                            $entry['status'] = 'duplicate';
-                            $entry['reason'] = 'source_url_exists';
-                            $summary['duplicates']++;
-                            $results[] = $entry;
-                            continue;
-                        }
-
-                        $secondaryImages = [];
-                        if ($includeSecondaryImages) {
-                            try {
-                                $secondaryImages = $this->fetchSecondaryImages($ululeApiClient, (int) $projectId, $lang);
-                            } catch (\Throwable $e) {
-                                $entry['secondary_images_error'] = $e->getMessage();
-                            }
-                        }
-
-                        $structuredText = $this->buildStructuredText(
-                            $detail,
-                            $project,
-                            $lang,
-                            $fallbackLang,
-                            $sourceUrl,
-                            $description,
-                            $secondaryImages,
-                            $includeVideo
-                        );
-
-                        $entry['input'] = $structuredText;
-
-                        try {
-                            $resp = $client->chat()->create([
-                                'model' => $appScraperModel,
-                                'temperature' => 0.3,
-                                'messages' => [
-                                    ['role' => 'system', 'content' => $prompt],
-                                    ['role' => 'user', 'content' => $structuredText],
-                                ],
-                            ]);
-                        } catch (\Throwable $e) {
-                            $entry['status'] = 'error';
-                            $entry['reason'] = 'openai_failed';
-                            $entry['error'] = $e->getMessage();
-                            $summary['errors']++;
-                            $results[] = $entry;
-                            continue;
-                        }
-
-                        $content = $resp->choices[0]->message->content ?? '';
-                        $entry['raw'] = $content;
-                        $summary['normalized']++;
-
-                        if ($persist && $content && $creator) {
-                            try {
-                                $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-                                $data = $this->applyFundingMetadata($detail, $data);
-                                $created = $persister->persist($data, $creator);
-                                $entry['created'] = $created;
-                                $entry['status'] = 'created';
-                                $summary['created']++;
-                            } catch (\Throwable $e) {
-                                $entry['status'] = 'error';
-                                $entry['reason'] = 'persist_failed';
-                                $entry['error'] = $e->getMessage();
-                                $summary['errors']++;
-                            }
-                        } else {
-                            $entry['status'] = 'normalized';
-                        }
-
-                        $results[] = $entry;
-                    }
-                }
-            }
-        }
-
-        if ($isJson) {
-            return $this->json([
-                'page_start' => $pageStart,
-                'page_count' => $pageCount,
-                'page_size' => $pageSize ?? 0,
-                'item_offset' => $itemOffset,
-                'item_limit' => $itemLimit,
-                'summary' => $summary,
-                'results' => $this->normalizeResultsForJson($results, $includeDebug),
-            ]);
-        }
-
-        return $this->render('admin/ulule_import.html.twig', [
-            'lang' => $lang,
-            'country' => $country,
-            'status' => $status,
-            'sort' => $sort,
-            'pageStart' => $pageStart,
-            'pageCount' => $pageCount,
-            'minDescriptionLength' => $minDescriptionLength,
-            'excludeFunded' => $excludeFunded,
-            'includeVideo' => $includeVideo,
-            'includeSecondaryImages' => $includeSecondaryImages,
-            'persist' => $persist,
-            'extraQuery' => $extraQuery,
-            'promptExtra' => $promptExtra,
-            'results' => $results,
-            'summary' => $summary,
-        ]);
-    }
+    private const DEFAULT_PROMPT_EXTRA = 'Ce complément de prompt définit des instructions hautement prioritaires par rapport aux précédentes : Pour chaque image remplit le champ licence avec "Copyright Ulule.fr". N\'inclue pas la localisation (ville/commune/région/pays) dans les keywords, sauf si la localisation fait partie du titre du projet. Pour goal, évite toute sémantique de collecte/soutien/financement (ex: "soutenir", "collecter", "financer") et formule l\'objectif comme la réalisation concrète du projet (ex: "Produire…", "Réaliser…", "Créer…" ou autre tournure).';
 
     #[Route('/admin/ulule/import/project/{ululeId}', name: 'admin_ulule_import_project', methods: ['POST'])]
     public function importProject(
@@ -387,6 +100,7 @@ class UluleImportController extends AbstractController
         try {
             $detail = $ululeApiClient->getProject($ululeId, [
                 'lang' => $lang,
+                'extra_fields' => 'links',
             ]);
         } catch (\Throwable $e) {
             $catalogEntry->setImportStatus(UluleProjectCatalog::STATUS_FAILED);
@@ -544,7 +258,7 @@ class UluleImportController extends AbstractController
 
         try {
             $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-            $data = $this->applyFundingMetadata($detail, $data);
+            $data = $this->applyUluleMetadata($detail, $data);
             $created = $persister->persist($data, $creator);
             $catalogEntry->setImportStatus(UluleProjectCatalog::STATUS_IMPORTED);
             $catalogEntry->setImportStatusComment(null);
@@ -705,6 +419,7 @@ class UluleImportController extends AbstractController
         try {
             $detail = $ululeApiClient->getProject($ululeId, [
                 'lang' => $lang,
+                'extra_fields' => 'links',
             ]);
         } catch (\Throwable $e) {
             $result['status'] = 'error';
@@ -812,46 +527,10 @@ class UluleImportController extends AbstractController
         }
 
         $result['raw'] = $content;
+        $result['enriched'] = $this->buildEnrichedPayload($detail, $content);
         $result['status'] = 'normalized';
 
         return $this->json($result);
-    }
-
-    private function buildQueryString(string $lang, string $country, string $status, string $sort, string $extraQuery): string
-    {
-        $parts = [];
-        if ($lang !== '') {
-            $parts[] = sprintf('lang:%s', $lang);
-        }
-        if ($country !== '') {
-            $parts[] = sprintf('country:%s', $country);
-        }
-        if ($status !== '') {
-            $parts[] = sprintf('status:%s', $status);
-        }
-        if ($sort !== '') {
-            $parts[] = sprintf('sort:%s', $sort);
-        }
-        if ($extraQuery !== '') {
-            $parts[] = $extraQuery;
-        }
-
-        return implode(' ', $parts);
-    }
-
-    /**
-     * @param array<string, mixed> $project
-     * @return array<string, mixed>
-     */
-    private function buildBaseResult(array $project, string $lang): array
-    {
-        return [
-            'id' => $project['id'] ?? null,
-            'slug' => $project['slug'] ?? null,
-            'url' => $project['absolute_url'] ?? null,
-            'name' => $this->extractI18nString($project['name'] ?? null, $lang, null),
-            'subtitle' => $this->extractI18nString($project['subtitle'] ?? null, $lang, null),
-        ];
     }
 
     /**
@@ -1007,7 +686,8 @@ class UluleImportController extends AbstractController
             $descriptionYourself = $this->normalizeHtmlToText($descriptionYourself);
         }
 
-        $location = $detail['location']['full_name'] ?? $detail['location']['city'] ?? null;
+        $location = $this->extractLocationLabel($detail);
+        $websiteLinks = $this->extractProjectLinks($detail);
 
         $mainImageResource = $this->extractI18nResource($detail['main_image'] ?? null, $lang, $fallbackLang);
         $mainImageUrl = $this->extractImageUrl($mainImageResource);
@@ -1047,6 +727,12 @@ class UluleImportController extends AbstractController
         if ($location) {
             $lines[] = 'LOCATION: ' . $location;
         }
+        if ($websiteLinks !== []) {
+            $lines[] = 'WEBSITES:';
+            foreach ($websiteLinks as $link) {
+                $lines[] = sprintf('%s | %s', $link['title'], $link['url']);
+            }
+        }
 
         $lines[] = 'DESCRIPTION:';
         $lines[] = $description;
@@ -1076,6 +762,487 @@ class UluleImportController extends AbstractController
         }
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * @param array<string, mixed> $detail
+     */
+    private function applyUluleEnrichment(array $detail, array $data): array
+    {
+        $location = $this->extractLocationLabel($detail);
+        if ($location) {
+            $data['places'] = [$location];
+        }
+
+        $thumbnailUrl = $this->extractUluleMainImageUrl($detail);
+        if ($thumbnailUrl && (!isset($data['thumbnail_url']) || !is_string($data['thumbnail_url']) || trim($data['thumbnail_url']) === '')) {
+            $data['thumbnail_url'] = $thumbnailUrl;
+        }
+        if ($thumbnailUrl) {
+            $data = $this->prependMainImageToSlides($data, $thumbnailUrl);
+            $data['keep_thumbnail_in_slides'] = true;
+        }
+
+        if (!isset($data['places_default_country']) || !is_string($data['places_default_country']) || trim($data['places_default_country']) === '') {
+            $country = $detail['country'] ?? null;
+            if (is_string($country)) {
+                $country = trim($country);
+                if ($country !== '') {
+                    $data['places_default_country'] = $country;
+                }
+            }
+        }
+
+        $links = $this->extractProjectLinks($detail);
+        $sourceUrl = $this->extractSourceUrl($detail, $detail);
+        if ($sourceUrl) {
+            if (!isset($data['source_url']) || !is_string($data['source_url']) || trim($data['source_url']) === '') {
+                $data['source_url'] = $sourceUrl;
+            }
+        }
+
+        $mergedWebsites = $this->mergeWebsiteEntries($data['websites'] ?? null, $links);
+        if ($sourceUrl) {
+            $mergedWebsites = $this->mergeWebsiteEntries(
+                [
+                    ['title' => 'Page Ulule', 'url' => $sourceUrl],
+                ],
+                $mergedWebsites
+            );
+        }
+        if ($mergedWebsites !== []) {
+            $data['websites'] = $mergedWebsites;
+        }
+
+        $data = $this->stripLocationKeywords($data, $location);
+
+        return $data;
+    }
+
+    private function prependMainImageToSlides(array $data, string $url): array
+    {
+        $url = trim($url);
+        if ($url === '') {
+            return $data;
+        }
+
+        $imageUrls = [];
+        if (isset($data['image_urls']) && is_array($data['image_urls'])) {
+            foreach ($data['image_urls'] as $item) {
+                if (is_string($item) && $item !== $url) {
+                    $imageUrls[] = $item;
+                }
+            }
+        }
+        array_unshift($imageUrls, $url);
+        $data['image_urls'] = $imageUrls;
+
+        $images = [];
+        if (isset($data['images']) && is_array($data['images'])) {
+            foreach ($data['images'] as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+                $itemUrl = $item['url'] ?? null;
+                if (is_string($itemUrl) && $itemUrl === $url) {
+                    continue;
+                }
+                $images[] = $item;
+            }
+        }
+        array_unshift($images, [
+            'url' => $url,
+            'caption' => null,
+            'licence' => 'Copyright Ulule.fr',
+        ]);
+        $data['images'] = $images;
+
+        return $data;
+    }
+
+    private function extractUluleMainImageUrl(array $detail): ?string
+    {
+        $lang = is_string($detail['lang'] ?? null) ? $detail['lang'] : 'fr';
+        $mainImageResource = $this->extractI18nResource($detail['main_image'] ?? null, $lang, null);
+        $mainImageUrl = $this->extractImageUrl($mainImageResource);
+
+        if (!$mainImageUrl && isset($detail['image']) && is_string($detail['image']) && trim($detail['image']) !== '') {
+            $mainImageUrl = trim($detail['image']);
+        }
+
+        return $mainImageUrl ?: null;
+    }
+
+    /**
+     * @param array<string, mixed> $detail
+     */
+    private function extractLocationLabel(array $detail): ?string
+    {
+        $location = $detail['location'] ?? null;
+        if (!is_array($location)) {
+            return null;
+        }
+
+        $city = $this->compactLocationLabel($location['city'] ?? null);
+        if ($city) {
+            return $city;
+        }
+
+        $fullName = $this->compactLocationLabel($location['full_name'] ?? null);
+        if ($fullName) {
+            return $fullName;
+        }
+
+        $name = $this->compactLocationLabel($location['name'] ?? null);
+        if ($name) {
+            return $name;
+        }
+
+        $region = $this->compactLocationLabel($location['region'] ?? null);
+        if ($region) {
+            return $region;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array<string, mixed> $detail
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    private function applyUluleMetadata(array $detail, array $data): array
+    {
+        $data = $this->applyFundingMetadata($detail, $data);
+        return $this->applyUluleEnrichment($detail, $data);
+    }
+
+    /**
+     * @param array<string, mixed> $detail
+     */
+    private function buildEnrichedPayload(array $detail, string $content): ?array
+    {
+        try {
+            $decoded = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\Throwable) {
+            return null;
+        }
+
+        if (!is_array($decoded)) {
+            return null;
+        }
+
+        return $this->applyUluleMetadata($detail, $decoded);
+    }
+
+    private function compactLocationLabel(mixed $value): ?string
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value);
+        if ($value === '') {
+            return null;
+        }
+
+        $parts = array_map('trim', explode(',', $value));
+        foreach ($parts as $part) {
+            if ($part !== '') {
+                return $part;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array<string, mixed> $detail
+     * @return array<int, array{title:string,url:string}>
+     */
+    private function extractProjectLinks(array $detail): array
+    {
+        $links = $detail['links'] ?? null;
+        if (!is_array($links)) {
+            return [];
+        }
+
+        $items = [];
+        foreach ($links as $link) {
+            if (!is_array($link)) {
+                continue;
+            }
+            $url = $link['url'] ?? null;
+            if (!is_string($url)) {
+                continue;
+            }
+            $url = trim($url);
+            if ($url === '') {
+                continue;
+            }
+            if (!filter_var($url, FILTER_VALIDATE_URL)) {
+                continue;
+            }
+
+            $title = $this->guessWebsiteTitle($url);
+            if ($title === null) {
+                continue;
+            }
+
+            $items[] = [
+                'title' => $title,
+                'url' => $url,
+            ];
+        }
+
+        return $this->mergeWebsiteEntries([], $items);
+    }
+
+    private function guessWebsiteTitle(string $url): ?string
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+        if (!is_string($host) || $host === '') {
+            return null;
+        }
+
+        $host = strtolower($host);
+        $host = preg_replace('/^www\./', '', $host ?? '');
+        if ($host === '') {
+            return null;
+        }
+
+        if (str_ends_with($host, 'ulule.com')) {
+            return null;
+        }
+
+        $map = [
+            'facebook.com' => 'Facebook',
+            'instagram.com' => 'Instagram',
+            'twitter.com' => 'X',
+            'x.com' => 'X',
+            'linkedin.com' => 'LinkedIn',
+            'youtube.com' => 'YouTube',
+            'youtu.be' => 'YouTube',
+            'tiktok.com' => 'TikTok',
+            'pinterest.com' => 'Pinterest',
+            'snapchat.com' => 'Snapchat',
+            'discord.gg' => 'Discord',
+            'discord.com' => 'Discord',
+            'twitch.tv' => 'Twitch',
+            'github.com' => 'GitHub',
+            'gitlab.com' => 'GitLab',
+            'medium.com' => 'Medium',
+        ];
+
+        foreach ($map as $suffix => $label) {
+            if ($host === $suffix || str_ends_with($host, '.' . $suffix)) {
+                return $label;
+            }
+        }
+
+        return $host;
+    }
+
+    /**
+     * @param mixed $existing
+     * @param array<int, array{title:string,url:string}> $incoming
+     * @return array<int, array{title:string,url:string}>
+     */
+    private function mergeWebsiteEntries(mixed $existing, array $incoming): array
+    {
+        $merged = [];
+        $seen = [];
+
+        if (is_array($existing)) {
+            foreach ($existing as $entry) {
+                if (!is_array($entry)) {
+                    continue;
+                }
+                $url = $entry['url'] ?? null;
+                $title = $entry['title'] ?? null;
+                if (!is_string($url) || $url === '' || !is_string($title) || $title === '') {
+                    continue;
+                }
+                $key = $this->normalizeUrlKey($url);
+                $merged[] = ['title' => $title, 'url' => $url];
+                $seen[$key] = true;
+            }
+        }
+
+        foreach ($incoming as $entry) {
+            $url = $entry['url'] ?? null;
+            $title = $entry['title'] ?? null;
+            if (!is_string($url) || $url === '' || !is_string($title) || $title === '') {
+                continue;
+            }
+            $key = $this->normalizeUrlKey($url);
+            if (isset($seen[$key])) {
+                continue;
+            }
+            $merged[] = ['title' => $title, 'url' => $url];
+            $seen[$key] = true;
+        }
+
+        return $merged;
+    }
+
+    private function normalizeUrlKey(string $url): string
+    {
+        $url = trim($url);
+        if ($url === '') {
+            return '';
+        }
+
+        $parsed = parse_url($url);
+        if (!is_array($parsed) || !isset($parsed['host'])) {
+            return strtolower($url);
+        }
+
+        $host = strtolower($parsed['host'] ?? '');
+        $path = $parsed['path'] ?? '';
+        $path = is_string($path) ? rtrim($path, '/') : '';
+
+        return $host . $path;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    private function stripLocationKeywords(array $data, ?string $location): array
+    {
+        if (!$location) {
+            return $data;
+        }
+
+        $keywords = $data['keywords'] ?? null;
+        if (!is_array($keywords) || $keywords === []) {
+            return $data;
+        }
+
+        $title = $this->stringValue($data['title'] ?? null) ?? '';
+        $locationTokens = $this->extractLocationTokens($location);
+        $normalizedLocation = $this->normalizeForMatch($location);
+
+        if ($title !== '' && $this->titleMentionsLocation($title, $normalizedLocation, $locationTokens)) {
+            return $data;
+        }
+
+        $filtered = [];
+        foreach ($keywords as $keyword) {
+            if (!is_string($keyword)) {
+                continue;
+            }
+            $normalizedKeyword = $this->normalizeForMatch($keyword);
+            if ($normalizedKeyword === '') {
+                continue;
+            }
+
+            $isLocation = false;
+            if ($normalizedLocation !== '' && str_contains($normalizedKeyword, $normalizedLocation)) {
+                $isLocation = true;
+            }
+
+            if (!$isLocation) {
+                foreach ($locationTokens as $token) {
+                    if ($token !== '' && str_contains($normalizedKeyword, $token)) {
+                        $isLocation = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($isLocation) {
+                continue;
+            }
+
+            $filtered[] = $keyword;
+        }
+
+        $data['keywords'] = array_values($filtered);
+
+        return $data;
+    }
+
+    /**
+     * @return string[]
+     */
+    private function extractLocationTokens(string $location): array
+    {
+        $normalized = $this->normalizeForMatch($location);
+        if ($normalized === '') {
+            return [];
+        }
+
+        $parts = preg_split('/\s+/', $normalized) ?: [];
+        $tokens = [];
+        foreach ($parts as $part) {
+            if (strlen($part) < 3) {
+                continue;
+            }
+            $tokens[] = $part;
+        }
+
+        return array_values(array_unique($tokens));
+    }
+
+    /**
+     * @param string[] $locationTokens
+     */
+    private function titleMentionsLocation(string $title, string $normalizedLocation, array $locationTokens): bool
+    {
+        $normalizedTitle = $this->normalizeForMatch($title);
+        if ($normalizedTitle === '') {
+            return false;
+        }
+
+        if ($normalizedLocation !== '' && str_contains($normalizedTitle, $normalizedLocation)) {
+            return true;
+        }
+
+        foreach ($locationTokens as $token) {
+            if ($token !== '' && str_contains($normalizedTitle, $token)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function normalizeForMatch(string $value): string
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return '';
+        }
+
+        $value = mb_strtolower($value);
+        $value = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $value) ?? '';
+        $value = $this->stripAccents($value);
+        $value = preg_replace('/\s+/', ' ', $value) ?? '';
+
+        return trim($value);
+    }
+
+    private function stripAccents(string $value): string
+    {
+        $transliterated = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $value);
+        if ($transliterated === false) {
+            return $value;
+        }
+
+        return $transliterated;
+    }
+
+    private function stringValue(mixed $value): ?string
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value);
+
+        return $value === '' ? null : $value;
     }
 
     /**
@@ -1202,49 +1369,4 @@ class UluleImportController extends AbstractController
         return null;
     }
 
-    /**
-     * @param array<int, array<string, mixed>> $results
-     * @return array<int, array<string, mixed>>
-     */
-    private function normalizeResultsForJson(array $results, bool $includeDebug): array
-    {
-        $normalized = [];
-
-        foreach ($results as $item) {
-            $entry = [
-                'id' => $item['id'] ?? null,
-                'slug' => $item['slug'] ?? null,
-                'name' => $item['name'] ?? null,
-                'url' => $item['url'] ?? null,
-                'source_url' => $item['source_url'] ?? null,
-                'status' => $item['status'] ?? null,
-                'reason' => $item['reason'] ?? null,
-                'error' => $item['error'] ?? null,
-                'description_length' => $item['description_length'] ?? null,
-                'description_min' => $item['description_min'] ?? null,
-            ];
-
-            if ($includeDebug) {
-                $entry['input'] = $item['input'] ?? null;
-                $entry['raw'] = $item['raw'] ?? null;
-            }
-
-            if (isset($item['created']) && $item['created'] instanceof PPBase) {
-                $entry['created'] = [
-                    'stringId' => $item['created']->getStringId(),
-                    'title' => $item['created']->getTitle(),
-                    'goal' => $item['created']->getGoal(),
-                    'url' => $this->generateUrl(
-                        'edit_show_project_presentation',
-                        ['stringId' => $item['created']->getStringId()],
-                        UrlGeneratorInterface::ABSOLUTE_PATH
-                    ),
-                ];
-            }
-
-            $normalized[] = $entry;
-        }
-
-        return $normalized;
-    }
 }

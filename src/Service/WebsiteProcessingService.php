@@ -14,6 +14,7 @@ class WebsiteProcessingService
         "instagram.com",
         "twitch.tv",
         "twitter.com",
+        "x.com",
         "discord.gg",
         "discord.com",
         "github.com",
@@ -57,8 +58,8 @@ class WebsiteProcessingService
         // assign icon
         if ($this->isUluleHost($host)) {
             $website->setIcon('ulule');
-        } elseif (in_array($host, self::KNOWN_LOGOS, true)) {
-            $website->setIcon($this->extractBaseIconName($host));
+        } elseif ($matchedHost = $this->resolveKnownHost($host)) {
+            $website->setIcon($this->extractBaseIconName($matchedHost));
         } else {
             $website->setIcon($this->deterministicFallback($host));
         }
@@ -89,6 +90,20 @@ class WebsiteProcessingService
             || $host === 'ulule.fr'
             || str_ends_with($host, '.ulule.com')
             || str_ends_with($host, '.ulule.fr');
+    }
+
+    private function resolveKnownHost(string $host): ?string
+    {
+        foreach (self::KNOWN_LOGOS as $knownHost) {
+            if ($host === $knownHost) {
+                return $knownHost;
+            }
+            if (str_ends_with($host, '.' . $knownHost)) {
+                return $knownHost;
+            }
+        }
+
+        return null;
     }
 
     private function deterministicFallback(string $host): string

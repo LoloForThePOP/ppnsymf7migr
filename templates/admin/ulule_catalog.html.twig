@@ -80,6 +80,7 @@
                         <option value="all" {% if statusFilter == 'all' %}selected{% endif %}>Tous</option>
                     </select>
                     <div class="form-check mt-2">
+                        <input type="hidden" name="eligible_only" value="0">
                         <input class="form-check-input" type="checkbox" id="eligible_only" name="eligible_only" value="1" {% if eligibleOnly %}checked{% endif %}>
                         <label class="form-check-label" for="eligible_only">Afficher uniquement les projets éligibles</label>
                     </div>
@@ -362,11 +363,25 @@
                             const details = document.createElement('details');
                             details.className = 'mt-2';
                             const summary = document.createElement('summary');
-                            summary.textContent = 'Voir le JSON brut';
+                            summary.textContent = 'Voir le JSON brut (IA)';
                             const pre = document.createElement('pre');
                             pre.className = 'theme-pre p-2 rounded';
                             pre.style.whiteSpace = 'pre-wrap';
                             pre.textContent = payload.raw;
+                            details.appendChild(summary);
+                            details.appendChild(pre);
+                            content.appendChild(details);
+                        }
+
+                        if (payload.enriched) {
+                            const details = document.createElement('details');
+                            details.className = 'mt-2';
+                            const summary = document.createElement('summary');
+                            summary.textContent = 'Voir le JSON enrichi (persisté)';
+                            const pre = document.createElement('pre');
+                            pre.className = 'theme-pre p-2 rounded';
+                            pre.style.whiteSpace = 'pre-wrap';
+                            pre.textContent = JSON.stringify(payload.enriched, null, 2);
                             details.appendChild(summary);
                             details.appendChild(pre);
                             content.appendChild(details);

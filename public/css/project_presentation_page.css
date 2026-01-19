@@ -47,6 +47,15 @@
 	display: flex;
 	align-items: center;
 }
+
+.in-consultation-mode #slideshow-struct-container {
+	display: flex;
+	align-items: center;
+}
+
+.in-consultation-mode #slideshow-struct-container .slideshow-container {
+	width: 100%;
+}
  
 
 /* Each Structure Title Container (contains title + edit button) */
