@@ -9,11 +9,17 @@ final class UrlHarvestListService
     private const URLS_FILENAME = 'urls.csv';
     private const PROMPT_FILENAME = 'prompt.txt';
     private const CONFIG_FILENAME = 'config.json';
-    private const ALLOWED_STATUSES = ['pending', 'done', 'normalized', 'error', 'skipped'];
+    private const ALLOWED_STATUSES = ['pending', 'queued', 'processing', 'done', 'normalized', 'error', 'skipped'];
     private const DEFAULT_PAYLOAD_POLICY = [
         'min_text_chars' => 600,
         'warn_text_chars' => 350,
         'min_assets' => 2,
+    ];
+    private const DEFAULT_QUEUE_STATE = [
+        'paused' => false,
+        'running' => false,
+        'persist' => true,
+        'remaining' => null,
     ];
     private const SOURCE_PAYLOAD_POLICIES = [
         'je_veux_aider' => [
@@ -113,6 +119,49 @@ final class UrlHarvestListService
         }
 
         return $policy;
+    }
+
+    /**
+     * @return array{paused:bool,running:bool,persist:bool}
+     */
+    public function readQueueState(string $source): array
+    {
+        $state = self::DEFAULT_QUEUE_STATE;
+        $config = $this->readConfig($source);
+        if (isset($config['queue']) && is_array($config['queue'])) {
+            $queue = $config['queue'];
+            if (isset($queue['paused'])) {
+                $state['paused'] = filter_var($queue['paused'], FILTER_VALIDATE_BOOLEAN);
+            }
+            if (isset($queue['running'])) {
+                $state['running'] = filter_var($queue['running'], FILTER_VALIDATE_BOOLEAN);
+            }
+            if (isset($queue['persist'])) {
+                $state['persist'] = filter_var($queue['persist'], FILTER_VALIDATE_BOOLEAN);
+            }
+            if (array_key_exists('remaining', $queue)) {
+                $remaining = $queue['remaining'];
+                $state['remaining'] = is_int($remaining) ? $remaining : (is_numeric($remaining) ? (int) $remaining : null);
+            }
+        }
+
+        return $state;
+    }
+
+    /**
+     * @param array{paused?:bool,running?:bool,persist?:bool,remaining?:?int} $state
+     */
+    public function writeQueueState(string $source, array $state): void
+    {
+        $config = $this->readConfig($source);
+        $queue = self::DEFAULT_QUEUE_STATE;
+        if (isset($config['queue']) && is_array($config['queue'])) {
+            $queue = array_merge($queue, $config['queue']);
+        }
+        $queue = array_merge($queue, $state);
+        $config['queue'] = $queue;
+
+        $this->writeConfig($source, $config);
     }
 
     public function writePrompt(string $source, string $content): void
@@ -281,6 +330,16 @@ final class UrlHarvestListService
         return $path;
     }
 
+    public function resolveQueueLockPath(string $source): ?string
+    {
+        $path = $this->resolveSourcePath($source);
+        if ($path === null) {
+            return null;
+        }
+
+        return $path . DIRECTORY_SEPARATOR . '.queue.lock';
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -303,6 +362,27 @@ final class UrlHarvestListService
 
         $payload = json_decode($content, true);
         return is_array($payload) ? $payload : [];
+    }
+
+    /**
+     * @param array<string, mixed> $config
+     */
+    private function writeConfig(string $source, array $config): void
+    {
+        $path = $this->resolveSourcePath($source);
+        if ($path === null) {
+            throw new \RuntimeException('Source introuvable.');
+        }
+
+        $file = $path . DIRECTORY_SEPARATOR . self::CONFIG_FILENAME;
+        $payload = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        if (!is_string($payload)) {
+            throw new \RuntimeException('Configuration invalide.');
+        }
+
+        if (file_put_contents($file, $payload . "\n", LOCK_EX) === false) {
+            throw new \RuntimeException('Impossible d\'écrire la configuration.');
+        }
     }
 
     private function detectDelimiter(string $line): string
