@@ -73,9 +73,17 @@
 			
 	<div class="nav-buttons">
 		
-		<a class="prev text-decoration-none" onclick="plusSlides(-1)">❮</a>
+		<a class="prev text-decoration-none" onclick="plusSlides(-1)" role="button" aria-label="Slide précédent">
+			<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+				<path d="M15.5 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+			</svg>
+		</a>
 	
-		<a id="slide-next" class="next text-decoration-none" onclick="plusSlides(1)">❯</a>
+		<a id="slide-next" class="next text-decoration-none" onclick="plusSlides(1)" role="button" aria-label="Slide suivant">
+			<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+				<path d="M8.5 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+			</svg>
+		</a>
 	
 	</div>	
 

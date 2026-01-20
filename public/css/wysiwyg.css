@@ -122,10 +122,21 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .in-edit
 .in-edition-mode #text_description {
 
     display: flex;
+    flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	height: 100%;
+    width: 100%;
     padding-left: 0;
+}
+
+.in-edition-mode #text-descr-live-edition-container {
+    width: 100%;
+}
+
+.in-edition-mode #text-descr-live-edition-container .tox-tinymce {
+    width: 100% !important;
+    max-width: 100%;
 }
 
 

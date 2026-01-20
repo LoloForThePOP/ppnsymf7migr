@@ -288,10 +288,18 @@ final class UrlHarvestController extends AbstractController
             }
             $html = $fetch['html'] ?? '';
             $finalUrl = $fetch['final_url'] ?? $url;
+            $daysRemaining = $this->inferFondationPatrimoineDaysRemaining($html, $finalUrl);
+            $fundingEndAt = $daysRemaining !== null
+                ? (new \DateTimeImmutable())->modify(sprintf('+%d days', $daysRemaining))
+                : null;
             $entry['debug'] = [
                 'final_url' => $finalUrl,
                 'html_preview' => $this->truncateHtml($html),
             ];
+            if ($daysRemaining !== null && $fundingEndAt !== null) {
+                $entry['debug']['funding_days_remaining'] = $daysRemaining;
+                $entry['debug']['funding_end_at_guess'] = $fundingEndAt->format('Y-m-d');
+            }
             $extracted = $extractor->extract($html, $finalUrl);
             $entry['debug']['links'] = $extracted['links'] ?? [];
             $entry['debug']['images'] = $extracted['images'] ?? [];
@@ -313,6 +321,9 @@ final class UrlHarvestController extends AbstractController
 
             if ($persist && $content && $creator) {
                 $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+                if ($fundingEndAt !== null && empty($data['funding_end_at'])) {
+                    $data['funding_end_at'] = $fundingEndAt->format('Y-m-d');
+                }
                 $created = $persister->persist($data, $creator);
                 $entry['places_debug'] = $persister->getLastPlaceDebug();
             }
@@ -434,5 +445,54 @@ final class UrlHarvestController extends AbstractController
         $dir = rtrim(dirname($path), '/\\');
 
         return sprintf('%s://%s%s/%s', $scheme, $host, $port, ltrim($dir . '/' . $location, '/'));
+    }
+
+    private function inferFondationPatrimoineDaysRemaining(string $html, ?string $finalUrl): ?int
+    {
+        if (!$this->isFondationPatrimoineUrl($finalUrl)) {
+            return null;
+        }
+
+        $patterns = [
+            '/data-testid="time-remaining"[^>]*>([^<]+)/i',
+            '/\\b(\\d[\\d\\s]{0,6})\\s*jours\\s*restants\\b/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (!preg_match($pattern, $html, $matches)) {
+                continue;
+            }
+
+            $raw = $matches[1] ?? '';
+            $digits = preg_replace('/\\D+/', '', $raw);
+            if ($digits === '' || $digits === null) {
+                continue;
+            }
+
+            $days = (int) $digits;
+            if ($days > 0 && $days < 5000) {
+                return $days;
+            }
+        }
+
+        return null;
+    }
+
+    private function isFondationPatrimoineUrl(?string $url): bool
+    {
+        if ($url === null || trim($url) === '') {
+            return false;
+        }
+
+        $host = parse_url($url, PHP_URL_HOST);
+        if (!is_string($host) || $host === '') {
+            return false;
+        }
+
+        $host = strtolower($host);
+        $host = preg_replace('/^(www\\.|m\\.)/i', '', $host);
+
+        return $host === 'fondation-patrimoine.org'
+            || str_ends_with($host, '.fondation-patrimoine.org');
     }
 }

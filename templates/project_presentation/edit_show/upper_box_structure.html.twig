@@ -70,12 +70,13 @@
                 {% set dateText = 'termine le ' ~ fundingEndAt|date('d/m/Y') %}
             {% endif %}
         {% endif %}
+        {% set platformLabelText = platform_label(fundingPlatform, sourceUrl) %}
         {% set platformLabel = '' %}
-        {% if fundingPlatform %}
+        {% if platformLabelText %}
             {% if safeSourceUrl %}
-                {% set platformLabel = '<a class="pp-funding-link" href="' ~ safeSourceUrl ~ '" target="_blank" rel="noopener">(' ~ fundingPlatform ~ ')</a>' %}
+                {% set platformLabel = '<a class="pp-funding-link" href="' ~ safeSourceUrl ~ '" target="_blank" rel="noopener">(' ~ platformLabelText ~ ')</a>' %}
             {% else %}
-                {% set platformLabel = '(' ~ fundingPlatform ~ ')' %}
+                {% set platformLabel = '(' ~ platformLabelText ~ ')' %}
             {% endif %}
         {% endif %}
         <div class="pp-funding-info {{ extraClasses|default('') }}">

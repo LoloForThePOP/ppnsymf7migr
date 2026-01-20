@@ -39,6 +39,7 @@ The crowdfunding row is rendered in the 3P upper box:
 
 - Resolver service: `src/Service/PlatformIconResolver.php`
 - Twig helper: `platform_icon()` in `src/Twig/PlatformIconExtension.php`
+- Platform label helper: `platform_label()` in `src/Twig/PlatformIconExtension.php`
 - Icon assets live in:
   - `public/media/static/images/icons/popular_websites/{slug}.png`
 

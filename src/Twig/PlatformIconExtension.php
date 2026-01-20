@@ -16,11 +16,17 @@ class PlatformIconExtension extends AbstractExtension
     {
         return [
             new TwigFunction('platform_icon', [$this, 'resolvePlatformIcon']),
+            new TwigFunction('platform_label', [$this, 'resolvePlatformLabel']),
         ];
     }
 
     public function resolvePlatformIcon(?string $platform = null, ?string $sourceUrl = null): ?string
     {
         return $this->resolver->resolve($platform, $sourceUrl);
+    }
+
+    public function resolvePlatformLabel(?string $platform = null, ?string $sourceUrl = null): ?string
+    {
+        return $this->resolver->resolveLabel($platform, $sourceUrl);
     }
 }

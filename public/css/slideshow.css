@@ -67,22 +67,49 @@
     position: absolute;
     top: 170px;
 
-    font-weight: bold;
+    font-weight: 600;
 
     user-select: none;
     -webkit-user-select: none;
 
-    width: 50px;
-    height: 50px;
+    width: 46px;
+    height: 46px;
 
     border-radius: 50%;
-    font-size: 20px;
-    color: var(--theme-text) !important;
-    line-height: 50px;
+    font-size: 22px;
+    color: color-mix(in srgb, var(--theme-accent) 45%, var(--theme-text)) !important;
+    line-height: 1;
     text-align: center;
-    background-color: color-mix(in srgb, var(--theme-text) 20%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: color-mix(in srgb, var(--theme-accent) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--theme-accent) 22%, var(--theme-border));
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--theme-text) 10%, transparent);
 
     z-index: 30; /* keep above coverable links */
+}
+
+.prev svg,
+.next svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+html[data-theme-variant="custom"][data-theme="dark"] body[data-theme-scope="presentation"] .prev,
+html[data-theme-variant="custom"][data-theme="dark"] body[data-theme-scope="presentation"] .next,
+html[data-theme-variant="custom"][data-theme="neon"] body[data-theme-scope="presentation"] .prev,
+html[data-theme-variant="custom"][data-theme="neon"] body[data-theme-scope="presentation"] .next,
+html[data-theme-variant="custom"][data-theme="cyberpunk"] body[data-theme-scope="presentation"] .prev,
+html[data-theme-variant="custom"][data-theme="cyberpunk"] body[data-theme-scope="presentation"] .next,
+html[data-theme-variant="custom"][data-theme="matrix"] body[data-theme-scope="presentation"] .prev,
+html[data-theme-variant="custom"][data-theme="matrix"] body[data-theme-scope="presentation"] .next,
+html[data-theme-variant="custom"][data-theme="luxury-black"] body[data-theme-scope="presentation"] .prev,
+html[data-theme-variant="custom"][data-theme="luxury-black"] body[data-theme-scope="presentation"] .next,
+html[data-theme-variant="custom"][data-theme="deep-ocean"] body[data-theme-scope="presentation"] .prev,
+html[data-theme-variant="custom"][data-theme="deep-ocean"] body[data-theme-scope="presentation"] .next {
+    color: var(--theme-text) !important;
 }
 
 /* Position the "previous button" to the left */
@@ -117,7 +144,8 @@
 /* On hover, add a black background color with a little bit see-through */
 .prev:hover,
 .next:hover {
-    background-color: color-mix(in srgb, var(--theme-text) 45%, transparent);
+    background-color: color-mix(in srgb, var(--theme-accent) 22%, transparent);
+    border-color: color-mix(in srgb, var(--theme-accent) 35%, var(--theme-border));
 }
 
 .nav-buttons {

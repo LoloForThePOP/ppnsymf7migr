@@ -83,6 +83,12 @@
                     </form>
 
                     {% if sourceEntries %}
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" id="toggle-hide-done" checked>
+                            <label class="form-check-label" for="toggle-hide-done">
+                                Masquer les URLs terminées
+                            </label>
+                        </div>
                         <div class="table-responsive mt-4">
                             <table class="table table-sm align-middle mb-0" id="source-urls-table">
                                 <thead>
@@ -283,12 +289,27 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('source-run-form');
+            const table = document.getElementById('source-urls-table');
+            const toggleHideDone = document.getElementById('toggle-hide-done');
+
+            const applyHideDone = () => {
+                if (!table || !toggleHideDone) return;
+                const hideDone = toggleHideDone.checked;
+                table.querySelectorAll('tbody tr[data-status="done"]').forEach((row) => {
+                    row.classList.toggle('d-none', hideDone);
+                });
+            };
+
+            if (toggleHideDone) {
+                toggleHideDone.addEventListener('change', applyHideDone);
+                applyHideDone();
+            }
+
             if (!form) return;
             form.addEventListener('submit', () => {
                 const batchInput = document.getElementById('source-batch-size');
                 const batchSize = batchInput ? parseInt(batchInput.value, 10) || 0 : 0;
                 if (batchSize <= 0) return;
-                const table = document.getElementById('source-urls-table');
                 if (!table) return;
                 const rows = Array.from(table.querySelectorAll('tbody tr[data-status="pending"], tbody tr[data-status="error"]'));
                 rows.slice(0, batchSize).forEach((row) => {
