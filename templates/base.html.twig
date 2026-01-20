@@ -5,8 +5,10 @@
 {% set storedTheme = allowThemeSelection and app.user and app.user.profile ? (app.user.profile.extra.theme|default('classic')) : 'classic' %}
 {% set resolvedTheme = storedTheme == 'light' ? 'classic' : storedTheme %}
 {% set themeVariant = resolvedTheme == 'classic' ? 'classic' : 'custom' %}
+{% set darkThemes = ['dark', 'neon', 'cyberpunk', 'matrix', 'luxury-black', 'deep-ocean'] %}
+{% set themeTone = resolvedTheme in darkThemes ? 'dark' : 'light' %}
 
-<html class="is-loading" data-theme="{{ resolvedTheme }}" data-theme-variant="{{ themeVariant }}">
+<html class="is-loading" data-theme="{{ resolvedTheme }}" data-theme-variant="{{ themeVariant }}" data-theme-tone="{{ themeTone }}">
 
     <head>
 
@@ -65,8 +67,11 @@
                                 storedTheme = 'classic';
                             }
                             var variant = storedTheme === 'classic' ? 'classic' : 'custom';
+                            var darkThemes = {{ darkThemes|json_encode|raw }};
+                            var tone = darkThemes.indexOf(storedTheme) !== -1 ? 'dark' : 'light';
                             document.documentElement.setAttribute('data-theme', storedTheme);
                             document.documentElement.setAttribute('data-theme-variant', variant);
+                            document.documentElement.setAttribute('data-theme-tone', tone);
                         }
                     } catch (e) {}
                 })();

@@ -1,10 +1,16 @@
 
 {# Case a logo is set, we display the logo and we cover it with a link to update it on click #}
 {% if not presentation.logo is empty %}
+    {% set logoPath = vich_uploader_asset(presentation, 'logoFile') %}
+    {% set logoExt = presentation.logo|lower|split('.')|last %}
 
     <div class="pp-logo-plate">
         <div class="pp-logo-chip">
-            <img id="pp-logo" class="img-fluid" src="{{ vich_uploader_asset(presentation, 'logoFile') | imagine_filter('logo')}}" alt="Logo du Projet">
+            {% if logoExt == 'svg' %}
+                <img id="pp-logo" class="img-fluid" src="{{ logoPath }}" alt="Logo du Projet">
+            {% else %}
+                <img id="pp-logo" class="img-fluid" src="{{ logoPath | imagine_filter('logo') }}" alt="Logo du Projet">
+            {% endif %}
         </div>
     </div>
 

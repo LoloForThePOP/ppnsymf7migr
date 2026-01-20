@@ -22,6 +22,10 @@ class NormalizedProjectPersister
      * @var array<int, array<string, mixed>>
      */
     private array $lastPlaceDebug = [];
+    /**
+     * @var array<string, mixed>
+     */
+    private array $lastMediaDebug = [];
 
     public function __construct(
         private readonly EntityManagerInterface $em,
@@ -41,6 +45,7 @@ class NormalizedProjectPersister
     public function persist(array $payload, User $creator): PPBase
     {
         $this->lastPlaceDebug = [];
+        $this->lastMediaDebug = [];
 
         $pp = new PPBase();
         $pp->setCreator($creator);
@@ -63,7 +68,8 @@ class NormalizedProjectPersister
 
         // Ingestion metadata
         $ing = $pp->getIngestion();
-        $ing->setSourceUrl($payload['source_url'] ?? null);
+        $sourceUrl = $this->stringValue($payload['source_url'] ?? null);
+        $ing->setSourceUrl($sourceUrl);
         $ing->setIngestedAt(new \DateTimeImmutable());
         $ing->setIngestionStatus('ok');
 
@@ -91,19 +97,19 @@ class NormalizedProjectPersister
         }
         // Logo
         if ($logoUrl) {
-            $this->attachLogo($pp, $logoUrl, $mediaBaseName);
+            $this->attachLogo($pp, $logoUrl, $mediaBaseName, $sourceUrl);
         }
 
         // Dedicated thumbnail (custom thumbnail takes precedence in cache)
         if ($thumbnailUrl) {
-            $this->attachCustomThumbnail($pp, $thumbnailUrl, $mediaBaseName);
+            $this->attachCustomThumbnail($pp, $thumbnailUrl, $mediaBaseName, $sourceUrl);
             if (!$keepThumbnailInSlides) {
                 $imagesPayload = $this->filterImagesPayload($imagesPayload, $thumbnailUrl);
             }
         }
         
         $this->attachVideos($pp, $payload['videos'] ?? []);
-        $this->attachImages($pp, $imagesPayload, $logoUrl, $mediaBaseName);
+        $this->attachImages($pp, $imagesPayload, $logoUrl, $mediaBaseName, $sourceUrl);
         $this->attachWebsites($pp, $payload['websites'] ?? []);
         $this->attachBusinessCards($pp, $payload['business_cards'] ?? []);
         
@@ -136,6 +142,14 @@ class NormalizedProjectPersister
     public function getLastPlaceDebug(): array
     {
         return $this->lastPlaceDebug;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getLastMediaDebug(): array
+    {
+        return $this->lastMediaDebug;
     }
 
     private function attachCategories(PPBase $pp, array $cats): void
@@ -193,7 +207,13 @@ class NormalizedProjectPersister
         }
     }
 
-    private function attachImages(PPBase $pp, array $images, ?string $logoUrl = null, ?string $mediaBaseName = null): void
+    private function attachImages(
+        PPBase $pp,
+        array $images,
+        ?string $logoUrl = null,
+        ?string $mediaBaseName = null,
+        ?string $referer = null
+    ): void
     {
         $maxSlides = 3;
         $seen = [];
@@ -228,7 +248,7 @@ class NormalizedProjectPersister
                 break;
             }
             $preferredName = $mediaBaseName ? sprintf('image-slide-%s-%d', $mediaBaseName, $slideIndex) : null;
-            $file = $this->downloader->download($url, $preferredName);
+            $file = $this->downloader->download($url, $preferredName, $referer);
             if (!$file) {
                 continue;
             }
@@ -374,17 +394,35 @@ class NormalizedProjectPersister
         return null;
     }
 
-    private function attachLogo(PPBase $pp, string $url, string $mediaBaseName): void
+    private function attachLogo(PPBase $pp, string $url, string $mediaBaseName, ?string $referer = null): void
     {
-        $file = $this->downloader->download($url, sprintf('logo-used-for-project-%s', $mediaBaseName));
+        $file = $this->downloader->download(
+            $url,
+            sprintf('logo-used-for-project-%s', $mediaBaseName),
+            $referer
+        );
         if ($file) {
             $pp->setLogoFile($file);
+            $this->lastMediaDebug['logo'] = [
+                'downloaded' => true,
+                'client_name' => $file->getClientOriginalName(),
+                'mime' => $file->getMimeType(),
+                'size' => $file->getSize(),
+            ];
+        } else {
+            $this->lastMediaDebug['logo'] = [
+                'downloaded' => false,
+            ];
         }
     }
 
-    private function attachCustomThumbnail(PPBase $pp, string $url, string $mediaBaseName): void
+    private function attachCustomThumbnail(PPBase $pp, string $url, string $mediaBaseName, ?string $referer = null): void
     {
-        $file = $this->downloader->download($url, sprintf('thumb-used-for-project-%s', $mediaBaseName));
+        $file = $this->downloader->download(
+            $url,
+            sprintf('thumb-used-for-project-%s', $mediaBaseName),
+            $referer
+        );
         if ($file) {
             $pp->setCustomThumbnailFile($file);
         }

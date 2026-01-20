@@ -7,6 +7,7 @@
 {% set paletteIconTemplate = asset('color_palettes/color-palette--THEME.svg', 'misc') %}
 {% set paletteIconFallback = asset('color_palettes/color-palette--generic.svg', 'misc') %}
 {% set paletteIconSrc = paletteIconTemplate|replace({'THEME': currentTheme}) %}
+{% set darkThemes = ['dark', 'neon', 'cyberpunk', 'matrix', 'luxury-black', 'deep-ocean'] %}
 {% set themeGroups = [
   {
     label: 'Classiques',
@@ -85,6 +86,7 @@
               class="theme-option-card js-theme-option {{ isActive ? 'active' : '' }}"
               type="button"
               data-theme="{{ theme.id }}"
+              data-theme-tone="{{ theme.id in darkThemes ? 'dark' : 'light' }}"
             >
               <span
                 class="theme-preview theme-preview-shell"

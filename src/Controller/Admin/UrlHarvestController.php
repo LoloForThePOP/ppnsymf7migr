@@ -7,6 +7,8 @@ use App\Service\NormalizedProjectPersister;
 use App\Service\UrlSafetyChecker;
 use App\Service\ScraperUserResolver;
 use App\Service\UrlHarvestListService;
+use App\Service\ImageDownloader;
+use App\Repository\PPBaseRepository;
 use OpenAI;
 use OpenAI\Client;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,6 +33,8 @@ final class UrlHarvestController extends AbstractController
         UrlSafetyChecker $urlSafetyChecker,
         ScraperUserResolver $scraperUserResolver,
         UrlHarvestListService $listService,
+        ImageDownloader $imageDownloader,
+        PPBaseRepository $ppBaseRepository,
         string $appNormalizeHtmlPromptPath,
         string $appScraperModel
     ): Response {
@@ -47,6 +51,7 @@ final class UrlHarvestController extends AbstractController
 
         $sources = $listService->listSources();
         $sourcePrompt = $selectedSource !== '' ? $listService->readPrompt($selectedSource) : '';
+        $sourcePayloadPolicy = $selectedSource !== '' ? $listService->readPayloadPolicy($selectedSource) : $this->defaultPayloadPolicy();
         $sourceEntries = [];
         $sourceError = null;
         $sourceSummary = null;
@@ -118,20 +123,54 @@ final class UrlHarvestController extends AbstractController
                             $extractor,
                             $persister,
                             $urlSafetyChecker,
+                            $imageDownloader,
+                            $ppBaseRepository,
                             $creator,
                             $persistSource,
                             $prompt,
-                            $appScraperModel
+                            $appScraperModel,
+                            $sourcePayloadPolicy,
+                            true
                         );
 
                         $sourceResults[] = $result;
                         $sourceEntries[$index]['last_run_at'] = $now->format('Y-m-d H:i:s');
+                        if (isset($result['payload']) && is_array($result['payload'])) {
+                            $sourceEntries[$index]['payload_status'] = (string) ($result['payload']['status'] ?? '');
+                            $sourceEntries[$index]['payload_text_chars'] = (string) ($result['payload']['text_chars'] ?? '');
+                            $sourceEntries[$index]['payload_links'] = (string) ($result['payload']['links'] ?? '');
+                            $sourceEntries[$index]['payload_images'] = (string) ($result['payload']['images'] ?? '');
+                            $payloadNote = $this->formatPayloadNote($result['payload']);
+                            $sourceEntries[$index]['notes'] = $this->mergeNotes(
+                                (string) ($sourceEntries[$index]['notes'] ?? ''),
+                                $payloadNote
+                            );
+                        }
 
                         if (!empty($result['error'])) {
                             $sourceEntries[$index]['status'] = 'error';
                             $sourceEntries[$index]['error'] = $result['error'];
+                        } elseif (!empty($result['skip_persist'])) {
+                            $sourceEntries[$index]['status'] = 'skipped';
+                            $sourceEntries[$index]['error'] = $result['skip_reason'] ?? 'Payload trop faible';
+                            $sourceEntries[$index]['created_string_id'] = '';
+                            $sourceEntries[$index]['created_url'] = '';
                         } else {
-                            if (!empty($result['created']) && $result['created'] instanceof \App\Entity\PPBase) {
+                            if (!empty($result['duplicate'])) {
+                                $sourceEntries[$index]['status'] = 'skipped';
+                                $sourceEntries[$index]['error'] = 'Doublon';
+                                if (!empty($result['created']) && $result['created'] instanceof \App\Entity\PPBase) {
+                                    $sourceEntries[$index]['created_string_id'] = $result['created']->getStringId();
+                                    $sourceEntries[$index]['created_url'] = $this->generateUrl(
+                                        'edit_show_project_presentation',
+                                        ['stringId' => $result['created']->getStringId()],
+                                        UrlGeneratorInterface::ABSOLUTE_PATH
+                                    );
+                                } else {
+                                    $sourceEntries[$index]['created_string_id'] = '';
+                                    $sourceEntries[$index]['created_url'] = '';
+                                }
+                            } elseif (!empty($result['created']) && $result['created'] instanceof \App\Entity\PPBase) {
                                 $sourceEntries[$index]['status'] = 'done';
                                 $sourceEntries[$index]['error'] = '';
                                 $sourceEntries[$index]['created_string_id'] = $result['created']->getStringId();
@@ -195,10 +234,14 @@ final class UrlHarvestController extends AbstractController
                         $extractor,
                         $persister,
                         $urlSafetyChecker,
+                        $imageDownloader,
+                        $ppBaseRepository,
                         $creator,
                         $persist,
                         $prompt,
-                        $appScraperModel
+                        $appScraperModel,
+                        $this->defaultPayloadPolicy(),
+                        false
                     );
                 }
             }
@@ -274,10 +317,14 @@ final class UrlHarvestController extends AbstractController
         WebpageContentExtractor $extractor,
         NormalizedProjectPersister $persister,
         UrlSafetyChecker $urlSafetyChecker,
+        ImageDownloader $imageDownloader,
+        PPBaseRepository $ppBaseRepository,
         mixed $creator,
         bool $persist,
         string $prompt,
-        string $model
+        string $model,
+        array $payloadPolicy,
+        bool $enforcePayloadGate
     ): array {
         $entry = ['url' => $url];
 
@@ -303,6 +350,12 @@ final class UrlHarvestController extends AbstractController
             $extracted = $extractor->extract($html, $finalUrl);
             $entry['debug']['links'] = $extracted['links'] ?? [];
             $entry['debug']['images'] = $extracted['images'] ?? [];
+            $entry['payload'] = $this->assessPayload($extracted, $payloadPolicy);
+            if ($enforcePayloadGate && $entry['payload']['status'] === 'too_thin') {
+                $entry['skip_persist'] = true;
+                $entry['skip_reason'] = 'Payload trop faible';
+                $persist = false;
+            }
 
             $userContent = "URL: {$url}\n\n### TEXT\n{$extracted['text']}\n\n### LINKS\n" . implode("\n", $extracted['links']) . "\n\n### IMAGES\n" . implode("\n", $extracted['images']);
 
@@ -318,14 +371,58 @@ final class UrlHarvestController extends AbstractController
             $content = $resp->choices[0]->message->content ?? '';
             $entry['raw'] = $content;
             $created = null;
+            $data = null;
+
+            if ($content) {
+                try {
+                    $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+                } catch (\Throwable $e) {
+                    if ($persist) {
+                        throw $e;
+                    }
+                    $entry['debug']['json_error'] = $e->getMessage();
+                }
+            }
+
+            if (is_array($data)) {
+                $sourceUrl = is_string($data['source_url'] ?? null) ? trim($data['source_url']) : '';
+                if ($sourceUrl === '') {
+                    $sourceUrl = $finalUrl ?: $url;
+                }
+                $logoUrl = is_string($data['logo_url'] ?? null) ? trim((string) $data['logo_url']) : '';
+                if ($logoUrl !== '') {
+                    $entry['debug']['logo_probe'] = $imageDownloader->debugDownload($logoUrl, $sourceUrl ?: null);
+                }
+            }
 
             if ($persist && $content && $creator) {
-                $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+                if (!is_array($data)) {
+                    $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+                }
                 if ($fundingEndAt !== null && empty($data['funding_end_at'])) {
                     $data['funding_end_at'] = $fundingEndAt->format('Y-m-d');
                 }
+                $sourceUrl = is_string($data['source_url'] ?? null) ? trim($data['source_url']) : '';
+                if ($sourceUrl === '') {
+                    $sourceUrl = $finalUrl ?: $url;
+                }
+                if ($sourceUrl !== '') {
+                    $existing = $ppBaseRepository->createQueryBuilder('p')
+                        ->where('p.ingestion.sourceUrl = :url')
+                        ->setParameter('url', $sourceUrl)
+                        ->setMaxResults(1)
+                        ->getQuery()
+                        ->getOneOrNullResult();
+                    if ($existing instanceof \App\Entity\PPBase) {
+                        $entry['duplicate'] = true;
+                        $entry['created'] = $existing;
+                        return $entry;
+                    }
+                }
                 $created = $persister->persist($data, $creator);
                 $entry['places_debug'] = $persister->getLastPlaceDebug();
+                $entry['debug']['logo_saved'] = $created->getLogo() ?: null;
+                $entry['debug']['media'] = $persister->getLastMediaDebug();
             }
 
             if ($created) {
@@ -476,6 +573,101 @@ final class UrlHarvestController extends AbstractController
         }
 
         return null;
+    }
+
+    /**
+     * @return array{min_text_chars:int,warn_text_chars:int,min_assets:int}
+     */
+    private function defaultPayloadPolicy(): array
+    {
+        return [
+            'min_text_chars' => 600,
+            'warn_text_chars' => 350,
+            'min_assets' => 2,
+        ];
+    }
+
+    /**
+     * @param array{links?:array<int,string>,images?:array<int,string>,text?:string} $extracted
+     * @param array{min_text_chars:int,warn_text_chars:int,min_assets:int} $policy
+     * @return array{status:string,text_chars:int,links:int,images:int,assets:int}
+     */
+    private function assessPayload(array $extracted, array $policy): array
+    {
+        $text = trim((string) ($extracted['text'] ?? ''));
+        $textChars = $this->countChars($text);
+        $links = is_array($extracted['links'] ?? null) ? count($extracted['links']) : 0;
+        $images = is_array($extracted['images'] ?? null) ? count($extracted['images']) : 0;
+        $assets = $links + $images;
+
+        $minText = max(0, (int) ($policy['min_text_chars'] ?? 0));
+        $warnText = max(0, (int) ($policy['warn_text_chars'] ?? 0));
+        $minAssets = max(0, (int) ($policy['min_assets'] ?? 0));
+
+        if ($textChars >= $minText) {
+            $status = 'ok';
+        } elseif ($textChars >= $warnText || $assets >= $minAssets) {
+            $status = 'weak';
+        } else {
+            $status = 'too_thin';
+        }
+
+        return [
+            'status' => $status,
+            'text_chars' => $textChars,
+            'links' => $links,
+            'images' => $images,
+            'assets' => $assets,
+        ];
+    }
+
+    /**
+     * @param array{status?:string,text_chars?:int,links?:int,images?:int} $payload
+     */
+    private function formatPayloadNote(array $payload): string
+    {
+        $status = (string) ($payload['status'] ?? '');
+        if ($status === '' || $status === 'ok') {
+            return '';
+        }
+
+        $textChars = (int) ($payload['text_chars'] ?? 0);
+        $links = (int) ($payload['links'] ?? 0);
+        $images = (int) ($payload['images'] ?? 0);
+
+        return sprintf(
+            'Payload %s (%d car., %d liens, %d images)',
+            $status === 'weak' ? 'faible' : 'trop faible',
+            $textChars,
+            $links,
+            $images
+        );
+    }
+
+    private function mergeNotes(string $current, string $payloadNote): string
+    {
+        $current = trim($current);
+        $payloadNote = trim($payloadNote);
+        if ($payloadNote === '') {
+            return $current;
+        }
+        if ($current === '') {
+            return $payloadNote;
+        }
+        if (str_contains($current, $payloadNote)) {
+            return $current;
+        }
+
+        return $current . ' | ' . $payloadNote;
+    }
+
+    private function countChars(string $value): int
+    {
+        if (function_exists('mb_strlen')) {
+            return (int) mb_strlen($value, 'UTF-8');
+        }
+
+        return strlen($value);
     }
 
     private function isFondationPatrimoineUrl(?string $url): bool

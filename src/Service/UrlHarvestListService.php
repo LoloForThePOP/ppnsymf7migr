@@ -8,6 +8,25 @@ final class UrlHarvestListService
 {
     private const URLS_FILENAME = 'urls.csv';
     private const PROMPT_FILENAME = 'prompt.txt';
+    private const CONFIG_FILENAME = 'config.json';
+    private const ALLOWED_STATUSES = ['pending', 'done', 'normalized', 'error', 'skipped'];
+    private const DEFAULT_PAYLOAD_POLICY = [
+        'min_text_chars' => 600,
+        'warn_text_chars' => 350,
+        'min_assets' => 2,
+    ];
+    private const SOURCE_PAYLOAD_POLICIES = [
+        'je_veux_aider' => [
+            'min_text_chars' => 250,
+            'warn_text_chars' => 160,
+            'min_assets' => 1,
+        ],
+        'fondation_du_patrimoine' => [
+            'min_text_chars' => 400,
+            'warn_text_chars' => 250,
+            'min_assets' => 1,
+        ],
+    ];
 
     public function __construct(
         #[Autowire('%kernel.project_dir%/var/collect/url_lists')]
@@ -72,6 +91,30 @@ final class UrlHarvestListService
         return trim($content);
     }
 
+    /**
+     * @return array{min_text_chars:int,warn_text_chars:int,min_assets:int}
+     */
+    public function readPayloadPolicy(string $source): array
+    {
+        $policy = self::DEFAULT_PAYLOAD_POLICY;
+
+        if (isset(self::SOURCE_PAYLOAD_POLICIES[$source])) {
+            $policy = array_merge($policy, self::SOURCE_PAYLOAD_POLICIES[$source]);
+        }
+
+        $config = $this->readConfig($source);
+        if (isset($config['payload']) && is_array($config['payload'])) {
+            $payload = $config['payload'];
+            foreach (self::DEFAULT_PAYLOAD_POLICY as $key => $default) {
+                if (isset($payload[$key]) && is_int($payload[$key])) {
+                    $policy[$key] = $payload[$key];
+                }
+            }
+        }
+
+        return $policy;
+    }
+
     public function writePrompt(string $source, string $content): void
     {
         $path = $this->resolveSourcePath($source);
@@ -91,7 +134,7 @@ final class UrlHarvestListService
     }
 
     /**
-     * @return array{entries: array<int, array{url:string,status:string,last_run_at:string,error:string,notes:string,created_string_id:string,created_url:string}>, error: ?string}
+     * @return array{entries: array<int, array{url:string,status:string,last_run_at:string,error:string,notes:string,created_string_id:string,created_url:string,payload_status:string,payload_text_chars:string,payload_links:string,payload_images:string}>, error: ?string}
      */
     public function loadEntries(string $source): array
     {
@@ -144,7 +187,8 @@ final class UrlHarvestListService
             }
 
             $url = $mapped['url'] ?? $row[0] ?? '';
-            if (!is_string($url) || trim($url) === '') {
+            $url = $this->normalizeUrl($url);
+            if ($url === null) {
                 continue;
             }
 
@@ -156,6 +200,10 @@ final class UrlHarvestListService
                 'notes' => (string) ($mapped['notes'] ?? ''),
                 'created_string_id' => (string) ($mapped['created_string_id'] ?? ''),
                 'created_url' => (string) ($mapped['created_url'] ?? ''),
+                'payload_status' => (string) ($mapped['payload_status'] ?? ''),
+                'payload_text_chars' => (string) ($mapped['payload_text_chars'] ?? ''),
+                'payload_links' => (string) ($mapped['payload_links'] ?? ''),
+                'payload_images' => (string) ($mapped['payload_images'] ?? ''),
             ];
         }
 
@@ -163,7 +211,7 @@ final class UrlHarvestListService
     }
 
     /**
-     * @param array<int, array{url:string,status:string,last_run_at:string,error:string,notes:string,created_string_id:string,created_url:string}> $entries
+     * @param array<int, array{url:string,status:string,last_run_at:string,error:string,notes:string,created_string_id:string,created_url:string,payload_status:string,payload_text_chars:string,payload_links:string,payload_images:string}> $entries
      */
     public function saveEntries(string $source, array $entries): void
     {
@@ -178,16 +226,36 @@ final class UrlHarvestListService
             throw new \RuntimeException('Impossible d\'écrire urls.csv.');
         }
 
-        fputcsv($handle, ['url', 'status', 'last_run_at', 'error', 'notes', 'created_string_id', 'created_url']);
+        fputcsv($handle, [
+            'url',
+            'status',
+            'last_run_at',
+            'error',
+            'notes',
+            'created_string_id',
+            'created_url',
+            'payload_status',
+            'payload_text_chars',
+            'payload_links',
+            'payload_images',
+        ]);
         foreach ($entries as $entry) {
+            $url = $this->normalizeUrl($entry['url'] ?? '');
+            if ($url === null) {
+                continue;
+            }
             fputcsv($handle, [
-                $entry['url'] ?? '',
-                $entry['status'] ?? 'pending',
+                $url,
+                $this->normalizeStatus($entry['status'] ?? 'pending'),
                 $entry['last_run_at'] ?? '',
                 $entry['error'] ?? '',
                 $entry['notes'] ?? '',
                 $entry['created_string_id'] ?? '',
                 $entry['created_url'] ?? '',
+                $entry['payload_status'] ?? '',
+                $entry['payload_text_chars'] ?? '',
+                $entry['payload_links'] ?? '',
+                $entry['payload_images'] ?? '',
             ]);
         }
 
@@ -213,6 +281,30 @@ final class UrlHarvestListService
         return $path;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    private function readConfig(string $source): array
+    {
+        $path = $this->resolveSourcePath($source);
+        if ($path === null) {
+            return [];
+        }
+
+        $file = $path . DIRECTORY_SEPARATOR . self::CONFIG_FILENAME;
+        if (!is_file($file)) {
+            return [];
+        }
+
+        $content = file_get_contents($file);
+        if ($content === false) {
+            return [];
+        }
+
+        $payload = json_decode($content, true);
+        return is_array($payload) ? $payload : [];
+    }
+
     private function detectDelimiter(string $line): string
     {
         foreach ([';', "\t", ','] as $delimiter) {
@@ -231,6 +323,33 @@ final class UrlHarvestListService
             return 'pending';
         }
 
+        if (!in_array($status, self::ALLOWED_STATUSES, true)) {
+            return 'pending';
+        }
+
         return $status;
+    }
+
+    private function normalizeUrl(mixed $value): ?string
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value);
+        if ($value === '') {
+            return null;
+        }
+
+        if (!filter_var($value, FILTER_VALIDATE_URL)) {
+            return null;
+        }
+
+        $scheme = parse_url($value, PHP_URL_SCHEME);
+        if (!is_string($scheme) || !in_array(strtolower($scheme), ['http', 'https'], true)) {
+            return null;
+        }
+
+        return $value;
     }
 }

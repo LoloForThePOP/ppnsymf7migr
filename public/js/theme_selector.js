@@ -20,6 +20,22 @@ document.addEventListener('DOMContentLoaded', function () {
         return theme === 'light' ? 'classic' : theme;
     };
 
+    const themeToneMap = new Map();
+    optionsBySelector.forEach(function (options) {
+        options.forEach(function (option) {
+            const theme = option.dataset.theme;
+            const tone = option.dataset.themeTone;
+            if (theme && tone && !themeToneMap.has(theme)) {
+                themeToneMap.set(theme, tone);
+            }
+        });
+    });
+
+    const resolveTone = function (theme) {
+        const resolved = normalizeTheme(theme);
+        return themeToneMap.get(resolved) || (resolved === 'dark' ? 'dark' : 'light');
+    };
+
     const setActiveOption = function (theme) {
         optionsBySelector.forEach(function (options) {
             options.forEach(function (option) {
@@ -67,6 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const resolved = normalizeTheme(theme);
         root.setAttribute('data-theme', resolved);
         root.setAttribute('data-theme-variant', resolved === 'classic' ? 'classic' : 'custom');
+        root.setAttribute('data-theme-tone', resolveTone(resolved));
         selectors.forEach(function (selector) {
             selector.dataset.currentTheme = resolved;
         });

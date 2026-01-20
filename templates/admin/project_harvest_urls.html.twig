@@ -83,6 +83,14 @@
                     </form>
 
                     {% if sourceEntries %}
+                        {% set sourceResultsByUrl = {} %}
+                        {% if sourceResults %}
+                            {% for result in sourceResults %}
+                                {% if result.url is defined and result.url %}
+                                    {% set sourceResultsByUrl = sourceResultsByUrl|merge({(result.url): result}) %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
                         <div class="form-check form-switch mt-3">
                             <input class="form-check-input" type="checkbox" id="toggle-hide-done" checked>
                             <label class="form-check-label" for="toggle-hide-done">
@@ -96,8 +104,11 @@
                                         <th>URL</th>
                                         <th>Progression</th>
                                         <th>Statut</th>
+                                        <th>Payload</th>
                                         <th>Dernier run</th>
                                         <th>Page créée</th>
+                                        <th>Dernier résultat</th>
+                                        <th>JSON & debug</th>
                                         <th>Erreur</th>
                                     </tr>
                                 </thead>
@@ -105,7 +116,8 @@
                                     {% for entry in sourceEntries|slice(0, 200) %}
                                         {% set status = entry.status|default('pending')|lower %}
                                         {% set badgeClass = status == 'done' ? 'success' : (status == 'normalized' ? 'info text-dark' : (status == 'error' ? 'danger' : (status == 'pending' ? 'warning text-dark' : 'secondary'))) %}
-                                        <tr data-status="{{ status }}">
+                                        {% set runResult = sourceResultsByUrl[entry.url]|default(null) %}
+                                        <tr data-status="{{ status }}" data-recent-result="{{ runResult is not null ? '1' : '0' }}">
                                             <td class="small"><a href="{{ entry.url }}" target="_blank" rel="noopener noreferrer">{{ entry.url }}</a></td>
                                             <td class="small">
                                                 <span class="processing-indicator d-none align-items-center gap-1">
@@ -114,11 +126,97 @@
                                                 </span>
                                             </td>
                                             <td><span class="badge bg-{{ badgeClass }}">{{ status }}</span></td>
+                                            <td class="small">
+                                                {% set payloadStatus = entry.payload_status|default('') %}
+                                                {% if payloadStatus %}
+                                                    {% set payloadBadge = payloadStatus == 'ok' ? 'success' : (payloadStatus == 'weak' ? 'warning text-dark' : 'danger') %}
+                                                    <span class="badge bg-{{ payloadBadge }}">{{ payloadStatus }}</span>
+                                                    <div class="text-muted small">
+                                                        {{ entry.payload_text_chars|default('0') }} car.,
+                                                        {{ entry.payload_links|default('0') }} liens,
+                                                        {{ entry.payload_images|default('0') }} images
+                                                    </div>
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
                                             <td class="small">{{ entry.last_run_at ?: '-' }}</td>
                                             <td class="small">
                                                 {% if entry.created_url is defined and entry.created_url %}
                                                     <a href="{{ entry.created_url }}" target="_blank" rel="noopener noreferrer">Ouvrir</a>
                                                 {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                            <td class="small">
+                                                {% if runResult is not null and runResult.created is defined and runResult.created %}
+                                                    <a href="{{ path('edit_show_project_presentation', {'stringId': runResult.created.stringId}) }}" target="_blank" rel="noopener noreferrer">Ouvrir</a>
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                            <td class="small">
+                                                {% if runResult is not null and runResult.raw is defined and runResult.raw %}
+                                                    <details>
+                                                        <summary>JSON brut</summary>
+                                                        <pre class="theme-pre p-2 rounded" style="white-space: pre-wrap;">{{ runResult.raw }}</pre>
+                                                    </details>
+                                                {% endif %}
+                                                {% if runResult is not null and runResult.debug is defined and runResult.debug %}
+                                                    <details class="mt-1">
+                                                        <summary>Debug</summary>
+                                                        {% if runResult.debug.final_url is defined %}
+                                                            <div class="small text-muted">URL finale : {{ runResult.debug.final_url }}</div>
+                                                        {% endif %}
+                                                        {% if runResult.debug.links is defined %}
+                                                            <div class="mt-2 small fw-bold">Liens extraits ({{ runResult.debug.links|length }})</div>
+                                                            {% if runResult.debug.links %}
+                                                                <pre class="theme-pre p-2 rounded" style="white-space: pre-wrap;">{{ runResult.debug.links|join('\n') }}</pre>
+                                                            {% else %}
+                                                                <div class="small text-muted">Aucun lien extrait.</div>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                        {% if runResult.debug.images is defined %}
+                                                            <div class="mt-2 small fw-bold">Images extraites ({{ runResult.debug.images|length }})</div>
+                                                            {% if runResult.debug.images %}
+                                                                <pre class="theme-pre p-2 rounded" style="white-space: pre-wrap;">{{ runResult.debug.images|join('\n') }}</pre>
+                                                            {% else %}
+                                                                <div class="small text-muted">Aucune image extraite.</div>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                        {% if runResult.debug.logo_probe is defined %}
+                                                            {% set logoProbe = runResult.debug.logo_probe %}
+                                                            <div class="mt-2 small fw-bold">Logo</div>
+                                                            <div class="small text-muted">
+                                                                Statut : {{ logoProbe.status ?? '-' }} |
+                                                                Type : {{ logoProbe.resolved_type ?? logoProbe.content_type ?? '-' }}
+                                                            </div>
+                                                            {% if logoProbe.final_url is defined and logoProbe.final_url %}
+                                                                <div class="small text-muted">URL finale : {{ logoProbe.final_url }}</div>
+                                                            {% endif %}
+                                                            {% if logoProbe.error is defined and logoProbe.error %}
+                                                                <div class="small text-danger">Erreur : {{ logoProbe.error }}</div>
+                                                            {% endif %}
+                                                            {% if runResult.debug.logo_saved is defined %}
+                                                                <div class="small text-muted">
+                                                                    Logo enregistré :
+                                                                    {{ runResult.debug.logo_saved ? runResult.debug.logo_saved : 'non' }}
+                                                                </div>
+                                                            {% endif %}
+                                                            {% if runResult.debug.media is defined and runResult.debug.media.logo is defined %}
+                                                                {% set logoMedia = runResult.debug.media.logo %}
+                                                                <div class="small text-muted">
+                                                                    Téléchargé :
+                                                                    {{ logoMedia.downloaded ? 'oui' : 'non' }}
+                                                                    {% if logoMedia.downloaded %}
+                                                                        ({{ logoMedia.mime ?? '-' }}, {{ logoMedia.size ?? 0 }} octets)
+                                                                    {% endif %}
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </details>
+                                                {% endif %}
+                                                {% if runResult is null or (runResult.raw is not defined and runResult.debug is not defined) %}
                                                     -
                                                 {% endif %}
                                             </td>
@@ -296,7 +394,8 @@
                 if (!table || !toggleHideDone) return;
                 const hideDone = toggleHideDone.checked;
                 table.querySelectorAll('tbody tr[data-status="done"]').forEach((row) => {
-                    row.classList.toggle('d-none', hideDone);
+                    const keepVisible = row.dataset.recentResult === '1';
+                    row.classList.toggle('d-none', hideDone && !keepVisible);
                 });
             };
 
