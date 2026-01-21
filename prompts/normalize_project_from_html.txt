@@ -30,8 +30,8 @@ Produit un JSON UTF-8 valide :
 
 Contraintes :
 - Langue : français.
-- title : formulation neutre et factuelle du titre, éviter les verbes et sujets pour le titre sauf si le titre est déjà formé et en contient explicitement, éviter les appels au soutien pour le titre.
-- goal : l'objectif principal du projet formulé de manière simple avec verbe à l'infinitif.
+- title : formulation neutre et factuelle du titre, éviter les verbes, sujets et mots d'action pour le titre sauf si le titre est déjà formé et en contient explicitement, éviter les appels au soutien pour le titre.
+- goal : l'objectif principal du projet formulé de manière simple avec verbe à l'infinitif, il commence par une majuscule.
 - description_html : 2 paragraphes si possible, balisés avec <p>…</p>, sans autres balises. Adopter un ton plûtot simple, clair et descriptif. Ne pas utiliser "je/nous/notre/mon". Ne pas inventer.
 - qa : 2 à 4 questions / réponses relativement courtes pour rendre le contenu digestible (en français), dans qa ne pas parler directement de l'objectif du projet, ne pas se répéter, ne pas parler de choses déjà dites dans description_html, ne pas parler de positions géographiques / lieux dans qa.
 - logo_url : URL explicite d’un logo si un logo est présent dans TEXT/LINKS/IMAGES ; sinon null. Ne pas inventer. Si un logo est présent, ne pas l’inclure dans image_urls/images.

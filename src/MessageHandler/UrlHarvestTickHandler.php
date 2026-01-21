@@ -75,15 +75,24 @@ final class UrlHarvestTickHandler
             $creator = $queueState['persist'] ? $this->scraperUserResolver->resolve() : null;
             $payloadPolicy = $this->listService->readPayloadPolicy($source);
 
-            $result = $this->runner->run(
-                $entries[$nextIndex]['url'],
-                $queueState['persist'] && $creator !== null,
-                $prompt,
-                $this->appScraperModel,
-                $creator,
-                $payloadPolicy,
-                true
-            );
+            try {
+                $result = $this->runner->run(
+                    $entries[$nextIndex]['url'],
+                    $queueState['persist'] && $creator !== null,
+                    $prompt,
+                    $this->appScraperModel,
+                    $creator,
+                    $payloadPolicy,
+                    true
+                );
+            } catch (\Throwable $e) {
+                $result = [
+                    'url' => $entries[$nextIndex]['url'],
+                    'error' => $e->getMessage(),
+                    'payload' => [],
+                    'ai_payload' => [],
+                ];
+            }
 
             $entries = $this->applyResult($entries, $nextIndex, $result);
             $this->listService->saveEntries($source, $entries);

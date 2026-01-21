@@ -474,9 +474,11 @@
             const applyHideDone = () => {
                 if (!table || !toggleHideDone) return;
                 const hideDone = toggleHideDone.checked;
-                table.querySelectorAll('tbody tr[data-status="done"]').forEach((row) => {
-                    const keepVisible = row.dataset.recentResult === '1';
-                    row.classList.toggle('d-none', hideDone && !keepVisible);
+                const finishedStatuses = new Set(['done', 'normalized', 'skipped', 'error']);
+                table.querySelectorAll('tbody tr[data-status]').forEach((row) => {
+                    const status = (row.dataset.status || '').toLowerCase();
+                    const shouldHide = hideDone && finishedStatuses.has(status);
+                    row.classList.toggle('d-none', shouldHide);
                 });
             };
 
@@ -587,18 +589,27 @@
             const refresh = async () => {
                 if (!table || !table.dataset.statusUrl) return;
                 try {
-                    const response = await fetch(table.dataset.statusUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    const urls = Array.from(table.querySelectorAll('tbody tr[data-url]'))
+                        .map((row) => row.dataset.url)
+                        .filter((value) => value && value.length > 0);
+                    const data = new FormData();
+                    urls.forEach((url) => data.append('urls[]', url));
+                    const response = await fetch(table.dataset.statusUrl, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: data,
+                    });
                     if (!response.ok) return;
-                    const data = await response.json();
-                    if (data.queue) updateQueueState(data.queue);
-                    if (data.summary) updateSummary(data.summary);
+                    const payload = await response.json();
+                    if (payload.queue) updateQueueState(payload.queue);
+                    if (payload.summary) updateSummary(payload.summary);
 
-                    if (Array.isArray(data.entries)) {
+                    if (Array.isArray(payload.entries)) {
                         const rowMap = new Map();
                         table.querySelectorAll('tbody tr[data-url]').forEach((row) => {
                             rowMap.set(row.dataset.url, row);
                         });
-                        data.entries.forEach((entry) => {
+                        payload.entries.forEach((entry) => {
                             const row = rowMap.get(entry.url);
                             if (row) updateRow(row, entry);
                         });

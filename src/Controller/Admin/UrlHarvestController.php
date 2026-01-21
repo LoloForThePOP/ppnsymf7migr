@@ -60,7 +60,8 @@ final class UrlHarvestController extends AbstractController
 
         if ($selectedSource !== '') {
             $loaded = $listService->loadEntries($selectedSource);
-            $sourceEntries = $loaded['entries'];
+            $entries = $this->normalizeStaleEntries($selectedSource, $loaded['entries'], $queueState, $listService);
+            $sourceEntries = $this->orderEntriesForDisplay($entries);
             $sourceError = $loaded['error'];
             $sourceSummary = $this->summarizeEntries($sourceEntries);
             $sourceResults = $this->loadLastResults($resultStore, $selectedSource, $sourceEntries);
@@ -173,7 +174,7 @@ final class UrlHarvestController extends AbstractController
         ]);
     }
 
-    #[Route('/status', name: 'admin_project_harvest_urls_status', methods: ['GET'])]
+    #[Route('/status', name: 'admin_project_harvest_urls_status', methods: ['GET', 'POST'])]
     #[IsGranted(ScraperAccessVoter::ATTRIBUTE)]
     public function status(Request $request, UrlHarvestListService $listService, UrlHarvestResultStore $resultStore): JsonResponse
     {
@@ -187,7 +188,33 @@ final class UrlHarvestController extends AbstractController
             return new JsonResponse(['error' => $loaded['error']], Response::HTTP_BAD_REQUEST);
         }
 
-        $entries = array_slice($loaded['entries'], 0, 200);
+        $queueState = $listService->readQueueState($source);
+        $entries = $this->normalizeStaleEntries($source, $loaded['entries'], $queueState, $listService);
+        $entries = $this->orderEntriesForDisplay($entries);
+        $requestedUrls = $request->request->all('urls');
+        if ($requestedUrls === [] && $request->query->has('urls')) {
+            $requestedUrls = $request->query->all('urls');
+        }
+
+        if (is_string($requestedUrls)) {
+            $requestedUrls = array_filter(array_map('trim', explode(',', $requestedUrls)));
+        }
+
+        if (is_array($requestedUrls) && $requestedUrls !== []) {
+            $requestedUrls = array_values(array_filter($requestedUrls, fn($value) => is_string($value) && $value !== ''));
+            $entryByUrl = [];
+            foreach ($entries as $entry) {
+                $entryByUrl[$entry['url']] = $entry;
+            }
+            $entries = [];
+            foreach ($requestedUrls as $url) {
+                if (isset($entryByUrl[$url])) {
+                    $entries[] = $entryByUrl[$url];
+                }
+            }
+        }
+
+        $entries = array_slice($entries, 0, 200);
         foreach ($entries as &$entry) {
             $entry['result_key'] = $resultStore->getPublicKey($entry['url']);
             $entry['has_result'] = $resultStore->hasResult($source, $entry['url']);
@@ -197,7 +224,7 @@ final class UrlHarvestController extends AbstractController
         return new JsonResponse([
             'entries' => $entries,
             'summary' => $this->summarizeEntries($loaded['entries']),
-            'queue' => $listService->readQueueState($source),
+            'queue' => $queueState,
         ]);
     }
 
@@ -317,5 +344,76 @@ final class UrlHarvestController extends AbstractController
         }
 
         return $results;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $entries
+     * @return array<int, array<string, mixed>>
+     */
+    private function normalizeStaleEntries(
+        string $source,
+        array $entries,
+        array $queueState,
+        UrlHarvestListService $listService
+    ): array {
+        if (!empty($queueState['running'])) {
+            return $entries;
+        }
+
+        $changed = false;
+        foreach ($entries as &$entry) {
+            $status = strtolower(trim((string) ($entry['status'] ?? 'pending')));
+            if (in_array($status, ['processing', 'queued'], true)) {
+                $entry['status'] = 'pending';
+                $changed = true;
+            }
+        }
+        unset($entry);
+
+        if ($changed) {
+            $listService->saveEntries($source, $entries);
+        }
+
+        return $entries;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $entries
+     * @return array<int, array<string, mixed>>
+     */
+    private function orderEntriesForDisplay(array $entries): array
+    {
+        $priority = [
+            'processing',
+            'queued',
+            'pending',
+            'error',
+            'normalized',
+            'skipped',
+            'done',
+        ];
+
+        $buckets = [];
+        foreach ($entries as $entry) {
+            $status = strtolower(trim((string) ($entry['status'] ?? 'pending')));
+            if ($status === '') {
+                $status = 'pending';
+            }
+            $buckets[$status][] = $entry;
+        }
+
+        $ordered = [];
+        foreach ($priority as $status) {
+            if (!empty($buckets[$status])) {
+                $ordered = array_merge($ordered, $buckets[$status]);
+                unset($buckets[$status]);
+            }
+        }
+
+        foreach ($buckets as $rest) {
+            $ordered = array_merge($ordered, $rest);
+        }
+
+        return $ordered;
     }
 }
