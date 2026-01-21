@@ -96,12 +96,18 @@ final class UrlHarvestTickHandler
             }
             $this->resultStore->store($source, $entries[$nextIndex]['url'], $storedResult);
 
+            $queueState = $this->listService->readQueueState($source);
+            if ($queueState['paused']) {
+                $queueState['running'] = false;
+                $this->listService->writeQueueState($source, $queueState);
+                return;
+            }
+
             if (is_int($queueState['remaining'])) {
                 $queueState['remaining'] = max(0, $queueState['remaining'] - 1);
             }
 
             $queueState['running'] = $this->hasQueueable($entries)
-                && (!$queueState['paused'])
                 && (!is_int($queueState['remaining']) || $queueState['remaining'] > 0);
             $this->listService->writeQueueState($source, $queueState);
 
@@ -157,6 +163,8 @@ final class UrlHarvestTickHandler
         $entries[$index]['payload_text_chars'] = (string) ($result['payload']['text_chars'] ?? '');
         $entries[$index]['payload_links'] = (string) ($result['payload']['links'] ?? '');
         $entries[$index]['payload_images'] = (string) ($result['payload']['images'] ?? '');
+        $entries[$index]['ai_payload_status'] = (string) ($result['ai_payload']['status'] ?? '');
+        $entries[$index]['ai_payload_reason'] = (string) ($result['ai_payload']['reason'] ?? '');
         $entries[$index]['notes'] = $this->mergeNotes(
             (string) ($entries[$index]['notes'] ?? ''),
             $this->formatPayloadNote($result['payload'] ?? [])

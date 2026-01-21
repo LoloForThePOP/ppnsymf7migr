@@ -183,7 +183,7 @@ final class UrlHarvestListService
     }
 
     /**
-     * @return array{entries: array<int, array{url:string,status:string,last_run_at:string,error:string,notes:string,created_string_id:string,created_url:string,payload_status:string,payload_text_chars:string,payload_links:string,payload_images:string}>, error: ?string}
+     * @return array{entries: array<int, array{url:string,status:string,last_run_at:string,error:string,notes:string,created_string_id:string,created_url:string,payload_status:string,payload_text_chars:string,payload_links:string,payload_images:string,ai_payload_status:string,ai_payload_reason:string}>, error: ?string}
      */
     public function loadEntries(string $source): array
     {
@@ -253,6 +253,8 @@ final class UrlHarvestListService
                 'payload_text_chars' => (string) ($mapped['payload_text_chars'] ?? ''),
                 'payload_links' => (string) ($mapped['payload_links'] ?? ''),
                 'payload_images' => (string) ($mapped['payload_images'] ?? ''),
+                'ai_payload_status' => (string) ($mapped['ai_payload_status'] ?? ''),
+                'ai_payload_reason' => (string) ($mapped['ai_payload_reason'] ?? ''),
             ];
         }
 
@@ -260,7 +262,7 @@ final class UrlHarvestListService
     }
 
     /**
-     * @param array<int, array{url:string,status:string,last_run_at:string,error:string,notes:string,created_string_id:string,created_url:string,payload_status:string,payload_text_chars:string,payload_links:string,payload_images:string}> $entries
+     * @param array<int, array{url:string,status:string,last_run_at:string,error:string,notes:string,created_string_id:string,created_url:string,payload_status:string,payload_text_chars:string,payload_links:string,payload_images:string,ai_payload_status:string,ai_payload_reason:string}> $entries
      */
     public function saveEntries(string $source, array $entries): void
     {
@@ -287,6 +289,8 @@ final class UrlHarvestListService
             'payload_text_chars',
             'payload_links',
             'payload_images',
+            'ai_payload_status',
+            'ai_payload_reason',
         ]);
         foreach ($entries as $entry) {
             $url = $this->normalizeUrl($entry['url'] ?? '');
@@ -305,6 +309,8 @@ final class UrlHarvestListService
                 $entry['payload_text_chars'] ?? '',
                 $entry['payload_links'] ?? '',
                 $entry['payload_images'] ?? '',
+                $entry['ai_payload_status'] ?? '',
+                $entry['ai_payload_reason'] ?? '',
             ]);
         }
 

@@ -28,6 +28,8 @@ Each source lives under `var/collect/url_lists/<source>/`:
 - `payload_text_chars`
 - `payload_links`
 - `payload_images`
+- `ai_payload_status`
+- `ai_payload_reason`
 
 Status meanings:
 - `pending`: never processed.
@@ -36,6 +38,10 @@ Status meanings:
 - `normalized`: LLM ok but not persisted.
 - `skipped`: duplicate or payload too thin.
 - `error`: runtime failure.
+
+AI payload fields:
+- `ai_payload_status` is reported by the model (`ok`, `weak`, `too_thin`).
+- `ai_payload_reason` is a short, factual explanation when the model flags a weak payload.
 
 ## Prompt Handling
 Pipeline prompt = `prompts/normalize_project_from_html.txt` + optional `prompt.txt` (source-specific).
@@ -74,6 +80,7 @@ Default policy:
 Per-source overrides live in `config.json` under `payload`. Built-in defaults for `je_veux_aider` and `fondation_du_patrimoine` are defined in `UrlHarvestListService`.
 
 If the payload is **too thin**, the run is marked `skipped` with an error note and no persistence.
+An additional **AI payload assessment** is used: if the model flags `too_thin`, persistence is also skipped.
 
 ## Result Store (JSON debug)
 Each processed URL saves a debug JSON:

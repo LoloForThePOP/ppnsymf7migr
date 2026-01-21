@@ -24,9 +24,9 @@ class UluleCatalogController extends AbstractController
     #[Route('/admin/ulule/catalog', name: 'admin_ulule_catalog', methods: ['GET', 'POST'])]
     public function __invoke(
         Request $request,
-        UluleApiClient $ululeApiClient,
         UluleProjectCatalogRepository $catalogRepository,
-        EntityManagerInterface $em
+        \App\Service\UluleCatalogRefresher $catalogRefresher,
+        \App\Service\UluleQueueStateService $queueStateService
     ): Response {
         $input = $request->isMethod('POST') ? $request->request : $request->query;
         $lang = trim((string) $input->get('lang', 'fr'));
@@ -65,10 +65,7 @@ class UluleCatalogController extends AbstractController
 
         $refreshSummary = null;
         if ($request->isMethod('POST')) {
-            $refreshSummary = $this->refreshCatalog(
-                $ululeApiClient,
-                $catalogRepository,
-                $em,
+            $refreshSummary = $catalogRefresher->refreshCatalog(
                 $lang,
                 $country,
                 $status,
@@ -77,6 +74,9 @@ class UluleCatalogController extends AbstractController
                 $pageCount,
                 $extraQuery
             );
+            foreach ($refreshSummary['error_messages'] ?? [] as $message) {
+                $this->addFlash('danger', $message);
+            }
         }
 
         $items = $this->loadItems($catalogRepository, $statusFilter);
@@ -118,6 +118,7 @@ class UluleCatalogController extends AbstractController
             'lastSeenLabels' => $lastSeenLabels,
             'lastImportedLabels' => $lastImportedLabels,
             'ululeCreatedLabels' => $ululeCreatedLabels,
+            'ululeQueueState' => $queueStateService->readState()['queue'],
         ]);
     }
 

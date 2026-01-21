@@ -482,6 +482,13 @@ textarea:focus, input:focus{
     
 }
 
+.in-consultation-mode #text_description {
+
+    padding-left: 13px;
+    padding-right: 13px;
+    
+}
+
 
 
 /* Other Media Queries */

@@ -52,6 +52,7 @@ class CacheThumbnailService
         $removedOldCache = false;
 
         $sourcePath = $this->determineSourceImage($project);
+        $sourcePath = $this->normalizeLocalSourcePath($sourcePath);
 
         // Case 1 — no image available → clear old cache if any
         if ($sourcePath === null) {
@@ -73,6 +74,8 @@ class CacheThumbnailService
         } else {
             $newUrl = $this->resolveCachedUrl($sourcePath);
         }
+
+        $newUrl = $this->normalizeCacheUrl($newUrl);
 
         // If changed or forced refresh → remove old cache and update
         if ($forceRefresh || $newUrl !== $currentUrl) {
@@ -102,14 +105,14 @@ class CacheThumbnailService
                 $this->cacheManager->store($filteredBinary, $relativePath, self::FILTER);
             }
 
-            return $this->cacheManager->resolve($relativePath, self::FILTER);
+            return $this->normalizeCacheUrl($this->cacheManager->resolve($relativePath, self::FILTER));
         } catch (\Throwable $e) {
             return $this->cacheManager->generateUrl(
                 $sourcePath,
                 self::FILTER,
                 [],
                 null,
-                UrlGeneratorInterface::ABSOLUTE_URL
+                UrlGeneratorInterface::ABSOLUTE_PATH
             );
         }
     }
@@ -147,6 +150,43 @@ class CacheThumbnailService
         }
 
         return null;
+    }
+
+    /**
+     * Convert local absolute URLs (localhost/127.0.0.1) to relative paths
+     * so the Liip cache resolver can generate thumbnails in CLI/worker contexts.
+     */
+    private function normalizeLocalSourcePath(?string $sourcePath): ?string
+    {
+        if ($sourcePath === null || $sourcePath === '') {
+            return $sourcePath;
+        }
+
+        $path = parse_url($sourcePath, PHP_URL_PATH);
+        if (is_string($path) && str_starts_with($path, '/media/uploads/')) {
+            return $path;
+        }
+
+        return $sourcePath;
+    }
+
+    /**
+     * Ensures cached URLs stay relative (no host/port baked in from CLI context).
+     */
+    private function normalizeCacheUrl(string $url): string
+    {
+        $parts = parse_url($url);
+        if (!is_array($parts)) {
+            return $url;
+        }
+
+        $path = $parts['path'] ?? '';
+        if ($path !== '' && (str_starts_with($path, '/media/cache/') || str_starts_with($path, '/media/uploads/'))) {
+            $query = isset($parts['query']) && $parts['query'] !== '' ? '?' . $parts['query'] : '';
+            return $path . $query;
+        }
+
+        return $url;
     }
 
     /**

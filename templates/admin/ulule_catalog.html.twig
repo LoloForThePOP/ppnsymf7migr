@@ -92,6 +92,40 @@
                 <button type="button" class="btn btn-outline-primary" id="ulule-load-more">Charger 200 suivants</button>
                 <span class="small text-muted">Ajoute 10 pages Ulule de plus à la requête.</span>
             </div>
+
+            <div class="card mt-3">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                            <div class="fw-semibold">File d’import Ulule</div>
+                            <div class="small text-muted d-inline-flex align-items-center" id="ulule-queue-state" data-queue-state="{{ ululeQueueState.paused ? 'paused' : (ululeQueueState.running ? 'running' : 'stopped') }}">
+                                <span id="ulule-queue-text">
+                                {% if ululeQueueState.paused %}
+                                    File : en pause
+                                {% elseif ululeQueueState.running %}
+                                    File : en cours
+                                {% else %}
+                                    File : arrêtée
+                                {% endif %}
+                                </span>
+                                <span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true" id="ulule-queue-spinner"></span>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <div class="input-group input-group-sm" style="max-width: 170px;">
+                                <span class="input-group-text">Limite</span>
+                                <input type="number" class="form-control" name="batch_size" min="0" max="500" value="0">
+                            </div>
+                            <span class="small text-muted">0 = traitement continu.</span>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary" formaction="{{ path('admin_ulule_queue_start') }}" id="ulule-queue-run" data-queue-action="start" {% if ululeQueueState.running and not ululeQueueState.paused %}disabled{% endif %}>Traiter la file</button>
+                        <button type="submit" class="btn btn-outline-warning" formaction="{{ path('admin_ulule_queue_pause') }}" id="ulule-queue-pause" data-queue-action="pause" {% if ululeQueueState.paused %}disabled{% endif %}>Pause</button>
+                        <button type="submit" class="btn btn-outline-success" formaction="{{ path('admin_ulule_queue_resume') }}" id="ulule-queue-resume" data-queue-action="resume" {% if not ululeQueueState.paused %}disabled{% endif %}>Reprendre</button>
+                    </div>
+                </div>
+            </div>
         </form>
 
         {% if refreshSummary %}
@@ -103,17 +137,23 @@
         <div class="mt-4">
             <h2 class="h6">Résumé</h2>
             <div class="d-flex flex-wrap gap-2 mb-3">
-                <span class="badge bg-warning text-dark">À importer: {{ statusCounts.pending ?? 0 }}</span>
-                <span class="badge bg-success">Importés: {{ statusCounts.imported ?? 0 }}</span>
-                <span class="badge bg-secondary">Ignorés: {{ statusCounts.skipped ?? 0 }}</span>
-                <span class="badge bg-danger">Échoués: {{ statusCounts.failed ?? 0 }}</span>
+                <span class="badge bg-warning text-dark" data-summary="pending">À importer: {{ statusCounts.pending ?? 0 }}</span>
+                <span class="badge bg-success" data-summary="imported">Importés: {{ statusCounts.imported ?? 0 }}</span>
+                <span class="badge bg-secondary" data-summary="skipped">Ignorés: {{ statusCounts.skipped ?? 0 }}</span>
+                <span class="badge bg-danger" data-summary="failed">Échoués: {{ statusCounts.failed ?? 0 }}</span>
             </div>
 
             <div class="table-responsive">
-                <table class="table table-sm align-middle">
+                <table class="table table-sm align-middle" id="ulule-catalog-table" data-status-url="{{ path('admin_ulule_queue_status', {
+                    status_filter: statusFilter,
+                    eligible_only: eligibleOnly ? 1 : 0,
+                    min_description_length: minDescriptionLength,
+                    exclude_funded: excludeFunded ? 1 : 0
+                }) }}">
                     <thead>
                         <tr>
                             <th scope="col">Projet</th>
+                            <th scope="col">Progression</th>
                             <th scope="col">Ajout Ulule</th>
                             <th scope="col">Données</th>
                             <th scope="col">État</th>
@@ -139,7 +179,7 @@
                                 and (item.descriptionLength is not null)
                                 and (item.descriptionLength >= minDescriptionLength)
                             ) %}
-                            <tr>
+                            <tr data-ulule-id="{{ item.ululeId }}">
                                 <td>
                                     <div class="fw-bold">
                                         {{ item.name ?? 'Projet Ulule' }}
@@ -153,6 +193,12 @@
                                     {% if item.subtitle %}
                                         <div class="small text-muted">{{ item.subtitle }}</div>
                                     {% endif %}
+                                </td>
+                                <td class="small" data-col="progress">
+                                    <span class="processing-indicator {{ ululeQueueState.running and ululeQueueState.current_id == item.ululeId ? 'd-inline-flex' : 'd-none' }} align-items-center gap-1">
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        <span>en cours</span>
+                                    </span>
                                 </td>
                                 <td class="small text-muted">
                                     {% if item.ululeCreatedAt %}
@@ -183,19 +229,21 @@
                                         | Annulé : {{ item.isCancelled ? 'oui' : 'non' }}
                                     </div>
                                 </td>
-                                <td>
+                                <td data-col="status">
                                     <span class="badge {{ statusClass }}">{{ importStatus }}</span>
-                                    {% if not eligible %}
-                                        <span class="badge bg-light text-muted">non éligible</span>
-                                    {% endif %}
+                                    <span class="badge bg-light text-muted {{ eligible ? 'd-none' : '' }}" data-col="eligible">non éligible</span>
                                     {% if item.importStatusComment %}
-                                        <div class="small text-muted mt-1">{{ item.importStatusComment }}</div>
+                                        <div class="small text-muted mt-1" data-col="status-comment">{{ item.importStatusComment }}</div>
+                                    {% else %}
+                                        <div class="small text-muted mt-1 d-none" data-col="status-comment"></div>
                                     {% endif %}
                                     {% if item.lastError %}
-                                        <div class="small text-danger mt-1">{{ item.lastError }}</div>
+                                        <div class="small text-danger mt-1" data-col="status-error">{{ item.lastError }}</div>
+                                    {% else %}
+                                        <div class="small text-danger mt-1 d-none" data-col="status-error"></div>
                                     {% endif %}
                                 </td>
-                                <td class="small text-muted">
+                                <td class="small text-muted" data-col="import-link">
                                     {% if item.importedStringId %}
                                         <a href="{{ path('edit_show_project_presentation', {'stringId': item.importedStringId}) }}" target="_blank" rel="noopener noreferrer">
                                             Voir la fiche
@@ -242,13 +290,13 @@
                                 </td>
                             </tr>
                             <tr id="ulule-preview-row-{{ item.ululeId }}" class="d-none">
-                                <td colspan="5">
+                                <td colspan="7">
                                     <div class="ulule-preview-content small"></div>
                                 </td>
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="5" class="text-muted">Aucun projet trouvé.</td>
+                                <td colspan="7" class="text-muted">Aucun projet trouvé.</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -264,10 +312,147 @@
                 return;
             }
 
+            const table = document.getElementById('ulule-catalog-table');
+            const queueLabel = document.getElementById('ulule-queue-state');
+            const queueText = document.getElementById('ulule-queue-text');
+            const queueSpinner = document.getElementById('ulule-queue-spinner');
+            const queueRunBtn = document.getElementById('ulule-queue-run');
+            const queuePauseBtn = document.getElementById('ulule-queue-pause');
+            const queueResumeBtn = document.getElementById('ulule-queue-resume');
             const loadMoreBtn = document.getElementById('ulule-load-more');
             const previewButtons = document.querySelectorAll('.js-ulule-preview');
             const importButtons = document.querySelectorAll('.js-ulule-import-open');
+            const queueButtons = document.querySelectorAll('[data-queue-action]');
             const importUrlTemplate = `{{ path('admin_ulule_import_project', {'ululeId': 'ULULE_ID'}) }}`;
+
+            const statusClass = (status) => {
+                if (status === 'pending') return 'bg-warning text-dark';
+                if (status === 'imported') return 'bg-success';
+                if (status === 'skipped') return 'bg-secondary';
+                if (status === 'failed') return 'bg-danger';
+                return 'bg-secondary';
+            };
+
+            const updateQueueState = (queue) => {
+                if (!queueLabel || !queue) return;
+                let label = 'arrêtée';
+                let state = 'stopped';
+                if (queue.paused) {
+                    label = 'en pause';
+                    state = 'paused';
+                } else if (queue.running) {
+                    label = 'en cours';
+                    state = 'running';
+                }
+                if (queueText) {
+                    queueText.textContent = `File : ${label}`;
+                }
+                queueLabel.dataset.queueState = state;
+                if (queueRunBtn) queueRunBtn.disabled = queue.running && !queue.paused;
+                if (queuePauseBtn) queuePauseBtn.disabled = queue.paused;
+                if (queueResumeBtn) queueResumeBtn.disabled = !queue.paused;
+                if (queueSpinner) {
+                    queueSpinner.classList.toggle('d-none', state !== 'running');
+                }
+            };
+
+            const updateSummary = (summary) => {
+                if (!summary) return;
+                document.querySelectorAll('[data-summary]').forEach((badge) => {
+                    const key = badge.getAttribute('data-summary');
+                    if (!key || summary[key] === undefined) return;
+                    const parts = badge.textContent.split(' ');
+                    parts[parts.length - 1] = summary[key];
+                    badge.textContent = parts.join(' ');
+                });
+            };
+
+            const updateRow = (row, item, queue) => {
+                if (!row || !item) return;
+                const status = (item.import_status || 'pending').toLowerCase();
+                const statusCell = row.querySelector('[data-col="status"]');
+                if (statusCell) {
+                    const badge = statusCell.querySelector('.badge');
+                    if (badge) {
+                        badge.className = `badge ${statusClass(status)}`;
+                        badge.textContent = status;
+                    }
+                    const eligibleBadge = statusCell.querySelector('[data-col="eligible"]');
+                    if (eligibleBadge) {
+                        eligibleBadge.classList.toggle('d-none', item.eligible);
+                    }
+                    const comment = statusCell.querySelector('[data-col="status-comment"]');
+                    if (comment) {
+                        if (item.import_status_comment) {
+                            comment.textContent = item.import_status_comment;
+                            comment.classList.remove('d-none');
+                        } else {
+                            comment.textContent = '';
+                            comment.classList.add('d-none');
+                        }
+                    }
+                    const error = statusCell.querySelector('[data-col="status-error"]');
+                    if (error) {
+                        if (item.last_error) {
+                            error.textContent = item.last_error;
+                            error.classList.remove('d-none');
+                        } else {
+                            error.textContent = '';
+                            error.classList.add('d-none');
+                        }
+                    }
+                }
+
+                const linkCell = row.querySelector('[data-col="import-link"]');
+                if (linkCell) {
+                    linkCell.innerHTML = item.created_url
+                        ? `<a href="${item.created_url}" target="_blank" rel="noopener noreferrer">Voir la fiche</a>`
+                        : '-';
+                }
+
+                const progressCell = row.querySelector('[data-col="progress"]');
+                if (progressCell) {
+                    const isActive = queue && queue.running && String(queue.current_id) === String(item.id);
+                    const indicator = progressCell.querySelector('.processing-indicator');
+                    if (indicator) {
+                        indicator.classList.toggle('d-none', !isActive);
+                        indicator.classList.toggle('d-inline-flex', isActive);
+                    }
+                }
+            };
+
+            const refreshStatus = async () => {
+                if (!table || !table.dataset.statusUrl) return;
+                const baseStatusUrl = table.dataset.statusUrl;
+                const ids = Array.from(table.querySelectorAll('tbody tr[data-ulule-id]'))
+                    .map((row) => row.dataset.ululeId)
+                    .filter((id) => id && id.length > 0)
+                    .join(',');
+                let statusUrl = baseStatusUrl;
+                if (ids.length > 0) {
+                    const separator = baseStatusUrl.includes('?') ? '&' : '?';
+                    statusUrl = `${baseStatusUrl}${separator}ids=${encodeURIComponent(ids)}`;
+                }
+                try {
+                    const response = await fetch(statusUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    if (!response.ok) return;
+                    const data = await response.json();
+                    if (data.queue) updateQueueState(data.queue);
+                    if (data.summary) updateSummary(data.summary);
+                    if (Array.isArray(data.items)) {
+                        const rowMap = new Map();
+                        table.querySelectorAll('tbody tr[data-ulule-id]').forEach((row) => {
+                            rowMap.set(row.dataset.ululeId, row);
+                        });
+                        data.items.forEach((item) => {
+                            const row = rowMap.get(String(item.id));
+                            if (row) updateRow(row, item, data.queue);
+                        });
+                    }
+                } catch (e) {
+                    // ignore polling errors
+                }
+            };
 
             if (loadMoreBtn) {
                 loadMoreBtn.addEventListener('click', () => {
@@ -283,6 +468,51 @@
                     form.submit();
                 });
             }
+
+            queueButtons.forEach((button) => {
+                button.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    const actionUrl = button.getAttribute('formaction');
+                    if (!actionUrl) {
+                        form.submit();
+                        return;
+                    }
+
+                    if (queueText) {
+                        queueText.textContent = button.dataset.queueAction === 'pause'
+                            ? 'File : mise en pause...'
+                            : 'File : démarrage...';
+                    }
+                    if (queueSpinner) {
+                        queueSpinner.classList.remove('d-none');
+                    }
+
+                    const data = new FormData(form);
+                    button.disabled = true;
+                    try {
+                        const response = await fetch(actionUrl, {
+                            method: 'POST',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            body: data,
+                        });
+                        if (!response.ok) {
+                            if (queueText) {
+                                queueText.textContent = 'File : erreur de démarrage';
+                            }
+                        }
+                        await refreshStatus();
+                    } catch (error) {
+                        if (queueText) {
+                            queueText.textContent = 'File : erreur réseau';
+                        }
+                    } finally {
+                        button.disabled = false;
+                        if (queueSpinner) {
+                            queueSpinner.classList.add('d-none');
+                        }
+                    }
+                });
+            });
             previewButtons.forEach((button) => {
                 button.addEventListener('click', async () => {
                     const ululeId = button.dataset.ululeId;
@@ -455,6 +685,11 @@
                     }
                 });
             });
+
+            if (table && table.dataset.statusUrl) {
+                refreshStatus();
+                setInterval(refreshStatus, 4000);
+            }
         });
     </script>
 {% endblock %}

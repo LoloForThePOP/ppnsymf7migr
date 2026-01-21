@@ -90,6 +90,17 @@ class UrlHarvestRunner
             }
 
             if (is_array($data)) {
+                $entry['ai_payload'] = $this->normalizeAiPayload($data['payload_assessment'] ?? null);
+                if ($enforcePayloadGate && !$this->hasSkipPersist($entry)) {
+                    $aiStatus = $entry['ai_payload']['status'] ?? '';
+                    if ($aiStatus === 'too_thin') {
+                        $entry['skip_persist'] = true;
+                        $reason = trim((string) ($entry['ai_payload']['reason'] ?? ''));
+                        $entry['skip_reason'] = $reason !== '' ? $reason : 'Payload jugé trop faible par l’IA';
+                        $persist = false;
+                    }
+                }
+
                 $sourceUrl = is_string($data['source_url'] ?? null) ? trim($data['source_url']) : '';
                 if ($sourceUrl === '') {
                     $sourceUrl = $finalUrl ?: $url;
@@ -139,6 +150,36 @@ class UrlHarvestRunner
         }
 
         return $entry;
+    }
+
+    /**
+     * @return array{status:string,reason:string}|null
+     */
+    private function normalizeAiPayload(mixed $payload): ?array
+    {
+        if (!is_array($payload)) {
+            return null;
+        }
+
+        $status = strtolower(trim((string) ($payload['status'] ?? '')));
+        if (!in_array($status, ['ok', 'weak', 'too_thin'], true)) {
+            return null;
+        }
+
+        $reason = trim((string) ($payload['reason'] ?? ''));
+
+        return [
+            'status' => $status,
+            'reason' => $reason,
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $entry
+     */
+    private function hasSkipPersist(array $entry): bool
+    {
+        return !empty($entry['skip_persist']);
     }
 
     private function askModel(string $prompt, string $userContent, string $model): string

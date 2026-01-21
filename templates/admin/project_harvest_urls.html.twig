@@ -156,6 +156,7 @@
                                             <td data-col="status"><span class="badge bg-{{ badgeClass }}">{{ status }}</span></td>
                                             <td class="small" data-col="payload">
                                                 {% set payloadStatus = entry.payload_status|default('') %}
+                                                {% set aiStatus = entry.ai_payload_status|default('') %}
                                                 {% if payloadStatus %}
                                                     {% set payloadBadge = payloadStatus == 'ok' ? 'success' : (payloadStatus == 'weak' ? 'warning text-dark' : 'danger') %}
                                                     <span class="badge bg-{{ payloadBadge }}">{{ payloadStatus }}</span>
@@ -164,7 +165,17 @@
                                                         {{ entry.payload_links|default('0') }} liens,
                                                         {{ entry.payload_images|default('0') }} images
                                                     </div>
-                                                {% else %}
+                                                {% endif %}
+                                                {% if aiStatus %}
+                                                    {% set aiBadge = aiStatus == 'ok' ? 'success' : (aiStatus == 'weak' ? 'warning text-dark' : 'danger') %}
+                                                    <div class="{{ payloadStatus ? 'mt-1' : '' }}">
+                                                        <span class="badge bg-{{ aiBadge }}">AI {{ aiStatus }}</span>
+                                                        {% if entry.ai_payload_reason is defined and entry.ai_payload_reason %}
+                                                            <div class="text-muted small">{{ entry.ai_payload_reason }}</div>
+                                                        {% endif %}
+                                                    </div>
+                                                {% endif %}
+                                                {% if not payloadStatus and not aiStatus %}
                                                     -
                                                 {% endif %}
                                             </td>
@@ -444,6 +455,15 @@
                 return 'secondary';
             };
 
+            const escapeHtml = (value) => {
+                return String(value)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            };
+
             const payloadClass = (status) => {
                 if (status === 'ok') return 'success';
                 if (status === 'weak') return 'warning text-dark';
@@ -511,12 +531,19 @@
                 const payloadCell = row.querySelector('[data-col="payload"]');
                 if (payloadCell) {
                     const payloadStatus = entry.payload_status || '';
-                    if (!payloadStatus) {
-                        payloadCell.textContent = '-';
-                    } else {
-                        payloadCell.innerHTML = '<span class="badge bg-' + payloadClass(payloadStatus) + '">' + payloadStatus + '</span>'
-                            + '<div class="text-muted small">' + (entry.payload_text_chars || 0) + ' car., ' + (entry.payload_links || 0) + ' liens, ' + (entry.payload_images || 0) + ' images</div>';
+                    const aiStatus = entry.ai_payload_status || '';
+                    const aiReason = entry.ai_payload_reason || '';
+                    const parts = [];
+                    if (payloadStatus) {
+                        parts.push('<span class="badge bg-' + payloadClass(payloadStatus) + '">' + payloadStatus + '</span>'
+                            + '<div class="text-muted small">' + (entry.payload_text_chars || 0) + ' car., ' + (entry.payload_links || 0) + ' liens, ' + (entry.payload_images || 0) + ' images</div>');
                     }
+                    if (aiStatus) {
+                        const aiBadge = payloadClass(aiStatus);
+                        const reasonHtml = aiReason ? '<div class="text-muted small">' + escapeHtml(aiReason) + '</div>' : '';
+                        parts.push('<div class="' + (payloadStatus ? 'mt-1' : '') + '"><span class="badge bg-' + aiBadge + '">AI ' + aiStatus + '</span>' + reasonHtml + '</div>');
+                    }
+                    payloadCell.innerHTML = parts.length ? parts.join('') : '-';
                 }
 
                 const lastRunCell = row.querySelector('[data-col="last-run"]');

@@ -1,80 +1,304 @@
 <?php
 
-namespace App\Controller\Admin;
+namespace App\Service;
 
 use App\Entity\PPBase;
 use App\Entity\UluleProjectCatalog;
+use App\Entity\User;
 use App\Repository\UluleProjectCatalogRepository;
-use App\Service\UluleImportService;
-use App\Service\UluleApiClient;
-use OpenAI;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use App\Security\Voter\ScraperAccessVoter;
+use OpenAI;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-#[IsGranted(ScraperAccessVoter::ATTRIBUTE)]
-class UluleImportController extends AbstractController
+final class UluleImportService
 {
     private const MAX_SECONDARY_IMAGES = 5;
     private const DEFAULT_PROMPT_EXTRA = 'Ce complément de prompt définit des instructions hautement prioritaires par rapport aux précédentes : Pour chaque image remplit le champ licence avec "Copyright Ulule.fr". N\'inclue pas la localisation (ville/commune/région/pays) dans les keywords, sauf si la localisation fait partie du titre du projet. Pour goal, évite toute sémantique de collecte/soutien/financement (ex: "soutenir", "collecter", "financer") et formule l\'objectif comme la réalisation concrète du projet (ex: "Produire…", "Réaliser…", "Créer…" ou autre tournure).';
 
-    #[Route('/admin/ulule/import/project/{ululeId}', name: 'admin_ulule_import_project', methods: ['POST'])]
-    public function importProject(
-        int $ululeId,
-        Request $request,
-        UluleImportService $importService
-    ): Response {
-        $isAjax = $request->isXmlHttpRequest();
-        $redirectUrl = $request->headers->get('referer') ?? $this->generateUrl('admin_ulule_catalog');
-        $respond = function (
-            string $status,
-            string $message,
-            array $extra = [],
-            int $httpStatus = Response::HTTP_OK
-        ) use ($isAjax, $redirectUrl) {
-            if ($isAjax) {
-                return $this->json(array_merge([
-                    'status' => $status,
-                    'message' => $message,
-                ], $extra), $httpStatus);
+    public function __construct(
+        private readonly UluleApiClient $ululeApiClient,
+        private readonly NormalizedProjectPersister $persister,
+        private readonly ScraperUserResolver $scraperUserResolver,
+        private readonly EntityManagerInterface $em,
+        private readonly UluleProjectCatalogRepository $catalogRepository,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly string $appNormalizeTextPromptPath,
+        private readonly string $appScraperModel
+    ) {
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     * @return array{status:string,message:string,reason?:string,created_url?:string,created_string_id?:string,http_status:int}
+     */
+    public function importProject(int $ululeId, array $options): array
+    {
+        $opts = $this->normalizeOptions($options);
+
+        $creator = $opts['creator'];
+        if (!$creator instanceof User) {
+            $creator = $this->scraperUserResolver->resolve();
+        }
+        if (!$creator) {
+            return [
+                'status' => 'error',
+                'message' => sprintf('Compte "%s" introuvable ou multiple. Import annulé.', $this->scraperUserResolver->getRole()),
+                'reason' => 'creator_missing',
+                'http_status' => 400,
+            ];
+        }
+
+        $catalogEntry = $this->catalogRepository->findOneByUluleId($ululeId);
+        if (!$catalogEntry) {
+            $catalogEntry = new UluleProjectCatalog($ululeId);
+            $this->em->persist($catalogEntry);
+        }
+
+        try {
+            $detail = $this->ululeApiClient->getProject($ululeId, [
+                'lang' => $opts['lang'],
+                'extra_fields' => 'links',
+            ]);
+        } catch (\Throwable $e) {
+            $catalogEntry->setImportStatus(UluleProjectCatalog::STATUS_FAILED);
+            $catalogEntry->setImportStatusComment('detail_fetch_failed');
+            $catalogEntry->setLastError($e->getMessage());
+            $this->em->flush();
+
+            return [
+                'status' => 'error',
+                'message' => sprintf('Erreur Ulule: %s', $e->getMessage()),
+                'reason' => 'detail_fetch_failed',
+                'http_status' => 400,
+            ];
+        }
+
+        if (!$this->isProjectType($detail)) {
+            $catalogEntry->setImportStatus(UluleProjectCatalog::STATUS_SKIPPED);
+            $catalogEntry->setImportStatusComment('type_non_project');
+            $this->em->flush();
+            return [
+                'status' => 'skipped',
+                'message' => 'Projet Ulule ignoré (type non project).',
+                'reason' => 'type_non_project',
+                'http_status' => 200,
+            ];
+        }
+
+        if ($opts['exclude_funded'] && ($detail['goal_raised'] ?? false)) {
+            $catalogEntry->setImportStatus(UluleProjectCatalog::STATUS_SKIPPED);
+            $catalogEntry->setImportStatusComment('already_funded');
+            $this->em->flush();
+            return [
+                'status' => 'skipped',
+                'message' => 'Projet déjà financé, import ignoré.',
+                'reason' => 'already_funded',
+                'http_status' => 200,
+            ];
+        }
+
+        if (($detail['is_cancelled'] ?? false) || !($detail['is_online'] ?? true)) {
+            $catalogEntry->setImportStatus(UluleProjectCatalog::STATUS_SKIPPED);
+            $catalogEntry->setImportStatusComment('offline_or_cancelled');
+            $this->em->flush();
+            return [
+                'status' => 'skipped',
+                'message' => 'Projet hors ligne ou annulé, import ignoré.',
+                'reason' => 'offline_or_cancelled',
+                'http_status' => 200,
+            ];
+        }
+
+        $fallbackLang = is_string($detail['lang'] ?? null) ? $detail['lang'] : null;
+        $description = $this->extractDescription($detail, $opts['lang'], $fallbackLang);
+        $descriptionLength = $this->plainTextLength($description);
+
+        $sourceUrl = $this->extractSourceUrl($detail, $detail);
+        if ($sourceUrl) {
+            $existing = $this->findPresentationBySourceUrl($sourceUrl);
+            if ($existing) {
+                $catalogEntry->setImportStatus(UluleProjectCatalog::STATUS_IMPORTED);
+                $catalogEntry->setImportStatusComment('source_url_exists');
+                $catalogEntry->setSourceUrl($sourceUrl);
+                $catalogEntry->setImportedStringId($existing->getStringId());
+                $this->em->flush();
+                $createdUrl = $this->urlGenerator->generate(
+                    'edit_show_project_presentation',
+                    ['stringId' => $existing->getStringId()],
+                    UrlGeneratorInterface::ABSOLUTE_PATH
+                );
+
+                return [
+                    'status' => 'duplicate',
+                    'message' => 'Projet déjà importé (source URL existante).',
+                    'reason' => 'source_url_exists',
+                    'created_url' => $createdUrl,
+                    'created_string_id' => $existing->getStringId(),
+                    'http_status' => 200,
+                ];
             }
+        }
 
-            if ($message !== '') {
-                $level = match ($status) {
-                    'imported' => 'success',
-                    'duplicate' => 'info',
-                    'skipped' => 'warning',
-                    default => 'danger',
-                };
-                $this->addFlash($level, $message);
+        if ($opts['min_description_length'] > 0 && $descriptionLength < $opts['min_description_length']) {
+            $catalogEntry->setImportStatus(UluleProjectCatalog::STATUS_SKIPPED);
+            $catalogEntry->setImportStatusComment('description_too_short');
+            $catalogEntry->setDescriptionLength($descriptionLength);
+            $this->em->flush();
+            return [
+                'status' => 'skipped',
+                'message' => 'Description trop courte, import ignoré.',
+                'reason' => 'description_too_short',
+                'http_status' => 200,
+            ];
+        }
+
+        $catalogEntry->setName($this->extractI18nString($detail['name'] ?? null, $opts['lang'], $fallbackLang));
+        $catalogEntry->setSubtitle($this->extractI18nString($detail['subtitle'] ?? null, $opts['lang'], $fallbackLang));
+        $catalogEntry->setSlug(is_string($detail['slug'] ?? null) ? $detail['slug'] : null);
+        $catalogEntry->setSourceUrl($sourceUrl);
+        $catalogEntry->setLang(is_string($detail['lang'] ?? null) ? $detail['lang'] : $opts['lang']);
+        $catalogEntry->setCountry(is_string($detail['country'] ?? null) ? $detail['country'] : $opts['country']);
+        $catalogEntry->setType(
+            is_string($detail['type'] ?? null)
+                ? $detail['type']
+                : (is_int($detail['type'] ?? null) ? (string) $detail['type'] : null)
+        );
+        $catalogEntry->setGoalRaised(isset($detail['goal_raised']) ? (bool) $detail['goal_raised'] : null);
+        $catalogEntry->setIsOnline(isset($detail['is_online']) ? (bool) $detail['is_online'] : null);
+        $catalogEntry->setIsCancelled(isset($detail['is_cancelled']) ? (bool) $detail['is_cancelled'] : null);
+        $catalogEntry->setDescriptionLength($descriptionLength);
+        $catalogEntry->setUluleCreatedAt($this->extractUluleCreatedAt($detail));
+        $catalogEntry->setLastSeenAt(new \DateTimeImmutable());
+        $catalogEntry->setLastError(null);
+
+        $secondaryImages = [];
+        if ($opts['include_secondary_images']) {
+            try {
+                $secondaryImages = $this->fetchSecondaryImages($this->ululeApiClient, $ululeId, $opts['lang']);
+            } catch (\Throwable $e) {
+                $catalogEntry->setLastError($e->getMessage());
             }
+        }
 
-            return $this->redirect($redirectUrl);
-        };
+        $structuredText = $this->buildStructuredText(
+            $detail,
+            $detail,
+            $opts['lang'],
+            $fallbackLang,
+            $sourceUrl,
+            $description,
+            $secondaryImages,
+            $opts['include_video']
+        );
 
-        $lang = trim((string) $request->request->get('lang', 'fr'));
-        $country = trim((string) $request->request->get('country', 'FR'));
-        $minDescriptionLength = max(0, (int) $request->request->get('min_description_length', 500));
-        $excludeFunded = $request->request->has('exclude_funded')
-            ? (bool) $request->request->get('exclude_funded')
-            : false;
-        $includeVideo = $request->request->has('include_video')
-            ? (bool) $request->request->get('include_video')
-            : true;
-        $includeSecondaryImages = $request->request->has('include_secondary_images')
-            ? (bool) $request->request->get('include_secondary_images')
-            : true;
-        $promptExtra = trim((string) $request->request->get('prompt_extra', ''));
+        $prompt = file_get_contents($this->appNormalizeTextPromptPath);
+        if ($prompt === false) {
+            $catalogEntry->setImportStatus(UluleProjectCatalog::STATUS_FAILED);
+            $catalogEntry->setImportStatusComment('prompt_missing');
+            $this->em->flush();
+            return [
+                'status' => 'error',
+                'message' => 'Prompt introuvable.',
+                'reason' => 'prompt_missing',
+                'http_status' => 500,
+            ];
+        }
+
+        if ($opts['prompt_extra'] !== '') {
+            $prompt = rtrim($prompt) . "\n\n" . $opts['prompt_extra'];
+        }
+
+        try {
+            $client = OpenAI::client($_ENV['OPENAI_API_KEY'] ?? '');
+            $resp = $client->chat()->create([
+                'model' => $this->appScraperModel,
+                'temperature' => 0.3,
+                'messages' => [
+                    ['role' => 'system', 'content' => $prompt],
+                    ['role' => 'user', 'content' => $structuredText],
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            $catalogEntry->setImportStatus(UluleProjectCatalog::STATUS_FAILED);
+            $catalogEntry->setImportStatusComment('openai_failed');
+            $catalogEntry->setLastError($e->getMessage());
+            $this->em->flush();
+            return [
+                'status' => 'error',
+                'message' => sprintf('Erreur OpenAI: %s', $e->getMessage()),
+                'reason' => 'openai_failed',
+                'http_status' => 400,
+            ];
+        }
+
+        $content = $resp->choices[0]->message->content ?? '';
+        if (!$content) {
+            $catalogEntry->setImportStatus(UluleProjectCatalog::STATUS_FAILED);
+            $catalogEntry->setImportStatusComment('empty_response');
+            $this->em->flush();
+            return [
+                'status' => 'error',
+                'message' => 'Réponse OpenAI vide.',
+                'reason' => 'empty_response',
+                'http_status' => 400,
+            ];
+        }
+
+        try {
+            $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+            $data = $this->applyUluleMetadata($detail, $data);
+            $created = $this->persister->persist($data, $creator);
+            $catalogEntry->setImportStatus(UluleProjectCatalog::STATUS_IMPORTED);
+            $catalogEntry->setImportStatusComment(null);
+            $catalogEntry->setImportedStringId($created->getStringId());
+            $catalogEntry->setLastImportedAt(new \DateTimeImmutable());
+            $catalogEntry->setLastError(null);
+            $this->em->flush();
+            $createdUrl = $this->urlGenerator->generate(
+                'edit_show_project_presentation',
+                ['stringId' => $created->getStringId()],
+                UrlGeneratorInterface::ABSOLUTE_PATH
+            );
+
+            return [
+                'status' => 'imported',
+                'message' => 'Projet importé.',
+                'created_url' => $createdUrl,
+                'created_string_id' => $created->getStringId(),
+                'http_status' => 200,
+            ];
+        } catch (\Throwable $e) {
+            $catalogEntry->setImportStatus(UluleProjectCatalog::STATUS_FAILED);
+            $catalogEntry->setImportStatusComment('persist_failed');
+            $catalogEntry->setLastError($e->getMessage());
+            $this->em->flush();
+            return [
+                'status' => 'error',
+                'message' => sprintf('Erreur persistance: %s', $e->getMessage()),
+                'reason' => 'persist_failed',
+                'http_status' => 400,
+            ];
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     * @return array<string, mixed>
+     */
+    private function normalizeOptions(array $options): array
+    {
+        $lang = trim((string) ($options['lang'] ?? 'fr'));
+        $country = trim((string) ($options['country'] ?? 'FR'));
+        $minDescriptionLength = max(0, (int) ($options['min_description_length'] ?? 500));
+        $excludeFunded = (bool) ($options['exclude_funded'] ?? false);
+        $includeVideo = array_key_exists('include_video', $options) ? (bool) $options['include_video'] : true;
+        $includeSecondaryImages = array_key_exists('include_secondary_images', $options) ? (bool) $options['include_secondary_images'] : true;
+        $promptExtra = trim((string) ($options['prompt_extra'] ?? ''));
         if ($promptExtra === '') {
             $promptExtra = self::DEFAULT_PROMPT_EXTRA;
         }
 
-        $result = $importService->importProject($ululeId, [
+        return [
             'lang' => $lang,
             'country' => $country,
             'min_description_length' => $minDescriptionLength,
@@ -82,17 +306,8 @@ class UluleImportController extends AbstractController
             'include_video' => $includeVideo,
             'include_secondary_images' => $includeSecondaryImages,
             'prompt_extra' => $promptExtra,
-        ]);
-
-        $extra = $result;
-        unset($extra['status'], $extra['message'], $extra['http_status']);
-
-        return $respond(
-            $result['status'] ?? 'error',
-            $result['message'] ?? '',
-            $extra,
-            $result['http_status'] ?? Response::HTTP_OK
-        );
+            'creator' => $options['creator'] ?? null,
+        ];
     }
 
     private function parseUluleDate(mixed $value): ?\DateTimeImmutable
@@ -186,156 +401,6 @@ class UluleImportController extends AbstractController
         }
 
         return null;
-    }
-
-    #[Route('/admin/ulule/import/project/{ululeId}/preview', name: 'admin_ulule_import_project_preview', methods: ['POST'])]
-    public function previewProject(
-        int $ululeId,
-        Request $request,
-        UluleApiClient $ululeApiClient,
-        EntityManagerInterface $em,
-        string $appNormalizeTextPromptPath,
-        string $appScraperModel
-    ): Response {
-        $lang = trim((string) $request->request->get('lang', 'fr'));
-        $country = trim((string) $request->request->get('country', 'FR'));
-        $minDescriptionLength = max(0, (int) $request->request->get('min_description_length', 500));
-        $excludeFunded = $request->request->has('exclude_funded')
-            ? (bool) $request->request->get('exclude_funded')
-            : false;
-        $includeVideo = $request->request->has('include_video')
-            ? (bool) $request->request->get('include_video')
-            : true;
-        $includeSecondaryImages = $request->request->has('include_secondary_images')
-            ? (bool) $request->request->get('include_secondary_images')
-            : true;
-        $promptExtra = trim((string) $request->request->get('prompt_extra', ''));
-        if ($promptExtra === '') {
-            $promptExtra = self::DEFAULT_PROMPT_EXTRA;
-        }
-
-        $result = [
-            'id' => $ululeId,
-            'status' => null,
-            'reason' => null,
-            'error' => null,
-        ];
-
-        try {
-            $detail = $ululeApiClient->getProject($ululeId, [
-                'lang' => $lang,
-                'extra_fields' => 'links',
-            ]);
-        } catch (\Throwable $e) {
-            $result['status'] = 'error';
-            $result['reason'] = 'detail_fetch_failed';
-            $result['error'] = $e->getMessage();
-            return $this->json($result, Response::HTTP_BAD_REQUEST);
-        }
-
-        $fallbackLang = is_string($detail['lang'] ?? null) ? $detail['lang'] : null;
-        $result['name'] = $this->extractI18nString($detail['name'] ?? null, $lang, $fallbackLang);
-        $result['url'] = $this->extractSourceUrl($detail, $detail);
-        $result['source_url'] = $result['url'];
-
-        if (!$this->isProjectType($detail)) {
-            $result['status'] = 'skipped';
-            $result['reason'] = 'type_non_project';
-            return $this->json($result);
-        }
-
-        if ($excludeFunded && ($detail['goal_raised'] ?? false)) {
-            $result['status'] = 'skipped';
-            $result['reason'] = 'already_funded';
-            return $this->json($result);
-        }
-
-        if (($detail['is_cancelled'] ?? false) || !($detail['is_online'] ?? true)) {
-            $result['status'] = 'skipped';
-            $result['reason'] = 'offline_or_cancelled';
-            return $this->json($result);
-        }
-
-        $description = $this->extractDescription($detail, $lang, $fallbackLang);
-        $descriptionLength = $this->plainTextLength($description);
-        $result['description_length'] = $descriptionLength;
-
-        if (!empty($result['source_url']) && $this->isDuplicateSourceUrl($em, (string) $result['source_url'])) {
-            $result['status'] = 'duplicate';
-            $result['reason'] = 'source_url_exists';
-            return $this->json($result);
-        }
-
-        $secondaryImages = [];
-        if ($includeSecondaryImages) {
-            try {
-                $secondaryImages = $this->fetchSecondaryImages($ululeApiClient, $ululeId, $lang);
-            } catch (\Throwable $e) {
-                $result['secondary_images_error'] = $e->getMessage();
-            }
-        }
-
-        $structuredText = $this->buildStructuredText(
-            $detail,
-            $detail,
-            $lang,
-            $fallbackLang,
-            $result['source_url'],
-            $description,
-            $secondaryImages,
-            $includeVideo
-        );
-        $result['input'] = $structuredText;
-
-        if ($minDescriptionLength > 0 && $descriptionLength < $minDescriptionLength) {
-            $result['status'] = 'insufficient';
-            $result['reason'] = 'description_too_short';
-            $result['description_min'] = $minDescriptionLength;
-            return $this->json($result);
-        }
-
-        $prompt = file_get_contents($appNormalizeTextPromptPath);
-        if ($prompt === false) {
-            $result['status'] = 'error';
-            $result['reason'] = 'prompt_missing';
-            $result['error'] = 'Prompt introuvable.';
-            return $this->json($result, Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
-        if ($promptExtra !== '') {
-            $prompt = rtrim($prompt) . "\n\n" . $promptExtra;
-        }
-
-        try {
-            $client = OpenAI::client($_ENV['OPENAI_API_KEY'] ?? '');
-            $resp = $client->chat()->create([
-                'model' => $appScraperModel,
-                'temperature' => 0.3,
-                'messages' => [
-                    ['role' => 'system', 'content' => $prompt],
-                    ['role' => 'user', 'content' => $structuredText],
-                ],
-            ]);
-        } catch (\Throwable $e) {
-            $result['status'] = 'error';
-            $result['reason'] = 'openai_failed';
-            $result['error'] = $e->getMessage();
-            return $this->json($result, Response::HTTP_BAD_REQUEST);
-        }
-
-        $content = $resp->choices[0]->message->content ?? '';
-        if (!$content) {
-            $result['status'] = 'error';
-            $result['reason'] = 'empty_response';
-            $result['error'] = 'Réponse OpenAI vide.';
-            return $this->json($result, Response::HTTP_BAD_REQUEST);
-        }
-
-        $result['raw'] = $content;
-        $result['enriched'] = $this->buildEnrichedPayload($detail, $content);
-        $result['status'] = 'normalized';
-
-        return $this->json($result);
     }
 
     /**
@@ -439,22 +504,9 @@ class UluleImportController extends AbstractController
         return null;
     }
 
-    private function isDuplicateSourceUrl(EntityManagerInterface $em, string $sourceUrl): bool
+    private function findPresentationBySourceUrl(string $sourceUrl): ?PPBase
     {
-        $existing = $em->getRepository(PPBase::class)
-            ->createQueryBuilder('p')
-            ->where('p.ingestion.sourceUrl = :url')
-            ->setParameter('url', $sourceUrl)
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
-
-        return $existing !== null;
-    }
-
-    private function findPresentationBySourceUrl(EntityManagerInterface $em, string $sourceUrl): ?PPBase
-    {
-        return $em->getRepository(PPBase::class)
+        return $this->em->getRepository(PPBase::class)
             ->createQueryBuilder('p')
             ->where('p.ingestion.sourceUrl = :url')
             ->setParameter('url', $sourceUrl)
@@ -720,24 +772,6 @@ class UluleImportController extends AbstractController
     {
         $data = $this->applyFundingMetadata($detail, $data);
         return $this->applyUluleEnrichment($detail, $data);
-    }
-
-    /**
-     * @param array<string, mixed> $detail
-     */
-    private function buildEnrichedPayload(array $detail, string $content): ?array
-    {
-        try {
-            $decoded = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\Throwable) {
-            return null;
-        }
-
-        if (!is_array($decoded)) {
-            return null;
-        }
-
-        return $this->applyUluleMetadata($detail, $decoded);
     }
 
     private function compactLocationLabel(mixed $value): ?string
@@ -1173,5 +1207,4 @@ class UluleImportController extends AbstractController
 
         return null;
     }
-
 }
