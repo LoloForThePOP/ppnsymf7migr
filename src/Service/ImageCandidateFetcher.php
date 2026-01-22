@@ -74,8 +74,8 @@ class ImageCandidateFetcher
             }
         }
 
-        // <img> tags
-        foreach ($crawler->filter('img[src]') as $node) {
+        // <img> tags (src + lazy + srcset, including srcset-only)
+        foreach ($crawler->filter('img') as $node) {
             /** @var \DOMElement $node */
             $src = $node->getAttribute('src');
             $url = $this->resolveUrl($src, $base);
@@ -83,12 +83,76 @@ class ImageCandidateFetcher
                 $seen[$url] = true;
                 $candidates[] = ['url' => $url, 'source' => 'img'];
             }
+
+            $dataSrc = $node->getAttribute('data-src') ?: $node->getAttribute('data-lazy-src') ?: $node->getAttribute('data-original');
+            if ($dataSrc) {
+                $dataUrl = $this->resolveUrl($dataSrc, $base);
+                if ($dataUrl && (!$enforceSameDomain || $this->isSameDomain($dataUrl, $baseHost)) && !isset($seen[$dataUrl])) {
+                    $seen[$dataUrl] = true;
+                    $candidates[] = ['url' => $dataUrl, 'source' => 'img:data'];
+                }
+            }
+
+            $srcset = $node->getAttribute('srcset') ?: $node->getAttribute('data-srcset');
+            if ($srcset) {
+                $this->extractFromSrcset($srcset, $base, $baseHost, $enforceSameDomain, $seen, $candidates, 'img:srcset');
+            }
+
             if (count($candidates) >= self::MAX_CANDIDATES) {
                 break;
             }
         }
 
+        if (count($candidates) < self::MAX_CANDIDATES) {
+            // <source> inside <picture>
+            foreach ($crawler->filter('source[srcset]') as $node) {
+                /** @var \DOMElement $node */
+                $srcset = $node->getAttribute('srcset');
+                if ($srcset) {
+                    $this->extractFromSrcset($srcset, $base, $baseHost, $enforceSameDomain, $seen, $candidates, 'source:srcset');
+                }
+                if (count($candidates) >= self::MAX_CANDIDATES) {
+                    break;
+                }
+            }
+        }
+
         return array_slice($candidates, 0, self::MAX_CANDIDATES);
+    }
+
+    /**
+     * @param array<string,mixed>|false $base
+     * @param array<string, bool> $seen
+     * @param array<int, array{url:string, source:string}> $candidates
+     */
+    private function extractFromSrcset(
+        string $srcset,
+        array|false $base,
+        ?string $baseHost,
+        bool $enforceSameDomain,
+        array &$seen,
+        array &$candidates,
+        string $sourceLabel
+    ): void {
+        foreach (explode(',', $srcset) as $entry) {
+            $entry = trim($entry);
+            if ($entry === '') {
+                continue;
+            }
+            $parts = preg_split('/\s+/', $entry);
+            $candidate = $parts[0] ?? '';
+            if ($candidate === '') {
+                continue;
+            }
+            $url = $this->resolveUrl($candidate, $base);
+            if ($url && (!$enforceSameDomain || $this->isSameDomain($url, $baseHost)) && !isset($seen[$url])) {
+                $seen[$url] = true;
+                $candidates[] = ['url' => $url, 'source' => $sourceLabel];
+                if (count($candidates) >= self::MAX_CANDIDATES) {
+                    return;
+                }
+            }
+        }
     }
 
     private function fetchHtml(string $url): ?string

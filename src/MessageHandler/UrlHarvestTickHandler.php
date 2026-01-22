@@ -6,6 +6,7 @@ use App\Message\UrlHarvestTickMessage;
 use App\Service\UrlHarvestListService;
 use App\Service\UrlHarvestResultStore;
 use App\Service\UrlHarvestRunner;
+use App\Service\WorkerHeartbeatService;
 use App\Service\ScraperUserResolver;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -19,6 +20,7 @@ final class UrlHarvestTickHandler
         private readonly UrlHarvestRunner $runner,
         private readonly UrlHarvestResultStore $resultStore,
         private readonly ScraperUserResolver $scraperUserResolver,
+        private readonly WorkerHeartbeatService $workerHeartbeat,
         private readonly MessageBusInterface $bus,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly string $appNormalizeHtmlPromptPath,
@@ -28,6 +30,7 @@ final class UrlHarvestTickHandler
 
     public function __invoke(UrlHarvestTickMessage $message): void
     {
+        $this->workerHeartbeat->touch('url_harvest');
         $source = $message->getSource();
         $queueState = $this->listService->readQueueState($source);
         if ($queueState['paused']) {

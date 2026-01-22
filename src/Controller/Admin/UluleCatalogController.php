@@ -6,6 +6,7 @@ use App\Entity\PPBase;
 use App\Entity\UluleProjectCatalog;
 use App\Repository\UluleProjectCatalogRepository;
 use App\Service\UluleApiClient;
+use App\Service\WorkerHeartbeatService;
 use App\Security\Voter\ScraperAccessVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,7 +27,8 @@ class UluleCatalogController extends AbstractController
         Request $request,
         UluleProjectCatalogRepository $catalogRepository,
         \App\Service\UluleCatalogRefresher $catalogRefresher,
-        \App\Service\UluleQueueStateService $queueStateService
+        \App\Service\UluleQueueStateService $queueStateService,
+        WorkerHeartbeatService $workerHeartbeat
     ): Response {
         $input = $request->isMethod('POST') ? $request->request : $request->query;
         $lang = trim((string) $input->get('lang', 'fr'));
@@ -119,6 +121,8 @@ class UluleCatalogController extends AbstractController
             'lastImportedLabels' => $lastImportedLabels,
             'ululeCreatedLabels' => $ululeCreatedLabels,
             'ululeQueueState' => $queueStateService->readState()['queue'],
+            'workerStatus' => $workerHeartbeat->getStatus(),
+            'workerCommand' => 'php bin/console messenger:consume async -vv',
         ]);
     }
 

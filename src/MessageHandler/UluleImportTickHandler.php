@@ -7,6 +7,7 @@ use App\Message\UluleImportTickMessage;
 use App\Repository\UluleProjectCatalogRepository;
 use App\Service\UluleImportService;
 use App\Service\UluleQueueStateService;
+use App\Service\WorkerHeartbeatService;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -17,12 +18,14 @@ final class UluleImportTickHandler
         private readonly UluleQueueStateService $queueStateService,
         private readonly UluleProjectCatalogRepository $catalogRepository,
         private readonly UluleImportService $importService,
+        private readonly WorkerHeartbeatService $workerHeartbeat,
         private readonly MessageBusInterface $bus,
     ) {
     }
 
     public function __invoke(UluleImportTickMessage $message): void
     {
+        $this->workerHeartbeat->touch('ulule_import');
         $state = $this->queueStateService->readState();
         $queue = $state['queue'];
         $filters = $state['filters'];

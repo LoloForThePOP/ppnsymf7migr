@@ -110,6 +110,12 @@
                                 </span>
                                 <span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true" id="ulule-queue-spinner"></span>
                             </div>
+                            <div class="mt-2">
+                                {% include 'admin/_worker_status.html.twig' with {
+                                    workerStatus: workerStatus,
+                                    workerCommand: workerCommand
+                                } %}
+                            </div>
                         </div>
                         <div class="d-flex flex-wrap gap-2 align-items-center">
                             <div class="input-group input-group-sm" style="max-width: 170px;">
@@ -319,6 +325,10 @@
             const queueRunBtn = document.getElementById('ulule-queue-run');
             const queuePauseBtn = document.getElementById('ulule-queue-pause');
             const queueResumeBtn = document.getElementById('ulule-queue-resume');
+            const workerBadge = document.querySelector('.js-worker-badge');
+            const workerText = document.querySelector('.js-worker-text');
+            const workerCopyBtn = document.querySelector('.js-copy-worker-command');
+            const workerCopyFeedback = document.querySelector('.js-copy-worker-feedback');
             const loadMoreBtn = document.getElementById('ulule-load-more');
             const previewButtons = document.querySelectorAll('.js-ulule-preview');
             const importButtons = document.querySelectorAll('.js-ulule-import-open');
@@ -364,6 +374,48 @@
                     const parts = badge.textContent.split(' ');
                     parts[parts.length - 1] = summary[key];
                     badge.textContent = parts.join(' ');
+                });
+            };
+
+            const updateWorkerStatus = (worker) => {
+                if (!worker || !workerBadge || !workerText) return;
+                const active = Boolean(worker.active);
+                workerBadge.classList.toggle('bg-success', active);
+                workerBadge.classList.toggle('bg-secondary', !active);
+                workerBadge.textContent = active ? 'Worker actif' : 'Worker inactif';
+                workerBadge.dataset.workerActive = active ? '1' : '0';
+                workerText.textContent = `Derniere activite : ${worker.last_seen_label || 'jamais'}`;
+            };
+
+            const bindWorkerCopy = () => {
+                if (!workerCopyBtn) return;
+                workerCopyBtn.addEventListener('click', async () => {
+                    const command = workerCopyBtn.dataset.command || '';
+                    if (!command) return;
+                    let copied = false;
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        try {
+                            await navigator.clipboard.writeText(command);
+                            copied = true;
+                        } catch (e) {
+                            copied = false;
+                        }
+                    }
+                    if (!copied) {
+                        const temp = document.createElement('textarea');
+                        temp.value = command;
+                        temp.setAttribute('readonly', 'readonly');
+                        temp.style.position = 'absolute';
+                        temp.style.left = '-9999px';
+                        document.body.appendChild(temp);
+                        temp.select();
+                        copied = document.execCommand('copy');
+                        document.body.removeChild(temp);
+                    }
+                    if (copied && workerCopyFeedback) {
+                        workerCopyFeedback.classList.remove('d-none');
+                        window.setTimeout(() => workerCopyFeedback.classList.add('d-none'), 1200);
+                    }
                 });
             };
 
@@ -439,6 +491,7 @@
                     const data = await response.json();
                     if (data.queue) updateQueueState(data.queue);
                     if (data.summary) updateSummary(data.summary);
+                    if (data.worker) updateWorkerStatus(data.worker);
                     if (Array.isArray(data.items)) {
                         const rowMap = new Map();
                         table.querySelectorAll('tbody tr[data-ulule-id]').forEach((row) => {
@@ -687,6 +740,7 @@
             });
 
             if (table && table.dataset.statusUrl) {
+                bindWorkerCopy();
                 refreshStatus();
                 setInterval(refreshStatus, 4000);
             }

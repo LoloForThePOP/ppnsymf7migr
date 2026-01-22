@@ -6,6 +6,7 @@ use App\Service\ScraperUserResolver;
 use App\Service\UrlHarvestListService;
 use App\Service\UrlHarvestRunner;
 use App\Service\UrlHarvestResultStore;
+use App\Service\WorkerHeartbeatService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +29,7 @@ final class UrlHarvestController extends AbstractController
         UrlHarvestRunner $runner,
         UrlHarvestResultStore $resultStore,
         MessageBusInterface $bus,
+        WorkerHeartbeatService $workerHeartbeat,
         string $appNormalizeHtmlPromptPath,
         string $appScraperModel
     ): Response {
@@ -171,12 +173,19 @@ final class UrlHarvestController extends AbstractController
             'sourceBatchSize' => $batchSize,
             'persistSource' => $persistSource,
             'queueState' => $queueState,
+            'workerStatus' => $workerHeartbeat->getStatus(),
+            'workerCommand' => 'php bin/console messenger:consume async -vv',
         ]);
     }
 
     #[Route('/status', name: 'admin_project_harvest_urls_status', methods: ['GET', 'POST'])]
     #[IsGranted(ScraperAccessVoter::ATTRIBUTE)]
-    public function status(Request $request, UrlHarvestListService $listService, UrlHarvestResultStore $resultStore): JsonResponse
+    public function status(
+        Request $request,
+        UrlHarvestListService $listService,
+        UrlHarvestResultStore $resultStore,
+        WorkerHeartbeatService $workerHeartbeat
+    ): JsonResponse
     {
         $source = trim((string) $request->query->get('source', ''));
         if ($source === '') {
@@ -225,6 +234,7 @@ final class UrlHarvestController extends AbstractController
             'entries' => $entries,
             'summary' => $this->summarizeEntries($loaded['entries']),
             'queue' => $queueState,
+            'worker' => $workerHeartbeat->getStatus(),
         ]);
     }
 

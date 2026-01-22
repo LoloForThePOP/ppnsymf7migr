@@ -8,6 +8,7 @@ use App\Repository\UluleProjectCatalogRepository;
 use App\Security\Voter\ScraperAccessVoter;
 use App\Service\UluleCatalogRefresher;
 use App\Service\UluleQueueStateService;
+use App\Service\WorkerHeartbeatService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -106,7 +107,8 @@ final class UluleQueueController extends AbstractController
     public function status(
         Request $request,
         UluleQueueStateService $stateService,
-        UluleProjectCatalogRepository $catalogRepository
+        UluleProjectCatalogRepository $catalogRepository,
+        WorkerHeartbeatService $workerHeartbeat
     ): JsonResponse {
         $state = $stateService->readState();
         $filters = $this->readFilters($request, $state['filters']);
@@ -156,6 +158,7 @@ final class UluleQueueController extends AbstractController
             'queue' => $state['queue'],
             'summary' => $catalogRepository->getStatusCounts(),
             'items' => $payload,
+            'worker' => $workerHeartbeat->getStatus(),
         ]);
     }
 

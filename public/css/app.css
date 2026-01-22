@@ -893,6 +893,15 @@ html[data-theme-variant="custom"] .table {
     --bs-table-active-bg: color-mix(in srgb, var(--theme-surface-alt) 60%, var(--theme-border));
 }
 
+html[data-theme-tone="dark"] #source-urls-table td[data-col="url"] a {
+    color: var(--theme-text);
+}
+
+html[data-theme-tone="dark"] #source-urls-table td[data-col="url"] a:hover,
+html[data-theme-tone="dark"] #source-urls-table td[data-col="url"] a:focus {
+    color: var(--theme-accent);
+}
+
 html[data-theme-variant="custom"] .text-muted,
 html[data-theme-variant="custom"] .form-text {
     color: var(--theme-text-muted) !important;

@@ -88,6 +88,10 @@
                                         arrêtée
                                     {% endif %}
                                 </div>
+                                {% include 'admin/_worker_status.html.twig' with {
+                                    workerStatus: workerStatus,
+                                    workerCommand: workerCommand
+                                } %}
                                 <div class="d-flex flex-wrap gap-2">
                                     <button type="submit" name="action" value="save_source_prompt" class="btn btn-outline-secondary">Enregistrer le prompt</button>
                                     <button type="submit" name="action" value="run_source" class="btn btn-primary" id="queue-run-btn" {% if queueState.running and not queueState.paused %}disabled{% endif %}>Traiter la file</button>
@@ -444,6 +448,14 @@
             const runBtn = document.getElementById('queue-run-btn');
             const pauseBtn = document.getElementById('queue-pause-btn');
             const resumeBtn = document.getElementById('queue-resume-btn');
+            const workerBadge = document.querySelector('.js-worker-badge');
+            const workerText = document.querySelector('.js-worker-text');
+            const workerCopyBtn = document.querySelector('.js-copy-worker-command');
+            const workerCopyFeedback = document.querySelector('.js-copy-worker-feedback');
+            const pollDelayActive = 4000;
+            let pollTimer = null;
+            let pollInFlight = false;
+            let queueState = queueLabel ? queueLabel.dataset.queueState : 'stopped';
 
             const statusClass = (status) => {
                 if (status === 'done') return 'success';
@@ -495,9 +507,72 @@
                 }
                 queueLabel.textContent = `File : ${label}`;
                 queueLabel.dataset.queueState = state;
+                queueState = state;
                 if (runBtn) runBtn.disabled = queue.running && !queue.paused;
                 if (pauseBtn) pauseBtn.disabled = queue.paused;
                 if (resumeBtn) resumeBtn.disabled = !queue.paused;
+                if (state !== 'running') {
+                    stopPolling();
+                }
+            };
+
+            const shouldPoll = () => {
+                return document.visibilityState === 'visible' && queueState === 'running';
+            };
+
+            const stopPolling = () => {
+                if (pollTimer) {
+                    window.clearTimeout(pollTimer);
+                    pollTimer = null;
+                }
+            };
+
+            const schedulePoll = (delay) => {
+                stopPolling();
+                if (!shouldPoll()) return;
+                pollTimer = window.setTimeout(() => refresh(true), delay);
+            };
+
+            const updateWorkerStatus = (worker) => {
+                if (!worker || !workerBadge || !workerText) return;
+                const active = Boolean(worker.active);
+                workerBadge.classList.toggle('bg-success', active);
+                workerBadge.classList.toggle('bg-secondary', !active);
+                workerBadge.textContent = active ? 'Worker actif' : 'Worker inactif';
+                workerBadge.dataset.workerActive = active ? '1' : '0';
+                workerText.textContent = `Derniere activite : ${worker.last_seen_label || 'jamais'}`;
+            };
+
+            const bindWorkerCopy = () => {
+                if (!workerCopyBtn) return;
+                workerCopyBtn.addEventListener('click', async () => {
+                    const command = workerCopyBtn.dataset.command || '';
+                    if (!command) return;
+                    let copied = false;
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        try {
+                            await navigator.clipboard.writeText(command);
+                            copied = true;
+                        } catch (e) {
+                            copied = false;
+                        }
+                    }
+                    if (!copied) {
+                        const temp = document.createElement('textarea');
+                        temp.value = command;
+                        temp.setAttribute('readonly', 'readonly');
+                        temp.style.position = 'absolute';
+                        temp.style.left = '-9999px';
+                        document.body.appendChild(temp);
+                        temp.select();
+                        copied = document.execCommand('copy');
+                        document.body.removeChild(temp);
+                    }
+                    if (copied && workerCopyFeedback) {
+                        workerCopyFeedback.classList.remove('d-none');
+                        window.setTimeout(() => workerCopyFeedback.classList.add('d-none'), 1200);
+                    }
+                });
             };
 
             const updateSummary = (summary) => {
@@ -588,6 +663,8 @@
 
             const refresh = async () => {
                 if (!table || !table.dataset.statusUrl) return;
+                if (pollInFlight) return;
+                pollInFlight = true;
                 try {
                     const urls = Array.from(table.querySelectorAll('tbody tr[data-url]'))
                         .map((row) => row.dataset.url)
@@ -603,6 +680,7 @@
                     const payload = await response.json();
                     if (payload.queue) updateQueueState(payload.queue);
                     if (payload.summary) updateSummary(payload.summary);
+                    if (payload.worker) updateWorkerStatus(payload.worker);
 
                     if (Array.isArray(payload.entries)) {
                         const rowMap = new Map();
@@ -617,6 +695,9 @@
                     }
                 } catch (e) {
                     // ignore polling errors
+                } finally {
+                    pollInFlight = false;
+                    schedulePoll(pollDelayActive);
                 }
             };
 
@@ -626,8 +707,18 @@
             }
 
             if (table && table.dataset.statusUrl) {
+                bindWorkerCopy();
                 refresh();
-                setInterval(refresh, 4000);
+                schedulePoll(pollDelayActive);
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible') {
+                        if (shouldPoll()) {
+                            refresh();
+                        }
+                    } else {
+                        stopPolling();
+                    }
+                });
             }
         });
     </script>

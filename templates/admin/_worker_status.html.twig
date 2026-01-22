@@ -1,0 +1,11 @@
+{% set workerActive = workerStatus.active ?? false %}
+{% set workerLabel = workerActive ? 'Worker actif' : 'Worker inactif' %}
+{% set workerBadgeClass = workerActive ? 'bg-success' : 'bg-secondary' %}
+{% set workerLastSeen = workerStatus.last_seen_label ?? 'jamais' %}
+<div class="d-flex flex-wrap align-items-center gap-2 js-worker-status mb-3">
+    <span class="badge {{ workerBadgeClass }} js-worker-badge" data-worker-active="{{ workerActive ? '1' : '0' }}">{{ workerLabel }}</span>
+    <span class="small text-muted js-worker-text">Derniere activite : {{ workerLastSeen }}</span>
+    <button type="button" class="btn btn-outline-secondary btn-sm js-copy-worker-command" data-command="{{ workerCommand|e('html_attr') }}">Copier la commande run workers</button>
+    <span class="small text-muted d-none js-copy-worker-feedback">Copie.</span>
+    <div class="small text-muted">Stop workers: php bin/console messenger:stop-workers</div>
+</div>

@@ -421,6 +421,10 @@
         color: var(--theme-text-muted);
     }
 
+    .pp-funding-label{
+        min-width: 0;
+    }
+
     .pp-funding-icon{
         display: inline-flex;
         align-items: center;
@@ -446,6 +450,12 @@
 
     .pp-funding-link:hover{
         text-decoration: underline;
+    }
+
+    @media screen and (min-width: 768px) {
+        .pp-funding-info{
+            flex-wrap: nowrap;
+        }
     }
 
         
