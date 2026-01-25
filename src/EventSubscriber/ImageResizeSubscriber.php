@@ -16,6 +16,8 @@ use Vich\UploaderBundle\Event\Events;
  */
 final class ImageResizeSubscriber implements EventSubscriberInterface
 {
+    private const LOGO_RESIZE_MIN_BYTES = 350 * 1024;
+
     /**
      * Per-mapping resizing rules.
      *
@@ -57,7 +59,19 @@ final class ImageResizeSubscriber implements EventSubscriberInterface
             return;
         }
 
+        $fileSize = $file->getSize();
+        if ($mappingName === 'project_logo_image'
+            && is_int($fileSize)
+            && $fileSize > 0
+            && $fileSize <= self::LOGO_RESIZE_MIN_BYTES) {
+            return;
+        }
+
         $rule = $this->rules[$mappingName];
+        $originalContent = null;
+        if ($mappingName === 'project_logo_image') {
+            $originalContent = @file_get_contents($file->getPathname());
+        }
 
         try {
             $image = $this->imagine->open($file->getPathname());
@@ -72,6 +86,9 @@ final class ImageResizeSubscriber implements EventSubscriberInterface
                 ->thumbnail($box, ImageInterface::THUMBNAIL_INSET)
                 ->save($file->getPathname(), ['quality' => $rule['quality']]);
         } catch (\Throwable $e) {
+            if (is_string($originalContent)) {
+                @file_put_contents($file->getPathname(), $originalContent);
+            }
             $this->logger->warning('Image resize failed', [
                 'mapping' => $mappingName,
                 'path' => $file->getPathname(),

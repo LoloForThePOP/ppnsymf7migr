@@ -57,7 +57,7 @@
             <div class="row g-3 mt-2">
                 <div class="col-md-4">
                     <label class="form-label" for="prompt_extra">Complément de prompt</label>
-                    <textarea id="prompt_extra" name="prompt_extra" class="form-control" rows="5" placeholder="Optionnel : instructions supplémentaires pour la normalisation">{{ promptExtra }}</textarea>
+                    <textarea id="prompt_extra" name="prompt_extra" class="form-control" rows="8" placeholder="Optionnel : instructions supplémentaires pour la normalisation">{{ promptExtra }}</textarea>
                     <div class="form-text">Utilisé lors des imports manuels.</div>
                 </div>
                 <div class="col-md-4">
@@ -89,6 +89,7 @@
 
             <div class="d-flex align-items-center gap-2 mt-3">
                 <button type="submit" class="btn btn-primary">Actualiser la liste</button>
+                <button type="submit" class="btn btn-outline-secondary" name="save_prompt" value="1">Enregistrer le complément de prompt</button>
                 <button type="button" class="btn btn-outline-primary" id="ulule-load-more">Charger 200 suivants</button>
                 <span class="small text-muted">Ajoute 10 pages Ulule de plus à la requête.</span>
             </div>

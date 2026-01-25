@@ -86,6 +86,7 @@ final class SettingsController extends AbstractController
         ]);
     }
 
+
     #[Route('/projects/{stringId}/delete', name: 'pp_delete_presentation', methods: ['GET', 'POST'])]
     public function deletePresentation(
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,

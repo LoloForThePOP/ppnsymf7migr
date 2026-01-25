@@ -14,7 +14,9 @@ use App\Entity\Embeddables\PPBase\OtherComponentsModels\WebsiteComponent;
 use App\Entity\Embeddables\PPBase\OtherComponentsModels\BusinessCardComponent;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\AsciiSlugger;
+use Vich\UploaderBundle\Handler\UploadHandler;
 
 class NormalizedProjectPersister
 {
@@ -34,6 +36,7 @@ class NormalizedProjectPersister
         private readonly CacheThumbnailService $thumbnailService,
         private readonly WebsiteProcessingService $websiteProcessor,
         private readonly PlaceNormalizationService $placeNormalizationService,
+        private readonly UploadHandler $uploadHandler,
     ) {
     }
 
@@ -403,12 +406,25 @@ class NormalizedProjectPersister
         );
         if ($file) {
             $pp->setLogoFile($file);
-            $this->lastMediaDebug['logo'] = [
+            $logoDebug = [
                 'downloaded' => true,
                 'client_name' => $file->getClientOriginalName(),
                 'mime' => $file->getMimeType(),
                 'size' => $file->getSize(),
             ];
+            // Force-upload in ingestion pipelines when Vich doesn't set the logo on flush (observed in URL harvest).
+            if ($file instanceof UploadedFile && $pp->getLogo() === null) {
+                try {
+                    $this->uploadHandler->upload($pp, 'logoFile');
+                    $pp->setLogoFile(null);
+                    $logoDebug['stored'] = $pp->getLogo();
+                } catch (\Throwable $e) {
+                    $logoDebug['upload_error'] = $e->getMessage();
+                }
+            } elseif ($pp->getLogo() !== null) {
+                $logoDebug['upload_skipped'] = 'already_set';
+            }
+            $this->lastMediaDebug['logo'] = $logoDebug;
         } else {
             $this->lastMediaDebug['logo'] = [
                 'downloaded' => false,
@@ -587,6 +603,7 @@ class NormalizedProjectPersister
             default => $status,
         };
     }
+
 
     private function stringValue(mixed $value): ?string
     {

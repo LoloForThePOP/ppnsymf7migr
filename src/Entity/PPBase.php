@@ -441,6 +441,7 @@ class PPBase
         return $this;
     }
 
+
     public function isAdminValidated(): bool
     {
         return $this->isAdminValidated;

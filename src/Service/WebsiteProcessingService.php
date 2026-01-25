@@ -29,6 +29,7 @@ class WebsiteProcessingService
         "jeveuxaider.gouv.fr",
         "ulule.com",
         "ulule.fr",
+        "helloasso.com",
     ];
 
     private const FALLBACK_ICONS = [

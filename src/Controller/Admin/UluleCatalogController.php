@@ -51,7 +51,8 @@ class UluleCatalogController extends AbstractController
         $extraQuery = trim((string) $input->get('extra_query', ''));
         $promptExtra = trim((string) $input->get('prompt_extra', ''));
         if ($promptExtra === '') {
-            $promptExtra = self::DEFAULT_PROMPT_EXTRA;
+            $savedPrompt = trim((string) ($queueStateService->readState()['filters']['prompt_extra'] ?? ''));
+            $promptExtra = $savedPrompt !== '' ? $savedPrompt : self::DEFAULT_PROMPT_EXTRA;
         }
 
         $statusFilter = trim((string) $input->get('status_filter', UluleProjectCatalog::STATUS_PENDING));
@@ -63,6 +64,16 @@ class UluleCatalogController extends AbstractController
             $eligibleOnly = true;
         } else {
             $eligibleOnly = filter_var($eligibleOnlyParam, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        if ($request->isMethod('POST') && $request->request->has('save_prompt')) {
+            $queueStateService->writeState([
+                'filters' => [
+                    'prompt_extra' => $promptExtra,
+                ],
+            ]);
+            $this->addFlash('success', 'Complément de prompt enregistré.');
+            return $this->redirect($this->generateUrl('admin_ulule_catalog'));
         }
 
         $refreshSummary = null;

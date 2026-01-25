@@ -389,6 +389,36 @@
                                             <div class="small text-muted">Aucune image extraite.</div>
                                         {% endif %}
                                     {% endif %}
+                                    {% if item.debug.logo_probe is defined %}
+                                        {% set logoProbe = item.debug.logo_probe %}
+                                        <div class="mt-2 small fw-bold">Logo</div>
+                                        <div class="small text-muted">
+                                            Statut : {{ logoProbe.status ?? '-' }} |
+                                            Type : {{ logoProbe.resolved_type ?? logoProbe.content_type ?? '-' }}
+                                        </div>
+                                        {% if logoProbe.final_url is defined and logoProbe.final_url %}
+                                            <div class="small text-muted">URL finale : {{ logoProbe.final_url }}</div>
+                                        {% endif %}
+                                        {% if logoProbe.error is defined and logoProbe.error %}
+                                            <div class="small text-danger">Erreur : {{ logoProbe.error }}</div>
+                                        {% endif %}
+                                        {% if item.debug.logo_saved is defined %}
+                                            <div class="small text-muted">
+                                                Logo enregistré :
+                                                {{ item.debug.logo_saved ? item.debug.logo_saved : 'non' }}
+                                            </div>
+                                        {% endif %}
+                                        {% if item.debug.media is defined and item.debug.media.logo is defined %}
+                                            {% set logoMedia = item.debug.media.logo %}
+                                            <div class="small text-muted">
+                                                Téléchargé :
+                                                {{ logoMedia.downloaded ? 'oui' : 'non' }}
+                                                {% if logoMedia.downloaded %}
+                                                    ({{ logoMedia.mime ?? '-' }}, {{ logoMedia.size ?? 0 }} octets)
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
                                     {% if item.debug.html_preview is defined and item.debug.html_preview %}
                                         <div class="mt-2 small fw-bold">HTML (prévisualisation)</div>
                                         <pre class="theme-pre p-2 rounded" style="white-space: pre-wrap;">{{ item.debug.html_preview }}</pre>
