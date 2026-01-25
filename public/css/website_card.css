@@ -16,6 +16,16 @@
     
     border-radius: 3px;
 
+    --pp-website-icon-size: 40px;
+    --pp-website-icon-bg: transparent;
+    --pp-website-icon-border: transparent;
+    --pp-website-icon-radius: 50%;
+    --pp-website-icon-scale: 100%;
+    --pp-website-icon-shadow: none;
+    --pp-website-fallback-bg: var(--theme-surface-alt);
+    --pp-website-fallback-border: var(--theme-border);
+    --pp-website-fallback-color: var(--theme-text);
+
 }
 
 .pp-website-card:hover, .pp-website-card:hover a{
@@ -52,14 +62,35 @@
 }
 
 .website-logo-icon {
-    display: inline-block;
-    width: 40px;
-    height: 40px;
-    background-color: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--pp-website-icon-size);
+    height: var(--pp-website-icon-size);
+    background-color: var(--pp-website-icon-bg);
+    border: 1px solid var(--pp-website-icon-border);
+    border-radius: var(--pp-website-icon-radius);
+    box-shadow: var(--pp-website-icon-shadow);
     background-image: var(--website-logo-url);
     background-repeat: no-repeat;
-    background-size: contain;
+    background-size: var(--pp-website-icon-scale);
     background-position: center;
+}
+
+.default-website-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--pp-website-icon-size);
+    height: var(--pp-website-icon-size);
+    background-color: var(--pp-website-fallback-bg);
+    border: 1px solid var(--pp-website-fallback-border);
+    border-radius: var(--pp-website-icon-radius);
+    box-shadow: var(--pp-website-icon-shadow);
+    color: var(--pp-website-fallback-color);
+    text-transform: uppercase;
+    font-size: 18px;
+    font-weight: 700;
 }
 
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-website-card {
@@ -88,10 +119,18 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .website
     color: var(--theme-text-muted);
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .default-website-logo {
-    background-color: var(--theme-surface-alt) !important;
-    color: var(--theme-text);
-    border: 1px solid var(--theme-border);
+html[data-theme-variant="custom"][data-theme="dark"] body[data-theme-scope="presentation"] .pp-website-card,
+html[data-theme-variant="custom"][data-theme="neon"] body[data-theme-scope="presentation"] .pp-website-card,
+html[data-theme-variant="custom"][data-theme="cyberpunk"] body[data-theme-scope="presentation"] .pp-website-card,
+html[data-theme-variant="custom"][data-theme="matrix"] body[data-theme-scope="presentation"] .pp-website-card,
+html[data-theme-variant="custom"][data-theme="luxury-black"] body[data-theme-scope="presentation"] .pp-website-card,
+html[data-theme-variant="custom"][data-theme="deep-ocean"] body[data-theme-scope="presentation"] .pp-website-card {
+    --pp-website-icon-bg: color-mix(in srgb, var(--theme-surface-alt) 80%, var(--theme-accent) 20%);
+    --pp-website-icon-border: color-mix(in srgb, var(--theme-border) 70%, var(--theme-bg) 30%);
+    --pp-website-icon-scale: 82%;
+    --pp-website-icon-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+    --pp-website-fallback-bg: color-mix(in srgb, var(--theme-surface-alt) 84%, var(--theme-accent) 16%);
+    --pp-website-fallback-border: color-mix(in srgb, var(--theme-border) 70%, var(--theme-bg) 30%);
 }
 
 @media screen and (max-width: 768px) {

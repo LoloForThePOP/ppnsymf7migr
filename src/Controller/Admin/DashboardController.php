@@ -50,7 +50,6 @@ class DashboardController extends AbstractDashboardController
         }
         if ($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_SUPER_ADMIN')) {
             yield MenuItem::linkToRoute('🧐 À vérifier', 'fa fa-check-circle', 'admin_presentations_to_review');
-            yield MenuItem::section('🧰 Divers');
             yield MenuItem::linkToRoute('🧰 Divers', 'fa fa-toolbox', 'admin_misc');
         }
     }

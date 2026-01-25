@@ -127,36 +127,32 @@
                 //alert(idCityProject);
                 //alert(cityName);
 
-                if (confirm("Confirmez-vous retirer ce lieu ?"))
-                { 
-                    $('#feedbackBox').html('<div class="loader me-2"></div><span class="h5">Demande en Cours...</span>');
+                $('#feedbackBox').html('<div class="loader me-2"></div><span class="h5">Demande en Cours...</span>');
 
-                    $(this).html('<div class="loader"></div>');
+                $(this).html('<div class="loader"></div>');
+                
+                $.ajax({  
+
+                    url: "{{ path('ajax_remove_place', {'stringId': presentation.stringId}) }}",
+                    type:       'POST',   
+                    dataType:   'json',
+                    data: {
+                    "placeId": placeId,
+                    "_token": placeCsrfToken,
+                    },
+
+                    async: true,  
                     
-                    $.ajax({  
+                    success: function() {
 
-                        url: "{{ path('ajax_remove_place', {'stringId': presentation.stringId}) }}",
-                        type:       'POST',   
-                        dataType:   'json',
-                        data: {
-                        "placeId": placeId,
-                        "_token": placeCsrfToken,
-                        },
+                        window.location.reload();
+                    
+                    },  
 
-                        async: true,  
-                        
-                        success: function() {
-
-                            window.location.reload();
-                        
-                        },  
-
-                        error : function(xhr, textStatus, errorThrown) {  
-                            // alert('Ajax request failed.');  
-                        }  
-                    }); 
-                        
-                }
+                    error : function(xhr, textStatus, errorThrown) {  
+                        // alert('Ajax request failed.');  
+                    }  
+                }); 
 
 
             });

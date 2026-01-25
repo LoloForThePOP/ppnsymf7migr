@@ -156,33 +156,52 @@ class UluleImportController extends AbstractController
             return 'cancelled';
         }
 
-        $goalRaised = (bool) ($detail['goal_raised'] ?? false);
+        $goalRaised = $detail['goal_raised'] ?? null;
+        if ($goalRaised !== null) {
+            $goalRaised = (bool) $goalRaised;
+        }
         $finished = (bool) ($detail['finished'] ?? false);
         $isOnline = (bool) ($detail['is_online'] ?? false);
-
-        if ($finished) {
-            return $goalRaised ? 'success' : 'failed';
-        }
-
-        if ($goalRaised) {
-            return 'success';
-        }
-
-        if ($isOnline) {
-            return 'ongoing';
-        }
+        $fundingEndAt = $this->extractFundingEndAt($detail);
+        $now = new \DateTimeImmutable();
+        $isPast = $fundingEndAt && $fundingEndAt <= $now;
 
         $status = $detail['status'] ?? null;
         if (is_string($status)) {
             $status = strtolower(trim($status));
-            return match ($status) {
-                'online', 'live', 'ongoing', 'funding' => 'ongoing',
-                'success', 'successful', 'funded', 'goal_raised' => 'success',
-                'failed', 'failure', 'unfunded' => 'failed',
-                'cancelled', 'canceled' => 'cancelled',
-                'ended', 'finished', 'closed' => 'ended',
-                default => null,
-            };
+        } else {
+            $status = null;
+        }
+
+        $statusOngoing = in_array($status, ['online', 'live', 'ongoing', 'funding'], true);
+        $statusSuccess = in_array($status, ['success', 'successful', 'funded', 'goal_raised'], true);
+        $statusFailed = in_array($status, ['failed', 'failure', 'unfunded'], true);
+        $statusEnded = in_array($status, ['ended', 'finished', 'closed'], true);
+
+        if ($finished || $statusEnded || $isPast) {
+            if ($goalRaised === true || $statusSuccess) {
+                return 'success';
+            }
+            if ($goalRaised === false || $statusFailed) {
+                return 'failed';
+            }
+            return 'ended';
+        }
+
+        if ($isOnline || $statusOngoing || ($fundingEndAt && !$isPast)) {
+            return 'ongoing';
+        }
+
+        if ($statusSuccess) {
+            return 'success';
+        }
+
+        if ($statusFailed) {
+            return 'failed';
+        }
+
+        if ($status === 'cancelled' || $status === 'canceled') {
+            return 'cancelled';
         }
 
         return null;
