@@ -92,6 +92,23 @@ class SearchController extends AbstractController
                     'label' => $category->getLabel() ?? $category->getUniqueName(),
                 ];
             }
+            $location = null;
+            foreach ($pp->getPlaces() as $place) {
+                $geoloc = $place->getGeoloc();
+                if ($geoloc->isDefined()) {
+                    $parts = array_filter([
+                        $place->getName(),
+                        $place->getLocality(),
+                        $place->getCountry(),
+                    ]);
+                    $location = [
+                        'lat' => $geoloc->getLatitude(),
+                        'lng' => $geoloc->getLongitude(),
+                        'label' => $parts ? implode(', ', array_unique($parts)) : null,
+                    ];
+                    break;
+                }
+            }
             return [
                 'id' => $pp->getId(),
                 'title' => $pp->getTitle(),
@@ -101,6 +118,7 @@ class SearchController extends AbstractController
                 'createdAt' => $pp->getCreatedAt()?->format(DATE_ATOM),
                 'thumbnail' => $thumb,
                 'categories' => $categories,
+                'location' => $location,
             ];
         }, $results);
 

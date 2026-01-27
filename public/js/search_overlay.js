@@ -10,6 +10,11 @@
   const countLocationEl = overlay.querySelector('#search-overlay-count-location');
   const emptyEl = overlay.querySelector('#search-overlay-empty');
   const categoriesEl = overlay.querySelector('#search-overlay-categories');
+  const mapModal = overlay.querySelector('#search-overlay-map');
+  const mapFrame = overlay.querySelector('#search-overlay-map-frame');
+  const mapTitle = overlay.querySelector('#search-overlay-map-title');
+  const mapLink = overlay.querySelector('#search-overlay-map-link');
+  const mapCloseButtons = Array.from(overlay.querySelectorAll('[data-search-map-close]'));
   const clearInputBtn = overlay.querySelector('[data-search-clear]');
   const clearFiltersBtn = overlay.querySelector('[data-search-clear-filters]');
   const closeBtn = overlay.querySelector('[data-search-close]');
@@ -81,6 +86,30 @@
     if (!emptyEl) return;
     if (message) emptyEl.textContent = message;
     emptyEl.classList.toggle('d-none', !show);
+  };
+
+  const openMapModal = (item) => {
+    if (!mapModal || !mapFrame || !item?.location) return;
+    const { lat, lng, label } = item.location;
+    if (typeof lat !== 'number' || typeof lng !== 'number') return;
+    const title = label || item.title || 'Localisation';
+    if (mapTitle) mapTitle.textContent = title;
+    const mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent(`${lat},${lng}`)}&z=12&output=embed`;
+    mapFrame.src = mapUrl;
+    if (mapLink) {
+      mapLink.href = `https://www.google.com/maps?q=${encodeURIComponent(`${lat},${lng}`)}`;
+    }
+    mapModal.classList.remove('d-none');
+    mapModal.setAttribute('aria-hidden', 'false');
+  };
+
+  const closeMapModal = () => {
+    if (!mapModal) return;
+    mapModal.classList.add('d-none');
+    mapModal.setAttribute('aria-hidden', 'true');
+    if (mapFrame) {
+      mapFrame.src = '';
+    }
   };
 
   const setLoading = (loading) => {
@@ -474,6 +503,24 @@
         thumb.textContent = 'Aucune image';
       }
 
+      if (item.location && typeof item.location.lat === 'number' && typeof item.location.lng === 'number') {
+        const mapBtn = document.createElement('button');
+        mapBtn.type = 'button';
+        mapBtn.className = 'search-result-card__map-btn';
+        mapBtn.setAttribute('aria-label', 'Voir la localisation');
+        mapBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor" d="M12 2c-4.418 0-8 3.582-8 8 0 6 8 12 8 12s8-6 8-12c0-4.418-3.582-8-8-8Zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+          </svg>
+        `;
+        mapBtn.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openMapModal(item);
+        });
+        thumb.appendChild(mapBtn);
+      }
+
       const body = document.createElement('div');
       body.className = 'search-result-card__body';
 
@@ -654,10 +701,16 @@
   });
 
   document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && mapModal && !mapModal.classList.contains('d-none')) {
+      closeMapModal();
+      return;
+    }
     if (event.key === 'Escape' && overlay.classList.contains('is-open')) {
       closeOverlay();
     }
   });
+
+  mapCloseButtons.forEach((btn) => btn.addEventListener('click', closeMapModal));
 
   triggers.forEach((trigger) => {
     if (trigger.tagName === 'INPUT') {

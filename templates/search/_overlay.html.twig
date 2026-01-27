@@ -19,7 +19,7 @@
             >
             <button class="search-overlay__clear d-none" type="button" data-search-clear aria-label="Effacer la recherche">&times;</button>
         </div>
-        <button class="search-overlay__close" type="button" data-search-close aria-label="Fermer">&times;</button>
+        <button class="search-overlay__close search-overlay__close-btn" type="button" data-search-close aria-label="Fermer">Fermer</button>
     </div>
 
     <div class="search-overlay__body">
@@ -102,5 +102,33 @@
                 <span id="search-overlay-page" class="search-overlay__page"></span>
             </div>
         </section>
+    </div>
+
+    <div id="search-overlay-map" class="search-overlay__map-modal d-none" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="search-overlay__map-backdrop" data-search-map-close></div>
+        <div class="search-overlay__map-card" role="document">
+            <div class="search-overlay__map-header">
+                <div id="search-overlay-map-title" class="search-overlay__map-title">Localisation</div>
+                <button class="search-overlay__map-close" type="button" data-search-map-close>Fermer</button>
+            </div>
+            <iframe
+                id="search-overlay-map-frame"
+                class="search-overlay__map-frame"
+                title="Localisation du projet"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+            <div class="search-overlay__map-footer">
+                <a
+                    id="search-overlay-map-link"
+                    class="search-overlay__map-link"
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Ouvrir dans Google Maps
+                </a>
+            </div>
+        </div>
     </div>
 </div>

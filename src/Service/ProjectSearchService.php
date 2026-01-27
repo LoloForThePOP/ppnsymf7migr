@@ -124,16 +124,17 @@ class ProjectSearchService
 
         if ($terms) {
             foreach ($terms as $i => $term) {
-                $param = ':t' . $i;
-                $qb->andWhere(
-                    $qb->expr()->orX(
-                        'LOWER(p.title) LIKE LOWER(' . $param . ')',
-                        'LOWER(p.goal) LIKE LOWER(' . $param . ')',
-                        'LOWER(p.textDescription) LIKE LOWER(' . $param . ')',
-                        'LOWER(p.keywords) LIKE LOWER(' . $param . ')'
-                    )
-                );
-                $qb->setParameter($param, '%' . $term . '%');
+                $variants = $this->buildTermVariants($term);
+                $termExpr = $qb->expr()->orX();
+                foreach ($variants as $j => $variant) {
+                    $param = ':t' . $i . '_' . $j;
+                    $termExpr->add('LOWER(p.title) LIKE LOWER(' . $param . ')');
+                    $termExpr->add('LOWER(p.goal) LIKE LOWER(' . $param . ')');
+                    $termExpr->add('LOWER(p.textDescription) LIKE LOWER(' . $param . ')');
+                    $termExpr->add('LOWER(p.keywords) LIKE LOWER(' . $param . ')');
+                    $qb->setParameter($param, '%' . $variant . '%');
+                }
+                $qb->andWhere($termExpr);
             }
         }
 
@@ -202,6 +203,8 @@ class ProjectSearchService
     {
         foreach ($terms as $i => $_term) {
             $param = ':t' . $i;
+            $term = $this->normalizeScoreTerm($_term);
+            $qb->setParameter($param, '%' . $term . '%');
             $qb->addSelect(
                 '(
                     (CASE WHEN LOWER(p.title) LIKE LOWER(' . $param . ') THEN 3 ELSE 0 END) +
@@ -211,6 +214,45 @@ class ProjectSearchService
                 ) AS HIDDEN score_' . $i
             );
         }
+    }
+
+    /**
+     * @return string[]
+     */
+    private function buildTermVariants(string $term): array
+    {
+        $term = trim($term);
+        if ($term === '') {
+            return [];
+        }
+        $variants = [$term];
+        $length = mb_strlen($term);
+        if ($length >= 4) {
+            if (str_ends_with($term, 'eaux')) {
+                $variants[] = mb_substr($term, 0, -1);
+            }
+            if (str_ends_with($term, 'aux')) {
+                $variants[] = mb_substr($term, 0, -3) . 'al';
+            }
+            if (str_ends_with($term, 'es')) {
+                $variants[] = mb_substr($term, 0, -2);
+            }
+            if (str_ends_with($term, 's') || str_ends_with($term, 'x')) {
+                $variants[] = mb_substr($term, 0, -1);
+            }
+        }
+        $variants = array_values(array_unique(array_filter($variants, static fn ($value) => $value !== '')));
+        return $variants;
+    }
+
+    private function normalizeScoreTerm(string $term): string
+    {
+        $variants = $this->buildTermVariants($term);
+        if ($variants === []) {
+            return $term;
+        }
+        usort($variants, static fn ($a, $b) => mb_strlen($a) <=> mb_strlen($b));
+        return $variants[0];
     }
 
     /**
