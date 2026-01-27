@@ -2,7 +2,9 @@
 <div id="search-overlay" class="search-overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="search-overlay__header">
         <div class="search-overlay__title">
-            <img class="search-overlay__section-icon icon-themed" src="{{ asset('search.svg', 'misc') }}" alt="" aria-hidden="true">
+            <svg class="search-overlay__section-icon" viewBox="0 0 50.798 50.931" aria-hidden="true">
+                <path fill="currentColor" d="M61 59.8l-.4.4-1.2-1.2c2.7-3.5 4.2-7.7 4.2-12.2 0-5.3-2.1-10.3-5.8-14.1-8-8-21.3-7.8-28.9.8-7 7.8-6.6 20.1.9 27.5 3.9 3.8 8.9 5.7 14 5.7 4.3 0 8.6-1.4 12.2-4.2l1.2 1.2-.5.3 12.9 12.9c1.2 1.2 3.1 1.2 4.2 0 1.2-1.2 1.2-3.1 0-4.2zM33.1 57.3c-5.8-5.8-5.8-15.3 0-21.1 2.9-2.9 6.7-4.4 10.6-4.4 3.8 0 7.6 1.5 10.6 4.4 2.8 2.8 4.4 6.6 4.4 10.6s-1.6 7.7-4.4 10.6c-5.9 5.7-15.3 5.7-21.2-.1z" transform="translate(-23.902 -26.869)"/>
+            </svg>
             Rechercher
         </div>
         <div class="search-overlay__input-wrap">
@@ -26,7 +28,7 @@
                 <div class="search-overlay__filters-header">
                     <span class="search-overlay__filters-title">
                         <svg class="search-overlay__section-icon search-overlay__section-icon--stroke" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M12 22s8-7.5 8-13a8 8 0 1 0-16 0c0 5.5 8 13 8 13Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                            <path d="M12 22s8.5-7.7 8.5-13.3a8.5 8.5 0 1 0-17 0c0 5.6 8.5 13.3 8.5 13.3Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
                             <circle cx="12" cy="9" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
                         </svg>
                         Localisation
@@ -48,7 +50,12 @@
                     </div>
 
                     <div class="search-overlay__location-actions">
-                        <button class="search-overlay__location-btn" type="button" data-search-location-me>Autour de moi</button>
+                        <button class="search-overlay__location-btn" type="button" data-search-location-me>
+                            <svg class="search-overlay__btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12 2c.55 0 1 .45 1 1v1.84c3.19.44 5.72 2.97 6.16 6.16H21c.55 0 1 .45 1 1s-.45 1-1 1h-1.84c-.44 3.19-2.97 5.72-6.16 6.16V21c0 .55-.45 1-1 1s-1-.45-1-1v-1.84c-3.19-.44-5.72-2.97-6.16-6.16H3c-.55 0-1-.45-1-1s.45-1 1-1h1.84c.44-3.19 2.97-5.72 6.16-6.16V3c0-.55.45-1 1-1Zm0 4.77A5.23 5.23 0 0 0 6.77 12 5.23 5.23 0 0 0 12 17.23 5.23 5.23 0 0 0 17.23 12 5.23 5.23 0 0 0 12 6.77Zm0 3.26a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/>
+                            </svg>
+                            Autour de moi
+                        </button>
                         <span id="search-location-status" class="search-overlay__location-status"></span>
                     </div>
 
@@ -67,13 +74,15 @@
             <div class="search-overlay__filters-section">
                 <div class="search-overlay__filters-header">
                     <span class="search-overlay__filters-title">
-                        <img class="search-overlay__section-icon search-overlay__section-icon--wide icon-themed" src="{{ asset('categories.svg', 'misc') }}" alt="" aria-hidden="true">
+                        <svg class="search-overlay__section-icon search-overlay__section-icon--wide" viewBox="0 0 475.248 228.092" aria-hidden="true">
+                            <path fill="currentColor" d="M462.836 114.054 412.799 85.158v20.613H157.046l49.798-52.612c4.238-3.397 9.783-5.78 15.487-5.912 23.075 0 36.778-.006 41.822-.016 3.419 9.741 12.603 16.772 23.521 16.772 13.812 0 25.021-11.208 25.021-25.025 0-13.823-11.208-25.027-25.021-25.027-10.918 0-20.102 7.027-23.521 16.76l-41.332-.007c-11.202 0-22.94 6.146-30.411 13.351.204-.214.416-.442-.012.004-.158.178-52.834 55.814-52.834 55.814-4.229 3.392-9.771 5.76-15.471 5.896H95.161C91.326 86.656 74.448 72.256 54.202 72.256c-23.083 0-41.794 18.711-41.794 41.787 0 23.083 18.711 41.795 41.794 41.795 20.25 0 37.128-14.412 40.963-33.541h28.425c.073 0 .146.004.22 0h62.871c5.689.145 11.224 2.516 15.449 5.912 0 0 52.664 55.632 52.827 55.812.422.447.212.214.004.004 7.471 7.204 19.214 13.346 30.418 13.346l39.832-.009v16.777h50.05v-50.045h-50.05v16.755s-10.491-.019-40.32-.019c-5.705-.131-11.256-2.511-15.492-5.908l-52.745-55.743h193.209v20.646z"/>
+                        </svg>
                         Categories
                     </span>
                     <button class="search-overlay__filters-clear" type="button" data-search-clear-filters>Effacer filtres</button>
                 </div>
                 <div id="search-overlay-categories" class="search-overlay__categories">
-                    <div class="search-overlay__categories-empty">Tapez pour afficher les categories.</div>
+                    <div class="search-overlay__categories-empty">Tapez pour afficher les catégories.</div>
                 </div>
             </div>
         </aside>
@@ -82,9 +91,12 @@
             <div class="search-overlay__meta">
                 <span id="search-overlay-status" class="search-overlay__status">Tapez au moins 2 caracteres.</span>
             </div>
-            <div id="search-overlay-count" class="search-overlay__count"></div>
+            <div id="search-overlay-count" class="search-overlay__count">
+                <div id="search-overlay-count-total" class="search-overlay__count-line"></div>
+                <div id="search-overlay-count-location" class="search-overlay__count-line search-overlay__count-line--details"></div>
+            </div>
             <div id="search-overlay-results" class="search-results-grid"></div>
-            <div id="search-overlay-empty" class="search-overlay__empty d-none">Aucun resultat pour le moment.</div>
+            <div id="search-overlay-empty" class="search-overlay__empty d-none">Aucun résultat pour le moment.</div>
             <div class="search-overlay__pagination d-none">
                 <button class="search-overlay__more" type="button" data-search-more>Afficher plus</button>
                 <span id="search-overlay-page" class="search-overlay__page"></span>

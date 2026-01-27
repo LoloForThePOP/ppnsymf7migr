@@ -27,12 +27,14 @@ class SearchController extends AbstractController
         $page = (int) $request->query->get('page', 1);
         $page = max(1, $page);
 
-        $categories = $request->query->all('categories');
-        if (!is_array($categories) || $categories === []) {
-            $rawCategories = $request->query->get('categories', '');
-            $categories = is_string($rawCategories)
-                ? array_filter(array_map('trim', explode(',', $rawCategories)))
-                : [];
+        $queryParams = $request->query->all();
+        $rawCategories = $queryParams['categories'] ?? [];
+        if (is_string($rawCategories)) {
+            $categories = array_filter(array_map('trim', explode(',', $rawCategories)));
+        } elseif (is_array($rawCategories)) {
+            $categories = $rawCategories;
+        } else {
+            $categories = [];
         }
         $categories = array_values(array_filter(
             array_map(static fn ($value) => trim((string) $value), $categories),
@@ -70,6 +72,8 @@ class SearchController extends AbstractController
         $total = $result['total'];
         $page = $result['page'];
         $pages = $result['pages'];
+        $totalBase = $result['totalBase'] ?? $total;
+        $categoryCounts = $result['categoryCounts'] ?? [];
 
         $uploader = $this->uploaderHelper;
         $payload = array_map(function ($pp) use ($uploader) {
@@ -104,10 +108,12 @@ class SearchController extends AbstractController
             'query' => $q,
             'count' => count($payload),
             'total' => $total,
+            'totalBase' => $totalBase,
             'page' => $page,
             'pages' => $pages,
             'limit' => $limit,
             'results' => $payload,
+            'categoryCounts' => $categoryCounts,
         ]);
     }
 

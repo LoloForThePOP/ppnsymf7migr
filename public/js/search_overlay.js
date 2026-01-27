@@ -6,6 +6,8 @@
   const resultsEl = overlay.querySelector('#search-overlay-results');
   const statusEl = overlay.querySelector('#search-overlay-status');
   const countEl = overlay.querySelector('#search-overlay-count');
+  const countTotalEl = overlay.querySelector('#search-overlay-count-total');
+  const countLocationEl = overlay.querySelector('#search-overlay-count-location');
   const emptyEl = overlay.querySelector('#search-overlay-empty');
   const categoriesEl = overlay.querySelector('#search-overlay-categories');
   const clearInputBtn = overlay.querySelector('[data-search-clear]');
@@ -33,6 +35,8 @@
   let currentPage = 1;
   let totalPages = 0;
   let totalCount = 0;
+  let totalBase = 0;
+  let categoryCounts = [];
   let activeCategories = new Set();
   let activeController = null;
   let isLoading = false;
@@ -60,9 +64,17 @@
     }
   };
 
-  const setCount = (message) => {
-    if (!countEl) return;
-    countEl.textContent = message || '';
+  const setCountLines = (totalLabel, locationLabel) => {
+    if (countTotalEl) {
+      countTotalEl.textContent = totalLabel || '';
+    }
+    if (countLocationEl) {
+      countLocationEl.textContent = locationLabel || '';
+    }
+    if (countEl) {
+      const hasContent = (totalLabel && totalLabel.length > 0) || (locationLabel && locationLabel.length > 0);
+      countEl.classList.toggle('d-none', !hasContent);
+    }
   };
 
   const setEmpty = (show, message) => {
@@ -166,9 +178,9 @@
       performSearch(term, { page: 1 });
     } else {
       setStatus('Tapez au moins 2 caracteres.');
-      renderCategories([]);
+      renderCategories([], []);
       renderResults([]);
-      setCount('');
+      setCountLines('', '');
       updatePagination();
     }
   };
@@ -280,10 +292,12 @@
       currentResults = [];
       totalPages = 0;
       totalCount = 0;
+      totalBase = 0;
+      categoryCounts = [];
       currentPage = 1;
       setStatus('Tapez au moins 2 caracteres.');
-      setCount('');
-      renderCategories([]);
+      setCountLines('', '');
+      renderCategories([], []);
       renderResults([]);
       updatePagination();
     }
@@ -305,11 +319,13 @@
     currentResults = [];
     totalPages = 0;
     totalCount = 0;
+    totalBase = 0;
+    categoryCounts = [];
     currentPage = 1;
-    renderCategories([]);
+    renderCategories([], []);
     renderResults([]);
     setStatus('Tapez au moins 2 caracteres.');
-    setCount('');
+    setCountLines('', '');
     setEmpty(false);
     updatePagination();
   };
@@ -319,7 +335,7 @@
     if (canSearch(currentQuery)) {
       performSearch(currentQuery, { page: 1 });
     } else {
-      renderCategories(currentResults);
+      renderCategories(currentResults, categoryCounts);
       updatePagination();
     }
   };
@@ -340,13 +356,39 @@
     return map;
   };
 
-  const renderCategories = (items) => {
+  const normalizeCategoryCounts = (counts) => {
+    if (!Array.isArray(counts)) return [];
+    return counts
+      .map((cat) => {
+        const key = cat.key || cat.uniqueName || '';
+        if (!key) return null;
+        const label = cat.label || cat.uniqueName || key;
+        const count = Number(cat.count || 0);
+        return { key, label, count };
+      })
+      .filter((cat) => cat && cat.key);
+  };
+
+  const renderCategories = (items, counts = null) => {
     if (!categoriesEl) return;
-    const map = buildCategoryMap(items);
-    const categories = Array.from(map.values()).sort((a, b) => {
+    let categories = normalizeCategoryCounts(counts);
+    if (categories.length === 0) {
+      const map = buildCategoryMap(items);
+      categories = Array.from(map.values());
+    }
+    categories.sort((a, b) => {
       if (b.count !== a.count) return b.count - a.count;
       return a.label.localeCompare(b.label);
     });
+
+    if (activeCategories.size > 0) {
+      const known = new Set(categories.map((cat) => cat.key));
+      Array.from(activeCategories).forEach((key) => {
+        if (!known.has(key)) {
+          categories.push({ key, label: key, count: 0 });
+        }
+      });
+    }
     if (categories.length > 0) {
       const available = new Set(categories.map((cat) => cat.key));
       activeCategories = new Set(Array.from(activeCategories).filter((key) => available.has(key)));
@@ -356,7 +398,7 @@
     if (categories.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'search-overlay__categories-empty';
-      empty.textContent = 'Aucune categorie trouvee.';
+      empty.textContent = 'Aucune catégorie trouvée.';
       categoriesEl.appendChild(empty);
       if (activeCategories.size === 0) {
         clearFiltersBtn?.setAttribute('disabled', 'disabled');
@@ -391,7 +433,7 @@
         if (canSearch(currentQuery)) {
           performSearch(currentQuery, { page: 1 });
         } else {
-          renderCategories(currentResults);
+          renderCategories(currentResults, categoryCounts);
         }
       });
       categoriesEl.appendChild(button);
@@ -455,14 +497,29 @@
 
   const applyCountLabel = () => {
     if (totalCount === 0) {
-      setCount('');
+      setCountLines('', '');
       return;
     }
-    if (totalCount > currentResults.length) {
-      setCount(`Affichage ${currentResults.length} / ${totalCount} resultats`);
-    } else {
-      setCount(`${totalCount} resultat(s)`);
+    const plural = totalCount > 1 ? 's' : '';
+    let totalLabel = `${totalCount} résultat${plural}`;
+    if (currentQuery) {
+      totalLabel += ` pour "${currentQuery}"`;
     }
+    if (activeLocation) {
+      totalLabel += ` dans un rayon de ${activeLocation.radius} km`;
+    }
+    if (activeCategories.size > 0) {
+      const catPlural = activeCategories.size > 1 ? 's' : '';
+      const selectedText = `${activeCategories.size} catégorie${catPlural} sélectionnée${catPlural}`;
+      totalLabel += ` (${selectedText})`;
+    }
+
+    let locationLabel = '';
+    if (activeLocation && activeCategories.size > 0 && totalBase > totalCount) {
+      const basePlural = totalBase > 1 ? 's' : '';
+      locationLabel = `Avant filtre catégories : ${totalBase} projet${basePlural} dans ce rayon`;
+    }
+    setCountLines(totalLabel, locationLabel);
   };
 
   const performSearch = (term, { page = 1, append = false } = {}) => {
@@ -485,6 +542,8 @@
         if (controller !== activeController) return;
         const items = Array.isArray(data.results) ? data.results : [];
         totalCount = typeof data.total === 'number' ? data.total : items.length;
+        totalBase = typeof data.totalBase === 'number' ? data.totalBase : totalCount;
+        categoryCounts = Array.isArray(data.categoryCounts) ? data.categoryCounts : [];
         totalPages = typeof data.pages === 'number' ? data.pages : 1;
         currentPage = typeof data.page === 'number' ? data.page : page;
         if (append) {
@@ -492,18 +551,13 @@
         } else {
           currentResults = items;
         }
-        renderCategories(currentResults);
+        renderCategories(currentResults, categoryCounts);
         renderResults(currentResults);
         if (currentResults.length === 0) {
-          setStatus(data.message || 'Aucun resultat');
-          setEmpty(true, 'Aucun resultat pour cette recherche.');
+          setStatus(data.message || 'Aucun résultat');
+          setEmpty(true, 'Aucun résultat pour cette recherche.');
         } else {
-          const label = term
-            ? `Resultats pour "${term}"`
-            : activeLocation
-              ? 'Resultats pour la localisation'
-              : 'Resultats';
-          setStatus(label);
+          setStatus('Résultats');
           setEmpty(false);
         }
         applyCountLabel();
@@ -514,11 +568,13 @@
         setStatus('Erreur de recherche');
         currentResults = [];
         totalCount = 0;
+        totalBase = 0;
+        categoryCounts = [];
         totalPages = 0;
         currentPage = 1;
-        renderCategories([]);
+        renderCategories([], []);
         renderResults([]);
-        setCount('');
+        setCountLines('', '');
         setEmpty(true, 'Une erreur est survenue.');
         updatePagination();
       })
@@ -536,11 +592,13 @@
       currentResults = [];
       totalPages = 0;
       totalCount = 0;
+      totalBase = 0;
+      categoryCounts = [];
       currentPage = 1;
-      renderCategories([]);
+      renderCategories([], []);
       renderResults([]);
       setStatus('Tapez au moins 2 caracteres ou choisissez une localisation.');
-      setCount('');
+      setCountLines('', '');
       setEmpty(false);
       updatePagination();
       return;

@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Category;
 use App\Entity\PPBase;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
@@ -27,7 +28,14 @@ class ProjectSearchService
     /**
      * @param string[] $categories
      * @param array{lat: float, lng: float, radius?: float}|null $location
-     * @return array{items: PPBase[], total: int, page: int, pages: int}
+     * @return array{
+     *   items: PPBase[],
+     *   total: int,
+     *   page: int,
+     *   pages: int,
+     *   totalBase: int,
+     *   categoryCounts: array<int, array{key: string, label: string, count: int}>
+     * }
      */
     public function searchWithFilters(string $query, array $categories = [], int $limit = 20, int $page = 1, ?array $location = null): array
     {
@@ -46,15 +54,31 @@ class ProjectSearchService
             static fn ($value) => $value !== ''
         ));
 
+        $baseCountQb = $this->em->createQueryBuilder()
+            ->select('COUNT(DISTINCT p.id)')
+            ->from(PPBase::class, 'p');
+        $this->applyBaseFilters($baseCountQb, $terms, $location);
+        $totalBase = (int) $baseCountQb->getQuery()->getSingleScalarResult();
+
+        $categoryCounts = $totalBase > 0 ? $this->fetchCategoryCounts($terms, $location) : [];
+
         $countQb = $this->em->createQueryBuilder()
             ->select('COUNT(DISTINCT p.id)')
             ->from(PPBase::class, 'p');
 
-        $this->applySearchFilters($countQb, $terms, $categories, $location);
+        $this->applyBaseFilters($countQb, $terms, $location);
+        $this->applyCategoryFilter($countQb, $categories);
 
         $total = (int) $countQb->getQuery()->getSingleScalarResult();
         if ($total === 0) {
-            return ['items' => [], 'total' => 0, 'page' => $page, 'pages' => 0];
+            return [
+                'items' => [],
+                'total' => 0,
+                'page' => $page,
+                'pages' => 0,
+                'totalBase' => $totalBase,
+                'categoryCounts' => $categoryCounts,
+            ];
         }
 
         $pages = (int) ceil($total / $limit);
@@ -69,7 +93,8 @@ class ProjectSearchService
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
 
-        $this->applySearchFilters($qb, $terms, $categories, $location);
+        $this->applyBaseFilters($qb, $terms, $location);
+        $this->applyCategoryFilter($qb, $categories);
         if ($terms) {
             $this->addScoringSelects($qb, $terms);
             $qb->orderBy('score_0', 'DESC')
@@ -83,6 +108,8 @@ class ProjectSearchService
             'total' => $total,
             'page' => $page,
             'pages' => $pages,
+            'totalBase' => $totalBase,
+            'categoryCounts' => $categoryCounts,
         ];
     }
 
@@ -90,16 +117,10 @@ class ProjectSearchService
      * @param string[] $terms
      * @param string[] $categories
      */
-    private function applySearchFilters(QueryBuilder $qb, array $terms, array $categories, ?array $location): void
+    private function applyBaseFilters(QueryBuilder $qb, array $terms, ?array $location): void
     {
         $qb->where('p.isPublished = true')
            ->andWhere('(p.isDeleted IS NULL OR p.isDeleted = false)');
-
-        if ($categories !== []) {
-            $qb->join('p.categories', 'c')
-               ->andWhere('c.uniqueName IN (:cats)')
-               ->setParameter('cats', $categories);
-        }
 
         if ($terms) {
             foreach ($terms as $i => $term) {
@@ -128,6 +149,52 @@ class ProjectSearchService
         }
     }
 
+    /**
+     * @param string[] $categories
+     */
+    private function applyCategoryFilter(QueryBuilder $qb, array $categories): void
+    {
+        if ($categories === []) {
+            return;
+        }
+
+        foreach (array_values($categories) as $index => $category) {
+            $alias = 'c' . $index;
+            $param = 'cat' . $index;
+            $qb->join('p.categories', $alias, 'WITH', $alias . '.uniqueName = :' . $param)
+               ->setParameter($param, $category);
+        }
+    }
+
+    /**
+     * @param string[] $terms
+     * @return array<int, array{key: string, label: string, count: int}>
+     */
+    private function fetchCategoryCounts(array $terms, ?array $location): array
+    {
+        $qb = $this->em->createQueryBuilder()
+            ->select('c.uniqueName AS uniqueName')
+            ->addSelect('COALESCE(c.label, c.uniqueName) AS label')
+            ->addSelect('COUNT(DISTINCT p.id) AS count')
+            ->from(Category::class, 'c')
+            ->join('c.projectPresentation', 'p');
+
+        $this->applyBaseFilters($qb, $terms, $location);
+
+        $rows = $qb->groupBy('c.uniqueName, c.label')
+            ->orderBy('count', 'DESC')
+            ->addOrderBy('c.label', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_values(array_map(static function (array $row): array {
+            return [
+                'key' => (string) $row['uniqueName'],
+                'label' => (string) $row['label'],
+                'count' => (int) $row['count'],
+            ];
+        }, $rows));
+    }
     /**
      * @param string[] $terms
      */
