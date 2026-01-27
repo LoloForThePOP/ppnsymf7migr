@@ -36,6 +36,30 @@ body.search-overlay-open {
     font-weight: 700;
     color: var(--theme-title);
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-overlay__section-icon {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    opacity: 0.9;
+}
+
+.search-overlay__title .search-overlay__section-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.search-overlay__section-icon--wide {
+    width: 26px;
+    height: 18px;
+}
+
+.search-overlay__section-icon--stroke {
+    color: var(--theme-accent);
 }
 
 .search-overlay__input-wrap {
@@ -88,10 +112,121 @@ body.search-overlay-open {
 .search-overlay__filters {
     width: 260px;
     border-right: 1px solid var(--theme-border);
-    background: var(--theme-surface);
+    background: color-mix(in srgb, var(--theme-surface-alt) 88%, var(--theme-bg));
     padding: 16px;
     overflow-y: auto;
 }
+
+.search-overlay__filters-section {
+    background: var(--theme-surface);
+    border-radius: 16px;
+    padding: 12px 12px 14px;
+}
+
+.search-overlay__filters-section + .search-overlay__filters-section {
+    margin-top: 14px;
+}
+
+.search-overlay__location {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.search-overlay__location-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-overlay__location-field {
+    width: 100%;
+    border: 1px solid var(--theme-border);
+    border-radius: 999px;
+    padding: 8px 12px;
+    background: var(--theme-surface-alt);
+    color: var(--theme-text);
+    outline: none;
+    font-size: 0.95rem;
+}
+
+.search-overlay__location-field:focus {
+    border-color: var(--theme-accent);
+}
+
+.search-overlay__location-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.search-overlay__location-btn {
+    border: 1px solid var(--theme-border);
+    background: var(--theme-surface);
+    color: var(--theme-text);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.search-overlay__location-btn:hover {
+    border-color: var(--theme-accent);
+}
+
+.search-overlay__location-status {
+    font-size: 0.8rem;
+    color: var(--theme-text-muted);
+}
+
+.search-overlay__radius {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.search-overlay__radius.is-hidden {
+    display: none;
+}
+
+.search-overlay__radius-label {
+    font-size: 0.85rem;
+    color: var(--theme-text-muted);
+}
+
+.search-overlay__radius-input {
+    width: 100%;
+}
+
+.search-overlay__apply {
+    border: none;
+    background: var(--theme-accent);
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.search-overlay__apply.is-hidden {
+    display: none;
+}
+
+.search-overlay__apply:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.search-overlay__location-summary {
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px dashed var(--theme-border);
+    background: var(--theme-surface-alt);
+    color: var(--theme-text-muted);
+    font-size: 0.85rem;
+}
+
+/* Divider no longer needed when using section cards */
 
 .search-overlay__filters-header {
     display: flex;
@@ -103,6 +238,9 @@ body.search-overlay-open {
 .search-overlay__filters-title {
     font-weight: 700;
     color: var(--theme-title);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .search-overlay__filters-clear {

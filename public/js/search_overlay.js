@@ -16,6 +16,15 @@
   const paginationEl = overlay.querySelector('.search-overlay__pagination');
   const triggers = Array.from(document.querySelectorAll('[data-search-trigger]'));
   const triggerInputs = triggers.filter((el) => el.tagName === 'INPUT');
+  const locationInput = overlay.querySelector('#search-location-input');
+  const locationApplyBtn = overlay.querySelector('[data-search-location-apply]');
+  const locationResetBtn = overlay.querySelector('[data-search-location-reset]');
+  const locationMeBtn = overlay.querySelector('[data-search-location-me]');
+  const locationStatusEl = overlay.querySelector('#search-location-status');
+  const locationSummaryEl = overlay.querySelector('#search-location-summary');
+  const radiusInput = overlay.querySelector('#search-radius-input');
+  const radiusValueEl = overlay.querySelector('#search-radius-value');
+  const radiusWrap = overlay.querySelector('[data-search-radius-wrap]');
 
   const minLength = 2;
   const limit = 16;
@@ -27,6 +36,10 @@
   let activeCategories = new Set();
   let activeController = null;
   let isLoading = false;
+  let pendingLocation = null;
+  let activeLocation = null;
+  const defaultRadius = 10;
+  let hasPlacesInit = false;
 
   const debounce = (fn, wait = 250) => {
     let t = null;
@@ -65,6 +78,149 @@
     moreBtn.textContent = loading ? 'Chargement...' : 'Afficher plus';
   };
 
+  const setLocationStatus = (message) => {
+    if (!locationStatusEl) return;
+    locationStatusEl.textContent = message || '';
+  };
+
+  const canSearch = (term) => term.length >= minLength || !!activeLocation;
+
+  const updateLocationSummary = () => {
+    if (!locationSummaryEl) return;
+    if (!activeLocation) {
+      locationSummaryEl.textContent = '';
+      locationSummaryEl.classList.add('d-none');
+      return;
+    }
+    const label = activeLocation.label || 'Autour de moi';
+    locationSummaryEl.textContent = `${label} · ${activeLocation.radius} km`;
+    locationSummaryEl.classList.remove('d-none');
+  };
+
+  const updateRadiusLabel = (value) => {
+    if (!radiusValueEl) return;
+    radiusValueEl.textContent = String(value);
+  };
+
+  const updateLocationUI = () => {
+    const hasPending = !!pendingLocation;
+    if (radiusWrap) {
+      radiusWrap.classList.toggle('is-hidden', !hasPending);
+    }
+    if (radiusInput) {
+      radiusInput.disabled = !hasPending;
+    }
+    if (locationApplyBtn) {
+      locationApplyBtn.disabled = !hasPending;
+      if (locationInput) {
+        const shouldShow = locationInput.value.trim().length > 0;
+        locationApplyBtn.classList.toggle('is-hidden', !shouldShow);
+      }
+    }
+  };
+
+  const setPendingLocation = (location) => {
+    pendingLocation = location
+      ? {
+          ...location,
+          radius: location.radius ?? pendingLocation?.radius ?? defaultRadius,
+        }
+      : null;
+    if (pendingLocation && locationInput && pendingLocation.label) {
+      locationInput.value = pendingLocation.label;
+    }
+    if (pendingLocation && radiusInput) {
+      radiusInput.value = String(pendingLocation.radius);
+      updateRadiusLabel(pendingLocation.radius);
+    }
+    updateLocationUI();
+  };
+
+  const applyLocation = () => {
+    if (!pendingLocation) return;
+    activeLocation = { ...pendingLocation };
+    updateLocationSummary();
+    const term = input.value.trim();
+    if (!canSearch(term)) {
+      setStatus('Tapez au moins 2 caracteres ou choisissez une localisation.');
+      return;
+    }
+    performSearch(term, { page: 1 });
+  };
+
+  const resetLocation = () => {
+    pendingLocation = null;
+    activeLocation = null;
+    if (locationInput) {
+      locationInput.value = '';
+    }
+    if (radiusInput) {
+      radiusInput.value = String(defaultRadius);
+      updateRadiusLabel(defaultRadius);
+    }
+    setLocationStatus('');
+    updateLocationSummary();
+    updateLocationUI();
+    const term = input.value.trim();
+    if (term.length >= minLength) {
+      performSearch(term, { page: 1 });
+    } else {
+      setStatus('Tapez au moins 2 caracteres.');
+      renderCategories([]);
+      renderResults([]);
+      setCount('');
+      updatePagination();
+    }
+  };
+
+  const initPlacesAutocomplete = () => {
+    if (hasPlacesInit) return;
+    if (!locationInput) return;
+    if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
+      setTimeout(initPlacesAutocomplete, 250);
+      return;
+    }
+    hasPlacesInit = true;
+    const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+      types: ['(regions)'],
+    });
+    autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace();
+      if (!place || !place.geometry || !place.geometry.location) {
+        setLocationStatus('Lieu non reconnu.');
+        return;
+      }
+      setLocationStatus('');
+      setPendingLocation({
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng(),
+        label: place.name || place.formatted_address || 'Lieu sélectionné',
+      });
+    });
+  };
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationStatus('Géolocalisation indisponible.');
+      return;
+    }
+    setLocationStatus('Localisation en cours...');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocationStatus('');
+        setPendingLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          label: 'Autour de moi',
+        });
+      },
+      () => {
+        setLocationStatus('Autorisation refusée.');
+      },
+      { enableHighAccuracy: false, timeout: 8000 }
+    );
+  };
+
   const updatePagination = () => {
     if (!paginationEl || !moreBtn || !pageEl) return;
     if (currentResults.length === 0) {
@@ -96,6 +252,11 @@
     if (activeCategories.size > 0) {
       params.set('categories', Array.from(activeCategories).join(','));
     }
+    if (activeLocation) {
+      params.set('lat', String(activeLocation.lat));
+      params.set('lng', String(activeLocation.lng));
+      params.set('radius', String(activeLocation.radius));
+    }
     return `/search/projects?${params.toString()}`;
   };
 
@@ -111,10 +272,11 @@
     }
     clearInputBtn?.classList.toggle('d-none', input.value.length === 0);
     input.focus();
-    if (input.value.length >= minLength) {
-      debouncedSearch(input.value.trim());
+    const term = input.value.trim();
+    if (canSearch(term)) {
+      performSearch(term, { page: 1 });
     } else {
-      currentQuery = input.value.trim();
+      currentQuery = term;
       currentResults = [];
       totalPages = 0;
       totalCount = 0;
@@ -125,6 +287,7 @@
       renderResults([]);
       updatePagination();
     }
+    updateLocationSummary();
   };
 
   const closeOverlay = () => {
@@ -153,7 +316,7 @@
 
   const clearFilters = () => {
     activeCategories.clear();
-    if (currentQuery.length >= minLength) {
+    if (canSearch(currentQuery)) {
       performSearch(currentQuery, { page: 1 });
     } else {
       renderCategories(currentResults);
@@ -225,7 +388,7 @@
         } else {
           activeCategories.add(cat.key);
         }
-        if (currentQuery.length >= minLength) {
+        if (canSearch(currentQuery)) {
           performSearch(currentQuery, { page: 1 });
         } else {
           renderCategories(currentResults);
@@ -335,7 +498,12 @@
           setStatus(data.message || 'Aucun resultat');
           setEmpty(true, 'Aucun resultat pour cette recherche.');
         } else {
-          setStatus(`Resultats pour "${term}"`);
+          const label = term
+            ? `Resultats pour "${term}"`
+            : activeLocation
+              ? 'Resultats pour la localisation'
+              : 'Resultats';
+          setStatus(label);
           setEmpty(false);
         }
         applyCountLabel();
@@ -363,7 +531,7 @@
 
   const debouncedSearch = debounce((raw) => {
     const term = raw.trim();
-    if (term.length < minLength) {
+    if (!canSearch(term)) {
       currentQuery = term;
       currentResults = [];
       totalPages = 0;
@@ -371,7 +539,7 @@
       currentPage = 1;
       renderCategories([]);
       renderResults([]);
-      setStatus('Tapez au moins 2 caracteres.');
+      setStatus('Tapez au moins 2 caracteres ou choisissez une localisation.');
       setCount('');
       setEmpty(false);
       updatePagination();
@@ -386,12 +554,37 @@
     debouncedSearch(input.value);
   });
 
+  locationInput?.addEventListener('input', () => {
+    setLocationStatus('');
+    pendingLocation = null;
+    updateLocationUI();
+  });
+
+  radiusInput?.addEventListener('input', () => {
+    const value = parseInt(radiusInput.value, 10);
+    updateRadiusLabel(value);
+    if (pendingLocation) {
+      pendingLocation.radius = value;
+    }
+  });
+
+  locationApplyBtn?.addEventListener('click', applyLocation);
+  locationResetBtn?.addEventListener('click', resetLocation);
+  locationMeBtn?.addEventListener('click', useCurrentLocation);
+
+  if (radiusInput) {
+    updateRadiusLabel(radiusInput.value || defaultRadius);
+  }
+  updateLocationUI();
+  updateLocationSummary();
+  initPlacesAutocomplete();
+
   clearInputBtn?.addEventListener('click', clearSearch);
   clearFiltersBtn?.addEventListener('click', clearFilters);
   closeBtn?.addEventListener('click', closeOverlay);
   moreBtn?.addEventListener('click', () => {
     if (isLoading) return;
-    if (currentQuery.length < minLength) return;
+    if (!canSearch(currentQuery)) return;
     if (currentPage >= totalPages) return;
     performSearch(currentQuery, { page: currentPage + 1, append: true });
   });

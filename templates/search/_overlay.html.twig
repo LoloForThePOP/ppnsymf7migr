@@ -1,7 +1,10 @@
 {# Fullscreen search overlay #}
 <div id="search-overlay" class="search-overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="search-overlay__header">
-        <div class="search-overlay__title">Rechercher</div>
+        <div class="search-overlay__title">
+            <img class="search-overlay__section-icon icon-themed" src="{{ asset('search.svg', 'misc') }}" alt="" aria-hidden="true">
+            Rechercher
+        </div>
         <div class="search-overlay__input-wrap">
             <input
                 id="search-overlay-input"
@@ -19,12 +22,59 @@
 
     <div class="search-overlay__body">
         <aside class="search-overlay__filters">
-            <div class="search-overlay__filters-header">
-                <span class="search-overlay__filters-title">Categories</span>
-                <button class="search-overlay__filters-clear" type="button" data-search-clear-filters>Effacer filtres</button>
+            <div class="search-overlay__filters-section">
+                <div class="search-overlay__filters-header">
+                    <span class="search-overlay__filters-title">
+                        <svg class="search-overlay__section-icon search-overlay__section-icon--stroke" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 22s8-7.5 8-13a8 8 0 1 0-16 0c0 5.5 8 13 8 13Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                            <circle cx="12" cy="9" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        Localisation
+                    </span>
+                    <button class="search-overlay__filters-clear" type="button" data-search-location-reset>Réinitialiser</button>
+                </div>
+
+                <div class="search-overlay__location">
+                    <div class="search-overlay__location-input">
+                        <input
+                            id="search-location-input"
+                            class="search-overlay__location-field"
+                            type="text"
+                            placeholder="Ville, région, pays..."
+                            autocomplete="off"
+                            autocorrect="off"
+                            spellcheck="false"
+                        >
+                    </div>
+
+                    <div class="search-overlay__location-actions">
+                        <button class="search-overlay__location-btn" type="button" data-search-location-me>Autour de moi</button>
+                        <span id="search-location-status" class="search-overlay__location-status"></span>
+                    </div>
+
+                    <div class="search-overlay__radius is-hidden" data-search-radius-wrap>
+                        <label for="search-radius-input" class="search-overlay__radius-label">
+                            Dans un rayon de <span id="search-radius-value">10</span> km
+                        </label>
+                        <input id="search-radius-input" class="search-overlay__radius-input" type="range" min="1" max="200" step="1" value="10">
+                    </div>
+
+                    <button class="search-overlay__apply" type="button" data-search-location-apply disabled>Appliquer la localisation</button>
+                    <div id="search-location-summary" class="search-overlay__location-summary d-none"></div>
+                </div>
             </div>
-            <div id="search-overlay-categories" class="search-overlay__categories">
-                <div class="search-overlay__categories-empty">Tapez pour afficher les categories.</div>
+
+            <div class="search-overlay__filters-section">
+                <div class="search-overlay__filters-header">
+                    <span class="search-overlay__filters-title">
+                        <img class="search-overlay__section-icon search-overlay__section-icon--wide icon-themed" src="{{ asset('categories.svg', 'misc') }}" alt="" aria-hidden="true">
+                        Categories
+                    </span>
+                    <button class="search-overlay__filters-clear" type="button" data-search-clear-filters>Effacer filtres</button>
+                </div>
+                <div id="search-overlay-categories" class="search-overlay__categories">
+                    <div class="search-overlay__categories-empty">Tapez pour afficher les categories.</div>
+                </div>
             </div>
         </aside>
 

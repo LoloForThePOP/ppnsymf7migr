@@ -39,7 +39,20 @@ class SearchController extends AbstractController
             static fn ($value) => $value !== ''
         ));
 
-        if (mb_strlen(trim($q)) < 2) {
+        $lat = $request->query->get('lat');
+        $lng = $request->query->get('lng');
+        $radius = $request->query->get('radius');
+        $location = null;
+        if (is_numeric($lat) && is_numeric($lng)) {
+            $location = [
+                'lat' => (float) $lat,
+                'lng' => (float) $lng,
+                'radius' => is_numeric($radius) ? (float) $radius : null,
+            ];
+        }
+
+        $hasText = mb_strlen(trim($q)) >= 2;
+        if (!$hasText && $location === null) {
             return $this->json([
                 'query' => $q,
                 'count' => 0,
@@ -48,11 +61,11 @@ class SearchController extends AbstractController
                 'pages' => 0,
                 'limit' => $limit,
                 'results' => [],
-                'message' => 'Tapez au moins 2 caractères',
+                'message' => 'Tapez au moins 2 caractères ou choisissez une localisation',
             ]);
         }
 
-        $result = $this->searchService->searchWithFilters($q, $categories, $limit, $page);
+        $result = $this->searchService->searchWithFilters($q, $categories, $limit, $page, $location);
         $results = $result['items'];
         $total = $result['total'];
         $page = $result['page'];

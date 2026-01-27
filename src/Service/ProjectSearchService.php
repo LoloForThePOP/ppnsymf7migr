@@ -26,17 +26,16 @@ class ProjectSearchService
 
     /**
      * @param string[] $categories
+     * @param array{lat: float, lng: float, radius?: float}|null $location
      * @return array{items: PPBase[], total: int, page: int, pages: int}
      */
-    public function searchWithFilters(string $query, array $categories = [], int $limit = 20, int $page = 1): array
+    public function searchWithFilters(string $query, array $categories = [], int $limit = 20, int $page = 1, ?array $location = null): array
     {
         $q = trim($query);
-        if ($q === '') {
-            return ['items' => [], 'total' => 0, 'page' => 1, 'pages' => 0];
-        }
+        $location = $this->normalizeLocation($location);
 
         $terms = array_filter(preg_split('/\s+/', $q) ?: [], static fn ($t) => $t !== '');
-        if (!$terms) {
+        if (!$terms && !$location) {
             return ['items' => [], 'total' => 0, 'page' => 1, 'pages' => 0];
         }
 
@@ -51,7 +50,7 @@ class ProjectSearchService
             ->select('COUNT(DISTINCT p.id)')
             ->from(PPBase::class, 'p');
 
-        $this->applySearchFilters($countQb, $terms, $categories);
+        $this->applySearchFilters($countQb, $terms, $categories, $location);
 
         $total = (int) $countQb->getQuery()->getSingleScalarResult();
         if ($total === 0) {
@@ -70,11 +69,14 @@ class ProjectSearchService
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
 
-        $this->applySearchFilters($qb, $terms, $categories);
-        $this->addScoringSelects($qb, $terms);
-
-        $qb->orderBy('score_0', 'DESC')
-           ->addOrderBy('p.createdAt', 'DESC');
+        $this->applySearchFilters($qb, $terms, $categories, $location);
+        if ($terms) {
+            $this->addScoringSelects($qb, $terms);
+            $qb->orderBy('score_0', 'DESC')
+               ->addOrderBy('p.createdAt', 'DESC');
+        } else {
+            $qb->orderBy('p.createdAt', 'DESC');
+        }
 
         return [
             'items' => $qb->getQuery()->getResult(),
@@ -88,7 +90,7 @@ class ProjectSearchService
      * @param string[] $terms
      * @param string[] $categories
      */
-    private function applySearchFilters(QueryBuilder $qb, array $terms, array $categories): void
+    private function applySearchFilters(QueryBuilder $qb, array $terms, array $categories, ?array $location): void
     {
         $qb->where('p.isPublished = true')
            ->andWhere('(p.isDeleted IS NULL OR p.isDeleted = false)');
@@ -99,17 +101,30 @@ class ProjectSearchService
                ->setParameter('cats', $categories);
         }
 
-        foreach ($terms as $i => $term) {
-            $param = ':t' . $i;
-            $qb->andWhere(
-                $qb->expr()->orX(
-                    'LOWER(p.title) LIKE LOWER(' . $param . ')',
-                    'LOWER(p.goal) LIKE LOWER(' . $param . ')',
-                    'LOWER(p.textDescription) LIKE LOWER(' . $param . ')',
-                    'LOWER(p.keywords) LIKE LOWER(' . $param . ')'
-                )
-            );
-            $qb->setParameter($param, '%' . $term . '%');
+        if ($terms) {
+            foreach ($terms as $i => $term) {
+                $param = ':t' . $i;
+                $qb->andWhere(
+                    $qb->expr()->orX(
+                        'LOWER(p.title) LIKE LOWER(' . $param . ')',
+                        'LOWER(p.goal) LIKE LOWER(' . $param . ')',
+                        'LOWER(p.textDescription) LIKE LOWER(' . $param . ')',
+                        'LOWER(p.keywords) LIKE LOWER(' . $param . ')'
+                    )
+                );
+                $qb->setParameter($param, '%' . $term . '%');
+            }
+        }
+
+        if ($location) {
+            $bbox = $this->computeBoundingBox($location['lat'], $location['lng'], $location['radius']);
+            $qb->join('p.places', 'pl')
+               ->andWhere('pl.geoloc.latitude BETWEEN :minLat AND :maxLat')
+               ->andWhere('pl.geoloc.longitude BETWEEN :minLng AND :maxLng')
+               ->setParameter('minLat', $bbox['minLat'])
+               ->setParameter('maxLat', $bbox['maxLat'])
+               ->setParameter('minLng', $bbox['minLng'])
+               ->setParameter('maxLng', $bbox['maxLng']);
         }
     }
 
@@ -129,5 +144,50 @@ class ProjectSearchService
                 ) AS HIDDEN score_' . $i
             );
         }
+    }
+
+    /**
+     * @param array{lat: mixed, lng: mixed, radius?: mixed}|null $location
+     * @return array{lat: float, lng: float, radius: float}|null
+     */
+    private function normalizeLocation(?array $location): ?array
+    {
+        if (!$location) {
+            return null;
+        }
+        $lat = $location['lat'] ?? $location['latitude'] ?? null;
+        $lng = $location['lng'] ?? $location['longitude'] ?? null;
+        if (!is_numeric($lat) || !is_numeric($lng)) {
+            return null;
+        }
+        $radius = $location['radius'] ?? 10;
+        if (!is_numeric($radius)) {
+            $radius = 10;
+        }
+        $radius = max(1.0, min(200.0, (float) $radius));
+
+        return [
+            'lat' => (float) $lat,
+            'lng' => (float) $lng,
+            'radius' => $radius,
+        ];
+    }
+
+    /**
+     * @return array{minLat: float, maxLat: float, minLng: float, maxLng: float}
+     */
+    private function computeBoundingBox(float $lat, float $lng, float $radiusKm): array
+    {
+        $earthRadiusKm = 6371.0;
+        $latRad = deg2rad($lat);
+        $latDelta = rad2deg($radiusKm / $earthRadiusKm);
+        $lngDelta = rad2deg($radiusKm / ($earthRadiusKm * max(0.0001, cos($latRad))));
+
+        return [
+            'minLat' => $lat - $latDelta,
+            'maxLat' => $lat + $latDelta,
+            'minLng' => $lng - $lngDelta,
+            'maxLng' => $lng + $lngDelta,
+        ];
     }
 }
