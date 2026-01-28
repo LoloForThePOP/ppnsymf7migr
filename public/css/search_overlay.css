@@ -477,6 +477,10 @@ body.search-overlay-open {
     z-index: 10;
 }
 
+.search-overlay__suggestions-section + .search-overlay__suggestions-section {
+    margin-top: 10px;
+}
+
 .search-overlay__suggestions-title {
     color: var(--theme-text-muted);
     font-size: 0.8rem;
@@ -499,11 +503,71 @@ body.search-overlay-open {
     font-size: 0.85rem;
     cursor: pointer;
     text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
 }
 
 .search-overlay__suggestions-item:hover {
     border-color: var(--theme-accent);
     color: var(--theme-accent);
+}
+
+.search-overlay__suggestions-item-main {
+    background: transparent;
+    border: none;
+    color: inherit;
+    font: inherit;
+    padding: 0;
+    text-align: left;
+    flex: 1;
+}
+
+.search-overlay__suggestions-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.search-overlay__suggestions-item-append {
+    border: none;
+    background: transparent;
+    color: var(--theme-text-muted);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-overlay__suggestions-item-append svg {
+    width: 14px;
+    height: 14px;
+}
+
+.search-overlay__suggestions-item-append:hover {
+    color: var(--theme-accent);
+}
+
+.search-overlay__suggestions-item-remove {
+    border: none;
+    background: transparent;
+    color: var(--theme-text-muted);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    opacity: 0;
+}
+
+.search-overlay__suggestions-item--history:hover .search-overlay__suggestions-item-remove,
+.search-overlay__suggestions-item--history.is-reveal-delete .search-overlay__suggestions-item-remove {
+    opacity: 1;
 }
 
 .search-overlay__count-line {
@@ -830,6 +894,12 @@ body.search-overlay-open {
 
     .search-overlay__map-frame {
         height: 260px;
+    }
+
+    .search-overlay__suggestions {
+        left: 28px;
+        right: auto;
+        width: calc(100vw - 58px);
     }
 
     .search-overlay__category-count,

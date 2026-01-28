@@ -140,4 +140,19 @@ class SearchController extends AbstractController
     {
         return $this->render('search/demo.html.twig');
     }
+
+    #[Route('/search/suggest', name: 'search_suggest', methods: ['GET'])]
+    public function suggest(Request $request): JsonResponse
+    {
+        $q = (string) $request->query->get('q', '');
+        $limit = (int) $request->query->get('limit', 8);
+        $limit = max(1, min($limit, 12));
+
+        $suggestions = $this->searchService->suggest($q, $limit);
+
+        return $this->json([
+            'query' => $q,
+            'suggestions' => $suggestions,
+        ]);
+    }
 }

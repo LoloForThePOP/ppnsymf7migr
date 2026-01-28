@@ -10,8 +10,11 @@
   const countLocationEl = overlay.querySelector('#search-overlay-count-location');
   const emptyEl = overlay.querySelector('#search-overlay-empty');
   const categoriesEl = overlay.querySelector('#search-overlay-categories');
+  const suggestBoxEl = overlay.querySelector('[data-search-suggest-box]');
   const recentEl = overlay.querySelector('[data-search-recent]');
   const recentListEl = overlay.querySelector('[data-search-recent-list]');
+  const suggestEl = overlay.querySelector('[data-search-suggest]');
+  const suggestListEl = overlay.querySelector('[data-search-suggest-list]');
   const mapModal = overlay.querySelector('#search-overlay-map');
   const mapFrame = overlay.querySelector('#search-overlay-map-frame');
   const mapTitle = overlay.querySelector('#search-overlay-map-title');
@@ -65,6 +68,8 @@
   let lastRadius = defaultRadius;
   const RECENT_KEY = 'searchRecentQueries';
   const RECENT_LIMIT = 5;
+  const SUGGEST_LIMIT = 8;
+  let suggestController = null;
   let hasPlacesInit = false;
 
   const debounce = (fn, wait = 250) => {
@@ -119,6 +124,13 @@
     }
   };
 
+  const removeRecentQuery = (term) => {
+    const current = loadRecentQueries();
+    const lower = term.toLowerCase();
+    const next = current.filter((item) => item.toLowerCase() !== lower);
+    saveRecentQueries(next);
+  };
+
   const updateRecentQueries = (query) => {
     const term = query.trim();
     if (term.length < minLength) return;
@@ -131,27 +143,174 @@
   };
 
   const renderRecentQueries = () => {
-    if (!recentEl || !recentListEl) return;
+    if (!recentEl || !recentListEl || !suggestBoxEl) return;
     const items = loadRecentQueries();
     recentListEl.innerHTML = '';
     if (items.length === 0) {
       recentEl.classList.add('d-none');
+      if (suggestEl?.classList.contains('d-none')) {
+        suggestBoxEl.classList.add('d-none');
+      }
       return;
     }
     items.forEach((term) => {
-      const chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'search-overlay__suggestions-item';
-      chip.textContent = term;
-      chip.addEventListener('click', () => {
+      const item = document.createElement('div');
+      item.className = 'search-overlay__suggestions-item search-overlay__suggestions-item--history';
+
+      const mainBtn = document.createElement('button');
+      mainBtn.type = 'button';
+      mainBtn.className = 'search-overlay__suggestions-item-main';
+      mainBtn.textContent = term;
+      mainBtn.addEventListener('click', () => {
         input.value = term;
         syncTriggerInputs(term);
         clearInputBtn?.classList.remove('d-none');
         performSearch(term, { page: 1 });
+        suggestBoxEl?.classList.add('d-none');
       });
-      recentListEl.appendChild(chip);
+
+      const actions = document.createElement('div');
+      actions.className = 'search-overlay__suggestions-actions';
+
+      const appendBtn = document.createElement('button');
+      appendBtn.type = 'button';
+      appendBtn.className = 'search-overlay__suggestions-item-append';
+      appendBtn.setAttribute('aria-label', 'Insérer la recherche');
+      appendBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 12h12.17l-3.58-3.59L14 7l6 6-6 6-1.41-1.41L16.17 13H4z"/></svg>';
+      appendBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const nextValue = `${term} `;
+        input.value = nextValue;
+        syncTriggerInputs(nextValue);
+        clearInputBtn?.classList.remove('d-none');
+        debouncedSearch(nextValue);
+        debouncedSuggest(nextValue);
+        input.focus();
+        if (input.setSelectionRange) {
+          const pos = nextValue.length;
+          input.setSelectionRange(pos, pos);
+        }
+      });
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'search-overlay__suggestions-item-remove';
+      removeBtn.setAttribute('aria-label', 'Supprimer cette recherche');
+      removeBtn.textContent = '×';
+      removeBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        removeRecentQuery(term);
+        renderRecentQueries();
+      });
+
+      let holdTimer = null;
+      const clearHold = () => {
+        if (holdTimer) {
+          clearTimeout(holdTimer);
+          holdTimer = null;
+        }
+      };
+      item.addEventListener('touchstart', () => {
+        clearHold();
+        holdTimer = setTimeout(() => {
+          item.classList.add('is-reveal-delete');
+        }, 450);
+      }, { passive: true });
+      item.addEventListener('touchend', clearHold);
+      item.addEventListener('touchcancel', clearHold);
+
+      actions.appendChild(appendBtn);
+      actions.appendChild(removeBtn);
+      item.appendChild(mainBtn);
+      item.appendChild(actions);
+      recentListEl.appendChild(item);
     });
     recentEl.classList.remove('d-none');
+    suggestBoxEl.classList.remove('d-none');
+  };
+
+  const renderSuggestions = (items, term) => {
+    if (!suggestEl || !suggestListEl || !suggestBoxEl) return;
+    suggestListEl.innerHTML = '';
+    if (!term || items.length === 0) {
+      suggestEl.classList.add('d-none');
+      if (recentEl?.classList.contains('d-none')) {
+        suggestBoxEl.classList.add('d-none');
+      }
+      return;
+    }
+    items.forEach((item) => {
+      const term = item.label || item;
+      const row = document.createElement('div');
+      row.className = 'search-overlay__suggestions-item';
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'search-overlay__suggestions-item-main';
+      btn.textContent = term;
+      btn.addEventListener('click', () => {
+        input.value = term;
+        syncTriggerInputs(term);
+        clearInputBtn?.classList.remove('d-none');
+        performSearch(term, { page: 1 });
+        suggestBoxEl?.classList.add('d-none');
+      });
+
+      const actions = document.createElement('div');
+      actions.className = 'search-overlay__suggestions-actions';
+
+      const appendBtn = document.createElement('button');
+      appendBtn.type = 'button';
+      appendBtn.className = 'search-overlay__suggestions-item-append';
+      appendBtn.setAttribute('aria-label', 'Insérer la suggestion');
+      appendBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 12h12.17l-3.58-3.59L14 7l6 6-6 6-1.41-1.41L16.17 13H4z"/></svg>';
+      appendBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const nextValue = `${term} `;
+        input.value = nextValue;
+        syncTriggerInputs(nextValue);
+        clearInputBtn?.classList.remove('d-none');
+        debouncedSearch(nextValue);
+        debouncedSuggest(nextValue);
+        input.focus();
+        if (input.setSelectionRange) {
+          const pos = nextValue.length;
+          input.setSelectionRange(pos, pos);
+        }
+      });
+
+      actions.appendChild(appendBtn);
+      row.appendChild(btn);
+      row.appendChild(actions);
+      suggestListEl.appendChild(row);
+    });
+    suggestEl.classList.remove('d-none');
+    suggestBoxEl.classList.remove('d-none');
+  };
+
+  const fetchSuggestions = (term) => {
+    if (!term || term.length < minLength) {
+      renderSuggestions([], '');
+      return;
+    }
+    if (suggestController) {
+      suggestController.abort();
+    }
+    suggestController = new AbortController();
+    fetch(`/search/suggest?q=${encodeURIComponent(term)}&limit=${SUGGEST_LIMIT}`, { signal: suggestController.signal })
+      .then((res) => res.json())
+      .then((data) => {
+        if (suggestController?.signal.aborted) return;
+        const items = Array.isArray(data.suggestions) ? data.suggestions : [];
+        renderSuggestions(items, term);
+      })
+      .catch((err) => {
+        if (err.name === 'AbortError') return;
+        renderSuggestions([], term);
+      });
   };
 
   const setEmpty = (show, message) => {
@@ -445,6 +604,7 @@
     }
     if (!term) {
       renderRecentQueries();
+      renderSuggestions([], '');
     } else if (recentEl) {
       recentEl.classList.add('d-none');
     }
@@ -526,6 +686,7 @@
     setEmpty(false);
     updatePagination();
     renderRecentQueries();
+    renderSuggestions([], '');
   };
 
   const clearFilters = () => {
@@ -769,12 +930,17 @@
         }
         renderCategories(currentResults, categoryCounts);
         renderResults(currentResults);
-        if (recentEl) {
-          recentEl.classList.add('d-none');
-        }
         if (currentResults.length === 0) {
           setStatus(data.message || 'Aucun résultat');
-          setEmpty(true, 'Aucun résultat pour cette recherche.');
+          const hints = [];
+          if (activeCategories.size > 0) {
+            hints.push('Essayez sans catégories');
+          }
+          if (activeLocation) {
+            hints.push('Augmenter le rayon');
+          }
+          const hintText = hints.length > 0 ? `\n\n${hints.join(' · ')}` : '';
+          setEmpty(true, `Aucun résultat pour cette recherche.${hintText}`);
         } else {
           setStatus('');
           setEmpty(false);
@@ -821,15 +987,22 @@
       setEmpty(false);
       updatePagination();
       renderRecentQueries();
+      renderSuggestions([], '');
       return;
     }
     performSearch(term, { page: 1 });
   }, 250);
 
+  const debouncedSuggest = debounce((raw) => {
+    const term = raw.trim();
+    fetchSuggestions(term);
+  }, 200);
+
   input.addEventListener('input', () => {
     syncTriggerInputs(input.value);
     clearInputBtn?.classList.toggle('d-none', input.value.length === 0);
     debouncedSearch(input.value);
+    debouncedSuggest(input.value);
   });
 
   input.addEventListener('keydown', (event) => {

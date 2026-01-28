@@ -18,9 +18,15 @@
                 spellcheck="false"
             >
             <button class="search-overlay__clear d-none" type="button" data-search-clear aria-label="Effacer la recherche">&times;</button>
-            <div class="search-overlay__suggestions d-none" data-search-recent>
-                <div class="search-overlay__suggestions-title">Recherches récentes</div>
-                <div class="search-overlay__suggestions-list" data-search-recent-list></div>
+            <div class="search-overlay__suggestions d-none" data-search-suggest-box>
+                <div class="search-overlay__suggestions-section" data-search-recent>
+                    <div class="search-overlay__suggestions-title">Recherches récentes</div>
+                    <div class="search-overlay__suggestions-list" data-search-recent-list></div>
+                </div>
+                <div class="search-overlay__suggestions-section d-none" data-search-suggest>
+                    <div class="search-overlay__suggestions-title">Suggestions</div>
+                    <div class="search-overlay__suggestions-list" data-search-suggest-list></div>
+                </div>
             </div>
         </div>
         <button class="search-overlay__close search-overlay__close-btn" type="button" data-search-close aria-label="Fermer">Fermer</button>

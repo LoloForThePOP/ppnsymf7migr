@@ -114,6 +114,65 @@ class ProjectSearchService
     }
 
     /**
+     * @return array<int, array{label: string, type: string}>
+     */
+    public function suggest(string $query, int $limit = 8): array
+    {
+        $q = trim($query);
+        if (mb_strlen($q) < 2) {
+            return [];
+        }
+        $limit = max(1, min($limit, 12));
+
+        $qb = $this->em->createQueryBuilder()
+            ->select('p.title AS title, p.keywords AS keywords')
+            ->from(PPBase::class, 'p')
+            ->where('p.isPublished = true')
+            ->andWhere('(p.isDeleted IS NULL OR p.isDeleted = false)')
+            ->andWhere('LOWER(p.title) LIKE LOWER(:q) OR LOWER(p.keywords) LIKE LOWER(:q)')
+            ->setParameter('q', '%' . $q . '%')
+            ->setMaxResults(50);
+
+        $rows = $qb->getQuery()->getArrayResult();
+        $results = [];
+        $seen = [];
+
+        foreach ($rows as $row) {
+            $keywords = (string) ($row['keywords'] ?? '');
+            if ($keywords === '') {
+                continue;
+            }
+            foreach (preg_split('/[,;]+/', $keywords) ?: [] as $keyword) {
+                $keyword = trim($keyword);
+                if ($keyword === '') {
+                    continue;
+                }
+                if (mb_stripos($keyword, $q) === false) {
+                    continue;
+                }
+                $key = 'k:' . mb_strtolower($keyword);
+                if (!isset($seen[$key])) {
+                    $results[] = ['label' => $keyword, 'type' => 'keyword'];
+                    $seen[$key] = true;
+                }
+            }
+        }
+
+        foreach ($rows as $row) {
+            $title = trim((string) ($row['title'] ?? ''));
+            if ($title !== '') {
+                $key = 't:' . mb_strtolower($title);
+                if (!isset($seen[$key])) {
+                    $results[] = ['label' => $title, 'type' => 'title'];
+                    $seen[$key] = true;
+                }
+            }
+        }
+
+        return array_slice($results, 0, $limit);
+    }
+
+    /**
      * @param string[] $terms
      * @param string[] $categories
      */
