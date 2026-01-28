@@ -73,6 +73,7 @@ body.search-overlay-open {
     background: var(--theme-surface-alt);
     border: 1px solid var(--theme-border);
     border-radius: 999px;
+    position: relative;
 }
 
 .search-overlay__input {
@@ -290,8 +291,37 @@ body.search-overlay-open {
     margin-top: 11px;
 }
 
+.search-overlay__radius.is-hidden + .search-overlay__location-note,
+.search-overlay__radius + .search-overlay__location-note {
+    margin-top: 11px;
+}
+
+.search-overlay__location-note + .search-overlay__apply {
+    margin-top: 11px;
+}
+
 .search-overlay__radius + .search-overlay__apply {
     margin-top: 11px;
+}
+
+.search-overlay__location-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--theme-surface-alt) 70%, var(--theme-bg));
+    color: var(--theme-text-muted);
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
+.search-overlay__location-note-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--theme-accent);
+    flex: 0 0 auto;
+    margin-top: 2px;
 }
 
 .search-overlay__radius.is-hidden {
@@ -431,6 +461,49 @@ body.search-overlay-open {
     display: flex;
     flex-direction: column;
     gap: 4px;
+}
+
+.search-overlay__suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 6px;
+    padding: 10px 12px;
+    background: var(--theme-surface);
+    border: 1px solid var(--theme-border);
+    border-radius: 12px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    z-index: 10;
+}
+
+.search-overlay__suggestions-title {
+    color: var(--theme-text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.search-overlay__suggestions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.search-overlay__suggestions-item {
+    border: 1px solid var(--theme-border);
+    background: var(--theme-surface-alt);
+    color: var(--theme-text);
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: left;
+}
+
+.search-overlay__suggestions-item:hover {
+    border-color: var(--theme-accent);
+    color: var(--theme-accent);
 }
 
 .search-overlay__count-line {

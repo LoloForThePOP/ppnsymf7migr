@@ -18,6 +18,10 @@
                 spellcheck="false"
             >
             <button class="search-overlay__clear d-none" type="button" data-search-clear aria-label="Effacer la recherche">&times;</button>
+            <div class="search-overlay__suggestions d-none" data-search-recent>
+                <div class="search-overlay__suggestions-title">Recherches récentes</div>
+                <div class="search-overlay__suggestions-list" data-search-recent-list></div>
+            </div>
         </div>
         <button class="search-overlay__close search-overlay__close-btn" type="button" data-search-close aria-label="Fermer">Fermer</button>
     </div>
@@ -74,6 +78,13 @@
                                 Dans un rayon de <span id="search-radius-value">10</span> km
                             </label>
                             <input id="search-radius-input" class="search-overlay__radius-input" type="range" min="1" max="200" step="1" value="10">
+                        </div>
+
+                        <div class="search-overlay__location-note d-none" data-search-location-note>
+                            <svg class="search-overlay__location-note-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill="currentColor" d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm0 7a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1.1 9H10.9v-7h2.2v7Z"/>
+                            </svg>
+                            <span>Info&nbsp;: des projets sans lieu peuvent ne pas apparaître quand la localisation est active.</span>
                         </div>
 
                         <button class="search-overlay__apply" type="button" data-search-location-apply disabled>Appliquer la localisation</button>

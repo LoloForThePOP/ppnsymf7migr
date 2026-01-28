@@ -10,6 +10,8 @@
   const countLocationEl = overlay.querySelector('#search-overlay-count-location');
   const emptyEl = overlay.querySelector('#search-overlay-empty');
   const categoriesEl = overlay.querySelector('#search-overlay-categories');
+  const recentEl = overlay.querySelector('[data-search-recent]');
+  const recentListEl = overlay.querySelector('[data-search-recent-list]');
   const mapModal = overlay.querySelector('#search-overlay-map');
   const mapFrame = overlay.querySelector('#search-overlay-map-frame');
   const mapTitle = overlay.querySelector('#search-overlay-map-title');
@@ -31,6 +33,7 @@
   const locationMeBtn = overlay.querySelector('[data-search-location-me]');
   const locationStatusEl = overlay.querySelector('#search-location-status');
   const locationInputClearBtn = overlay.querySelector('[data-search-location-clear-input]');
+  const locationNoteEl = overlay.querySelector('[data-search-location-note]');
   const locationActionsEl = overlay.querySelector('.search-overlay__location-actions');
   const locationSummaryEl = null;
   const locationSummaryLabelEl = null;
@@ -60,6 +63,8 @@
   let pendingDirty = false;
   const defaultRadius = 10;
   let lastRadius = defaultRadius;
+  const RECENT_KEY = 'searchRecentQueries';
+  const RECENT_LIMIT = 5;
   let hasPlacesInit = false;
 
   const debounce = (fn, wait = 250) => {
@@ -92,6 +97,61 @@
       const hasContent = (totalLabel && totalLabel.length > 0) || (locationLabel && locationLabel.length > 0);
       countEl.classList.toggle('d-none', !hasContent);
     }
+  };
+
+  const loadRecentQueries = () => {
+    try {
+      const raw = window.localStorage.getItem(RECENT_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((value) => typeof value === 'string' && value.trim() !== '');
+    } catch {
+      return [];
+    }
+  };
+
+  const saveRecentQueries = (queries) => {
+    try {
+      window.localStorage.setItem(RECENT_KEY, JSON.stringify(queries));
+    } catch {
+      // ignore
+    }
+  };
+
+  const updateRecentQueries = (query) => {
+    const term = query.trim();
+    if (term.length < minLength) return;
+    const current = loadRecentQueries();
+    const lower = term.toLowerCase();
+    const filtered = current.filter((item) => item.toLowerCase() !== lower);
+    filtered.unshift(term);
+    const next = filtered.slice(0, RECENT_LIMIT);
+    saveRecentQueries(next);
+  };
+
+  const renderRecentQueries = () => {
+    if (!recentEl || !recentListEl) return;
+    const items = loadRecentQueries();
+    recentListEl.innerHTML = '';
+    if (items.length === 0) {
+      recentEl.classList.add('d-none');
+      return;
+    }
+    items.forEach((term) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'search-overlay__suggestions-item';
+      chip.textContent = term;
+      chip.addEventListener('click', () => {
+        input.value = term;
+        syncTriggerInputs(term);
+        clearInputBtn?.classList.remove('d-none');
+        performSearch(term, { page: 1 });
+      });
+      recentListEl.appendChild(chip);
+    });
+    recentEl.classList.remove('d-none');
   };
 
   const setEmpty = (show, message) => {
@@ -164,6 +224,10 @@
       const shouldEnable = hasPending || !!activeLocation;
       locationApplyBtn.disabled = !shouldEnable;
       locationApplyBtn.classList.remove('is-hidden');
+    }
+    if (locationNoteEl) {
+      const showNote = !!activeLocation;
+      locationNoteEl.classList.toggle('d-none', !showNote);
     }
     if (locationInputWrap) {
       const hideInput = pendingLocation?.source === 'me' || activeLocation?.source === 'me';
@@ -379,6 +443,11 @@
       renderResults([]);
       updatePagination();
     }
+    if (!term) {
+      renderRecentQueries();
+    } else if (recentEl) {
+      recentEl.classList.add('d-none');
+    }
     syncLocationUI();
   };
 
@@ -456,6 +525,7 @@
     setCountLines('', '');
     setEmpty(false);
     updatePagination();
+    renderRecentQueries();
   };
 
   const clearFilters = () => {
@@ -589,6 +659,11 @@
 
       const link = document.createElement('a');
       link.href = item.url || '#';
+      link.addEventListener('click', () => {
+        if (currentQuery) {
+          updateRecentQueries(currentQuery);
+        }
+      });
 
       const thumb = document.createElement('div');
       thumb.className = 'search-result-card__thumb';
@@ -694,6 +769,9 @@
         }
         renderCategories(currentResults, categoryCounts);
         renderResults(currentResults);
+        if (recentEl) {
+          recentEl.classList.add('d-none');
+        }
         if (currentResults.length === 0) {
           setStatus(data.message || 'Aucun résultat');
           setEmpty(true, 'Aucun résultat pour cette recherche.');
@@ -742,6 +820,7 @@
       setCountLines('', '');
       setEmpty(false);
       updatePagination();
+      renderRecentQueries();
       return;
     }
     performSearch(term, { page: 1 });
@@ -751,6 +830,15 @@
     syncTriggerInputs(input.value);
     clearInputBtn?.classList.toggle('d-none', input.value.length === 0);
     debouncedSearch(input.value);
+  });
+
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      const term = input.value.trim();
+      if (term.length >= minLength) {
+        updateRecentQueries(term);
+      }
+    }
   });
 
   locationInput?.addEventListener('input', () => {
