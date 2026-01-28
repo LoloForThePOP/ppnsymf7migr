@@ -37,37 +37,46 @@
                 </div>
 
                 <div class="search-overlay__location">
-                    <div class="search-overlay__location-input">
-                        <input
-                            id="search-location-input"
-                            class="search-overlay__location-field"
-                            type="text"
-                            placeholder="Ville, région, pays..."
-                            autocomplete="off"
-                            autocorrect="off"
-                            spellcheck="false"
-                        >
-                    </div>
+                    <div class="search-overlay__location-fields" data-search-location-fields>
+                        <div id="search-location-summary" class="search-overlay__location-summary d-none" data-search-location-summary>
+                            <button class="search-overlay__location-summary-main" type="button" data-search-location-edit>
+                                <span class="search-overlay__location-summary-label" data-search-location-summary-label></span>
+                            </button>
+                            <button class="search-overlay__location-summary-edit" type="button" data-search-location-edit>Modifier</button>
+                            <button class="search-overlay__location-summary-clear" type="button" data-search-location-clear aria-label="Réinitialiser">×</button>
+                        </div>
 
-                    <div class="search-overlay__location-actions">
-                        <button class="search-overlay__location-btn" type="button" data-search-location-me>
-                            <svg class="search-overlay__btn-icon" viewBox="0 0 24 24" aria-hidden="true">
-                                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12 2c.55 0 1 .45 1 1v1.84c3.19.44 5.72 2.97 6.16 6.16H21c.55 0 1 .45 1 1s-.45 1-1 1h-1.84c-.44 3.19-2.97 5.72-6.16 6.16V21c0 .55-.45 1-1 1s-1-.45-1-1v-1.84c-3.19-.44-5.72-2.97-6.16-6.16H3c-.55 0-1-.45-1-1s.45-1 1-1h1.84c.44-3.19 2.97-5.72 6.16-6.16V3c0-.55.45-1 1-1Zm0 4.77A5.23 5.23 0 0 0 6.77 12 5.23 5.23 0 0 0 12 17.23 5.23 5.23 0 0 0 17.23 12 5.23 5.23 0 0 0 12 6.77Zm0 3.26a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/>
-                            </svg>
-                            Autour de moi
-                        </button>
-                        <span id="search-location-status" class="search-overlay__location-status"></span>
-                    </div>
+                        <div class="search-overlay__location-input">
+                            <input
+                                id="search-location-input"
+                                class="search-overlay__location-field"
+                                type="text"
+                                placeholder="Ville, région, pays..."
+                                autocomplete="off"
+                                autocorrect="off"
+                                spellcheck="false"
+                            >
+                        </div>
 
-                    <div class="search-overlay__radius is-hidden" data-search-radius-wrap>
-                        <label for="search-radius-input" class="search-overlay__radius-label">
-                            Dans un rayon de <span id="search-radius-value">10</span> km
-                        </label>
-                        <input id="search-radius-input" class="search-overlay__radius-input" type="range" min="1" max="200" step="1" value="10">
-                    </div>
+                        <div class="search-overlay__location-actions">
+                            <button class="search-overlay__location-btn" type="button" data-search-location-me>
+                                <svg class="search-overlay__btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12 2c.55 0 1 .45 1 1v1.84c3.19.44 5.72 2.97 6.16 6.16H21c.55 0 1 .45 1 1s-.45 1-1 1h-1.84c-.44 3.19-2.97 5.72-6.16 6.16V21c0 .55-.45 1-1 1s-1-.45-1-1v-1.84c-3.19-.44-5.72-2.97-6.16-6.16H3c-.55 0-1-.45-1-1s.45-1 1-1h1.84c.44-3.19 2.97-5.72 6.16-6.16V3c0-.55.45-1 1-1Zm0 4.77A5.23 5.23 0 0 0 6.77 12 5.23 5.23 0 0 0 12 17.23 5.23 5.23 0 0 0 17.23 12 5.23 5.23 0 0 0 12 6.77Zm0 3.26a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/>
+                                </svg>
+                                Autour de moi (désactivé)
+                            </button>
+                            <span id="search-location-status" class="search-overlay__location-status"></span>
+                        </div>
 
-                    <button class="search-overlay__apply" type="button" data-search-location-apply disabled>Appliquer la localisation</button>
-                    <div id="search-location-summary" class="search-overlay__location-summary d-none"></div>
+                        <div class="search-overlay__radius is-hidden" data-search-radius-wrap>
+                            <label for="search-radius-input" class="search-overlay__radius-label">
+                                Dans un rayon de <span id="search-radius-value">10</span> km
+                            </label>
+                            <input id="search-radius-input" class="search-overlay__radius-input" type="range" min="1" max="200" step="1" value="10">
+                        </div>
+
+                        <button class="search-overlay__apply" type="button" data-search-location-apply disabled>Appliquer la localisation</button>
+                    </div>
                 </div>
             </div>
 

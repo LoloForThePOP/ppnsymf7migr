@@ -158,6 +158,10 @@ body.search-overlay-open {
     gap: 8px;
 }
 
+.search-overlay__location-input.is-hidden {
+    display: none;
+}
+
 .search-overlay__location-field {
     width: 100%;
     border: 1px solid var(--theme-border);
@@ -178,6 +182,11 @@ body.search-overlay-open {
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
+    margin-top: 11px;
+}
+
+.search-overlay__location-actions.is-hidden {
+    display: none;
 }
 
 .search-overlay__location-btn {
@@ -215,6 +224,10 @@ body.search-overlay-open {
     gap: 6px;
 }
 
+.search-overlay__radius + .search-overlay__apply {
+    margin-top: 11px;
+}
+
 .search-overlay__radius.is-hidden {
     display: none;
 }
@@ -247,13 +260,70 @@ body.search-overlay-open {
     cursor: not-allowed;
 }
 
+.search-overlay__location-fields.is-hidden {
+    display: none;
+}
+
 .search-overlay__location-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     padding: 8px 10px;
     border-radius: 10px;
     border: 1px dashed var(--theme-border);
     background: var(--theme-surface-alt);
     color: var(--theme-text-muted);
     font-size: 0.85rem;
+}
+
+.search-overlay__location-summary-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-weight: 500;
+    padding: 0;
+}
+
+.search-overlay__location-summary-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.search-overlay__location-summary-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--theme-text-muted);
+}
+
+.search-overlay__location-summary-edit {
+    border: none;
+    background: transparent;
+    color: var(--theme-text-muted);
+    font-size: 0.85rem;
+    text-decoration: underline;
+    padding: 0 4px;
+}
+
+.search-overlay__location-summary-clear {
+    border: none;
+    background: transparent;
+    color: var(--theme-text-muted);
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.search-overlay__location-summary-clear:hover,
+.search-overlay__location-summary-edit:hover {
+    color: var(--theme-text);
 }
 
 /* Divider no longer needed when using section cards */

@@ -28,7 +28,13 @@
   const locationResetBtn = overlay.querySelector('[data-search-location-reset]');
   const locationMeBtn = overlay.querySelector('[data-search-location-me]');
   const locationStatusEl = overlay.querySelector('#search-location-status');
+  const locationActionsEl = overlay.querySelector('.search-overlay__location-actions');
   const locationSummaryEl = overlay.querySelector('#search-location-summary');
+  const locationSummaryLabelEl = overlay.querySelector('[data-search-location-summary-label]');
+  const locationSummaryClearBtn = overlay.querySelector('[data-search-location-clear]');
+  const locationSummaryEditBtns = Array.from(overlay.querySelectorAll('[data-search-location-edit]'));
+  const locationFieldsEl = overlay.querySelector('[data-search-location-fields]');
+  const locationInputWrap = locationInput?.closest('.search-overlay__location-input');
   const radiusInput = overlay.querySelector('#search-radius-input');
   const radiusValueEl = overlay.querySelector('#search-radius-value');
   const radiusWrap = overlay.querySelector('[data-search-radius-wrap]');
@@ -47,6 +53,8 @@
   let isLoading = false;
   let pendingLocation = null;
   let activeLocation = null;
+  let isEditingLocation = false;
+  let pendingDirty = false;
   const defaultRadius = 10;
   let hasPlacesInit = false;
 
@@ -128,14 +136,28 @@
 
   const updateLocationSummary = () => {
     if (!locationSummaryEl) return;
-    if (!activeLocation) {
-      locationSummaryEl.textContent = '';
+    const showSummary = !!activeLocation && !isEditingLocation;
+    if (!showSummary) {
       locationSummaryEl.classList.add('d-none');
+      if (locationInputWrap) locationInputWrap.classList.remove('is-hidden');
+      if (locationActionsEl) locationActionsEl.classList.remove('is-hidden');
+      if (locationResetBtn) locationResetBtn.classList.remove('d-none');
       return;
     }
+    const icon = activeLocation?.source === 'me'
+      ? '<svg class="search-overlay__location-summary-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12 2c.55 0 1 .45 1 1v1.84c3.19.44 5.72 2.97 6.16 6.16H21c.55 0 1 .45 1 1s-.45 1-1 1h-1.84c-.44 3.19-2.97 5.72-6.16 6.16V21c0 .55-.45 1-1 1s-1-.45-1-1v-1.84c-3.19-.44-5.72-2.97-6.16-6.16H3c-.55 0-1-.45-1-1s.45-1 1-1h1.84c.44-3.19 2.97-5.72 6.16-6.16V3c0-.55.45-1 1-1Zm0 4.77A5.23 5.23 0 0 0 6.77 12 5.23 5.23 0 0 0 12 17.23 5.23 5.23 0 0 0 17.23 12 5.23 5.23 0 0 0 12 6.77Zm0 3.26a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg>'
+      : '';
     const label = activeLocation.label || 'Autour de moi';
-    locationSummaryEl.textContent = `${label} · ${activeLocation.radius} km`;
+    const status = activeLocation?.source === 'me' ? 'Autour de moi activé' : label;
+    const summaryText = `${status} · ${activeLocation.radius} km`;
+    if (locationSummaryLabelEl) {
+      locationSummaryLabelEl.innerHTML = `${icon}<span>${summaryText}</span>`;
+    }
     locationSummaryEl.classList.remove('d-none');
+    if (locationInputWrap) locationInputWrap.classList.add('is-hidden');
+    if (locationActionsEl) locationActionsEl.classList.add('is-hidden');
+    if (locationApplyBtn) locationApplyBtn.classList.remove('is-hidden');
+    if (locationResetBtn) locationResetBtn.classList.remove('d-none');
   };
 
   const updateRadiusLabel = (value) => {
@@ -146,28 +168,36 @@
   const updateLocationUI = () => {
     const hasPending = !!pendingLocation;
     if (radiusWrap) {
-      radiusWrap.classList.toggle('is-hidden', !hasPending);
+      const shouldShowRadius = hasPending || !!activeLocation;
+      radiusWrap.classList.toggle('is-hidden', !shouldShowRadius);
     }
     if (radiusInput) {
-      radiusInput.disabled = !hasPending;
+      radiusInput.disabled = !(hasPending || !!activeLocation);
     }
     if (locationApplyBtn) {
-      locationApplyBtn.disabled = !hasPending;
-      if (locationInput) {
-        const shouldShow = locationInput.value.trim().length > 0;
-        locationApplyBtn.classList.toggle('is-hidden', !shouldShow);
-      }
+      const shouldEnable = hasPending || !!activeLocation;
+      locationApplyBtn.disabled = !shouldEnable;
+      locationApplyBtn.classList.remove('is-hidden');
+    }
+    if (locationMeBtn) {
+      const hideMe = pendingLocation?.source === 'place' || (activeLocation?.source === 'place' && isEditingLocation);
+      locationMeBtn.classList.toggle('d-none', !!hideMe);
+    }
+    if (locationInputWrap) {
+      const hideInput = pendingLocation?.source === 'me' || activeLocation?.source === 'me';
+      locationInputWrap.classList.toggle('is-hidden', !!hideInput);
     }
   };
 
-  const setPendingLocation = (location) => {
+  const setPendingLocation = (location, dirty = true) => {
     pendingLocation = location
       ? {
           ...location,
           radius: location.radius ?? pendingLocation?.radius ?? defaultRadius,
         }
       : null;
-    if (pendingLocation && locationInput && pendingLocation.label) {
+    pendingDirty = !!pendingLocation && dirty;
+    if (pendingLocation && locationInput && pendingLocation.label && pendingLocation.source !== 'me') {
       locationInput.value = pendingLocation.label;
     }
     if (pendingLocation && radiusInput) {
@@ -180,6 +210,8 @@
   const applyLocation = () => {
     if (!pendingLocation) return;
     activeLocation = { ...pendingLocation };
+    pendingDirty = false;
+    isEditingLocation = false;
     updateLocationSummary();
     const term = input.value.trim();
     if (!canSearch(term)) {
@@ -192,8 +224,13 @@
   const resetLocation = () => {
     pendingLocation = null;
     activeLocation = null;
+    pendingDirty = false;
+    isEditingLocation = false;
     if (locationInput) {
       locationInput.value = '';
+    }
+    if (locationMeBtn) {
+      locationMeBtn.innerHTML = `<svg class="search-overlay__btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12 2c.55 0 1 .45 1 1v1.84c3.19.44 5.72 2.97 6.16 6.16H21c.55 0 1 .45 1 1s-.45 1-1 1h-1.84c-.44 3.19-2.97 5.72-6.16 6.16V21c0 .55-.45 1-1 1s-1-.45-1-1v-1.84c-3.19-.44-5.72-2.97-6.16-6.16H3c-.55 0-1-.45-1-1s.45-1 1-1h1.84c.44-3.19 2.97-5.72 6.16-6.16V3c0-.55.45-1 1-1Zm0 4.77A5.23 5.23 0 0 0 6.77 12 5.23 5.23 0 0 0 12 17.23 5.23 5.23 0 0 0 17.23 12 5.23 5.23 0 0 0 12 6.77Zm0 3.26a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg>Autour de moi (désactivé)`;
     }
     if (radiusInput) {
       radiusInput.value = String(defaultRadius);
@@ -236,7 +273,9 @@
         lat: place.geometry.location.lat(),
         lng: place.geometry.location.lng(),
         label: place.name || place.formatted_address || 'Lieu sélectionné',
+        source: 'place',
       });
+      isEditingLocation = true;
     });
   };
 
@@ -249,11 +288,16 @@
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setLocationStatus('');
+        if (locationMeBtn) {
+          locationMeBtn.innerHTML = `<svg class="search-overlay__btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12 2c.55 0 1 .45 1 1v1.84c3.19.44 5.72 2.97 6.16 6.16H21c.55 0 1 .45 1 1s-.45 1-1 1h-1.84c-.44 3.19-2.97 5.72-6.16 6.16V21c0 .55-.45 1-1 1s-1-.45-1-1v-1.84c-3.19-.44-5.72-2.97-6.16-6.16H3c-.55 0-1-.45-1-1s.45-1 1-1h1.84c.44-3.19 2.97-5.72 6.16-6.16V3c0-.55.45-1 1-1Zm0 4.77A5.23 5.23 0 0 0 6.77 12 5.23 5.23 0 0 0 12 17.23 5.23 5.23 0 0 0 17.23 12 5.23 5.23 0 0 0 12 6.77Zm0 3.26a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg>Autour de moi (activé)`;
+        }
         setPendingLocation({
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
           label: 'Autour de moi',
+          source: 'me',
         });
+        isEditingLocation = true;
       },
       () => {
         setLocationStatus('Autorisation refusée.');
@@ -662,6 +706,7 @@
   locationInput?.addEventListener('input', () => {
     setLocationStatus('');
     pendingLocation = null;
+    pendingDirty = false;
     updateLocationUI();
   });
 
@@ -670,12 +715,19 @@
     updateRadiusLabel(value);
     if (pendingLocation) {
       pendingLocation.radius = value;
+      pendingDirty = true;
+    } else if (activeLocation) {
+      setPendingLocation({ ...activeLocation, radius: value }, true);
     }
   });
 
   locationApplyBtn?.addEventListener('click', applyLocation);
   locationResetBtn?.addEventListener('click', resetLocation);
   locationMeBtn?.addEventListener('click', useCurrentLocation);
+  locationSummaryClearBtn?.addEventListener('click', resetLocation);
+  locationSummaryEditBtns.forEach((btn) => btn.addEventListener('click', () => {
+    resetLocation();
+  }));
 
   if (radiusInput) {
     updateRadiusLabel(radiusInput.value || defaultRadius);
