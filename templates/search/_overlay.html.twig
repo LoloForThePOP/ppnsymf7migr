@@ -22,7 +22,15 @@
         <button class="search-overlay__close search-overlay__close-btn" type="button" data-search-close aria-label="Fermer">Fermer</button>
     </div>
 
+    <button class="search-overlay__filters-tab" type="button" data-search-filters-toggle aria-expanded="false" aria-label="Ouvrir les filtres">
+        <svg class="search-overlay__filters-tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor" d="M3 5h18l-7 8v5l-4 2v-7L3 5z"/>
+        </svg>
+        <span>Filtres</span>
+    </button>
+
     <div class="search-overlay__body">
+        <div class="search-overlay__filters-backdrop" data-search-filters-close></div>
         <aside class="search-overlay__filters">
             <div class="search-overlay__filters-section">
                 <div class="search-overlay__filters-header">

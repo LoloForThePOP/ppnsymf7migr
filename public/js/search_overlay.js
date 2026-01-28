@@ -18,6 +18,8 @@
   const clearInputBtn = overlay.querySelector('[data-search-clear]');
   const clearFiltersBtn = overlay.querySelector('[data-search-clear-filters]');
   const closeBtn = overlay.querySelector('[data-search-close]');
+  const filtersToggleBtn = overlay.querySelector('[data-search-filters-toggle]');
+  const filtersCloseTargets = Array.from(overlay.querySelectorAll('[data-search-filters-close]'));
   const moreBtn = overlay.querySelector('[data-search-more]');
   const pageEl = overlay.querySelector('#search-overlay-page');
   const paginationEl = overlay.querySelector('.search-overlay__pagination');
@@ -382,8 +384,58 @@
 
   const closeOverlay = () => {
     overlay.classList.remove('is-open');
+    overlay.classList.remove('is-filters-open');
+    if (filtersToggleBtn) {
+      filtersToggleBtn.setAttribute('aria-expanded', 'false');
+    }
     overlay.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('search-overlay-open');
+  };
+
+  const openFilters = () => {
+    overlay.classList.add('is-filters-open');
+    if (filtersToggleBtn) {
+      filtersToggleBtn.setAttribute('aria-expanded', 'true');
+    }
+  };
+
+  const closeFilters = () => {
+    overlay.classList.remove('is-filters-open');
+    if (filtersToggleBtn) {
+      filtersToggleBtn.setAttribute('aria-expanded', 'false');
+    }
+  };
+
+  let touchStartX = null;
+  let touchStartY = null;
+
+  const onTouchStart = (event) => {
+    if (!event.touches || event.touches.length !== 1) return;
+    touchStartX = event.touches[0].clientX;
+    touchStartY = event.touches[0].clientY;
+  };
+
+  const onTouchMove = (event) => {
+    if (touchStartX === null || touchStartY === null) return;
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - touchStartX;
+    const deltaY = touch.clientY - touchStartY;
+    if (Math.abs(deltaX) < 12 || Math.abs(deltaX) < Math.abs(deltaY)) return;
+
+    if (deltaX > 0 && !overlay.classList.contains('is-filters-open') && touchStartX < 24) {
+      openFilters();
+      touchStartX = null;
+      touchStartY = null;
+    } else if (deltaX < 0 && overlay.classList.contains('is-filters-open')) {
+      closeFilters();
+      touchStartX = null;
+      touchStartY = null;
+    }
+  };
+
+  const onTouchEnd = () => {
+    touchStartX = null;
+    touchStartY = null;
   };
 
   const clearSearch = () => {
@@ -732,6 +784,17 @@
   clearInputBtn?.addEventListener('click', clearSearch);
   clearFiltersBtn?.addEventListener('click', clearFilters);
   closeBtn?.addEventListener('click', closeOverlay);
+  filtersToggleBtn?.addEventListener('click', () => {
+    if (overlay.classList.contains('is-filters-open')) {
+      closeFilters();
+    } else {
+      openFilters();
+    }
+  });
+  filtersCloseTargets.forEach((el) => el.addEventListener('click', closeFilters));
+  overlay.addEventListener('touchstart', onTouchStart, { passive: true });
+  overlay.addEventListener('touchmove', onTouchMove, { passive: true });
+  overlay.addEventListener('touchend', onTouchEnd);
   moreBtn?.addEventListener('click', () => {
     if (isLoading) return;
     if (!canSearch(currentQuery)) return;
@@ -748,6 +811,10 @@
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && mapModal && !mapModal.classList.contains('d-none')) {
       closeMapModal();
+      return;
+    }
+    if (event.key === 'Escape' && overlay.classList.contains('is-filters-open')) {
+      closeFilters();
       return;
     }
     if (event.key === 'Escape' && overlay.classList.contains('is-open')) {
