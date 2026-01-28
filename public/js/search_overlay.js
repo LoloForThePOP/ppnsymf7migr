@@ -28,6 +28,7 @@
   const locationResetBtn = overlay.querySelector('[data-search-location-reset]');
   const locationMeBtn = overlay.querySelector('[data-search-location-me]');
   const locationStatusEl = overlay.querySelector('#search-location-status');
+  const locationInputClearBtn = overlay.querySelector('[data-search-location-clear-input]');
   const locationActionsEl = overlay.querySelector('.search-overlay__location-actions');
   const locationSummaryEl = overlay.querySelector('#search-location-summary');
   const locationSummaryLabelEl = overlay.querySelector('[data-search-location-summary-label]');
@@ -136,7 +137,7 @@
 
   const updateLocationSummary = () => {
     if (!locationSummaryEl) return;
-    const showSummary = !!activeLocation && !isEditingLocation;
+    const showSummary = !!activeLocation && !isEditingLocation && activeLocation?.source !== 'place';
     if (!showSummary) {
       locationSummaryEl.classList.add('d-none');
       if (locationInputWrap) locationInputWrap.classList.remove('is-hidden');
@@ -182,6 +183,10 @@
     if (locationMeBtn) {
       const hideMe = pendingLocation?.source === 'place' || (activeLocation?.source === 'place' && isEditingLocation);
       locationMeBtn.classList.toggle('d-none', !!hideMe);
+    }
+    if (locationInputClearBtn) {
+      const hasValue = !!locationInput?.value.trim();
+      locationInputClearBtn.classList.toggle('d-none', !hasValue);
     }
     if (locationInputWrap) {
       const hideInput = pendingLocation?.source === 'me' || activeLocation?.source === 'me';
@@ -230,7 +235,7 @@
       locationInput.value = '';
     }
     if (locationMeBtn) {
-      locationMeBtn.innerHTML = `<svg class="search-overlay__btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12 2c.55 0 1 .45 1 1v1.84c3.19.44 5.72 2.97 6.16 6.16H21c.55 0 1 .45 1 1s-.45 1-1 1h-1.84c-.44 3.19-2.97 5.72-6.16 6.16V21c0 .55-.45 1-1 1s-1-.45-1-1v-1.84c-3.19-.44-5.72-2.97-6.16-6.16H3c-.55 0-1-.45-1-1s.45-1 1-1h1.84c.44-3.19 2.97-5.72 6.16-6.16V3c0-.55.45-1 1-1Zm0 4.77A5.23 5.23 0 0 0 6.77 12 5.23 5.23 0 0 0 12 17.23 5.23 5.23 0 0 0 17.23 12 5.23 5.23 0 0 0 12 6.77Zm0 3.26a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg>Autour de moi (désactivé)`;
+      locationMeBtn.innerHTML = `<svg class=\"search-overlay__btn-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path fill=\"currentColor\" fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M12 2c.55 0 1 .45 1 1v1.84c3.19.44 5.72 2.97 6.16 6.16H21c.55 0 1 .45 1 1s-.45 1-1 1h-1.84c-.44 3.19-2.97 5.72-6.16 6.16V21c0 .55-.45 1-1 1s-1-.45-1-1v-1.84c-3.19-.44-5.72-2.97-6.16-6.16H3c-.55 0-1-.45-1-1s.45-1 1-1h1.84c.44-3.19 2.97-5.72 6.16-6.16V3c0-.55.45-1 1-1Zm0 4.77A5.23 5.23 0 0 0 6.77 12 5.23 5.23 0 0 0 12 17.23 5.23 5.23 0 0 0 17.23 12 5.23 5.23 0 0 0 12 6.77Zm0 3.26a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z\"/></svg>Autour de moi`;
     }
     if (radiusInput) {
       radiusInput.value = String(defaultRadius);
@@ -781,5 +786,14 @@
         openOverlay('');
       });
     }
+  });
+  locationInputClearBtn?.addEventListener('click', (event) => {
+    event.preventDefault();
+    if (locationInput) {
+      locationInput.value = '';
+    }
+    pendingLocation = null;
+    pendingDirty = false;
+    updateLocationUI();
   });
 })();
