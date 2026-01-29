@@ -27,6 +27,7 @@ class UserExtraService
         'last_seen_at'      => null,             // \DateTimeInterface|null
         'product_tours'     => [],               // array<string, string>
         'product_tour_visits' => [],             // array<string, int>
+        'search_history'    => [],               // array<int, string>
     ];
 
     /**
@@ -42,6 +43,7 @@ class UserExtraService
         'last_seen_at'      => 'datetime',
         'product_tours'     => 'array',
         'product_tour_visits' => 'array',
+        'search_history'    => 'array',
     ];
 
     // -------------------------------------------------------------

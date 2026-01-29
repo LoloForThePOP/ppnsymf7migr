@@ -47,6 +47,9 @@
   const radiusInput = overlay.querySelector('#search-radius-input');
   const radiusValueEl = overlay.querySelector('#search-radius-value');
   const radiusWrap = overlay.querySelector('[data-search-radius-wrap]');
+  const historyEnabled = overlay.dataset.searchHistoryEnabled === '1';
+  const historyUrl = overlay.dataset.searchHistoryUrl;
+  const historyToken = overlay.dataset.searchHistoryCsrf;
 
   const minLength = 2;
   const limit = 16;
@@ -71,6 +74,8 @@
   const SUGGEST_LIMIT = 8;
   let suggestController = null;
   let hasPlacesInit = false;
+  let remoteHistory = null;
+  let historyLoaded = false;
 
   const debounce = (fn, wait = 250) => {
     let t = null;
@@ -104,7 +109,7 @@
     }
   };
 
-  const loadRecentQueries = () => {
+  const loadLocalRecentQueries = () => {
     try {
       const raw = window.localStorage.getItem(RECENT_KEY);
       if (!raw) return [];
@@ -116,7 +121,7 @@
     }
   };
 
-  const saveRecentQueries = (queries) => {
+  const saveLocalRecentQueries = (queries) => {
     try {
       window.localStorage.setItem(RECENT_KEY, JSON.stringify(queries));
     } catch {
@@ -124,11 +129,87 @@
     }
   };
 
+  const normalizeRecentQueries = (queries) => {
+    const normalized = [];
+    const seen = new Set();
+    queries.forEach((value) => {
+      if (typeof value !== 'string') return;
+      const term = value.trim();
+      if (!term || term.length < minLength) return;
+      const key = term.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      normalized.push(term);
+    });
+    return normalized.slice(0, RECENT_LIMIT);
+  };
+
+  const loadRecentQueries = () => {
+    if (historyEnabled) {
+      return Array.isArray(remoteHistory) ? remoteHistory : [];
+    }
+    return loadLocalRecentQueries();
+  };
+
+  const persistRemoteHistory = (action, payload = {}) => {
+    if (!historyEnabled || !historyUrl || !historyToken) return;
+    fetch(historyUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: JSON.stringify({
+        _token: historyToken,
+        action,
+        ...payload,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data.history)) {
+          remoteHistory = normalizeRecentQueries(data.history);
+          renderRecentQueries();
+        }
+      })
+      .catch(() => {});
+  };
+
+  const ensureRecentQueriesLoaded = () => {
+    if (!historyEnabled || historyLoaded || !historyUrl) return;
+    historyLoaded = true;
+    fetch(historyUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then((res) => res.json())
+      .then((data) => {
+        const serverHistory = Array.isArray(data.history) ? data.history : [];
+        const localHistory = loadLocalRecentQueries();
+        const merged = normalizeRecentQueries([...localHistory, ...serverHistory]);
+        remoteHistory = merged;
+        if (localHistory.length > 0) {
+          persistRemoteHistory('replace', { items: merged });
+          try {
+            window.localStorage.removeItem(RECENT_KEY);
+          } catch {}
+        }
+        renderRecentQueries();
+      })
+      .catch(() => {
+        remoteHistory = normalizeRecentQueries(loadLocalRecentQueries());
+        renderRecentQueries();
+      });
+  };
+
   const removeRecentQuery = (term) => {
     const current = loadRecentQueries();
     const lower = term.toLowerCase();
     const next = current.filter((item) => item.toLowerCase() !== lower);
-    saveRecentQueries(next);
+    if (historyEnabled) {
+      remoteHistory = normalizeRecentQueries(next);
+      renderRecentQueries();
+      persistRemoteHistory('remove', { term });
+    } else {
+      saveLocalRecentQueries(next);
+    }
   };
 
   const updateRecentQueries = (query) => {
@@ -138,12 +219,21 @@
     const lower = term.toLowerCase();
     const filtered = current.filter((item) => item.toLowerCase() !== lower);
     filtered.unshift(term);
-    const next = filtered.slice(0, RECENT_LIMIT);
-    saveRecentQueries(next);
+    const next = normalizeRecentQueries(filtered);
+    if (historyEnabled) {
+      remoteHistory = next;
+      renderRecentQueries();
+      persistRemoteHistory('add', { term });
+    } else {
+      saveLocalRecentQueries(next);
+    }
   };
 
   const renderRecentQueries = () => {
     if (!recentEl || !recentListEl || !suggestBoxEl) return;
+    if (historyEnabled && !historyLoaded) {
+      ensureRecentQueriesLoaded();
+    }
     const items = loadRecentQueries();
     recentListEl.innerHTML = '';
     if (items.length === 0) {
@@ -603,6 +693,7 @@
       updatePagination();
     }
     if (!term) {
+      ensureRecentQueriesLoaded();
       renderRecentQueries();
       renderSuggestions([], '');
     } else if (recentEl) {
