@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Enum\NeedPaidStatus;
+use App\Enum\NeedStatus;
 use App\Enum\NeedType;
 use App\Repository\NeedRepository;
 use Doctrine\ORM\Mapping as ORM;
@@ -29,11 +30,15 @@ class Need
     #[Assert\Choice(callback: [NeedType::class, 'values'], message: 'Veuillez renseigner un type de besoin valide.')]
     private ?NeedType $type = null;
 
-    #[ORM\Column(enumType: NeedPaidStatus::class, nullable: true)]
+    #[ORM\Column(name: 'payment_status', enumType: NeedPaidStatus::class, nullable: true)]
     #[Assert\Choice(callback: [NeedPaidStatus::class, 'values'], message: 'Veuillez renseigner un type de transaction valide (payé, non, ou peut-être).')]
-    private ?NeedPaidStatus $isPaid = null;
+    private ?NeedPaidStatus $paymentStatus = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(enumType: NeedStatus::class)]
+    #[Assert\Choice(callback: [NeedStatus::class, 'values'], message: 'Veuillez renseigner un statut de besoin valide.')]
+    private NeedStatus $status = NeedStatus::Open;
+
+    #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'Le titre du besoin est obligatoire.')]
     #[Assert\Length(
         min: 5,
@@ -44,6 +49,10 @@ class Need
     private string $title;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Assert\Length(
+        max: 2000,
+        maxMessage: 'La description du besoin doit faire au maximum {{ limit }} caractères.'
+    )]
     private ?string $description = null;
 
     #[ORM\Column(type: 'smallint', nullable: true)]
@@ -75,14 +84,25 @@ class Need
         return $this;
     }
 
-    public function getIsPaid(): ?NeedPaidStatus
+    public function getPaymentStatus(): ?NeedPaidStatus
     {
-        return $this->isPaid;
+        return $this->paymentStatus;
     }
 
-    public function setIsPaid(?NeedPaidStatus $isPaid): self
+    public function setPaymentStatus(?NeedPaidStatus $paymentStatus): self
     {
-        $this->isPaid = $isPaid;
+        $this->paymentStatus = $paymentStatus;
+        return $this;
+    }
+
+    public function getStatus(): NeedStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(NeedStatus $status): self
+    {
+        $this->status = $status;
         return $this;
     }
 
