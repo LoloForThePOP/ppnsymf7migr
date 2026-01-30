@@ -71,6 +71,31 @@ html[data-theme-variant="custom"][data-theme="deep-ocean"] .project-card .image-
     object-fit: cover;
 }
 
+.project-card__fallback {
+    height: 100%;
+    width: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--theme-surface-alt, #f4f4f4);
+    border: 1px dashed var(--theme-border, #e3ddd3);
+    color: var(--theme-accent, #6b5bd6);
+    text-transform: uppercase;
+}
+
+.project-card__fallback-letter {
+    font-size: 64px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.02em;
+}
+
+.project-card__fallback-text {
+    color: var(--theme-text-muted, #7f7f7f);
+    font-size: 0.9rem;
+}
+
 .project-card .image-container img[src*="/pp/logos/"] {
     object-fit: contain;
     width: auto;

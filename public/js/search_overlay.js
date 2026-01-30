@@ -926,7 +926,19 @@
         img.loading = 'lazy';
         thumb.appendChild(img);
       } else {
-        thumb.textContent = 'Aucune image';
+        const fallback = document.createElement('div');
+        fallback.className = 'search-result-card__thumb-fallback';
+        const source = (item.title || item.goal || '').trim();
+        const letter = source ? source.slice(0, 1).toUpperCase() : '';
+        if (letter) {
+          const span = document.createElement('span');
+          span.className = 'search-result-card__thumb-fallback-letter';
+          span.textContent = letter;
+          fallback.appendChild(span);
+        } else {
+          fallback.textContent = 'Aucune image';
+        }
+        thumb.appendChild(fallback);
       }
 
       if (item.location && typeof item.location.lat === 'number' && typeof item.location.lng === 'number') {

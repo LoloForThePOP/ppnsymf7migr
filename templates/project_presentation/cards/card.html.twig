@@ -23,6 +23,8 @@
     {% set options = defaults|merge(opts) %}
     {% set imageUrl = options.image %}
     {% set ariaLabel = presentation.title ?? presentation.goal %}
+    {% set fallbackSource = (presentation.title ?? presentation.goal ?? '')|trim %}
+    {% set fallbackLetter = fallbackSource ? fallbackSource|slice(0, 1)|upper : '' %}
     {% set isAdminSession = is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN') %}
     {% set showEnrich = options.fetchImagesLink and not isAdminSession %}
     {% set showDelete = options.deleteLink is defined and options.deleteLink and not isAdminSession %}
@@ -41,8 +43,12 @@
         {% if imageUrl %}
             <img src="{{ imageUrl }}" alt="{{ ariaLabel }}" loading="lazy">
         {% else %}
-            <div class="h-100 w-100 d-flex align-items-center justify-content-center theme-surface-alt theme-text-muted rounded">
-                <small>{{ options.fallbackImageText }}</small>
+            <div class="project-card__fallback">
+                {% if fallbackLetter %}
+                    <span class="project-card__fallback-letter" aria-hidden="true">{{ fallbackLetter }}</span>
+                {% else %}
+                    <small class="project-card__fallback-text">{{ options.fallbackImageText }}</small>
+                {% endif %}
             </div>
         {% endif %}
         </div>
