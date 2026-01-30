@@ -44,7 +44,6 @@
 >
 
 	{% for slide in presentation.slides %}
-
 		<div id="{{slide.id}}" class="flex-child thumbnail js-sortable-element position-relative" data-slide-thumbnail-id="{{slide.id}}" data-loop-index="{{loop.index}}">
 
 			{% if slide.isVideo() %}	
@@ -78,7 +77,6 @@
 		</div>
 
 	{% endfor %}
-
 
 
 	

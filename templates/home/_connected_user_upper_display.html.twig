@@ -20,6 +20,8 @@
                 {% set continueTitle = continuePresentation.title ?: continuePresentation.goal %}
                 {% set continueThumbnail = continuePresentation.extra.cacheThumbnailUrl ?? null %}
                 {% set continueEditUrl = path('edit_show_project_presentation', {'stringId': continuePresentation.stringId}) %}
+                {% set continueFallbackSource = continueTitle|default('') %}
+                {% set continueFallbackLetter = continueFallbackSource ? continueFallbackSource|slice(0, 1)|upper : '' %}
                 <div class="connected-resume is-clickable">
                     <a class="connected-resume-link" href="{{ continueEditUrl }}" aria-label="Reprendre {{ continueTitle }}"></a>
                     <div class="connected-resume-main">
@@ -27,7 +29,13 @@
                             {% if continueThumbnail %}
                                 <img src="{{ continueThumbnail }}" alt="{{ continueTitle }}">
                             {% else %}
-                                <div class="connected-resume-placeholder">Aperçu</div>
+                                <div class="connected-resume-placeholder">
+                                    {% if continueFallbackLetter %}
+                                        <span class="connected-resume-placeholder-letter" aria-hidden="true">{{ continueFallbackLetter }}</span>
+                                    {% else %}
+                                        <span class="connected-resume-placeholder-text">Aperçu</span>
+                                    {% endif %}
+                                </div>
                             {% endif %}
                         </div>
                         <div class="connected-resume-content">

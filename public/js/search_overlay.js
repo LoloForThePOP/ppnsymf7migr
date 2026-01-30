@@ -15,6 +15,7 @@
   const recentListEl = overlay.querySelector('[data-search-recent-list]');
   const suggestEl = overlay.querySelector('[data-search-suggest]');
   const suggestListEl = overlay.querySelector('[data-search-suggest-list]');
+  const inputWrap = overlay.querySelector('.search-overlay__input-wrap');
   const mapModal = overlay.querySelector('#search-overlay-map');
   const mapFrame = overlay.querySelector('#search-overlay-map-frame');
   const mapTitle = overlay.querySelector('#search-overlay-map-title');
@@ -319,6 +320,11 @@
     });
     recentEl.classList.remove('d-none');
     suggestBoxEl.classList.remove('d-none');
+  };
+
+  const hideSuggestions = () => {
+    if (!suggestBoxEl) return;
+    suggestBoxEl.classList.add('d-none');
   };
 
   const renderSuggestions = (items, term) => {
@@ -1106,6 +1112,15 @@
     clearInputBtn?.classList.toggle('d-none', input.value.length === 0);
     debouncedSearch(input.value);
     debouncedSuggest(input.value);
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!suggestBoxEl || suggestBoxEl.classList.contains('d-none')) return;
+    const target = event.target;
+    if (inputWrap?.contains(target) || suggestBoxEl.contains(target)) {
+      return;
+    }
+    hideSuggestions();
   });
 
   input.addEventListener('keydown', (event) => {

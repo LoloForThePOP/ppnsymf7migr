@@ -15,11 +15,39 @@ use App\Entity\Embeddables\PPBase\OtherComponentsModels\BusinessCardComponent;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Vich\UploaderBundle\Handler\UploadHandler;
 
 class NormalizedProjectPersister
 {
+    private const STANDARD_FALLBACK_BASE_DIR = 'public/media/static/images/larger/project_presentation_std_images_fallbacks';
+    private const STANDARD_FALLBACK_FOLDERS = [
+        'administrative',
+        'health',
+        'education_or_inform',
+        'legal_advice',
+        'loneliness',
+        'home_care',
+        'homeless',
+        'sport',
+        'athletism',
+        'stadium',
+        'community_support',
+        'coaching_guidance',
+        'citizenship',
+        'craft_activities',
+        'general_animals',
+        'cats',
+        'dogs',
+        'nature',
+        'sea',
+        'talk_and_support',
+        'social_inclusion',
+        'volunteer_distribution',
+        'fallback',
+    ];
+    private const STANDARD_FALLBACK_CAPTION = "Image d’illustration non affiliée";
     /**
      * @var array<int, array<string, mixed>>
      */
@@ -37,6 +65,8 @@ class NormalizedProjectPersister
         private readonly WebsiteProcessingService $websiteProcessor,
         private readonly PlaceNormalizationService $placeNormalizationService,
         private readonly UploadHandler $uploadHandler,
+        #[Autowire(param: 'kernel.project_dir')]
+        private readonly string $projectDir,
     ) {
     }
 
@@ -115,6 +145,7 @@ class NormalizedProjectPersister
         $this->attachImages($pp, $imagesPayload, $logoUrl, $mediaBaseName, $sourceUrl);
         $this->attachWebsites($pp, $payload['websites'] ?? []);
         $this->attachBusinessCards($pp, $payload['business_cards'] ?? []);
+        $this->applyStandardFallbackImage($pp, $payload, $mediaBaseName);
         
         $placesDefaultCountry = $this->stringValue($payload['places_default_country'] ?? null);
         $this->attachPlaces($pp, $payload['places'] ?? [], $placesDefaultCountry);
@@ -461,6 +492,110 @@ class NormalizedProjectPersister
             $oc->addComponent('questions_answers', $component);
         }
         $pp->setOtherComponents($oc);
+    }
+
+    private function applyStandardFallbackImage(PPBase $pp, array $payload, ?string $mediaBaseName = null): void
+    {
+        $folder = $this->normalizeStandardFallbackFolder($payload['standard_image_fallback_name'] ?? null);
+        if ($folder === null) {
+            return;
+        }
+
+        if ($pp->getCustomThumbnail() || $pp->getLogo() || $pp->getSlides()->count() > 0) {
+            return;
+        }
+
+        $absolutePath = $this->pickStandardFallbackImage($folder);
+        if ($absolutePath === null) {
+            return;
+        }
+
+        $preferredName = $mediaBaseName ? sprintf('fallback-slide-%s', $mediaBaseName) : 'fallback-slide';
+        $file = $this->createUploadedFileFromLocalImage($absolutePath, $preferredName);
+        if ($file === null) {
+            return;
+        }
+
+        $slide = new Slide();
+        $slide->setType(SlideType::IMAGE);
+        $slide->setPosition($pp->getSlides()->count());
+        $slide->setImageFile($file);
+        $slide->setCaption(self::STANDARD_FALLBACK_CAPTION);
+        $slide->setLicence(self::STANDARD_FALLBACK_CAPTION);
+        $slide->setProjectPresentation($pp);
+        $pp->addSlide($slide);
+
+        $this->lastMediaDebug['standard_fallback'] = [
+            'folder' => $folder,
+            'selected' => basename($absolutePath),
+        ];
+    }
+
+    private function normalizeStandardFallbackFolder(mixed $value): ?string
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $folder = strtolower(trim($value));
+        if ($folder === '') {
+            return null;
+        }
+
+        if (!in_array($folder, self::STANDARD_FALLBACK_FOLDERS, true)) {
+            $folder = 'fallback';
+        }
+
+        return $folder;
+    }
+
+    private function pickStandardFallbackImage(string $folder): ?string
+    {
+        $base = rtrim($this->projectDir, '/') . '/' . self::STANDARD_FALLBACK_BASE_DIR . '/' . $folder;
+        if (!is_dir($base)) {
+            return null;
+        }
+
+        $files = glob($base . '/*.{avif,webp,png,jpg,jpeg}', GLOB_BRACE);
+        if (!is_array($files) || $files === []) {
+            return null;
+        }
+
+        return $files[array_rand($files)];
+    }
+
+    private function createUploadedFileFromLocalImage(string $absolutePath, string $baseName): ?UploadedFile
+    {
+        if (!is_file($absolutePath)) {
+            return null;
+        }
+
+        $tmpPath = tempnam(sys_get_temp_dir(), 'fallback_');
+        if ($tmpPath === false) {
+            return null;
+        }
+
+        if (!copy($absolutePath, $tmpPath)) {
+            return null;
+        }
+
+        $extension = pathinfo($absolutePath, PATHINFO_EXTENSION);
+        $extension = $extension ? '.' . $extension : '';
+        $safeBase = preg_replace('/[^a-z0-9_-]+/i', '-', $baseName) ?? 'fallback';
+        $safeBase = trim($safeBase, '-');
+        if ($safeBase === '') {
+            $safeBase = 'fallback';
+        }
+
+        $mimeType = mime_content_type($absolutePath) ?: null;
+
+        return new UploadedFile(
+            $tmpPath,
+            $safeBase . $extension,
+            $mimeType ?: null,
+            null,
+            true
+        );
     }
 
     private function attachKeywords(PPBase $pp, array $keywords): void

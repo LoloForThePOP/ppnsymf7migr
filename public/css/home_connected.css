@@ -120,6 +120,20 @@ html[data-theme-variant="classic"] .connected-title .connected-username {
     justify-content: center;
     font-size: 0.75rem;
     color: var(--theme-text-muted);
+    background: var(--theme-surface-alt);
+    text-transform: uppercase;
+}
+
+.connected-resume-placeholder-letter {
+    font-size: 2.1rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--theme-accent);
+    letter-spacing: 0.03em;
+}
+
+.connected-resume-placeholder-text {
+    color: var(--theme-text-muted);
 }
 
 .connected-resume-content {
