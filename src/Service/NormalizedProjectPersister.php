@@ -696,7 +696,7 @@ class NormalizedProjectPersister
         $normalized = [];
         $count = count($lines);
         for ($i = 0; $i < $count; $i++) {
-            $line = $lines[$i];
+            $line = $this->normalizeJeVeuxAiderPostalLine($lines[$i]);
             $next = $lines[$i + 1] ?? null;
             $nextPostal = $next !== null ? $this->parsePostalLine($next) : null;
             if ($nextPostal !== null
@@ -742,6 +742,39 @@ class NormalizedProjectPersister
     private function lineHasDigits(string $line): bool
     {
         return preg_match('/\d/', $line) === 1;
+    }
+
+    private function normalizeJeVeuxAiderPostalLine(string $line): string
+    {
+        $trimmed = trim($line);
+        if ($trimmed === '') {
+            return $line;
+        }
+
+        $match = null;
+        if (preg_match('/^(.+?)\s*,\s*(\d{5}\s+.+)$/u', $trimmed, $match) !== 1) {
+            if (preg_match('/^(.+?)\s+(\d{5}\s+.+)$/u', $trimmed, $match) !== 1) {
+                return $line;
+            }
+        }
+
+        $prefix = trim($match[1]);
+        $postalPart = trim($match[2]);
+
+        if ($prefix === '' || $this->lineHasDigits($prefix)) {
+            return $line;
+        }
+
+        $postal = $this->parsePostalLine($postalPart);
+        if ($postal === null) {
+            return $line;
+        }
+
+        if ($this->normalizeCity($prefix) === $this->normalizeCity($postal['city'])) {
+            return $postalPart;
+        }
+
+        return $line;
     }
 
     private function normalizeCity(string $value): string
