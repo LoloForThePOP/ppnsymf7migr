@@ -295,7 +295,7 @@ a{
     --theme-accent-contrast: #f7fff8;
     --theme-border: #c2edd2;
     --theme-title: #1f8f43;
-    --theme-icon-filter: invert(85%) sepia(49%) saturate(586%) hue-rotate(357deg) brightness(103%) contrast(103%);
+    --theme-icon-filter: invert(64%) sepia(38%) saturate(856%) hue-rotate(8deg) brightness(93%) contrast(139%);
     --theme-icon-filter-vegetation: invert(46%) sepia(93%) saturate(720%) hue-rotate(88deg) brightness(96%) contrast(94%);
     --theme-icon-filter-sky: invert(55%) sepia(74%) saturate(538%) hue-rotate(169deg) brightness(93%) contrast(92%);
     --theme-icon-filter-strong: var(--theme-icon-filter-sky);

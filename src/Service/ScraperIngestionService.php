@@ -133,7 +133,8 @@ class ScraperIngestionService
             'country' => isset($payload['country']) && is_string($payload['country']) ? trim($payload['country']) : null,
             'city' => isset($payload['city']) && is_string($payload['city']) ? trim($payload['city']) : null,
             'tags' => $this->normalizeTags($payload['tags'] ?? []),
-            'source_published_at' => $this->normalizeDate($payload['source_published_at'] ?? null),
+            'source_created_at' => $this->normalizeDateTime($payload['source_created_at'] ?? null),
+            'source_updated_at' => $this->normalizeDateTime($payload['source_updated_at'] ?? null),
             'language' => isset($payload['language']) && is_string($payload['language']) ? strtolower(trim($payload['language'])) : null,
             'source_url' => trim($payload['source_url']),
             'status' => isset($payload['status']) && is_string($payload['status']) ? trim($payload['status']) : null,
@@ -231,19 +232,6 @@ class ScraperIngestionService
         }
 
         return $normalized;
-    }
-
-    /**
-     * @param mixed $value
-     */
-    private function normalizeDate(mixed $value): ?\DateTimeImmutable
-    {
-        if (!is_string($value) || $value === '') {
-            return null;
-        }
-
-        $date = \DateTimeImmutable::createFromFormat('Y-m-d', $value);
-        return $date ?: null;
     }
 
     /**

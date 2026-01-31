@@ -433,6 +433,16 @@ body[data-theme-scope="presentation"] .pp-edit-thumbnail-link:focus {
     color: var(--theme-text);
 }
 
+body[data-theme-scope="presentation"] .pp-source-meta {
+    font-size: 0.85rem;
+    color: var(--theme-text-muted);
+    margin-bottom: 6px;
+}
+
+body[data-theme-scope="presentation"] .pp-source-meta__label {
+    font-weight: 600;
+}
+
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-struct-icon{
     --pp-struct-icon-color: var(--theme-accent);
 }

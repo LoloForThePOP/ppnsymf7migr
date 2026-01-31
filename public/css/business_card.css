@@ -69,6 +69,10 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .bc-cont
     color: var(--theme-text);
 }
 
+html[data-theme-variant="classic"] body[data-theme-scope="presentation"] .bc-content-wrapper a {
+    color: var(--theme-text);
+}
+
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .bc-content-wrapper a:hover,
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .bc-content-wrapper a:focus {
     color: var(--theme-accent);

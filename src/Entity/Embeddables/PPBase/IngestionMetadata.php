@@ -24,9 +24,13 @@ class IngestionMetadata
     #[ORM\Column(length: 2048, nullable: true)]
     private ?string $sourceOrganizationWebsite = null;
 
-    // Publication/update date extracted from the source page: date the project was first published or last updated on the source page when scrapped in order to confront with possible updates later on
-    #[ORM\Column(type: 'date', nullable: true)]
-    private ?\DateTimeInterface $sourcePublishedAt = null;
+    // Source creation timestamp (when available from the source payload)
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $sourceCreatedAt = null;
+
+    // Source update timestamp (when available from the source payload)
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $sourceUpdatedAt = null;
 
     // When this record was ingested by the scraper
     #[ORM\Column(type: 'datetime', nullable: true)]
@@ -86,14 +90,25 @@ class IngestionMetadata
         return $this;
     }
 
-    public function getSourcePublishedAt(): ?\DateTimeInterface
+    public function getSourceCreatedAt(): ?\DateTimeInterface
     {
-        return $this->sourcePublishedAt;
+        return $this->sourceCreatedAt;
     }
 
-    public function setSourcePublishedAt(?\DateTimeInterface $date): self
+    public function setSourceCreatedAt(?\DateTimeInterface $date): self
     {
-        $this->sourcePublishedAt = $date;
+        $this->sourceCreatedAt = $date;
+        return $this;
+    }
+
+    public function getSourceUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->sourceUpdatedAt;
+    }
+
+    public function setSourceUpdatedAt(?\DateTimeInterface $date): self
+    {
+        $this->sourceUpdatedAt = $date;
         return $this;
     }
 

@@ -67,8 +67,11 @@ class ScraperPersistenceService
                 $ing = $pp->getIngestion();
                 $ing->setSourceUrl($canonicalUrl);
                 $ing->setIngestedAt(new \DateTimeImmutable());
-                if (!empty($item['source_published_at']) && $item['source_published_at'] instanceof \DateTimeInterface) {
-                    $ing->setSourcePublishedAt($item['source_published_at']);
+                if (!empty($item['source_created_at']) && $item['source_created_at'] instanceof \DateTimeInterface) {
+                    $ing->setSourceCreatedAt($item['source_created_at']);
+                }
+                if (!empty($item['source_updated_at']) && $item['source_updated_at'] instanceof \DateTimeInterface) {
+                    $ing->setSourceUpdatedAt($item['source_updated_at']);
                 }
                 $ing->setIngestionStatus($item['status'] ?? 'ok');
                 $ing->setIngestionStatusComment($item['status_reason'] ?? null);
