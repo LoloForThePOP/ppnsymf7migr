@@ -48,7 +48,6 @@ class UrlHarvestRunner
             $fundingEndAt = $daysRemaining !== null
                 ? (new \DateTimeImmutable())->modify(sprintf('+%d days', $daysRemaining))
                 : null;
-
             $entry['debug'] = [
                 'final_url' => $finalUrl,
                 'html_preview' => $this->truncateHtml($html),

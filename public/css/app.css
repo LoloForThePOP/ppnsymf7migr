@@ -143,15 +143,17 @@ a{
     --theme-text: #1e293b;
     --theme-text-muted: #64748b;
     --theme-font-body: 'Source Sans 3', sans-serif;
-    --theme-font-heading: 'Source Sans 3', sans-serif;
+    --theme-font-heading: 'Source Serif 4', serif;
     --theme-accent: #3b82f6;
     --theme-accent-contrast: #ffffff;
     --theme-border: #e2e8f0;
     --theme-title: #0f172a;
     --pp-card-bg: #ffffff;
     --pp-card-border: #e2e8f0;
+    --pp-card-radius: 18px;
     --pp-card-shadow: 0 10px 24px rgba(30, 41, 59, 0.08);
     --pp-title-color: #1e3a8a;
+    --theme-button-weight: 600;
 }
 
 :root[data-theme="neon"] {
@@ -392,6 +394,13 @@ body {
     background-color: var(--theme-bg);
     color: var(--theme-text);
     font-family: var(--theme-font-body);
+}
+
+html[data-theme="concentration"] body {
+    background:
+        radial-gradient(1100px 520px at 8% -10%, rgba(79, 70, 229, 0.12), transparent 62%),
+        radial-gradient(900px 520px at 92% 0%, rgba(99, 102, 241, 0.12), transparent 58%),
+        var(--theme-bg);
 }
 
 h1,

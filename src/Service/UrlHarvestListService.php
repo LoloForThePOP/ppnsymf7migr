@@ -97,6 +97,7 @@ final class UrlHarvestListService
         return trim($content);
     }
 
+
     /**
      * @return array{min_text_chars:int,warn_text_chars:int,min_assets:int}
      */

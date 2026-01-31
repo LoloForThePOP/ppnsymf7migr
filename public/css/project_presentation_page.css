@@ -79,6 +79,14 @@
 
 }
 
+html[data-theme="concentration"] body[data-theme-scope="presentation"] .pp-struct-title {
+    letter-spacing: -0.01em;
+}
+
+html[data-theme="concentration"] body[data-theme-scope="presentation"] .pp-struct-container {
+    border-color: color-mix(in srgb, var(--pp-card-border) 70%, transparent);
+}
+
 /* Each Structure Icon */
 
 .pp-struct-icon{

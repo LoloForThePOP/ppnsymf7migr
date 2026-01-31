@@ -20,6 +20,6 @@ Contraintes :
 - PAS DE PROJETS INVENTES
 - 2 projets maximum.
 - title et goal en français, goal en une phrase.
-- description : 2 à 3 paragraphes en français, séparés par des balises html de paragraphes p.
+- description : 2 à 3 paragraphes en français, séparés par des balises html de paragraphes p. Ton descriptif et factuel, éviter les formulations marketing et les termes hyperboliques (ex: "formidable", "incroyable", etc.).
 - categories : 1 à 3 valeurs parmi la liste autorisée; si aucune ne colle, inclure "services". La catégorie "humane" couvre solidarité, vivre ensemble, inclusion sociale, aide humanitaire, insertion, lutte contre la précarité. Pas de catégories inventées.
 - source_url : URL http(s). Pas de vide, pas de texte hors JSON.

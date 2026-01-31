@@ -47,7 +47,7 @@ class NormalizedProjectPersister
         'volunteer_distribution',
         'fallback',
     ];
-    private const STANDARD_FALLBACK_CAPTION = "Image d’illustration non affiliée";
+    private const STANDARD_FALLBACK_LICENCE = "Image d’illustration non affiliée";
     /**
      * @var array<int, array<string, mixed>>
      */
@@ -144,7 +144,7 @@ class NormalizedProjectPersister
         $this->attachVideos($pp, $payload['videos'] ?? []);
         $this->attachImages($pp, $imagesPayload, $logoUrl, $mediaBaseName, $sourceUrl);
         $this->attachWebsites($pp, $payload['websites'] ?? []);
-        $this->attachBusinessCards($pp, $payload['business_cards'] ?? []);
+        $this->attachBusinessCards($pp, $payload['business_cards'] ?? [], $sourceUrl);
         $this->applyStandardFallbackImage($pp, $payload, $mediaBaseName);
         
         $placesDefaultCountry = $this->stringValue($payload['places_default_country'] ?? null);
@@ -520,8 +520,7 @@ class NormalizedProjectPersister
         $slide->setType(SlideType::IMAGE);
         $slide->setPosition($pp->getSlides()->count());
         $slide->setImageFile($file);
-        $slide->setCaption(self::STANDARD_FALLBACK_CAPTION);
-        $slide->setLicence(self::STANDARD_FALLBACK_CAPTION);
+        $slide->setLicence(self::STANDARD_FALLBACK_LICENCE);
         $slide->setProjectPresentation($pp);
         $pp->addSlide($slide);
 
@@ -631,13 +630,14 @@ class NormalizedProjectPersister
         $pp->setOtherComponents($oc);
     }
 
-    private function attachBusinessCards(PPBase $pp, array $cards): void
+    private function attachBusinessCards(PPBase $pp, array $cards, ?string $sourceUrl = null): void
     {
         $cards = array_slice($cards, 0, 2);
         if ($cards === []) {
             return;
         }
 
+        $isJeVeuxAider = $this->isJeVeuxAiderSource($sourceUrl);
         $oc = $pp->getOtherComponents();
         foreach ($cards as $entry) {
             if (!is_array($entry)) {
@@ -650,6 +650,9 @@ class NormalizedProjectPersister
             $website1 = $this->stringValue($entry['website1'] ?? null);
             $website2 = $this->stringValue($entry['website2'] ?? null);
             $postalMail = $this->stringValue($entry['postalMail'] ?? null);
+            if ($isJeVeuxAider) {
+                $postalMail = $this->normalizeJeVeuxAiderPostalMail($postalMail);
+            }
             $remarks = $this->stringValue($entry['remarks'] ?? null);
 
             if ($title === null && $email1 === null && $tel1 === null && $website1 === null && $website2 === null && $postalMail === null && $remarks === null) {
@@ -669,6 +672,92 @@ class NormalizedProjectPersister
         }
 
         $pp->setOtherComponents($oc);
+    }
+
+    /**
+     * JeVeuxAider pages often repeat the city line before the "ZIP City" line.
+     */
+    private function normalizeJeVeuxAiderPostalMail(?string $postalMail): ?string
+    {
+        if ($postalMail === null) {
+            return null;
+        }
+
+        $lines = preg_split('/\r\n|\r|\n/', trim($postalMail));
+        if (!is_array($lines)) {
+            return $postalMail;
+        }
+
+        $lines = array_values(array_filter(array_map('trim', $lines), static fn(string $line) => $line !== ''));
+        if ($lines === []) {
+            return null;
+        }
+
+        $normalized = [];
+        $count = count($lines);
+        for ($i = 0; $i < $count; $i++) {
+            $line = $lines[$i];
+            $next = $lines[$i + 1] ?? null;
+            $nextPostal = $next !== null ? $this->parsePostalLine($next) : null;
+            if ($nextPostal !== null
+                && !$this->lineHasDigits($line)
+                && $this->normalizeCity($line) === $this->normalizeCity($nextPostal['city'])) {
+                continue;
+            }
+
+            $postal = $this->parsePostalLine($line);
+            if ($postal !== null && $normalized !== []) {
+                $prev = $normalized[count($normalized) - 1];
+                if (!$this->lineHasDigits($prev)
+                    && $this->normalizeCity($prev) === $this->normalizeCity($postal['city'])) {
+                    array_pop($normalized);
+                }
+            }
+
+            $normalized[] = $line;
+        }
+
+        if ($normalized === []) {
+            return null;
+        }
+
+        return implode("\n", $normalized);
+    }
+
+    /**
+     * @return array{zip:string,city:string}|null
+     */
+    private function parsePostalLine(string $line): ?array
+    {
+        if (!preg_match('/^(\d{5})\s+(.+)$/u', $line, $matches)) {
+            return null;
+        }
+
+        return [
+            'zip' => $matches[1],
+            'city' => $matches[2],
+        ];
+    }
+
+    private function lineHasDigits(string $line): bool
+    {
+        return preg_match('/\d/', $line) === 1;
+    }
+
+    private function normalizeCity(string $value): string
+    {
+        $value = mb_strtolower($value);
+        $value = preg_replace('/\s+/', ' ', $value) ?? $value;
+        return trim($value);
+    }
+
+    private function isJeVeuxAiderSource(?string $sourceUrl): bool
+    {
+        if ($sourceUrl === null || $sourceUrl === '') {
+            return false;
+        }
+
+        return str_contains($sourceUrl, 'jeveuxaider.gouv.fr');
     }
 
     /**
@@ -719,6 +808,7 @@ class NormalizedProjectPersister
             return null;
         }
     }
+
 
     private function normalizeFundingStatus(mixed $value): ?string
     {
