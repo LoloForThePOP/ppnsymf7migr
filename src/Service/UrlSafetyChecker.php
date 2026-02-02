@@ -65,7 +65,10 @@ final class UrlSafetyChecker
 
         $ips = $this->resolveHost($host);
         if ($ips === []) {
-            return false;
+            // Some shared-hosting environments disable DNS resolution in PHP.
+            // In that case we still allow normal domain names (already filtered above)
+            // while keeping strict blocking for local/private suffixes and literal IPs.
+            return true;
         }
 
         foreach ($ips as $ip) {

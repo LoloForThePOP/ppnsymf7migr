@@ -19,6 +19,7 @@ class UrlHarvestRunner
         private readonly ImageDownloader $imageDownloader,
         private readonly PPBaseRepository $ppBaseRepository,
         private readonly JeVeuxAiderNuxtDataExtractor $jeVeuxAiderExtractor,
+        private readonly JeVeuxAiderFallbackImageResolver $jeVeuxAiderFallbackResolver,
     ) {
     }
 
@@ -131,6 +132,14 @@ class UrlHarvestRunner
             }
 
             if (is_array($data)) {
+                if ($this->isJeVeuxAiderUrl($finalUrl)) {
+                    $data['standard_image_fallback_name'] = $this->jeVeuxAiderFallbackResolver->resolve(
+                        $data,
+                        $structuredData['payload'] ?? null
+                    );
+                    $entry['debug']['resolved_standard_fallback_name'] = $data['standard_image_fallback_name'];
+                }
+
                 $sourceUrl = is_string($data['source_url'] ?? null) ? trim($data['source_url']) : '';
                 if ($sourceUrl === '') {
                     $sourceUrl = $finalUrl ?: $url;

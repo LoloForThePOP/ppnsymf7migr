@@ -542,6 +542,11 @@ class NormalizedProjectPersister
             return null;
         }
 
+        // Legacy aliases kept for backward compatibility with older prompt outputs.
+        if ($folder === 'physical_activity') {
+            $folder = 'sport';
+        }
+
         if (!in_array($folder, self::STANDARD_FALLBACK_FOLDERS, true)) {
             $folder = 'fallback';
         }
