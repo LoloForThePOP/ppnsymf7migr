@@ -35,6 +35,7 @@ final class UluleImportTickHandler
         }
         if ($queue['paused']) {
             $queue['running'] = false;
+            $queue['current_id'] = null;
             $this->queueStateService->writeState(['queue' => $queue]);
             return;
         }
@@ -71,6 +72,7 @@ final class UluleImportTickHandler
                 $queue['remaining'] = max(0, $queue['remaining'] - 1);
             }
 
+            $queue['last_processed_id'] = $next->getUluleId();
             $queue['current_id'] = null;
             $queueable = $this->hasQueueable($filters);
             $queue['running'] = $queueable && (!is_int($queue['remaining']) || $queue['remaining'] > 0);

@@ -74,6 +74,7 @@
   const RECENT_LIMIT = 5;
   const SUGGEST_LIMIT = 8;
   let suggestController = null;
+  let suggestionsLocked = false;
   let hasPlacesInit = false;
   let remoteHistory = null;
   let historyLoaded = false;
@@ -232,6 +233,13 @@
 
   const renderRecentQueries = () => {
     if (!recentEl || !recentListEl || !suggestBoxEl) return;
+    if (suggestionsLocked) {
+      recentEl.classList.add('d-none');
+      if (suggestEl?.classList.contains('d-none')) {
+        suggestBoxEl.classList.add('d-none');
+      }
+      return;
+    }
     if (historyEnabled && !historyLoaded) {
       ensureRecentQueriesLoaded();
     }
@@ -329,6 +337,13 @@
 
   const renderSuggestions = (items, term) => {
     if (!suggestEl || !suggestListEl || !suggestBoxEl) return;
+    if (suggestionsLocked) {
+      suggestEl.classList.add('d-none');
+      if (recentEl?.classList.contains('d-none')) {
+        suggestBoxEl.classList.add('d-none');
+      }
+      return;
+    }
     suggestListEl.innerHTML = '';
     if (!term || items.length === 0) {
       suggestEl.classList.add('d-none');
@@ -670,6 +685,7 @@
   };
 
   const openOverlay = (initialValue = '') => {
+    suggestionsLocked = false;
     if (!overlay.classList.contains('is-open')) {
       overlay.classList.add('is-open');
       overlay.setAttribute('aria-hidden', 'false');
@@ -765,6 +781,7 @@
   };
 
   const clearSearch = () => {
+    suggestionsLocked = false;
     input.value = '';
     syncTriggerInputs('');
     clearInputBtn?.classList.add('d-none');
@@ -1108,6 +1125,7 @@
   }, 200);
 
   input.addEventListener('input', () => {
+    suggestionsLocked = false;
     syncTriggerInputs(input.value);
     clearInputBtn?.classList.toggle('d-none', input.value.length === 0);
     debouncedSearch(input.value);
@@ -1125,10 +1143,16 @@
 
   input.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
+      suggestionsLocked = true;
       const term = input.value.trim();
       if (term.length >= minLength) {
         updateRecentQueries(term);
       }
+      if (suggestController) {
+        suggestController.abort();
+      }
+      renderSuggestions([], '');
+      hideSuggestions();
     }
   });
 

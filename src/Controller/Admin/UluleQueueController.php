@@ -31,6 +31,21 @@ final class UluleQueueController extends AbstractController
     ): Response {
         $filters = $this->readFilters($request);
         $batchSize = max(0, (int) $request->request->get('batch_size', 0));
+        $runId = bin2hex(random_bytes(8));
+
+        // Set the queue as running before catalog refresh so UI polling can show
+        // immediate processing feedback without a manual page reload.
+        $stateService->writeState([
+            'filters' => $filters,
+            'queue' => [
+                'paused' => false,
+                'running' => true,
+                'remaining' => $batchSize > 0 ? $batchSize : null,
+                'run_id' => $runId,
+                'current_id' => null,
+                'last_processed_id' => null,
+            ],
+        ]);
 
         $refreshSummary = $refresher->refreshCatalog(
             $filters['lang'],
@@ -45,23 +60,12 @@ final class UluleQueueController extends AbstractController
             $this->addFlash('danger', $message);
         }
 
-        $runId = bin2hex(random_bytes(8));
-        $stateService->writeState([
-            'filters' => $filters,
-            'queue' => [
-                'paused' => false,
-                'running' => true,
-                'remaining' => $batchSize > 0 ? $batchSize : null,
-                'run_id' => $runId,
-                'current_id' => null,
-            ],
-        ]);
-
         $bus->dispatch(new UluleImportTickMessage($runId));
 
         if ($request->isXmlHttpRequest()) {
             return new JsonResponse([
                 'queue' => $stateService->readState()['queue'],
+                'refresh_summary' => $refreshSummary,
             ]);
         }
 
@@ -75,6 +79,7 @@ final class UluleQueueController extends AbstractController
             'queue' => [
                 'paused' => true,
                 'running' => false,
+                'current_id' => null,
             ],
         ]);
 
@@ -101,6 +106,9 @@ final class UluleQueueController extends AbstractController
         $queue['paused'] = false;
         $queue['running'] = $this->hasQueueable($catalogRepository, $filters);
         $queue['current_id'] = null;
+        if ($queue['running']) {
+            $queue['last_processed_id'] = null;
+        }
 
         if ($queue['run_id'] === null || $queue['run_id'] === '') {
             $queue['run_id'] = bin2hex(random_bytes(8));
@@ -141,6 +149,18 @@ final class UluleQueueController extends AbstractController
                 }
             }
             $ids = array_values(array_unique($ids));
+        }
+
+        $queue = $state['queue'] ?? [];
+        $forcedQueueIds = [];
+        foreach (['current_id', 'last_processed_id'] as $key) {
+            $value = (int) ($queue[$key] ?? 0);
+            if ($value > 0) {
+                $forcedQueueIds[] = $value;
+            }
+        }
+        if ($forcedQueueIds !== []) {
+            $ids = array_values(array_unique(array_merge($ids, $forcedQueueIds)));
         }
 
         if ($ids !== []) {

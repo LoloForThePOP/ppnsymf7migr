@@ -13,6 +13,7 @@ final class UluleQueueStateService
         'remaining' => null,
         'run_id' => null,
         'current_id' => null,
+        'last_processed_id' => null,
     ];
     private const DEFAULT_FILTERS = [
         'lang' => 'fr',
@@ -38,7 +39,7 @@ final class UluleQueueStateService
     }
 
     /**
-     * @return array{queue: array{paused:bool,running:bool,remaining:?int,run_id:?string,current_id:?int}, filters: array<string, mixed>}
+     * @return array{queue: array{paused:bool,running:bool,remaining:?int,run_id:?string,current_id:?int,last_processed_id:?int}, filters: array<string, mixed>}
      */
     public function readState(): array
     {
@@ -57,6 +58,7 @@ final class UluleQueueStateService
         $queue['running'] = filter_var($queue['running'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $queue['remaining'] = $this->normalizeNullableInt($queue['remaining'] ?? null);
         $queue['current_id'] = $this->normalizeNullableInt($queue['current_id'] ?? null);
+        $queue['last_processed_id'] = $this->normalizeNullableInt($queue['last_processed_id'] ?? null);
         $queue['run_id'] = is_string($queue['run_id'] ?? null) ? $queue['run_id'] : null;
 
         return [
