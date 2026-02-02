@@ -508,6 +508,36 @@
                 return 'secondary';
             };
 
+            const buildResultFetchUrl = (source, resultKey) => {
+                if (!table || !table.dataset.resultUrl) return null;
+                const url = new URL(table.dataset.resultUrl, window.location.origin);
+                url.searchParams.set('source', source);
+                url.searchParams.set('key', resultKey);
+                return url.toString();
+            };
+
+            const buildResultActionsHtml = (resultKey, source) => {
+                const safeKey = escapeHtml(resultKey || '');
+                const safeSource = escapeHtml(source || '');
+                return '<div class="d-flex flex-column gap-1">'
+                    + '<button type="button" class="btn btn-link p-0 text-start js-result-modal" data-kind="raw" data-result-key="' + safeKey + '" data-source="' + safeSource + '">JSON brut (modal)</button>'
+                    + '<button type="button" class="btn btn-link p-0 text-start js-result-modal" data-kind="debug" data-result-key="' + safeKey + '" data-source="' + safeSource + '">Debug (modal)</button>'
+                    + '<button type="button" class="btn btn-link p-0 js-ai-input" data-result-key="' + safeKey + '" data-source="' + safeSource + '">Entrée IA (modal)</button>'
+                    + '</div>';
+            };
+
+            const fetchResultPayload = async (source, resultKey) => {
+                const requestUrl = buildResultFetchUrl(source, resultKey);
+                if (!requestUrl) {
+                    throw new Error('URL résultat indisponible');
+                }
+                const response = await fetch(requestUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!response.ok) {
+                    throw new Error('Chargement impossible.');
+                }
+                return await response.json();
+            };
+
             const applyHideDone = () => {
                 if (!table || !toggleHideDone) return;
                 const hideDone = toggleHideDone.checked;
@@ -555,7 +585,7 @@
             const schedulePoll = (delay) => {
                 stopPolling();
                 if (!shouldPoll()) return;
-                pollTimer = window.setTimeout(() => refresh(true), delay);
+                pollTimer = window.setTimeout(() => refresh(), delay);
             };
 
             const updateWorkerStatus = (worker) => {
@@ -672,13 +702,9 @@
                 }
 
                 const jsonCell = row.querySelector('[data-col="json"]');
-                if (jsonCell && !jsonCell.querySelector('details')) {
+                if (jsonCell) {
                     if (entry.has_result && entry.result_key) {
-                        jsonCell.innerHTML = '<div class="d-flex flex-column gap-1">'
-                            + '<button type="button" class="btn btn-link p-0 text-start js-result-modal" data-kind="raw" data-result-key="' + entry.result_key + '" data-source="{{ selectedSource }}">JSON brut (modal)</button>'
-                            + '<button type="button" class="btn btn-link p-0 text-start js-result-modal" data-kind="debug" data-result-key="' + entry.result_key + '" data-source="{{ selectedSource }}">Debug (modal)</button>'
-                            + '<button type="button" class="btn btn-link p-0 js-ai-input" data-result-key="' + entry.result_key + '" data-source="{{ selectedSource }}">Entrée IA (modal)</button>'
-                            + '</div>';
+                        jsonCell.innerHTML = buildResultActionsHtml(entry.result_key, '{{ selectedSource }}');
                     } else {
                         jsonCell.textContent = '-';
                     }
@@ -736,13 +762,8 @@
                 const resultKey = button.dataset.resultKey;
                 const source = button.dataset.source;
                 if (!resultKey || !source || !table || !table.dataset.resultUrl || !aiInputModalContent) return;
-                const url = new URL(table.dataset.resultUrl, window.location.origin);
-                url.searchParams.set('source', source);
-                url.searchParams.set('key', resultKey);
                 try {
-                    const response = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                    if (!response.ok) throw new Error('Chargement impossible.');
-                    const payload = await response.json();
+                    const payload = await fetchResultPayload(source, resultKey);
                     const input = payload?.debug?.ai_input || '';
                     const inputType = payload?.debug?.ai_input_type || 'n/a';
                     const structuredChars = payload?.debug?.structured_description_chars;
@@ -803,13 +824,8 @@
                 const source = button.dataset.source;
                 const kind = button.dataset.kind || 'raw';
                 if (!resultKey || !source || !table || !table.dataset.resultUrl || !resultModalContent) return;
-                const url = new URL(table.dataset.resultUrl, window.location.origin);
-                url.searchParams.set('source', source);
-                url.searchParams.set('key', resultKey);
                 try {
-                    const response = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                    if (!response.ok) throw new Error('Chargement impossible.');
-                    const payload = await response.json();
+                    const payload = await fetchResultPayload(source, resultKey);
                     if (kind === 'debug') {
                         if (resultModalLabel) resultModalLabel.textContent = 'Debug';
                         resultModalContent.textContent = JSON.stringify(payload?.debug || {}, null, 2) || '{}';
