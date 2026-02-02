@@ -344,6 +344,20 @@
                 return 'bg-secondary';
             };
 
+            const updateProgressIndicators = (queue) => {
+                if (!table) return;
+                const currentId = queue && queue.running && queue.current_id !== null
+                    ? String(queue.current_id)
+                    : '';
+                table.querySelectorAll('tbody tr[data-ulule-id]').forEach((row) => {
+                    const indicator = row.querySelector('[data-col="progress"] .processing-indicator');
+                    if (!indicator) return;
+                    const isActive = currentId !== '' && String(row.dataset.ululeId) === currentId;
+                    indicator.classList.toggle('d-none', !isActive);
+                    indicator.classList.toggle('d-inline-flex', isActive);
+                });
+            };
+
             const updateQueueState = (queue) => {
                 if (!queueLabel || !queue) return;
                 let label = 'arrêtée';
@@ -365,6 +379,7 @@
                 if (queueSpinner) {
                     queueSpinner.classList.toggle('d-none', state !== 'running');
                 }
+                updateProgressIndicators(queue);
             };
 
             const updateSummary = (summary) => {
@@ -474,12 +489,63 @@
                 }
             };
 
+            const createDynamicRow = (item) => {
+                if (!table || !item || item.id === undefined || item.id === null) return null;
+                const tbody = table.querySelector('tbody');
+                if (!tbody) return null;
+
+                const emptyStateRow = tbody.querySelector('tr td[colspan="7"]');
+                if (emptyStateRow) {
+                    emptyStateRow.closest('tr')?.remove();
+                }
+
+                const row = document.createElement('tr');
+                row.dataset.ululeId = String(item.id);
+                row.dataset.dynamic = '1';
+                row.innerHTML = `
+                    <td>
+                        <div class="fw-bold">
+                            Projet Ulule <span class="text-muted">#${item.id}</span>
+                        </div>
+                        <div class="small text-muted">Ajouté pendant le traitement</div>
+                    </td>
+                    <td class="small" data-col="progress">
+                        <span class="processing-indicator d-none align-items-center gap-1">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span>en cours</span>
+                        </span>
+                    </td>
+                    <td class="small text-muted">-</td>
+                    <td class="small text-muted">-</td>
+                    <td data-col="status">
+                        <span class="badge bg-secondary">pending</span>
+                        <span class="badge bg-light text-muted d-none" data-col="eligible">non éligible</span>
+                        <div class="small text-muted mt-1 d-none" data-col="status-comment"></div>
+                        <div class="small text-danger mt-1 d-none" data-col="status-error"></div>
+                    </td>
+                    <td class="small text-muted" data-col="import-link">-</td>
+                    <td class="text-end">
+                        <span class="small text-muted">Actualiser la page pour toutes les actions</span>
+                    </td>
+                `;
+
+                const firstRow = tbody.querySelector('tr[data-ulule-id]');
+                if (firstRow) {
+                    tbody.insertBefore(row, firstRow);
+                } else {
+                    tbody.appendChild(row);
+                }
+
+                return row;
+            };
+
             const refreshStatus = async () => {
                 if (!table || !table.dataset.statusUrl) return;
                 const baseStatusUrl = table.dataset.statusUrl;
                 const ids = Array.from(table.querySelectorAll('tbody tr[data-ulule-id]'))
                     .map((row) => row.dataset.ululeId)
                     .filter((id) => id && id.length > 0)
+                    .slice(0, 250)
                     .join(',');
                 let statusUrl = baseStatusUrl;
                 if (ids.length > 0) {
@@ -499,8 +565,17 @@
                             rowMap.set(row.dataset.ululeId, row);
                         });
                         data.items.forEach((item) => {
-                            const row = rowMap.get(String(item.id));
-                            if (row) updateRow(row, item, data.queue);
+                            const id = String(item.id);
+                            let row = rowMap.get(id);
+                            if (!row) {
+                                row = createDynamicRow(item);
+                                if (row) {
+                                    rowMap.set(id, row);
+                                }
+                            }
+                            if (row) {
+                                updateRow(row, item, data.queue);
+                            }
                         });
                     }
                 } catch (e) {
@@ -540,6 +615,11 @@
                     if (queueSpinner) {
                         queueSpinner.classList.remove('d-none');
                     }
+                    if (button.dataset.queueAction === 'pause') {
+                        updateQueueState({ running: false, paused: true, current_id: null });
+                    } else {
+                        updateQueueState({ running: true, paused: false, current_id: null });
+                    }
 
                     const data = new FormData(form);
                     button.disabled = true;
@@ -561,9 +641,6 @@
                         }
                     } finally {
                         button.disabled = false;
-                        if (queueSpinner) {
-                            queueSpinner.classList.add('d-none');
-                        }
                     }
                 });
             });

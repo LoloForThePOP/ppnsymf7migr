@@ -59,6 +59,12 @@ final class UluleQueueController extends AbstractController
 
         $bus->dispatch(new UluleImportTickMessage($runId));
 
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse([
+                'queue' => $stateService->readState()['queue'],
+            ]);
+        }
+
         return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('admin_ulule_catalog'));
     }
 
@@ -71,6 +77,12 @@ final class UluleQueueController extends AbstractController
                 'running' => false,
             ],
         ]);
+
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse([
+                'queue' => $stateService->readState()['queue'],
+            ]);
+        }
 
         return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('admin_ulule_catalog'));
     }
@@ -98,6 +110,12 @@ final class UluleQueueController extends AbstractController
 
         if ($queue['running']) {
             $bus->dispatch(new UluleImportTickMessage($queue['run_id']));
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse([
+                'queue' => $stateService->readState()['queue'],
+            ]);
         }
 
         return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('admin_ulule_catalog'));
@@ -131,14 +149,40 @@ final class UluleQueueController extends AbstractController
             $items = $this->loadItems($catalogRepository, $filters['status_filter']);
         }
 
+        // Keep visible rows (ids) AND include current filtered rows so newly refreshed
+        // catalog entries can appear in UI without a manual reload.
+        if ($ids !== []) {
+            $filteredItems = $this->loadItems($catalogRepository, $filters['status_filter']);
+            $itemById = [];
+
+            foreach ($items as $item) {
+                if ($item instanceof UluleProjectCatalog) {
+                    $itemById[$item->getUluleId()] = ['item' => $item, 'forced' => true];
+                }
+            }
+
+            foreach (array_slice($filteredItems, 0, 200) as $item) {
+                if (!$item instanceof UluleProjectCatalog) {
+                    continue;
+                }
+                $itemById[$item->getUluleId()] = ['item' => $item, 'forced' => false];
+            }
+        } else {
+            $itemById = [];
+            foreach ($items as $item) {
+                if ($item instanceof UluleProjectCatalog) {
+                    $itemById[$item->getUluleId()] = ['item' => $item, 'forced' => false];
+                }
+            }
+        }
+
         $eligibleOnly = $filters['eligible_only'];
         $payload = [];
-        foreach (array_slice($items, 0, 200) as $item) {
-            if (!$item instanceof UluleProjectCatalog) {
-                continue;
-            }
+        foreach (array_slice(array_values($itemById), 0, 200) as $entry) {
+            $item = $entry['item'];
+            $forced = (bool) ($entry['forced'] ?? false);
             $eligible = $this->isEligible($item, $filters);
-            if ($ids === [] && $eligibleOnly && !$eligible) {
+            if (!$forced && $eligibleOnly && !$eligible) {
                 continue;
             }
             $payload[] = [
