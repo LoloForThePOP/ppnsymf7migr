@@ -155,6 +155,34 @@ final class ProjectPresentationEditActionsTest extends WebTestCase
         self::assertSame('https://www.youtube.com/watch?v=dQw4w9WgXcQ', $slide->getYoutubeUrl());
     }
 
+    public function testAddVideoSlideAcceptsYoutubeShortsUrl(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $presentation = $this->createProject($em, $owner);
+
+        $client->loginUser($owner);
+        $client->setServerParameter('HTTP_REFERER', 'http://localhost/');
+        $token = $this->getCsrfToken($client, 'submit');
+        $client->request(
+            'POST',
+            sprintf('/projects/%s/add-video-slide', $presentation->getStringId()),
+            ['video_slide' => ['youtubeUrl' => 'https://www.youtube.com/shorts/dQw4w9WgXcQ?feature=share', '_token' => $token]]
+        );
+
+        self::assertResponseStatusCodeSame(302);
+
+        $presentation = $this->fetchPresentation($client, $presentation->getStringId());
+        self::assertCount(1, $presentation->getSlides());
+
+        $slide = $presentation->getSlides()->first();
+        self::assertInstanceOf(Slide::class, $slide);
+        self::assertSame('https://www.youtube.com/shorts/dQw4w9WgXcQ?feature=share', $slide->getYoutubeUrl());
+        self::assertSame('dQw4w9WgXcQ', $slide->getYoutubeVideoId());
+    }
+
     public function testAddVideoSlideRejectsInvalidUrl(): void
     {
         $client = static::createClient();

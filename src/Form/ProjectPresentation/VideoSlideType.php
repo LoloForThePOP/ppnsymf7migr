@@ -18,7 +18,7 @@ class VideoSlideType extends AbstractType
                 'label' => 'Lien de la vidéo YouTube',
                 'required' => true,
                 'attr' => [
-                    'placeholder' => 'Ex : https://www.youtube.com/watch?v=xxxx',
+                    'placeholder' => 'Ex : https://www.youtube.com/watch?v=xxxx ou pour un short : https://www.youtube.com/shorts/xxxx',
                     'spellcheck' => 'false',
                     'maxlength' => 255,
                     'aria-label' => 'Lien de la vidéo YouTube',

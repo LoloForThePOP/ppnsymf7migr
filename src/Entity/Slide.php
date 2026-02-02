@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[Vich\Uploadable]
 class Slide
 {
-    private const YOUTUBE_URL_PATTERN = "/^(?:http(?:s)?:\\/\\/)?(?:www\\.)?(?:m\\.)?(?:youtu\\.be\\/|youtube\\.com\\/(?:(?:watch)?\\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\\/))([^\\?&\"'>]+)/";
+    private const YOUTUBE_URL_PATTERN = "/^(?:http(?:s)?:\\/\\/)?(?:www\\.)?(?:m\\.)?(?:youtu\\.be\\/|youtube\\.com\\/(?:(?:watch)?\\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user|shorts|live)\\/))([^\\?&\"'>]+)/";
     use TimestampableTrait;
 
     // ────────────────────────────────────────
