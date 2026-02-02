@@ -404,13 +404,35 @@ final class UrlHarvestController extends AbstractController
         ];
 
         $buckets = [];
-        foreach ($entries as $entry) {
+        foreach ($entries as $index => $entry) {
             $status = strtolower(trim((string) ($entry['status'] ?? 'pending')));
             if ($status === '') {
                 $status = 'pending';
             }
+            $entry['_display_index'] = $index;
             $buckets[$status][] = $entry;
         }
+
+        foreach ($buckets as &$bucket) {
+            usort($bucket, static function (array $a, array $b): int {
+                $aTs = strtotime((string) ($a['last_run_at'] ?? '')) ?: 0;
+                $bTs = strtotime((string) ($b['last_run_at'] ?? '')) ?: 0;
+                if ($aTs !== $bTs) {
+                    return $bTs <=> $aTs;
+                }
+
+                return ((int) ($a['_display_index'] ?? 0)) <=> ((int) ($b['_display_index'] ?? 0));
+            });
+        }
+        unset($bucket);
+
+        foreach ($buckets as &$bucket) {
+            foreach ($bucket as &$entry) {
+                unset($entry['_display_index']);
+            }
+            unset($entry);
+        }
+        unset($bucket);
 
         $ordered = [];
         foreach ($priority as $status) {

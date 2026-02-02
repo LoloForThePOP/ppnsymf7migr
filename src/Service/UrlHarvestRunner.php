@@ -18,6 +18,7 @@ class UrlHarvestRunner
         private readonly UrlSafetyChecker $urlSafetyChecker,
         private readonly ImageDownloader $imageDownloader,
         private readonly PPBaseRepository $ppBaseRepository,
+        private readonly JeVeuxAiderNuxtDataExtractor $jeVeuxAiderExtractor,
     ) {
     }
 
@@ -57,6 +58,23 @@ class UrlHarvestRunner
                 $entry['debug']['funding_end_at_guess'] = $fundingEndAt->format('Y-m-d');
             }
 
+            $structuredData = null;
+            if ($this->isJeVeuxAiderUrl($finalUrl)) {
+                $structuredData = $this->jeVeuxAiderExtractor->extract($html);
+            }
+            if ($structuredData !== null) {
+                $entry['debug']['structured_source'] = $structuredData['debug'];
+                $structuredDescription = trim((string) ($structuredData['payload']['description'] ?? ''));
+                $structuredChars = $this->countChars($structuredDescription);
+                $entry['debug']['structured_description_chars'] = $structuredChars;
+                $minText = max(0, (int) ($payloadPolicy['min_text_chars'] ?? 0));
+                if ($enforcePayloadGate && $structuredChars < $minText) {
+                    $entry['skip_persist'] = true;
+                    $entry['skip_reason'] = 'Description structurée trop courte';
+                    $persist = false;
+                }
+            }
+
             $extracted = $this->extractor->extract($html, $finalUrl);
             $entry['debug']['links'] = $extracted['links'] ?? [];
             $entry['debug']['images'] = $extracted['images'] ?? [];
@@ -67,10 +85,34 @@ class UrlHarvestRunner
                 $persist = false;
             }
 
-            $userContent = "URL: {$url}\n\n### TEXT\n{$extracted['text']}\n\n### LINKS\n"
-                . implode("\n", $extracted['links'])
-                . "\n\n### IMAGES\n"
-                . implode("\n", $extracted['images']);
+            if ($structuredData !== null) {
+                $structuredJson = json_encode(
+                    $structuredData['payload'],
+                    JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                );
+                if ($structuredJson !== false) {
+                    $userContent = "URL: {$url}\n\n### STRUCTURED_DATA\n{$structuredJson}";
+                    $entry['debug']['ai_input'] = $this->truncateUserContent($userContent);
+                    $entry['debug']['ai_input_type'] = 'structured';
+                } else {
+                    $structuredData = null;
+                }
+            } else {
+                $userContent = "URL: {$url}\n\n### TEXT\n{$extracted['text']}\n\n### LINKS\n"
+                    . implode("\n", $extracted['links'])
+                    . "\n\n### IMAGES\n"
+                    . implode("\n", $extracted['images']);
+                $entry['debug']['ai_input'] = $this->truncateUserContent($userContent);
+                $entry['debug']['ai_input_type'] = 'html';
+            }
+            if ($structuredData === null && !isset($userContent)) {
+                $userContent = "URL: {$url}\n\n### TEXT\n{$extracted['text']}\n\n### LINKS\n"
+                    . implode("\n", $extracted['links'])
+                    . "\n\n### IMAGES\n"
+                    . implode("\n", $extracted['images']);
+                $entry['debug']['ai_input'] = $this->truncateUserContent($userContent);
+                $entry['debug']['ai_input_type'] = 'html';
+            }
 
             $content = $this->askModel($prompt, $userContent, $model);
             $entry['raw'] = $content;
@@ -104,6 +146,9 @@ class UrlHarvestRunner
                 if ($sourceUrl === '') {
                     $sourceUrl = $finalUrl ?: $url;
                 }
+                if ($sourceUrl !== '') {
+                    $entry['debug']['source_url'] = $sourceUrl;
+                }
                 $logoUrl = is_string($data['logo_url'] ?? null) ? trim((string) $data['logo_url']) : '';
                 if ($logoUrl !== '') {
                     $entry['debug']['logo_probe'] = $this->imageDownloader->debugDownload($logoUrl, $sourceUrl ?: null);
@@ -120,6 +165,9 @@ class UrlHarvestRunner
                 $sourceUrl = is_string($data['source_url'] ?? null) ? trim($data['source_url']) : '';
                 if ($sourceUrl === '') {
                     $sourceUrl = $finalUrl ?: $url;
+                }
+                if ($sourceUrl !== '') {
+                    $entry['debug']['source_url'] = $sourceUrl;
                 }
                 if ($sourceUrl !== '') {
                     $existing = $this->ppBaseRepository->createQueryBuilder('p')
@@ -258,6 +306,15 @@ class UrlHarvestRunner
         return substr($html, 0, $maxLength) . "\n<!-- HTML truncated -->";
     }
 
+    private function truncateUserContent(string $content, int $maxLength = 20000): string
+    {
+        if (strlen($content) <= $maxLength) {
+            return $content;
+        }
+
+        return substr($content, 0, $maxLength) . "\n<!-- USER_CONTENT truncated -->";
+    }
+
     private function stripLargeBlocks(string $html): string
     {
         $html = preg_replace('#<script\\b[^>]*>.*?</script>#is', '', $html) ?? $html;
@@ -391,5 +448,23 @@ class UrlHarvestRunner
 
         return $host === 'fondation-patrimoine.org'
             || str_ends_with($host, '.fondation-patrimoine.org');
+    }
+
+    private function isJeVeuxAiderUrl(?string $url): bool
+    {
+        if ($url === null || trim($url) === '') {
+            return false;
+        }
+
+        $host = parse_url($url, PHP_URL_HOST);
+        if (!is_string($host) || $host === '') {
+            return false;
+        }
+
+        $host = strtolower($host);
+        $host = preg_replace('/^(www\\.|m\\.)/i', '', $host);
+
+        return $host === 'jeveuxaider.gouv.fr'
+            || str_ends_with($host, '.jeveuxaider.gouv.fr');
     }
 }

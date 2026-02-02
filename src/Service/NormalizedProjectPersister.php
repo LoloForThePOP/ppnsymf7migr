@@ -103,6 +103,8 @@ class NormalizedProjectPersister
         $ing = $pp->getIngestion();
         $sourceUrl = $this->stringValue($payload['source_url'] ?? null);
         $ing->setSourceUrl($sourceUrl);
+        $ing->setSourceCreatedAt($this->parseSourceDateTime($payload['source_created_at'] ?? $payload['created_at'] ?? null));
+        $ing->setSourceUpdatedAt($this->parseSourceDateTime($payload['source_updated_at'] ?? $payload['updated_at'] ?? null));
         $ing->setIngestedAt(new \DateTimeImmutable());
         $ing->setIngestionStatus('ok');
 
@@ -824,6 +826,28 @@ class NormalizedProjectPersister
 
         if (is_int($value)) {
             return (new \DateTimeImmutable())->setTimestamp($value);
+        }
+
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value);
+        if ($value === '') {
+            return null;
+        }
+
+        try {
+            return new \DateTimeImmutable($value);
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    private function parseSourceDateTime(mixed $value): ?\DateTimeImmutable
+    {
+        if ($value instanceof \DateTimeInterface) {
+            return \DateTimeImmutable::createFromInterface($value);
         }
 
         if (!is_string($value)) {

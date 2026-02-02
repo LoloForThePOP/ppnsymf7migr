@@ -118,7 +118,7 @@
                             </label>
                         </div>
                         <div class="table-responsive mt-4">
-                            <table class="table table-sm align-middle mb-0" id="source-urls-table" data-status-url="{{ path('admin_project_harvest_urls_status', {source: selectedSource}) }}">
+                            <table class="table table-sm align-middle mb-0" id="source-urls-table" data-status-url="{{ path('admin_project_harvest_urls_status', {source: selectedSource}) }}" data-result-url="{{ path('admin_project_harvest_urls_result') }}">
                                 <thead>
                                     <tr>
                                         <th>URL</th>
@@ -201,72 +201,20 @@
                                                 {% endif %}
                                             </td>
                                             <td class="small" data-col="json">
-                                                {% if runResult is not null and runResult.raw is defined and runResult.raw %}
-                                                    <details>
-                                                        <summary>JSON brut</summary>
-                                                        <pre class="theme-pre p-2 rounded" style="white-space: pre-wrap;">{{ runResult.raw }}</pre>
-                                                    </details>
-                                                {% endif %}
-                                                {% if runResult is not null and runResult.debug is defined and runResult.debug %}
-                                                    <details class="mt-1">
-                                                        <summary>Debug</summary>
-                                                        {% if runResult.debug.final_url is defined %}
-                                                            <div class="small text-muted">URL finale : {{ runResult.debug.final_url }}</div>
-                                                        {% endif %}
-                                                        {% if runResult.debug.links is defined %}
-                                                            <div class="mt-2 small fw-bold">Liens extraits ({{ runResult.debug.links|length }})</div>
-                                                            {% if runResult.debug.links %}
-                                                                <pre class="theme-pre p-2 rounded" style="white-space: pre-wrap;">{{ runResult.debug.links|join('\n') }}</pre>
-                                                            {% else %}
-                                                                <div class="small text-muted">Aucun lien extrait.</div>
-                                                            {% endif %}
-                                                        {% endif %}
-                                                        {% if runResult.debug.images is defined %}
-                                                            <div class="mt-2 small fw-bold">Images extraites ({{ runResult.debug.images|length }})</div>
-                                                            {% if runResult.debug.images %}
-                                                                <pre class="theme-pre p-2 rounded" style="white-space: pre-wrap;">{{ runResult.debug.images|join('\n') }}</pre>
-                                                            {% else %}
-                                                                <div class="small text-muted">Aucune image extraite.</div>
-                                                            {% endif %}
-                                                        {% endif %}
-                                                        {% if runResult.debug.logo_probe is defined %}
-                                                            {% set logoProbe = runResult.debug.logo_probe %}
-                                                            <div class="mt-2 small fw-bold">Logo</div>
-                                                            <div class="small text-muted">
-                                                                Statut : {{ logoProbe.status ?? '-' }} |
-                                                                Type : {{ logoProbe.resolved_type ?? logoProbe.content_type ?? '-' }}
-                                                            </div>
-                                                            {% if logoProbe.final_url is defined and logoProbe.final_url %}
-                                                                <div class="small text-muted">URL finale : {{ logoProbe.final_url }}</div>
-                                                            {% endif %}
-                                                            {% if logoProbe.error is defined and logoProbe.error %}
-                                                                <div class="small text-danger">Erreur : {{ logoProbe.error }}</div>
-                                                            {% endif %}
-                                                            {% if runResult.debug.logo_saved is defined %}
-                                                                <div class="small text-muted">
-                                                                    Logo enregistré :
-                                                                    {{ runResult.debug.logo_saved ? runResult.debug.logo_saved : 'non' }}
-                                                                </div>
-                                                            {% endif %}
-                                                            {% if runResult.debug.media is defined and runResult.debug.media.logo is defined %}
-                                                                {% set logoMedia = runResult.debug.media.logo %}
-                                                                <div class="small text-muted">
-                                                                    Téléchargé :
-                                                                    {{ logoMedia.downloaded ? 'oui' : 'non' }}
-                                                                    {% if logoMedia.downloaded %}
-                                                                        ({{ logoMedia.mime ?? '-' }}, {{ logoMedia.size ?? 0 }} octets)
-                                                                    {% endif %}
-                                                                </div>
-                                                            {% endif %}
-                                                        {% endif %}
-                                                    </details>
-                                                {% endif %}
-                                                {% if runResult is null or (runResult.raw is not defined and runResult.debug is not defined) %}
-                                                    {% if entry.has_result is defined and entry.has_result %}
-                                                        <a href="{{ path('admin_project_harvest_urls_result', {source: selectedSource, key: entry.result_key}) }}" target="_blank" rel="noopener noreferrer">Voir JSON</a>
-                                                    {% else %}
-                                                        -
-                                                    {% endif %}
+                                                {% if (entry.has_result is defined and entry.has_result) or runResult is not null %}
+                                                    <div class="d-flex flex-column gap-1">
+                                                        <button type="button" class="btn btn-link p-0 text-start js-result-modal" data-kind="raw" data-result-key="{{ entry.result_key|default('') }}" data-source="{{ selectedSource }}">
+                                                            JSON brut (modal)
+                                                        </button>
+                                                        <button type="button" class="btn btn-link p-0 text-start js-result-modal" data-kind="debug" data-result-key="{{ entry.result_key|default('') }}" data-source="{{ selectedSource }}">
+                                                            Debug (modal)
+                                                        </button>
+                                                        <button type="button" class="btn btn-link p-0 text-start js-ai-input" data-result-key="{{ entry.result_key|default('') }}" data-source="{{ selectedSource }}">
+                                                            Entrée IA (modal)
+                                                        </button>
+                                                    </div>
+                                                {% else %}
+                                                    -
                                                 {% endif %}
                                             </td>
                                             <td class="small text-muted" data-col="error">{{ entry.error ?: '-' }}</td>
@@ -367,11 +315,20 @@
                                     <pre class="theme-pre p-2 rounded" style="white-space: pre-wrap;">{{ item.raw }}</pre>
                                 </details>
                             {% endif %}
+                            {% if item.debug is defined and item.debug.ai_input is defined and item.debug.ai_input %}
+                                <details class="mt-2">
+                                    <summary>Entrée IA ({{ item.debug.ai_input_type ?? 'n/a' }})</summary>
+                                    <pre class="theme-pre p-2 rounded" style="white-space: pre-wrap;">{{ item.debug.ai_input }}</pre>
+                                </details>
+                            {% endif %}
                             {% if item.debug is defined and item.debug %}
                                 <details class="mt-2">
                                     <summary>Debug extraction HTML</summary>
                                     {% if item.debug.final_url is defined %}
                                         <div class="small text-muted">URL finale : {{ item.debug.final_url }}</div>
+                                    {% endif %}
+                                    {% if item.debug.structured_description_chars is defined %}
+                                        <div class="small text-muted">Description structurée : {{ item.debug.structured_description_chars }} caractères</div>
                                     {% endif %}
                                     {% if item.debug.links is defined %}
                                         <div class="mt-2 small fw-bold">Liens extraits ({{ item.debug.links|length }})</div>
@@ -470,6 +427,33 @@
             </div>
         {% endif %}
     </div>
+    <div class="modal fade" id="ai-input-modal" tabindex="-1" aria-labelledby="ai-input-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ai-input-modal-label">Entrée envoyée à l’IA</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="small text-muted mb-2" id="ai-input-modal-meta"></div>
+                    <pre class="theme-pre p-2 rounded" style="white-space: pre-wrap;" id="ai-input-modal-content"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="result-modal" tabindex="-1" aria-labelledby="result-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="result-modal-label">Résultat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <pre class="theme-pre p-2 rounded" style="white-space: pre-wrap;" id="result-modal-content"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const table = document.getElementById('source-urls-table');
@@ -482,9 +466,20 @@
             const workerText = document.querySelector('.js-worker-text');
             const workerCopyBtn = document.querySelector('.js-copy-worker-command');
             const workerCopyFeedback = document.querySelector('.js-copy-worker-feedback');
+            const aiInputModalEl = document.getElementById('ai-input-modal');
+            const aiInputModalContent = document.getElementById('ai-input-modal-content');
+            const aiInputModalMeta = document.getElementById('ai-input-modal-meta');
+            const aiInputModal = aiInputModalEl && window.bootstrap ? new bootstrap.Modal(aiInputModalEl) : null;
+            const resultModalEl = document.getElementById('result-modal');
+            const resultModalLabel = document.getElementById('result-modal-label');
+            const resultModalContent = document.getElementById('result-modal-content');
+            const resultModal = resultModalEl && window.bootstrap ? new bootstrap.Modal(resultModalEl) : null;
+            const sourceRunForm = document.getElementById('source-run-form');
             const pollDelayActive = 4000;
+            const finishedStatuses = new Set(['done', 'normalized', 'skipped', 'error']);
             let pollTimer = null;
             let pollInFlight = false;
+            let formActionInFlight = false;
             let queueState = queueLabel ? queueLabel.dataset.queueState : 'stopped';
 
             const statusClass = (status) => {
@@ -516,10 +511,10 @@
             const applyHideDone = () => {
                 if (!table || !toggleHideDone) return;
                 const hideDone = toggleHideDone.checked;
-                const finishedStatuses = new Set(['done', 'normalized', 'skipped', 'error']);
                 table.querySelectorAll('tbody tr[data-status]').forEach((row) => {
                     const status = (row.dataset.status || '').toLowerCase();
-                    const shouldHide = hideDone && finishedStatuses.has(status);
+                    const isCurrentSessionDone = row.dataset.sessionDone === '1';
+                    const shouldHide = hideDone && finishedStatuses.has(status) && !isCurrentSessionDone;
                     row.classList.toggle('d-none', shouldHide);
                 });
             };
@@ -618,9 +613,13 @@
 
             const updateRow = (row, entry) => {
                 if (!row || !entry) return;
+                const previousStatus = (row.dataset.status || '').toLowerCase();
                 const status = (entry.status || 'pending').toLowerCase();
                 row.dataset.status = status;
                 row.dataset.recentResult = entry.has_result ? '1' : '0';
+                if (finishedStatuses.has(status) && !finishedStatuses.has(previousStatus)) {
+                    row.dataset.sessionDone = '1';
+                }
 
                 const statusCell = row.querySelector('[data-col="status"]');
                 if (statusCell) {
@@ -675,11 +674,11 @@
                 const jsonCell = row.querySelector('[data-col="json"]');
                 if (jsonCell && !jsonCell.querySelector('details')) {
                     if (entry.has_result && entry.result_key) {
-                        const url = new URL(table.dataset.statusUrl, window.location.origin);
-                        url.pathname = '{{ path('admin_project_harvest_urls_result') }}';
-                        url.searchParams.set('source', '{{ selectedSource }}');
-                        url.searchParams.set('key', entry.result_key);
-                        jsonCell.innerHTML = '<a href="' + url.toString() + '" target="_blank" rel="noopener noreferrer">Voir JSON</a>';
+                        jsonCell.innerHTML = '<div class="d-flex flex-column gap-1">'
+                            + '<button type="button" class="btn btn-link p-0 text-start js-result-modal" data-kind="raw" data-result-key="' + entry.result_key + '" data-source="{{ selectedSource }}">JSON brut (modal)</button>'
+                            + '<button type="button" class="btn btn-link p-0 text-start js-result-modal" data-kind="debug" data-result-key="' + entry.result_key + '" data-source="{{ selectedSource }}">Debug (modal)</button>'
+                            + '<button type="button" class="btn btn-link p-0 js-ai-input" data-result-key="' + entry.result_key + '" data-source="{{ selectedSource }}">Entrée IA (modal)</button>'
+                            + '</div>';
                     } else {
                         jsonCell.textContent = '-';
                     }
@@ -731,6 +730,111 @@
                 }
             };
 
+            const handleAiInputClick = async (event) => {
+                const button = event.target.closest('.js-ai-input');
+                if (!button) return;
+                const resultKey = button.dataset.resultKey;
+                const source = button.dataset.source;
+                if (!resultKey || !source || !table || !table.dataset.resultUrl || !aiInputModalContent) return;
+                const url = new URL(table.dataset.resultUrl, window.location.origin);
+                url.searchParams.set('source', source);
+                url.searchParams.set('key', resultKey);
+                try {
+                    const response = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    if (!response.ok) throw new Error('Chargement impossible.');
+                    const payload = await response.json();
+                    const input = payload?.debug?.ai_input || '';
+                    const inputType = payload?.debug?.ai_input_type || 'n/a';
+                    const structuredChars = payload?.debug?.structured_description_chars;
+                    const sourceUrl = payload?.debug?.source_url || '';
+                    if (aiInputModalMeta) {
+                        const parts = [];
+                        parts.push(`Type: ${inputType}`);
+                        if (structuredChars !== undefined) {
+                            parts.push(`Description: ${structuredChars} caractères`);
+                        }
+                        if (sourceUrl) {
+                            const safeUrl = sourceUrl.replace(/"/g, '&quot;');
+                            parts.push(`<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">Source</a>`);
+                        }
+                        aiInputModalMeta.innerHTML = parts.join(' • ');
+                    }
+                    aiInputModalContent.textContent = input || 'Aucune entrée IA disponible pour ce résultat.';
+                    if (aiInputModal) aiInputModal.show();
+                } catch (e) {
+                    if (aiInputModalMeta) aiInputModalMeta.textContent = '';
+                    aiInputModalContent.textContent = 'Impossible de charger l’entrée IA.';
+                    if (aiInputModal) aiInputModal.show();
+                }
+            };
+
+            const handleQueueActionClick = async (event) => {
+                const button = event.target.closest('#source-run-form button[name="action"]');
+                if (!button || !sourceRunForm) return;
+                const action = button.value || '';
+                if (!['run_source', 'pause_source', 'resume_source'].includes(action)) return;
+                event.preventDefault();
+                if (formActionInFlight) return;
+                formActionInFlight = true;
+                button.disabled = true;
+                try {
+                    const formData = new FormData(sourceRunForm);
+                    formData.set('action', action);
+                    const submitUrl = sourceRunForm.getAttribute('action') || window.location.href;
+                    const response = await fetch(submitUrl, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: formData,
+                    });
+                    if (!response.ok) throw new Error('Action impossible');
+                    await refresh();
+                } catch (e) {
+                    // keep UI stable; next poll/manual refresh will resync
+                } finally {
+                    formActionInFlight = false;
+                    button.disabled = false;
+                }
+            };
+
+            const handleResultModalClick = async (event) => {
+                const button = event.target.closest('.js-result-modal');
+                if (!button) return;
+                const resultKey = button.dataset.resultKey;
+                const source = button.dataset.source;
+                const kind = button.dataset.kind || 'raw';
+                if (!resultKey || !source || !table || !table.dataset.resultUrl || !resultModalContent) return;
+                const url = new URL(table.dataset.resultUrl, window.location.origin);
+                url.searchParams.set('source', source);
+                url.searchParams.set('key', resultKey);
+                try {
+                    const response = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    if (!response.ok) throw new Error('Chargement impossible.');
+                    const payload = await response.json();
+                    if (kind === 'debug') {
+                        if (resultModalLabel) resultModalLabel.textContent = 'Debug';
+                        resultModalContent.textContent = JSON.stringify(payload?.debug || {}, null, 2) || '{}';
+                    } else {
+                        if (resultModalLabel) resultModalLabel.textContent = 'JSON brut (= what the model returned as text in its answer)';
+                        const raw = payload?.raw || '';
+                        try {
+                            const parsed = JSON.parse(raw);
+                            resultModalContent.textContent = JSON.stringify(parsed, null, 2);
+                        } catch (e) {
+                            resultModalContent.textContent = raw || 'Aucun JSON brut disponible.';
+                        }
+                    }
+                    if (resultModal) resultModal.show();
+                } catch (e) {
+                    if (resultModalLabel) {
+                        resultModalLabel.textContent = kind === 'debug'
+                            ? 'Debug'
+                            : 'JSON brut (= what the model returned as text in its answer)';
+                    }
+                    resultModalContent.textContent = 'Impossible de charger le contenu.';
+                    if (resultModal) resultModal.show();
+                }
+            };
+
             if (toggleHideDone) {
                 toggleHideDone.addEventListener('change', applyHideDone);
                 applyHideDone();
@@ -750,6 +854,10 @@
                     }
                 });
             }
+
+            document.addEventListener('click', handleAiInputClick);
+            document.addEventListener('click', handleResultModalClick);
+            document.addEventListener('click', handleQueueActionClick);
         });
     </script>
 {% endblock %}
