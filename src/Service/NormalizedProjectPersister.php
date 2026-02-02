@@ -145,7 +145,7 @@ class NormalizedProjectPersister
         
         $this->attachVideos($pp, $payload['videos'] ?? []);
         $this->attachImages($pp, $imagesPayload, $logoUrl, $mediaBaseName, $sourceUrl);
-        $this->attachWebsites($pp, $payload['websites'] ?? []);
+        $this->attachWebsites($pp, $payload['websites'] ?? [], $sourceUrl);
         $this->attachBusinessCards($pp, $payload['business_cards'] ?? [], $sourceUrl);
         $this->applyStandardFallbackImage($pp, $payload, $mediaBaseName);
         
@@ -609,9 +609,19 @@ class NormalizedProjectPersister
         $pp->setKeywords(implode(', ', $keywords));
     }
 
-    private function attachWebsites(PPBase $pp, array $websites): void
+    private function attachWebsites(PPBase $pp, array $websites, ?string $sourceUrl = null): void
     {
         $oc = $pp->getOtherComponents();
+        $seen = [];
+
+        // For JeVeuxAider imports, always keep the source page as a website entry.
+        if ($this->isJeVeuxAiderSource($sourceUrl) && is_string($sourceUrl) && $sourceUrl !== '') {
+            $websites[] = [
+                'title' => 'Page JeVeuxAider.gouv',
+                'url' => $sourceUrl,
+            ];
+        }
+
         foreach ($websites as $entry) {
             if (!is_array($entry)) {
                 continue;
@@ -621,6 +631,13 @@ class NormalizedProjectPersister
             if (!is_string($url) || $url === '' || !is_string($title) || $title === '') {
                 continue;
             }
+
+            $canonicalUrl = $this->canonicalizeWebsiteUrl($url);
+            if (isset($seen[$canonicalUrl])) {
+                continue;
+            }
+            $seen[$canonicalUrl] = true;
+
             $component = WebsiteComponent::createNew($title, $url);
             try {
                 $component = $this->websiteProcessor->process($component);
@@ -630,6 +647,21 @@ class NormalizedProjectPersister
             }
         }
         $pp->setOtherComponents($oc);
+    }
+
+    private function canonicalizeWebsiteUrl(string $url): string
+    {
+        $parts = parse_url(trim($url));
+        if (!is_array($parts)) {
+            return strtolower(rtrim(trim($url), '/'));
+        }
+
+        $host = strtolower((string) ($parts['host'] ?? ''));
+        $host = preg_replace('/^(www\.|m\.)/i', '', $host);
+        $path = isset($parts['path']) ? rtrim((string) $parts['path'], '/') : '';
+        $query = isset($parts['query']) && $parts['query'] !== '' ? '?' . $parts['query'] : '';
+
+        return $host . $path . $query;
     }
 
     private function attachBusinessCards(PPBase $pp, array $cards, ?string $sourceUrl = null): void
