@@ -59,6 +59,7 @@ class UrlHarvestRunner
             }
 
             $structuredData = null;
+            $structuredChars = null;
             if ($this->isJeVeuxAiderUrl($finalUrl)) {
                 $structuredData = $this->jeVeuxAiderExtractor->extract($html);
             }
@@ -67,21 +68,20 @@ class UrlHarvestRunner
                 $structuredDescription = trim((string) ($structuredData['payload']['description'] ?? ''));
                 $structuredChars = $this->countChars($structuredDescription);
                 $entry['debug']['structured_description_chars'] = $structuredChars;
-                $minText = max(0, (int) ($payloadPolicy['min_text_chars'] ?? 0));
-                if ($enforcePayloadGate && $structuredChars < $minText) {
-                    $entry['skip_persist'] = true;
-                    $entry['skip_reason'] = 'Description structurée trop courte';
-                    $persist = false;
-                }
             }
 
             $extracted = $this->extractor->extract($html, $finalUrl);
             $entry['debug']['links'] = $extracted['links'] ?? [];
             $entry['debug']['images'] = $extracted['images'] ?? [];
             $entry['payload'] = $this->assessPayload($extracted, $payloadPolicy);
-            if ($enforcePayloadGate && $entry['payload']['status'] === 'too_thin') {
+            $programmaticSkip = $this->evaluateProgrammaticGate(
+                $entry['payload'],
+                $payloadPolicy,
+                $structuredChars
+            );
+            if ($enforcePayloadGate && $programmaticSkip !== null) {
                 $entry['skip_persist'] = true;
-                $entry['skip_reason'] = 'Payload trop faible';
+                $entry['skip_reason'] = $programmaticSkip;
                 $persist = false;
             }
 
@@ -131,17 +131,6 @@ class UrlHarvestRunner
             }
 
             if (is_array($data)) {
-                $entry['ai_payload'] = $this->normalizeAiPayload($data['payload_assessment'] ?? null);
-                if ($enforcePayloadGate && !$this->hasSkipPersist($entry)) {
-                    $aiStatus = $entry['ai_payload']['status'] ?? '';
-                    if ($aiStatus === 'too_thin') {
-                        $entry['skip_persist'] = true;
-                        $reason = trim((string) ($entry['ai_payload']['reason'] ?? ''));
-                        $entry['skip_reason'] = $reason !== '' ? $reason : 'Payload jugé trop faible par l’IA';
-                        $persist = false;
-                    }
-                }
-
                 $sourceUrl = is_string($data['source_url'] ?? null) ? trim($data['source_url']) : '';
                 if ($sourceUrl === '') {
                     $sourceUrl = $finalUrl ?: $url;
@@ -197,36 +186,6 @@ class UrlHarvestRunner
         }
 
         return $entry;
-    }
-
-    /**
-     * @return array{status:string,reason:string}|null
-     */
-    private function normalizeAiPayload(mixed $payload): ?array
-    {
-        if (!is_array($payload)) {
-            return null;
-        }
-
-        $status = strtolower(trim((string) ($payload['status'] ?? '')));
-        if (!in_array($status, ['ok', 'weak', 'too_thin'], true)) {
-            return null;
-        }
-
-        $reason = trim((string) ($payload['reason'] ?? ''));
-
-        return [
-            'status' => $status,
-            'reason' => $reason,
-        ];
-    }
-
-    /**
-     * @param array<string, mixed> $entry
-     */
-    private function hasSkipPersist(array $entry): bool
-    {
-        return !empty($entry['skip_persist']);
     }
 
     private function askModel(string $prompt, string $userContent, string $model): string
@@ -421,6 +380,38 @@ class UrlHarvestRunner
             'images' => $images,
             'assets' => $assets,
         ];
+    }
+
+    /**
+     * @param array{status:string,text_chars:int,links:int,images:int,assets:int} $payload
+     * @param array{min_text_chars:int,warn_text_chars:int,min_assets:int} $policy
+     */
+    private function evaluateProgrammaticGate(array $payload, array $policy, ?int $structuredChars): ?string
+    {
+        $minText = max(0, (int) ($policy['min_text_chars'] ?? 0));
+        $minAssets = max(0, (int) ($policy['min_assets'] ?? 0));
+
+        if ($structuredChars !== null && $structuredChars < $minText) {
+            return sprintf(
+                'Seuil programmatique non atteint : description structurée %d < %d caractères.',
+                $structuredChars,
+                $minText
+            );
+        }
+
+        $textChars = max(0, (int) ($payload['text_chars'] ?? 0));
+        $assets = max(0, (int) ($payload['assets'] ?? 0));
+        if ($textChars < $minText && $assets < $minAssets) {
+            return sprintf(
+                'Seuil programmatique non atteint : texte %d < %d et assets %d < %d.',
+                $textChars,
+                $minText,
+                $assets,
+                $minAssets
+            );
+        }
+
+        return null;
     }
 
     private function countChars(string $value): int

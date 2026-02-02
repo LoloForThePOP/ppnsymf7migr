@@ -160,7 +160,6 @@
                                             <td data-col="status"><span class="badge bg-{{ badgeClass }}">{{ status }}</span></td>
                                             <td class="small" data-col="payload">
                                                 {% set payloadStatus = entry.payload_status|default('') %}
-                                                {% set aiStatus = entry.ai_payload_status|default('') %}
                                                 {% if payloadStatus %}
                                                     {% set payloadBadge = payloadStatus == 'ok' ? 'success' : (payloadStatus == 'weak' ? 'warning text-dark' : 'danger') %}
                                                     <span class="badge bg-{{ payloadBadge }}">{{ payloadStatus }}</span>
@@ -170,16 +169,7 @@
                                                         {{ entry.payload_images|default('0') }} images
                                                     </div>
                                                 {% endif %}
-                                                {% if aiStatus %}
-                                                    {% set aiBadge = aiStatus == 'ok' ? 'success' : (aiStatus == 'weak' ? 'warning text-dark' : 'danger') %}
-                                                    <div class="{{ payloadStatus ? 'mt-1' : '' }}">
-                                                        <span class="badge bg-{{ aiBadge }}">AI {{ aiStatus }}</span>
-                                                        {% if entry.ai_payload_reason is defined and entry.ai_payload_reason %}
-                                                            <div class="text-muted small">{{ entry.ai_payload_reason }}</div>
-                                                        {% endif %}
-                                                    </div>
-                                                {% endif %}
-                                                {% if not payloadStatus and not aiStatus %}
+                                                {% if not payloadStatus %}
                                                     -
                                                 {% endif %}
                                             </td>

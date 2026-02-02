@@ -211,17 +211,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const payloadCell = row.querySelector('[data-col="payload"]');
         if (payloadCell) {
             const payloadStatus = entry.payload_status || '';
-            const aiStatus = entry.ai_payload_status || '';
-            const aiReason = entry.ai_payload_reason || '';
             const parts = [];
             if (payloadStatus) {
                 parts.push('<span class="badge bg-' + payloadClass(payloadStatus) + '">' + payloadStatus + '</span>'
                     + '<div class="text-muted small">' + (entry.payload_text_chars || 0) + ' car., ' + (entry.payload_links || 0) + ' liens, ' + (entry.payload_images || 0) + ' images</div>');
-            }
-            if (aiStatus) {
-                const aiBadge = payloadClass(aiStatus);
-                const reasonHtml = aiReason ? '<div class="text-muted small">' + escapeHtml(aiReason) + '</div>' : '';
-                parts.push('<div class="' + (payloadStatus ? 'mt-1' : '') + '"><span class="badge bg-' + aiBadge + '">AI ' + aiStatus + '</span>' + reasonHtml + '</div>');
             }
             payloadCell.innerHTML = parts.length ? parts.join('') : '-';
         }
