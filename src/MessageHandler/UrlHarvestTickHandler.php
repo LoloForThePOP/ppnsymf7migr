@@ -15,6 +15,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 #[AsMessageHandler]
 final class UrlHarvestTickHandler
 {
+    private const STALE_PROCESSING_SECONDS = 180;
+
     public function __construct(
         private readonly UrlHarvestListService $listService,
         private readonly UrlHarvestRunner $runner,
@@ -53,9 +55,12 @@ final class UrlHarvestTickHandler
                 return;
             }
 
+            $entries = $this->recoverStaleProcessingEntries($entries);
+
             $nextIndex = $this->findNextQueueableIndex($entries);
             if ($nextIndex === null) {
                 $queueState['running'] = false;
+                $this->listService->saveEntries($source, $entries);
                 $this->listService->writeQueueState($source, $queueState);
                 return;
             }
@@ -152,9 +157,17 @@ final class UrlHarvestTickHandler
      */
     private function findNextQueueableIndex(array $entries): ?int
     {
+        // Prioritize never-processed rows first so one failing URL doesn't block the whole list.
         foreach ($entries as $index => $entry) {
             $status = strtolower(trim((string) ($entry['status'] ?? 'pending')));
-            if (in_array($status, ['pending', 'error'], true)) {
+            if ($status === 'pending') {
+                return $index;
+            }
+        }
+
+        foreach ($entries as $index => $entry) {
+            $status = strtolower(trim((string) ($entry['status'] ?? 'pending')));
+            if ($status === 'error') {
                 return $index;
             }
         }
@@ -231,6 +244,31 @@ final class UrlHarvestTickHandler
         $entries[$index]['error'] = '';
         $entries[$index]['created_string_id'] = '';
         $entries[$index]['created_url'] = '';
+
+        return $entries;
+    }
+
+    /**
+     * @param array<int, array<string, string>> $entries
+     * @return array<int, array<string, string>>
+     */
+    private function recoverStaleProcessingEntries(array $entries): array
+    {
+        $now = time();
+
+        foreach ($entries as &$entry) {
+            $status = strtolower(trim((string) ($entry['status'] ?? 'pending')));
+            if (!in_array($status, ['processing', 'queued'], true)) {
+                continue;
+            }
+
+            $lastRunAt = strtotime((string) ($entry['last_run_at'] ?? ''));
+            if ($lastRunAt === false || ($now - $lastRunAt) > self::STALE_PROCESSING_SECONDS) {
+                $entry['status'] = 'error';
+                $entry['error'] = 'Traitement interrompu (timeout), nouvel essai possible.';
+            }
+        }
+        unset($entry);
 
         return $entries;
     }

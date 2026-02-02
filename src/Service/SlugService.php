@@ -54,10 +54,14 @@ final class SlugService
 
         $getter = 'get' . ucfirst($fieldName);
         if (method_exists($entity, $getter) && $entity->$getter() === $slug) {
-            if ($entity instanceof PPBase && $entity->getExtra()->isRandomizedStringId()) {
-                $entity->getExtra()->setIsRandomizedStringId(false);
+            // Keep existing slug only when it is actually unique for this entity.
+            // For new entities this prevents returning early when another row already owns the same slug.
+            if (!$this->slugExists($repository, $fieldName, $slug, $entity->getId() ?? null)) {
+                if ($entity instanceof PPBase && $entity->getExtra()->isRandomizedStringId()) {
+                    $entity->getExtra()->setIsRandomizedStringId(false);
+                }
+                return;
             }
-            return;
         }
 
         while ($this->slugExists($repository, $fieldName, $slug, $entity->getId() ?? null)) {

@@ -62,7 +62,13 @@ final class UrlHarvestController extends AbstractController
 
         if ($selectedSource !== '') {
             $loaded = $listService->loadEntries($selectedSource);
-            $entries = $this->normalizeStaleEntries($selectedSource, $loaded['entries'], $queueState, $listService);
+            $entries = $this->normalizeStaleEntries(
+                $selectedSource,
+                $loaded['entries'],
+                $queueState,
+                $listService,
+                $workerHeartbeat->getStatus()['active'] ?? false
+            );
             $sourceEntries = $this->orderEntriesForDisplay($entries);
             $sourceError = $loaded['error'];
             $sourceSummary = $this->summarizeEntries($sourceEntries);
@@ -89,16 +95,13 @@ final class UrlHarvestController extends AbstractController
             }
 
             if ($action === 'run_source' && $sourceError === null) {
-                $wasRunning = $queueState['running'];
                 $queueState['paused'] = false;
                 $queueState['running'] = true;
                 $queueState['persist'] = $persistSource;
                 $queueState['remaining'] = $batchSize > 0 ? $batchSize : null;
                 $listService->writeQueueState($selectedSource, $queueState);
-
-                if (!$wasRunning) {
-                    $bus->dispatch(new UrlHarvestTickMessage($selectedSource));
-                }
+                // Always dispatch one tick on manual run to recover from stale "running" states.
+                $bus->dispatch(new UrlHarvestTickMessage($selectedSource));
             }
 
             if ($action === 'pause_source' && $sourceError === null) {
@@ -198,7 +201,13 @@ final class UrlHarvestController extends AbstractController
         }
 
         $queueState = $listService->readQueueState($source);
-        $entries = $this->normalizeStaleEntries($source, $loaded['entries'], $queueState, $listService);
+        $entries = $this->normalizeStaleEntries(
+            $source,
+            $loaded['entries'],
+            $queueState,
+            $listService,
+            $workerHeartbeat->getStatus()['active'] ?? false
+        );
         $entries = $this->orderEntriesForDisplay($entries);
         $requestedUrls = $request->request->all('urls');
         if ($requestedUrls === [] && $request->query->has('urls')) {
@@ -364,10 +373,17 @@ final class UrlHarvestController extends AbstractController
         string $source,
         array $entries,
         array $queueState,
-        UrlHarvestListService $listService
+        UrlHarvestListService $listService,
+        bool $workerActive
     ): array {
-        if (!empty($queueState['running'])) {
+        // If queue says "running" but worker heartbeat is inactive, recover stale "processing" rows.
+        if (!empty($queueState['running']) && $workerActive) {
             return $entries;
+        }
+
+        if (!empty($queueState['running']) && !$workerActive) {
+            $queueState['running'] = false;
+            $listService->writeQueueState($source, $queueState);
         }
 
         $changed = false;

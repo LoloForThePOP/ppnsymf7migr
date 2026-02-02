@@ -160,8 +160,7 @@ class NormalizedProjectPersister
 
         // Slug/stringId if title present
         if ($pp->getTitle()) {
-            $slugger = new AsciiSlugger();
-            $pp->setStringId(strtolower($slugger->slug($pp->getTitle())));
+            $pp->setStringId($this->buildUniqueStringId($pp->getTitle()));
         }
 
         $this->em->flush();
@@ -956,5 +955,38 @@ class NormalizedProjectPersister
         }
 
         return $slug === '' ? 'projet' : $slug;
+    }
+
+    private function buildUniqueStringId(string $title): string
+    {
+        $slugger = new AsciiSlugger();
+        $base = strtolower((string) $slugger->slug($title));
+        $base = trim($base, '-');
+        if ($base === '') {
+            $base = 'projet';
+        }
+        if (strlen($base) > 190) {
+            $base = rtrim(substr($base, 0, 190), '-');
+            if ($base === '') {
+                $base = 'projet';
+            }
+        }
+
+        /** @var \Doctrine\ORM\EntityRepository<PPBase> $repository */
+        $repository = $this->em->getRepository(PPBase::class);
+        $candidate = $base;
+        $counter = 1;
+
+        while ($repository->findOneBy(['stringId' => $candidate]) !== null) {
+            $suffix = '-' . $counter++;
+            $maxBaseLength = 190 - strlen($suffix);
+            $trimmedBase = rtrim(substr($base, 0, max(1, $maxBaseLength)), '-');
+            if ($trimmedBase === '') {
+                $trimmedBase = 'projet';
+            }
+            $candidate = $trimmedBase . $suffix;
+        }
+
+        return $candidate;
     }
 }
