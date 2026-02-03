@@ -88,7 +88,8 @@
             </div>
 
             <div class="d-flex align-items-center gap-2 mt-3">
-                <button type="submit" class="btn btn-primary">Actualiser la liste</button>
+                <button type="submit" class="btn btn-primary" id="ulule-refresh-list">Actualiser la liste</button>
+                <button type="submit" class="btn btn-outline-success" name="refresh_latest" value="1" id="ulule-refresh-latest">Rafraîchir nouveautés</button>
                 <button type="submit" class="btn btn-outline-secondary" name="save_prompt" value="1">Enregistrer le complément de prompt</button>
                 <button type="button" class="btn btn-outline-primary" id="ulule-load-more">Charger 200 suivants</button>
                 <span class="small text-muted">Ajoute 10 pages Ulule de plus à la requête.</span>
@@ -137,7 +138,7 @@
 
         {% if refreshSummary %}
             <div class="alert alert-info mt-3">
-                Ulule rafraîchi : {{ refreshSummary.updated }} projets sur {{ refreshSummary.total }} ({{ refreshSummary.errors }} erreur{{ refreshSummary.errors > 1 ? 's' : '' }}).
+                Ulule rafraîchi : {{ refreshSummary.updated }} projets sur {{ refreshSummary.total }}{% if refreshSummary.new is defined %}, dont {{ refreshSummary.new }} nouveau{{ refreshSummary.new > 1 ? 'x' : '' }}{% endif %} ({{ refreshSummary.errors }} erreur{{ refreshSummary.errors > 1 ? 's' : '' }}).
             </div>
         {% endif %}
 
@@ -169,6 +170,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% set newestUluleIds = refreshSummary is defined and refreshSummary and refreshSummary.new_ids is defined ? refreshSummary.new_ids : [] %}
                         {% for item in items %}
                             {% set importStatus = item.importStatus ?? 'pending' %}
                             {% set statusClass = {
@@ -191,6 +193,9 @@
                                     <div class="fw-bold">
                                         {{ item.name ?? 'Projet Ulule' }}
                                         <span class="text-muted">#{{ item.ululeId }}</span>
+                                        {% if item.ululeId in newestUluleIds %}
+                                            <span class="badge bg-success ms-2">Nouveau</span>
+                                        {% endif %}
                                     </div>
                                     {% if item.sourceUrl %}
                                         <div class="small">
@@ -330,6 +335,8 @@
             const workerText = document.querySelector('.js-worker-text');
             const workerCopyBtn = document.querySelector('.js-copy-worker-command');
             const workerCopyFeedback = document.querySelector('.js-copy-worker-feedback');
+            const refreshListBtn = document.getElementById('ulule-refresh-list');
+            const refreshLatestBtn = document.getElementById('ulule-refresh-latest');
             const loadMoreBtn = document.getElementById('ulule-load-more');
             const previewButtons = document.querySelectorAll('.js-ulule-preview');
             const importButtons = document.querySelectorAll('.js-ulule-import-open');
@@ -595,6 +602,32 @@
                     const pageCount = parseInt(pageCountInput.value || '50', 10) || 50;
                     pageStartInput.value = `${pageStart + pageCount}`;
                     form.submit();
+                });
+            }
+
+            if (refreshListBtn) {
+                refreshListBtn.addEventListener('click', () => {
+                    const pageStartInput = form.querySelector('#page_start');
+                    if (pageStartInput) {
+                        pageStartInput.value = '1';
+                    }
+                });
+            }
+
+            if (refreshLatestBtn) {
+                refreshLatestBtn.addEventListener('click', () => {
+                    const pageStartInput = form.querySelector('#page_start');
+                    const statusInput = form.querySelector('#status');
+                    const sortInput = form.querySelector('#sort');
+                    if (pageStartInput) {
+                        pageStartInput.value = '1';
+                    }
+                    if (statusInput) {
+                        statusInput.value = 'currently';
+                    }
+                    if (sortInput) {
+                        sortInput.value = 'new';
+                    }
                 });
             }
 

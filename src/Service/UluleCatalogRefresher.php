@@ -30,6 +30,8 @@ final class UluleCatalogRefresher
         $summary = [
             'total' => 0,
             'updated' => 0,
+            'new' => 0,
+            'new_ids' => [],
             'errors' => 0,
             'error_messages' => [],
         ];
@@ -68,8 +70,10 @@ final class UluleCatalogRefresher
                 }
 
                 $entry = $this->catalogRepository->findOneByUluleId($ululeId);
+                $isNew = false;
                 if (!$entry) {
                     $entry = new UluleProjectCatalog($ululeId);
+                    $isNew = true;
                 }
 
                 $entry->setName($this->extractI18nString($project['name'] ?? null, $lang, null));
@@ -113,6 +117,10 @@ final class UluleCatalogRefresher
 
                 $this->em->persist($entry);
                 $summary['updated']++;
+                if ($isNew) {
+                    $summary['new']++;
+                    $summary['new_ids'][] = $ululeId;
+                }
             }
         }
 

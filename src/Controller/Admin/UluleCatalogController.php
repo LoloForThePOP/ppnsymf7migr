@@ -20,6 +20,7 @@ class UluleCatalogController extends AbstractController
 {
     private const PER_PAGE = 20;
     private const MAX_PAGES = 50;
+    private const LATEST_REFRESH_PAGE_COUNT = 3;
     private const DEFAULT_PROMPT_EXTRA = 'Ce complément de prompt définit des instructions hautement prioritaires par rapport aux précédentes : Pour chaque image remplit le champ licence avec "Copyright Ulule.fr". N\'inclue pas la localisation (ville/commune/région/pays) dans les keywords, sauf si la localisation fait partie du titre du projet. Pour goal, évite toute sémantique de collecte/soutien/financement (ex: "soutenir", "collecter", "financer") et formule l\'objectif comme la réalisation concrète du projet (ex: "Produire…", "Réaliser…", "Créer…").';
 
     #[Route('/admin/ulule/catalog', name: 'admin_ulule_catalog', methods: ['GET', 'POST'])]
@@ -38,6 +39,14 @@ class UluleCatalogController extends AbstractController
         $pageStart = max(1, (int) $input->get('page_start', 1));
         $pageCount = max(1, (int) $input->get('page_count', 10));
         $pageCount = min(self::MAX_PAGES, $pageCount);
+        $refreshLatest = $request->isMethod('POST') && $request->request->has('refresh_latest');
+        if ($refreshLatest) {
+            // Dedicated refresh mode focused on newest active campaigns.
+            $status = 'currently';
+            $sort = 'new';
+            $pageStart = 1;
+            $pageCount = self::LATEST_REFRESH_PAGE_COUNT;
+        }
         $minDescriptionLength = max(0, (int) $input->get('min_description_length', 500));
         $excludeFunded = $input->has('exclude_funded')
             ? (bool) $input->get('exclude_funded')
@@ -284,8 +293,9 @@ class UluleCatalogController extends AbstractController
     private function loadItems(UluleProjectCatalogRepository $repository, string $statusFilter): array
     {
         $qb = $repository->createQueryBuilder('u')
-            ->orderBy('u.lastSeenAt', 'DESC')
-            ->addOrderBy('u.ululeId', 'DESC');
+            ->orderBy('u.ululeCreatedAt', 'DESC')
+            ->addOrderBy('u.ululeId', 'DESC')
+            ->addOrderBy('u.lastSeenAt', 'DESC');
 
         if ($statusFilter !== 'all') {
             $qb->andWhere('u.importStatus = :status')
