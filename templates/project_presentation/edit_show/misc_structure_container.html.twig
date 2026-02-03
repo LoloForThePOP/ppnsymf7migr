@@ -10,7 +10,7 @@
             
                 {% include 'project_presentation/edit_show/follow_button.html.twig' %}
 
-                {% set isBookmarked = app.user and presentation.isBookmarkedBy(app.user) %}
+                {% set isBookmarked = app.user and presentation.id is defined ? app.user.hasBookmarkedProjectId(presentation.id) : (app.user and presentation.isBookmarkedBy(app.user)) %}
                 {% if app.user %}
                     <a
                         href="#"

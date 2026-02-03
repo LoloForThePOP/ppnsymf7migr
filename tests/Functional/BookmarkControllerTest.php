@@ -140,4 +140,28 @@ final class BookmarkControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertStringNotContainsString('Mes marque-pages', (string) $client->getResponse()->getContent());
     }
+
+    public function testPresentationPageRendersBookmarkedStateOnLoad(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $project = $this->createProject($em, $owner, 'bookmarked-state-goal');
+
+        $client->loginUser($owner);
+
+        $token = $this->getCsrfToken($client, 'bookmark' . $project->getStringId());
+        $client->request('POST', sprintf('/project/%s/bookmark', $project->getStringId()), [
+            '_token' => $token,
+        ]);
+        self::assertResponseIsSuccessful();
+
+        $client->request('GET', sprintf('/%s', $project->getStringId()));
+
+        self::assertResponseIsSuccessful();
+        $content = (string) $client->getResponse()->getContent();
+        self::assertStringContainsString('js-ajax-bookmark-pp-presentation', $content);
+        self::assertStringContainsString('Retirer des marque-pages', $content);
+    }
 }

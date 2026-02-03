@@ -28,7 +28,7 @@
 
 {% else %}
 
-    {% set isBookmarked = presentation.isBookmarkedBy(app.user) %}
+    {% set isBookmarked = presentation.id is defined ? app.user.hasBookmarkedProjectId(presentation.id) : presentation.isBookmarkedBy(app.user) %}
 
     <a
         href="#"
