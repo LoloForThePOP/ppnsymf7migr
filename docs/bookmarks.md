@@ -2,7 +2,7 @@
 
 ## Objectif
 
-Permettre à un utilisateur connecté d'enregistrer des présentations projet en favoris, puis de les retrouver dans une page dédiée.
+Permettre à un utilisateur connecté d'enregistrer des présentations projet en marque-pages, puis de les retrouver dans une page dédiée.
 
 ## Schéma DB
 
@@ -31,7 +31,7 @@ Migration: `migrations/Version20260203164000.php`
     - `ROLE_USER` requis
     - CSRF token: `bookmark{stringId}`
     - rate limiter: `bookmark_toggle_user`
-- Page "Mes favoris":
+- Page "Mes marque-pages":
   - Route: `user_bookmarks_index`
   - URL: `/my-bookmarks`
   - Contrôleur: `src/Controller/UserBookmarksController.php`
@@ -42,7 +42,7 @@ Migration: `migrations/Version20260203164000.php`
 - Bouton bookmark sur les cards:
   - `templates/project_presentation/cards/card.html.twig`
   - CSS: `public/css/project_card.css`
-- Lien vers "Mes favoris":
+- Lien vers "Mes marque-pages":
   - Menu utilisateur navbar: `templates/_partials/header_navbar.html.twig`
   - Page profil (si c'est son propre profil): `templates/user/profile/index.html.twig`
 
@@ -60,4 +60,3 @@ Migration: `migrations/Version20260203164000.php`
 ```bash
 php bin/console doctrine:migrations:migrate
 ```
-

@@ -150,6 +150,13 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
     private Collection $bookmarks;
 
     /**
+     * Request-scoped cache used to avoid scanning bookmarks on every card render.
+     *
+     * @var array<int, true>|null
+     */
+    private ?array $bookmarkedProjectIdMap = null;
+
+    /**
      * @var Collection<int, ConversationParticipant>
      */
     #[ORM\OneToMany(targetEntity: ConversationParticipant::class, mappedBy: 'user')]
@@ -655,6 +662,7 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
         if (!$this->bookmarks->contains($bookmark)) {
             $this->bookmarks->add($bookmark);
             $bookmark->setUser($this);
+            $this->bookmarkedProjectIdMap = null;
         }
 
         return $this;
@@ -666,6 +674,7 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
             if ($bookmark->getUser() === $this) {
                 $bookmark->setUser(null);
             }
+            $this->bookmarkedProjectIdMap = null;
         }
 
         return $this;
@@ -673,6 +682,11 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
 
     public function hasBookmarkedProject(PPBase $project): bool
     {
+        $projectId = $project->getId();
+        if ($projectId !== null) {
+            return $this->hasBookmarkedProjectId($projectId);
+        }
+
         foreach ($this->bookmarks as $bookmark) {
             if ($bookmark->getProjectPresentation() === $project) {
                 return true;
@@ -680,6 +694,41 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
         }
 
         return false;
+    }
+
+    public function hasBookmarkedProjectId(?int $projectId): bool
+    {
+        if ($projectId === null) {
+            return false;
+        }
+
+        $map = $this->getBookmarkedProjectIdMap();
+
+        return isset($map[$projectId]);
+    }
+
+    /**
+     * @return array<int, true>
+     */
+    private function getBookmarkedProjectIdMap(): array
+    {
+        if ($this->bookmarkedProjectIdMap !== null) {
+            return $this->bookmarkedProjectIdMap;
+        }
+
+        $map = [];
+        foreach ($this->bookmarks as $bookmark) {
+            $project = $bookmark->getProjectPresentation();
+            $projectId = $project?->getId();
+            if ($projectId === null) {
+                continue;
+            }
+            $map[$projectId] = true;
+        }
+
+        $this->bookmarkedProjectIdMap = $map;
+
+        return $map;
     }
 
     /**

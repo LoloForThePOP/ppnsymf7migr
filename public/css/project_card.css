@@ -17,14 +17,14 @@
 
 .project-card__bookmark {
     position: absolute;
-    top: 10px;
-    left: 10px;
+    bottom: 6px;
+    left: 6px;
     z-index: 60;
-    width: 34px;
-    height: 34px;
+    width: 24px;
+    height: 24px;
     border: 1px solid var(--theme-border, #e3ddd3);
     border-radius: 50%;
-    background: color-mix(in srgb, var(--theme-surface, #ffffff) 78%, transparent);
+    background: color-mix(in srgb, var(--theme-surface, #ffffff) 45%, transparent);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -37,9 +37,16 @@
     filter: brightness(0.96);
 }
 
+.project-card__bookmark:disabled,
+.project-card__bookmark.is-loading {
+    opacity: 0.68;
+    cursor: default;
+    pointer-events: none;
+}
+
 .project-card__bookmark .bookmarkIcon {
-    width: 18px;
-    height: 18px;
+    width: 13px;
+    height: 13px;
 }
 
 .project-card__bookmark .bookmarkIcon.filled {

@@ -9,6 +9,33 @@
             <div class="d-flex align-items-center">
             
                 {% include 'project_presentation/edit_show/follow_button.html.twig' %}
+
+                {% set isBookmarked = app.user and presentation.isBookmarkedBy(app.user) %}
+                {% if app.user %}
+                    <a
+                        href="#"
+                        class="bookmark-presentation-button btn js-ajax-bookmark-pp-misc {{ isBookmarked ? 'isBookmarked' }}"
+                        data-url="{{ path('ajax_bookmark_pp', { stringId: presentation.stringId }) }}"
+                        data-token="{{ csrf_token('bookmark' ~ presentation.stringId) }}"
+                        aria-label="{{ isBookmarked ? 'Retirer des marque-pages' : 'Ajouter aux marque-pages' }}"
+                        title="{{ isBookmarked ? 'Retirer des marque-pages' : 'Ajouter aux marque-pages' }}"
+                    >
+                        <svg class="icon bookmarkIcon notFilled" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M6 3.75A2.25 2.25 0 0 0 3.75 6v13.5c0 .6.68.95 1.17.6L12 15.95l7.08 4.15a.75.75 0 0 0 1.17-.6V6A2.25 2.25 0 0 0 18 3.75H6Zm0 1.5h12c.41 0 .75.34.75.75v12.2l-6.37-3.73a.75.75 0 0 0-.76 0l-6.37 3.73V6c0-.41.34-.75.75-.75Z" fill="currentColor"></path>
+                        </svg>
+                        <svg class="icon bookmarkIcon filled" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M6 3.75A2.25 2.25 0 0 0 3.75 6v13.5c0 .6.68.95 1.17.6L12 15.95l7.08 4.15a.75.75 0 0 0 1.17-.6V6A2.25 2.25 0 0 0 18 3.75H6Z" fill="currentColor"></path>
+                        </svg>
+                        <div class="text">{{ isBookmarked ? 'Marqué' : 'Marquer' }}</div>
+                    </a>
+                {% else %}
+                    <a href="{{ path('app_login') }}" class="bookmark-presentation-button btn">
+                        <svg class="icon bookmarkIcon notFilled" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M6 3.75A2.25 2.25 0 0 0 3.75 6v13.5c0 .6.68.95 1.17.6L12 15.95l7.08 4.15a.75.75 0 0 0 1.17-.6V6A2.25 2.25 0 0 0 18 3.75H6Zm0 1.5h12c.41 0 .75.34.75.75v12.2l-6.37-3.73a.75.75 0 0 0-.76 0l-6.37 3.73V6c0-.41.34-.75.75-.75Z" fill="currentColor"></path>
+                        </svg>
+                        <div class="text">Marquer</div>
+                    </a>
+                {% endif %}
             
                 <button class="share-presentation-button btn" data-bs-toggle="modal" data-bs-target="#pp-share" type="button">
 
@@ -132,11 +159,13 @@
 
     }
 
-    .share-presentation-button{
+    .share-presentation-button,
+    .bookmark-presentation-button{
 
         display: flex;
         align-items: center;
         padding: 8px 16px;
+        margin-right: 18px;
         border: 2px solid var(--pp-action-border);
         border-radius: 33px;
         color: var(--pp-action-text);
@@ -145,14 +174,37 @@
 
     }
 
-    .share-presentation-button img{
+    .share-presentation-button{
+        margin-right: 0;
+    }
+
+    .share-presentation-button img,
+    .bookmark-presentation-button .bookmarkIcon{
 
         margin-right: 3px;
         margin-bottom: 1px;
 
     }
 
-    .share-presentation-button .text{
+    .bookmark-presentation-button .bookmarkIcon {
+        width: 22px;
+        height: 22px;
+    }
+
+    .bookmark-presentation-button .bookmarkIcon.filled {
+        display: none;
+    }
+
+    .bookmark-presentation-button.isBookmarked .bookmarkIcon.filled {
+        display: inline;
+    }
+
+    .bookmark-presentation-button.isBookmarked .bookmarkIcon.notFilled {
+        display: none;
+    }
+
+    .share-presentation-button .text,
+    .bookmark-presentation-button .text{
 
         display: inline-block;
         font-size: 22px;
@@ -164,19 +216,22 @@
 
     @media screen and (max-width: 580px) {
 
-        .share-presentation-button{
+        .share-presentation-button,
+        .bookmark-presentation-button{
 
             padding: 6px 13px;
 
         }
 
-        .share-presentation-button .icon{
+        .share-presentation-button .icon,
+        .bookmark-presentation-button .icon{
 
             width: 22px;
 
         }
 
-        .share-presentation-button .text{
+        .share-presentation-button .text,
+        .bookmark-presentation-button .text{
 
             font-size: 15px;
 
@@ -185,3 +240,45 @@
     }
 
 </style>
+
+
+<script>
+
+    if (!window.__ppMiscBookmarkBound) {
+        window.__ppMiscBookmarkBound = true;
+
+        $(document).on('click', '.js-ajax-bookmark-pp-misc', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const $tag = $(this);
+            if ($tag.data('busy')) {
+                return;
+            }
+
+            $tag.data('busy', true).addClass('is-loading');
+
+            $.ajax({
+                url: $tag.data('url'),
+                data: { _token: $tag.data('token') },
+                type: 'POST',
+                success: function (data) {
+                    $tag.toggleClass('isBookmarked', data && data.action === 'created');
+
+                    const isBookmarked = $tag.hasClass('isBookmarked');
+                    const label = isBookmarked ? 'Retirer des marque-pages' : 'Ajouter aux marque-pages';
+                    const text = isBookmarked ? 'Marqué' : 'Marquer';
+                    $tag.attr('aria-label', label).attr('title', label);
+                    $tag.find('.text').text(text);
+                },
+                error: function () {
+                    // Keep silent.
+                },
+                complete: function () {
+                    $tag.data('busy', false).removeClass('is-loading');
+                }
+            });
+        });
+    }
+
+</script>

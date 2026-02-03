@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mes favoris{% endblock %}
+{% block title %}Mes marque-pages{% endblock %}
 
 {% block stylesheets %}
   <link href="/css/project_card.css" rel="stylesheet">
@@ -11,7 +11,7 @@
 {% block body %}
 <div class="container col-md-11 col-lg-8 my-5 p-0 pt-md-4 pb-3">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Mes favoris</h2>
+        <h2 class="mb-0">Mes marque-pages</h2>
         <a href="{{ path('homepage') }}" class="btn btn-light">Retour</a>
     </div>
 
@@ -28,7 +28,7 @@
         ) }}
     {% else %}
         <div class="theme-panel p-4 rounded text-center">
-            Vous n'avez aucun favori pour le moment.
+            Vous n'avez aucun marque-page pour le moment.
         </div>
     {% endif %}
 </div>

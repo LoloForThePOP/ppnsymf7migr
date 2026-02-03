@@ -508,6 +508,14 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .like-bu
     --pp-like-count-color: var(--theme-text);
 }
 
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .bookmark-button {
+    --pp-bookmark-icon-color: var(--theme-text);
+}
+
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .bookmark-button.isBookmarked {
+    --pp-bookmark-icon-color: var(--theme-accent);
+}
+
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .like-button.isLiked {
     --pp-like-count-color: var(--theme-accent);
 }
@@ -519,6 +527,10 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .likeIco
 html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .like-button {
     --pp-like-icon-color: var(--theme-sky);
     --pp-like-icon-active-color: var(--theme-sky);
+}
+
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .bookmark-button {
+    --pp-bookmark-icon-color: var(--theme-sky);
 }
 
 html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .likeIcon {
