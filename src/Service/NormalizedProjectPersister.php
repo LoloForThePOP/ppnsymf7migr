@@ -30,7 +30,7 @@ class NormalizedProjectPersister
         'loneliness',
         'home_care',
         'homeless',
-        'sport',
+        'physical_activity',
         'athletism',
         'stadium',
         'community_support',
@@ -542,11 +542,6 @@ class NormalizedProjectPersister
             return null;
         }
 
-        // Legacy aliases kept for backward compatibility with older prompt outputs.
-        if ($folder === 'physical_activity') {
-            $folder = 'sport';
-        }
-
         if (!in_array($folder, self::STANDARD_FALLBACK_FOLDERS, true)) {
             $folder = 'fallback';
         }
@@ -557,16 +552,22 @@ class NormalizedProjectPersister
     private function pickStandardFallbackImage(string $folder): ?string
     {
         $base = rtrim($this->projectDir, '/') . '/' . self::STANDARD_FALLBACK_BASE_DIR . '/' . $folder;
-        if (!is_dir($base)) {
+        $files = is_dir($base) ? glob($base . '/*.{avif,webp,png,jpg,jpeg}', GLOB_BRACE) : [];
+        if (is_array($files) && $files !== []) {
+            return $files[array_rand($files)];
+        }
+
+        if ($folder === 'fallback') {
             return null;
         }
 
-        $files = glob($base . '/*.{avif,webp,png,jpg,jpeg}', GLOB_BRACE);
-        if (!is_array($files) || $files === []) {
+        $fallbackBase = rtrim($this->projectDir, '/') . '/' . self::STANDARD_FALLBACK_BASE_DIR . '/fallback';
+        $fallbackFiles = is_dir($fallbackBase) ? glob($fallbackBase . '/*.{avif,webp,png,jpg,jpeg}', GLOB_BRACE) : [];
+        if (!is_array($fallbackFiles) || $fallbackFiles === []) {
             return null;
         }
 
-        return $files[array_rand($files)];
+        return $fallbackFiles[array_rand($fallbackFiles)];
     }
 
     private function createUploadedFileFromLocalImage(string $absolutePath, string $baseName): ?UploadedFile

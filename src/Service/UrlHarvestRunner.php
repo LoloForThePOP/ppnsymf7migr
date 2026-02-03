@@ -80,10 +80,18 @@ class UrlHarvestRunner
                 $payloadPolicy,
                 $structuredChars
             );
-            if ($enforcePayloadGate && $programmaticSkip !== null) {
+            $shouldSkipAi = $enforcePayloadGate && $programmaticSkip !== null;
+            if ($shouldSkipAi) {
                 $entry['skip_persist'] = true;
                 $entry['skip_reason'] = $programmaticSkip;
                 $persist = false;
+                $entry['debug']['programmatic_skip'] = true;
+                $entry['debug']['programmatic_skip_reason'] = $programmaticSkip;
+            }
+
+            // In strict queue mode, do not spend an AI call when programmatic gates already fail.
+            if ($shouldSkipAi) {
+                return $entry;
             }
 
             if ($structuredData !== null) {
@@ -133,11 +141,21 @@ class UrlHarvestRunner
 
             if (is_array($data)) {
                 if ($this->isJeVeuxAiderUrl($finalUrl)) {
-                    $data['standard_image_fallback_name'] = $this->jeVeuxAiderFallbackResolver->resolve(
-                        $data,
-                        $structuredData['payload'] ?? null
-                    );
-                    $entry['debug']['resolved_standard_fallback_name'] = $data['standard_image_fallback_name'];
+                    if ($this->payloadHasNativeMedia($data)) {
+                        unset($data['standard_image_fallback_name']);
+                        $entry['debug']['standard_fallback_selector'] = [
+                            'skipped' => true,
+                            'reason' => 'native_media_present',
+                        ];
+                    } else {
+                        $resolved = $this->jeVeuxAiderFallbackResolver->resolveWithDebug(
+                            $data,
+                            $structuredData['payload'] ?? null
+                        );
+                        $data['standard_image_fallback_name'] = $resolved['folder'];
+                        $entry['debug']['resolved_standard_fallback_name'] = $resolved['folder'];
+                        $entry['debug']['standard_fallback_selector'] = $resolved;
+                    }
                 }
 
                 $sourceUrl = is_string($data['source_url'] ?? null) ? trim($data['source_url']) : '';
@@ -398,7 +416,6 @@ class UrlHarvestRunner
     private function evaluateProgrammaticGate(array $payload, array $policy, ?int $structuredChars): ?string
     {
         $minText = max(0, (int) ($policy['min_text_chars'] ?? 0));
-        $minAssets = max(0, (int) ($policy['min_assets'] ?? 0));
 
         if ($structuredChars !== null && $structuredChars < $minText) {
             return sprintf(
@@ -409,14 +426,11 @@ class UrlHarvestRunner
         }
 
         $textChars = max(0, (int) ($payload['text_chars'] ?? 0));
-        $assets = max(0, (int) ($payload['assets'] ?? 0));
-        if ($textChars < $minText && $assets < $minAssets) {
+        if ($textChars < $minText) {
             return sprintf(
-                'Seuil programmatique non atteint : texte %d < %d et assets %d < %d.',
+                'Seuil programmatique non atteint : texte %d < %d caractères.',
                 $textChars,
-                $minText,
-                $assets,
-                $minAssets
+                $minText
             );
         }
 
@@ -466,5 +480,64 @@ class UrlHarvestRunner
 
         return $host === 'jeveuxaider.gouv.fr'
             || str_ends_with($host, '.jeveuxaider.gouv.fr');
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function payloadHasNativeMedia(array $data): bool
+    {
+        $logoUrl = trim((string) ($data['logo_url'] ?? ''));
+        if ($logoUrl !== '') {
+            return true;
+        }
+
+        $thumbnailUrl = trim((string) ($data['thumbnail_url'] ?? ''));
+        if ($thumbnailUrl !== '') {
+            return true;
+        }
+
+        $imageUrls = $data['image_urls'] ?? null;
+        if (is_array($imageUrls) && $imageUrls !== []) {
+            foreach ($imageUrls as $imageUrl) {
+                if (is_string($imageUrl) && trim($imageUrl) !== '') {
+                    return true;
+                }
+            }
+        }
+
+        $images = $data['images'] ?? null;
+        if (is_array($images) && $images !== []) {
+            foreach ($images as $image) {
+                if (is_string($image) && trim($image) !== '') {
+                    return true;
+                }
+                if (!is_array($image)) {
+                    continue;
+                }
+                $imageUrl = $image['url'] ?? null;
+                if (is_string($imageUrl) && trim($imageUrl) !== '') {
+                    return true;
+                }
+            }
+        }
+
+        $videos = $data['videos'] ?? null;
+        if (is_array($videos) && $videos !== []) {
+            foreach ($videos as $video) {
+                if (is_string($video) && trim($video) !== '') {
+                    return true;
+                }
+                if (!is_array($video)) {
+                    continue;
+                }
+                $videoUrl = $video['url'] ?? null;
+                if (is_string($videoUrl) && trim($videoUrl) !== '') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
