@@ -144,6 +144,12 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
     private Collection $likes;
 
     /**
+     * @var Collection<int, Bookmark>
+     */
+    #[ORM\OneToMany(targetEntity: Bookmark::class, mappedBy: 'user')]
+    private Collection $bookmarks;
+
+    /**
      * @var Collection<int, ConversationParticipant>
      */
     #[ORM\OneToMany(targetEntity: ConversationParticipant::class, mappedBy: 'user')]
@@ -172,6 +178,7 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
         $this->comments = new ArrayCollection();
         $this->follows = new ArrayCollection();
         $this->likes = new ArrayCollection();
+        $this->bookmarks = new ArrayCollection();
         $this->conversationParticipations = new ArrayCollection();
         $this->conversationMessages = new ArrayCollection();
         $this->articles = new ArrayCollection();
@@ -632,6 +639,46 @@ class User implements UserInterface, EquatableInterface, PasswordAuthenticatedUs
                 return true;
             }
         }
+        return false;
+    }
+
+    /**
+     * @return Collection<int, Bookmark>
+     */
+    public function getBookmarks(): Collection
+    {
+        return $this->bookmarks;
+    }
+
+    public function addBookmark(Bookmark $bookmark): static
+    {
+        if (!$this->bookmarks->contains($bookmark)) {
+            $this->bookmarks->add($bookmark);
+            $bookmark->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBookmark(Bookmark $bookmark): static
+    {
+        if ($this->bookmarks->removeElement($bookmark)) {
+            if ($bookmark->getUser() === $this) {
+                $bookmark->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function hasBookmarkedProject(PPBase $project): bool
+    {
+        foreach ($this->bookmarks as $bookmark) {
+            if ($bookmark->getProjectPresentation() === $project) {
+                return true;
+            }
+        }
+
         return false;
     }
 

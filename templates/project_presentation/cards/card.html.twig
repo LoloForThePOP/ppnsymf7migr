@@ -16,6 +16,7 @@
         showMeta: true,
         showViews: true,
         showCreator: false,
+        showBookmark: true,
         likesCount: null,
         commentsCount: null,
         fallbackImageText: 'Aucune image'
@@ -28,6 +29,8 @@
     {% set isAdminSession = is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN') %}
     {% set showEnrich = options.fetchImagesLink and not isAdminSession %}
     {% set showDelete = options.deleteLink is defined and options.deleteLink and not isAdminSession %}
+    {% set canBookmark = options.showBookmark and presentation is defined and presentation.stringId is defined %}
+    {% set isBookmarked = app.user and canBookmark ? app.user.hasBookmarkedProject(presentation) : false %}
 
     <article class="project-card position-relative text-reset">
         {% if options.link %}
@@ -37,6 +40,32 @@
                 {% if options.linkTarget %}target="{{ options.linkTarget }}"{% endif %}
                 aria-label="{{ ariaLabel }}"
             ></a>
+        {% endif %}
+
+        {% if canBookmark %}
+            {% if app.user %}
+                <button
+                    type="button"
+                    class="project-card__bookmark js-ajax-bookmark-pp {{ isBookmarked ? 'isBookmarked' }}"
+                    data-url="{{ path('ajax_bookmark_pp', { stringId: presentation.stringId }) }}"
+                    data-token="{{ csrf_token('bookmark' ~ presentation.stringId) }}"
+                    aria-label="{{ isBookmarked ? 'Retirer des favoris' : 'Ajouter aux favoris' }}"
+                    title="{{ isBookmarked ? 'Retirer des favoris' : 'Ajouter aux favoris' }}"
+                >
+                    <svg class="bookmarkIcon notFilled" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M6 3.75A2.25 2.25 0 0 0 3.75 6v13.5c0 .6.68.95 1.17.6L12 15.95l7.08 4.15a.75.75 0 0 0 1.17-.6V6A2.25 2.25 0 0 0 18 3.75H6Zm0 1.5h12c.41 0 .75.34.75.75v12.2l-6.37-3.73a.75.75 0 0 0-.76 0l-6.37 3.73V6c0-.41.34-.75.75-.75Z" fill="currentColor"></path>
+                    </svg>
+                    <svg class="bookmarkIcon filled" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M6 3.75A2.25 2.25 0 0 0 3.75 6v13.5c0 .6.68.95 1.17.6L12 15.95l7.08 4.15a.75.75 0 0 0 1.17-.6V6A2.25 2.25 0 0 0 18 3.75H6Z" fill="currentColor"></path>
+                    </svg>
+                </button>
+            {% else %}
+                <a class="project-card__bookmark" href="{{ path('app_login') }}" aria-label="Se connecter pour enregistrer ce projet" title="Se connecter pour enregistrer ce projet">
+                    <svg class="bookmarkIcon notFilled" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M6 3.75A2.25 2.25 0 0 0 3.75 6v13.5c0 .6.68.95 1.17.6L12 15.95l7.08 4.15a.75.75 0 0 0 1.17-.6V6A2.25 2.25 0 0 0 18 3.75H6Zm0 1.5h12c.41 0 .75.34.75.75v12.2l-6.37-3.73a.75.75 0 0 0-.76 0l-6.37 3.73V6c0-.41.34-.75.75-.75Z" fill="currentColor"></path>
+                    </svg>
+                </a>
+            {% endif %}
         {% endif %}
 
         <div class="image-container{{ imageUrl ? ' has-image' : '' }}">
@@ -103,4 +132,29 @@
             </div>
         {% endif %}
     </article>
+
+    <script>
+        if (!window.__ppBookmarkToggleBound) {
+            window.__ppBookmarkToggleBound = true;
+            $(document).on('click', '.js-ajax-bookmark-pp', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const $btn = $(this);
+                $.ajax({
+                    url: $btn.data('url'),
+                    data: { _token: $btn.data('token') },
+                    type: 'POST',
+                    success: function (data) {
+                        $btn.toggleClass('isBookmarked', data && data.action === 'created');
+                        const bookmarked = $btn.hasClass('isBookmarked');
+                        const label = bookmarked ? 'Retirer des favoris' : 'Ajouter aux favoris';
+                        $btn.attr('aria-label', label).attr('title', label);
+                    },
+                    error: function () {
+                        // Keep silent to avoid UI noise in card grids.
+                    }
+                });
+            });
+        }
+    </script>
 {% endmacro %}

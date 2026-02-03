@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes favoris{% endblock %}
+
+{% block stylesheets %}
+  <link href="/css/project_card.css" rel="stylesheet">
+  <link href="/css/titled_project_collection.css" rel="stylesheet">
+  <link href="/css/show_more_less_button.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="container col-md-11 col-lg-8 my-5 p-0 pt-md-4 pb-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Mes favoris</h2>
+        <a href="{{ path('homepage') }}" class="btn btn-light">Retour</a>
+    </div>
+
+    {% if presentations|length > 0 %}
+        {% import "project_presentation/cards/list.html.twig" as cardList %}
+        {% block javascripts %}<script src="/js/show_more_less_button.js"></script>{% endblock %}
+        {{ cardList.collection(
+            presentations|length ~ ' projet' ~ (presentations|length > 1 ? 's' : '') ~ ' sauvegardé' ~ (presentations|length > 1 ? 's' : ''),
+            presentations,
+            'tab-result',
+            'hide-335',
+            '',
+            presentationStats|default({})
+        ) }}
+    {% else %}
+        <div class="theme-panel p-4 rounded text-center">
+            Vous n'avez aucun favori pour le moment.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

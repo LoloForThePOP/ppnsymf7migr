@@ -251,6 +251,12 @@ class PPBase
     private Collection $likes;
 
     /**
+     * @var Collection<int, Bookmark>
+     */
+    #[ORM\OneToMany(targetEntity: Bookmark::class, mappedBy: 'projectPresentation')]
+    private Collection $bookmarks;
+
+    /**
      * @var Collection<int, Category>
      */
     #[ORM\ManyToMany(targetEntity: Category::class, mappedBy: 'projectPresentation')]
@@ -275,6 +281,7 @@ class PPBase
         $this->documents = new ArrayCollection();
         $this->followers = new ArrayCollection();
         $this->likes = new ArrayCollection();
+        $this->bookmarks = new ArrayCollection();
         $this->categories = new ArrayCollection();
         $this->places = new ArrayCollection();
     }
@@ -823,6 +830,46 @@ class PPBase
                 return true;
             }
         }
+        return false;
+    }
+
+    /**
+     * @return Collection<int, Bookmark>
+     */
+    public function getBookmarks(): Collection
+    {
+        return $this->bookmarks;
+    }
+
+    public function addBookmark(Bookmark $bookmark): static
+    {
+        if (!$this->bookmarks->contains($bookmark)) {
+            $this->bookmarks->add($bookmark);
+            $bookmark->setProjectPresentation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBookmark(Bookmark $bookmark): static
+    {
+        if ($this->bookmarks->removeElement($bookmark)) {
+            if ($bookmark->getProjectPresentation() === $this) {
+                $bookmark->setProjectPresentation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function isBookmarkedBy(User $user): bool
+    {
+        foreach ($this->bookmarks as $bookmark) {
+            if ($bookmark->getUser() === $user) {
+                return true;
+            }
+        }
+
         return false;
     }
     

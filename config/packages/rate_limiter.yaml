@@ -16,6 +16,10 @@ framework:
             policy: 'sliding_window'
             limit: 120
             interval: '1 minute'
+        bookmark_toggle_user:
+            policy: 'sliding_window'
+            limit: 120
+            interval: '1 minute'
         live_save_user:
             policy: 'sliding_window'
             limit: 600

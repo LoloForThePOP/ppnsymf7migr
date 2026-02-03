@@ -15,6 +15,45 @@
     box-shadow: 1px 1px 5px 1px rgb(238, 237, 237);
 }
 
+.project-card__bookmark {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 60;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--theme-border, #e3ddd3);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--theme-surface, #ffffff) 78%, transparent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--theme-text, #1f2937);
+    text-decoration: none;
+    padding: 0;
+}
+
+.project-card__bookmark:hover {
+    filter: brightness(0.96);
+}
+
+.project-card__bookmark .bookmarkIcon {
+    width: 18px;
+    height: 18px;
+}
+
+.project-card__bookmark .bookmarkIcon.filled {
+    display: none;
+}
+
+.project-card__bookmark.isBookmarked .bookmarkIcon.filled {
+    display: inline;
+}
+
+.project-card__bookmark.isBookmarked .bookmarkIcon.notFilled {
+    display: none;
+}
+
 .project-card .goal {
     color: #45429a;
     margin-bottom: 0;
