@@ -3,11 +3,11 @@
 namespace App\MessageHandler;
 
 use App\Message\UrlHarvestTickMessage;
-use App\Service\UrlHarvestListService;
-use App\Service\UrlHarvestResultStore;
-use App\Service\UrlHarvestRunner;
-use App\Service\WorkerHeartbeatService;
-use App\Service\ScraperUserResolver;
+use App\Service\Scraping\UrlHarvest\UrlHarvestListService;
+use App\Service\Scraping\UrlHarvest\UrlHarvestResultStore;
+use App\Service\Scraping\UrlHarvest\UrlHarvestRunner;
+use App\Service\Scraping\Common\WorkerHeartbeatService;
+use App\Service\Scraping\Common\ScraperUserResolver;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;

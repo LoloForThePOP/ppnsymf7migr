@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Scraping\Ulule;
 
 use App\Entity\PPBase;
 use App\Entity\UluleProjectCatalog;

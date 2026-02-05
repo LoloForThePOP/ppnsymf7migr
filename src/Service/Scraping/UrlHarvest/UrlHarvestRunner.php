@@ -1,10 +1,16 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Scraping\UrlHarvest;
 
 use App\Entity\PPBase;
 use App\Entity\User;
 use App\Repository\PPBaseRepository;
+use App\Service\ImageDownloader;
+use App\Service\NormalizedProjectPersister;
+use App\Service\Scraping\JeVeuxAider\JeVeuxAiderFallbackImageResolver;
+use App\Service\Scraping\JeVeuxAider\JeVeuxAiderNuxtDataExtractor;
+use App\Service\UrlSafetyChecker;
+use App\Service\WebpageContentExtractor;
 use OpenAI;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;

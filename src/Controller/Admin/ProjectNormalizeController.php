@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Service\NormalizedProjectPersister;
-use App\Service\ScraperUserResolver;
+use App\Service\Scraping\Common\ScraperUserResolver;
 use App\Security\Voter\ScraperAccessVoter;
 
 class ProjectNormalizeController extends AbstractController

@@ -5,9 +5,9 @@ namespace App\MessageHandler;
 use App\Entity\UluleProjectCatalog;
 use App\Message\UluleImportTickMessage;
 use App\Repository\UluleProjectCatalogRepository;
-use App\Service\UluleImportService;
-use App\Service\UluleQueueStateService;
-use App\Service\WorkerHeartbeatService;
+use App\Service\Scraping\Ulule\UluleImportService;
+use App\Service\Scraping\Ulule\UluleQueueStateService;
+use App\Service\Scraping\Common\WorkerHeartbeatService;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 

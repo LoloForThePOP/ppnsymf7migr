@@ -5,8 +5,8 @@ namespace App\Controller\Admin;
 use App\Entity\PPBase;
 use App\Entity\UluleProjectCatalog;
 use App\Repository\UluleProjectCatalogRepository;
-use App\Service\UluleApiClient;
-use App\Service\WorkerHeartbeatService;
+use App\Service\Scraping\Ulule\UluleApiClient;
+use App\Service\Scraping\Common\WorkerHeartbeatService;
 use App\Security\Voter\ScraperAccessVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,8 +27,8 @@ class UluleCatalogController extends AbstractController
     public function __invoke(
         Request $request,
         UluleProjectCatalogRepository $catalogRepository,
-        \App\Service\UluleCatalogRefresher $catalogRefresher,
-        \App\Service\UluleQueueStateService $queueStateService,
+        \App\Service\Scraping\Ulule\UluleCatalogRefresher $catalogRefresher,
+        \App\Service\Scraping\Ulule\UluleQueueStateService $queueStateService,
         WorkerHeartbeatService $workerHeartbeat
     ): Response {
         $input = $request->isMethod('POST') ? $request->request : $request->query;

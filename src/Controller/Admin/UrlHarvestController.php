@@ -2,11 +2,11 @@
 
 namespace App\Controller\Admin;
 
-use App\Service\ScraperUserResolver;
-use App\Service\UrlHarvestListService;
-use App\Service\UrlHarvestRunner;
-use App\Service\UrlHarvestResultStore;
-use App\Service\WorkerHeartbeatService;
+use App\Service\Scraping\Common\ScraperUserResolver;
+use App\Service\Scraping\UrlHarvest\UrlHarvestListService;
+use App\Service\Scraping\UrlHarvest\UrlHarvestRunner;
+use App\Service\Scraping\UrlHarvest\UrlHarvestResultStore;
+use App\Service\Scraping\Common\WorkerHeartbeatService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

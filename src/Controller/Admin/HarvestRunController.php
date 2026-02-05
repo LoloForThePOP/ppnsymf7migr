@@ -2,9 +2,9 @@
 
 namespace App\Controller\Admin;
 
-use App\Service\ScraperIngestionService;
-use App\Service\ScraperPersistenceService;
-use App\Service\ScraperUserResolver;
+use App\Service\Scraping\Core\ScraperIngestionService;
+use App\Service\Scraping\Core\ScraperPersistenceService;
+use App\Service\Scraping\Common\ScraperUserResolver;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

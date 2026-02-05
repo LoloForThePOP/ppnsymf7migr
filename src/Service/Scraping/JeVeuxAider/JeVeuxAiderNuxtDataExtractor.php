@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Scraping\JeVeuxAider;
 
 final class JeVeuxAiderNuxtDataExtractor
 {

@@ -4,7 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Service\WebpageContentExtractor;
 use App\Service\NormalizedProjectPersister;
-use App\Service\ScraperUserResolver;
+use App\Service\Scraping\Common\ScraperUserResolver;
 use App\Security\Voter\ScraperAccessVoter;
 use OpenAI;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

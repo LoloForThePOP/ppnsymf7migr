@@ -2,9 +2,9 @@
 
 namespace App\Command;
 
-use App\Service\ScraperIngestionService;
-use App\Service\ScraperPersistenceService;
-use App\Service\ScraperUserResolver;
+use App\Service\Scraping\Core\ScraperIngestionService;
+use App\Service\Scraping\Core\ScraperPersistenceService;
+use App\Service\Scraping\Common\ScraperUserResolver;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

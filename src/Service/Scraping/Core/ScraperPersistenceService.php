@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Scraping\Core;
 
 use App\Entity\Category;
 use App\Entity\PPBase;

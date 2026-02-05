@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Scraping\Ulule;
 
 use App\Entity\PPBase;
 use App\Entity\UluleProjectCatalog;
 use App\Entity\User;
 use App\Repository\UluleProjectCatalogRepository;
+use App\Service\NormalizedProjectPersister;
+use App\Service\Scraping\Common\ScraperUserResolver;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenAI;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
