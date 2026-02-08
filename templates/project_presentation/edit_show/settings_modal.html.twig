@@ -36,16 +36,23 @@
                 </form>
             </div>
 
-            <div class="pp-settings-row">
-                <div>
-                    <h6 class="mb-1 text-danger">Supprimer la présentation</h6>
-                    <div class="text-muted small">Suppression définitive après confirmation.</div>
-                </div>
+            {% if userAdmin %}
+                <div class="pp-settings-row">
+                    <div>
+                        <h6 class="mb-1 text-danger">Supprimer la présentation</h6>
+                        <div class="text-muted small">Action admin avec confirmation immédiate.</div>
+                    </div>
 
-                <a class="btn btn-danger" href="{{ path('pp_delete_presentation', {'stringId': presentation.stringId}) }}">
-                    Supprimer la présentation
-                </a>
-            </div>
+                    <form
+                        method="post"
+                        action="{{ path('pp_admin_delete_presentation', {'stringId': presentation.stringId}) }}"
+                        onsubmit="return confirm('Supprimer cette présentation ?');"
+                    >
+                        <input type="hidden" name="_token" value="{{ csrf_token('pp_admin_delete_presentation' ~ presentation.stringId) }}">
+                        <button type="submit" class="btn btn-danger">Supprimer la présentation</button>
+                    </form>
+                </div>
+            {% endif %}
         </div>
 
         <script>
