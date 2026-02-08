@@ -4,7 +4,7 @@
     display: inline-block;
     position: relative;
     width: 300px;
-    height: 340px;
+    height: 358px;
     overflow: hidden;
     border: 1px solid rgb(227, 221, 211);
     border-radius: 10px;
@@ -67,16 +67,19 @@
 .project-card .goal {
     color: #45429a;
     margin-bottom: 0;
-    font-size: 17px;
+    font-size: var(--project-card-goal-font-size, 17px);
     font-weight: bold;
     line-height: 1.2em;
+    max-height: 40px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .project-card .title {
-    margin-top: 6px;
-    margin-bottom: 6px;
+    margin-top: 3px;
+    margin-bottom: 2px;
     line-height: 1.13em;
-    font-size: 17px;
+    font-size: var(--project-card-title-font-size, 17px);
     font-weight: bold;
     color: #2C3E50;
 }
@@ -187,7 +190,7 @@ html[data-theme-variant="custom"][data-theme="deep-ocean"] .project-card .image-
 
 .goal-container {
     margin: 0 10px 8px;
-    padding: 8px 10px;
+    padding: 8px 9px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -327,7 +330,7 @@ html[data-theme-variant="custom"] .collection-container .other-info-container {
     }
 
     .project-card .goal {
-        font-size: 14px;
+        font-size: var(--project-card-goal-font-size-mobile, 14px);
     }
 
     .collection-container .other-info-container {

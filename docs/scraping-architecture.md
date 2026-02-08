@@ -60,3 +60,7 @@ Scraping services are grouped by domain under `src/Service/Scraping/`:
 - Clear boundaries per source/domain (Ulule, URL lists, JeVeuxAider specifics).
 - Lower cognitive load for maintenance and debugging.
 - Easier future extensions (new source = new folder + focused services).
+
+## Related docs
+
+- `docs/image-resize-pipeline.md`: backend resize flow (Vich `PRE_UPLOAD` + Imagine rules).

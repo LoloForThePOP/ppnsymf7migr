@@ -10,9 +10,14 @@ parameters:
     # website contact phone 
     app.phone.contact: "07 76 64 87 58"
 
+    # organization email roles
+    app.email.platform: "platform@propon.org"
+    app.email.alerts: "alerts@propon.org"
+    app.email.security: "security@propon.org"
+    app.email.billing: "billing@propon.org"
     app.email.noreply: "noreply@propon.org"
     app.email.contact: "contact@propon.org"
-    # not implemented yet: app.email.support: "support@propon.org"
+    app.email.support: "support@propon.org"
     # not implemented yet: app.email.newsletter: newsletter@propon.org
     app.scraping_from_llm_api.prompt_path: '%kernel.project_dir%/prompts/scraping_from_llm_api_query.txt'
     app.scraper.model: 'gpt-4o-mini' # use a stronger model to reduce hallucinations
