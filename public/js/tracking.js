@@ -9,6 +9,41 @@
 var showCookiesInvite; // Boolean that tells if we display the select cookies panel (when he has already visited the website the answer is no)
 var acceptCookies; // user choice: "accept" or "dismiss" cookies
 
+function hasGtag() {
+    return typeof window !== "undefined" && typeof window.gtag === "function";
+}
+
+function updateGoogleConsent(consentState) {
+    if (!hasGtag()) {
+        return;
+    }
+
+    var payload;
+    if (consentState === "accept") {
+        payload = {
+            analytics_storage: "granted",
+            ad_storage: "denied",
+            ad_user_data: "denied",
+            ad_personalization: "denied"
+        };
+    } else {
+        payload = {
+            analytics_storage: "denied",
+            ad_storage: "denied",
+            ad_user_data: "denied",
+            ad_personalization: "denied"
+        };
+    }
+
+    gtag("consent", "update", payload);
+}
+
+function optOutMixpanelIfAvailable() {
+    if (window.mixpanel && typeof window.mixpanel.opt_out_tracking === "function") {
+        window.mixpanel.opt_out_tracking();
+    }
+}
+
 // checking in user browser local storage if user once made a decision...
 const cookiesPreferences = localStorage.getItem('cookiesPreferences') ? localStorage.getItem('cookiesPreferences') : null;
 
@@ -27,6 +62,8 @@ else{ //case no trace of user previous website visit: we display cookies panel
 function cookiesResolution(cookiesPreferences) {
 
     if(cookiesPreferences == "accept"){
+
+        updateGoogleConsent("accept");
                 
         // Hotjar Tracking Code
         (function(h,o,t,j,a,r){
@@ -42,12 +79,8 @@ function cookiesResolution(cookiesPreferences) {
 
     else{ //user reject cookies
 
-        mixpanel.opt_out_tracking(); //opt out from mixpanel
-
-        gtag('consent', 'default', { // opt out from google analytics
-            'ad_storage': 'denied',
-            'analytics_storage': 'denied'
-        });
+        optOutMixpanelIfAvailable(); //opt out from mixpanel if available
+        updateGoogleConsent("reject");
           
 
     }
@@ -99,7 +132,11 @@ for(h=0;h<i.length;h++)g(a,i[h]);var j="set set_once union unset remove delete".
 
 // Enabling the debug mode flag is useful during implementation,
 // but it's recommended to remove it for production
-mixpanel.init('04e019910114a2706779d88fba4c1044', {'debug':'true'});
+mixpanel.init('04e019910114a2706779d88fba4c1044', {'debug': false});
+
+if (cookiesPreferences === "reject") {
+    optOutMixpanelIfAvailable();
+}
 
 
 

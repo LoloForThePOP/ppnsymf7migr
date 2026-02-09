@@ -272,20 +272,28 @@
         
         {% if app.environment != 'dev' %}
 
-            <script src="/js/tracking.js"></script> {# Manages some user tracking #}
-
-            <!-- Google tag (gtag.js) - Google Analytics -->
-
-            <script async src="https://www.googletagmanager.com/gtag/js?id=UA-245896945-1"></script>
-
-            <script>{# Init Google tag #}
-
+            {% if ga4_measurement_id is not empty %}
+                <script>
                     window.dataLayer = window.dataLayer || [];
                     function gtag(){dataLayer.push(arguments);}
+                    gtag('consent', 'default', {
+                        'analytics_storage': 'denied',
+                        'ad_storage': 'denied',
+                        'ad_user_data': 'denied',
+                        'ad_personalization': 'denied'
+                    });
+                </script>
+
+                <!-- Google tag (gtag.js) - GA4 -->
+                <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga4_measurement_id|e('url') }}"></script>
+
+                <script>
                     gtag('js', new Date());
-                    gtag('config', 'UA-245896945-1');
-            
-            </script>
+                    gtag('config', '{{ ga4_measurement_id|e('js') }}');
+                </script>
+            {% endif %}
+
+            <script src="/js/tracking.js"></script> {# Manages some user tracking #}
 
         {% endif %}
 

@@ -15,6 +15,23 @@
                     </div>
                 </div>
             </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h2 class="h6">🧪 Test Sentry (prod)</h2>
+                        <p class="text-muted small">Déclenche une exception volontaire pour vérifier la remontée Sentry en production.</p>
+                        <form
+                            method="post"
+                            action="{{ path('admin_misc_sentry_test') }}"
+                            class="mt-auto"
+                            onsubmit="return confirm('Déclencher une erreur de test Sentry ?');"
+                        >
+                            <input type="hidden" name="_token" value="{{ csrf_token('admin_misc_sentry_test') }}">
+                            <button type="submit" class="btn btn-outline-danger">Déclencher le test</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

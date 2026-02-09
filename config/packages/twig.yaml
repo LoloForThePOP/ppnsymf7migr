@@ -3,6 +3,7 @@ twig:
 
     globals:
         google_maps_api_key: '%env(GOOGLE_MAPS_API_KEY)%'
+        ga4_measurement_id: '%env(string:GA4_MEASUREMENT_ID)%'
 
     form_themes: ['bootstrap_5_layout.html.twig']
 
