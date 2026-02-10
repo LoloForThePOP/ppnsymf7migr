@@ -479,6 +479,13 @@ class NormalizedProjectPersister
     {
         $qa = array_slice($qa, 0, 4);
         $oc = $pp->getOtherComponents();
+        $descriptionCorpus = $this->normalizeComparableText(
+            sprintf('%s %s', (string) ($pp->getTextDescription() ?? ''), (string) $pp->getGoal())
+        );
+        $descriptionTokens = $this->tokenizeComparableText($descriptionCorpus);
+        $seenQuestions = [];
+        $seenAnswers = [];
+
         foreach ($qa as $item) {
             if (!is_array($item)) {
                 continue;
@@ -488,8 +495,63 @@ class NormalizedProjectPersister
             if (!is_string($q) || !is_string($a) || $q === '' || $a === '') {
                 continue;
             }
-            $component = QuestionAnswerComponent::createNew($q, $a);
+
+            $question = trim($q);
+            $answer = trim($a);
+            if ($question === '' || $answer === '') {
+                continue;
+            }
+
+            $normalizedQuestion = $this->normalizeComparableText($question);
+            $normalizedAnswer = $this->normalizeComparableText($answer);
+            if ($normalizedQuestion === '' || $normalizedAnswer === '') {
+                continue;
+            }
+
+            $questionTokens = $this->tokenizeComparableText($normalizedQuestion);
+            $answerTokens = $this->tokenizeComparableText($normalizedAnswer);
+            $qaTokens = $this->tokenizeComparableText($normalizedQuestion . ' ' . $normalizedAnswer);
+
+            // Drop Q&A that mostly repeats description/goal content.
+            if (
+                $this->lexicalOverlapRatio($answerTokens, $descriptionTokens) >= 0.72
+                || $this->lexicalOverlapRatio($qaTokens, $descriptionTokens) >= 0.68
+                || str_contains($descriptionCorpus, $normalizedAnswer)
+            ) {
+                continue;
+            }
+
+            // Drop duplicates / near-duplicates inside the Q&A block.
+            if (in_array($normalizedQuestion, $seenQuestions, true) || in_array($normalizedAnswer, $seenAnswers, true)) {
+                continue;
+            }
+
+            $isNearDuplicate = false;
+            foreach ($seenQuestions as $seenQuestion) {
+                $seenQuestionTokens = $this->tokenizeComparableText($seenQuestion);
+                if ($this->lexicalOverlapRatio($questionTokens, $seenQuestionTokens) >= 0.78) {
+                    $isNearDuplicate = true;
+                    break;
+                }
+            }
+            if ($isNearDuplicate) {
+                continue;
+            }
+            foreach ($seenAnswers as $seenAnswer) {
+                $seenAnswerTokens = $this->tokenizeComparableText($seenAnswer);
+                if ($this->lexicalOverlapRatio($answerTokens, $seenAnswerTokens) >= 0.80) {
+                    $isNearDuplicate = true;
+                    break;
+                }
+            }
+            if ($isNearDuplicate) {
+                continue;
+            }
+
+            $component = QuestionAnswerComponent::createNew($question, $answer);
             $oc->addComponent('questions_answers', $component);
+            $seenQuestions[] = $normalizedQuestion;
+            $seenAnswers[] = $normalizedAnswer;
         }
         $pp->setOtherComponents($oc);
     }
@@ -932,6 +994,61 @@ class NormalizedProjectPersister
         $value = trim($value);
 
         return $value === '' ? null : $value;
+    }
+
+    private function normalizeComparableText(string $text): string
+    {
+        $normalized = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $normalized = mb_strtolower($normalized, 'UTF-8');
+        $normalized = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $normalized) ?? $normalized;
+        $normalized = preg_replace('/\s+/u', ' ', $normalized) ?? $normalized;
+
+        return trim($normalized);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function tokenizeComparableText(string $text): array
+    {
+        if ($text === '') {
+            return [];
+        }
+
+        $parts = preg_split('/\s+/u', $text) ?: [];
+        $tokens = [];
+        foreach ($parts as $part) {
+            $token = trim($part);
+            if ($token === '' || mb_strlen($token, 'UTF-8') < 4) {
+                continue;
+            }
+            $tokens[$token] = true;
+        }
+
+        return array_keys($tokens);
+    }
+
+    /**
+     * Ratio of left-side lexical overlap in [0,1].
+     *
+     * @param array<int, string> $left
+     * @param array<int, string> $right
+     */
+    private function lexicalOverlapRatio(array $left, array $right): float
+    {
+        if ($left === [] || $right === []) {
+            return 0.0;
+        }
+
+        $rightMap = array_fill_keys($right, true);
+        $shared = 0;
+        foreach ($left as $token) {
+            if (isset($rightMap[$token])) {
+                $shared++;
+            }
+        }
+
+        return $shared / max(1, count($left));
     }
 
     /**

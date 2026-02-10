@@ -49,7 +49,7 @@ enum CategoryList: string
             self::ENVIRONMENT   => 'Environnement',
             self::HISTORY       => 'Histoire, Patrimoine',
             self::MONEY         => 'Finance, Argent',
-            self::FOOD          => 'Agriculture, Alimentation',
+            self::FOOD          => 'Alimentation, Agriculture',
             self::SERVICES      => 'Services, Mise en relation',
             self::ARTS          => 'Culture, Arts',
             self::ENTERTAINMENT => 'Divertissements, Loisirs',
