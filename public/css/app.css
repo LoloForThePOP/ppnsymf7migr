@@ -53,6 +53,9 @@ a{
     --theme-contact-icon-filter: var(--theme-icon-filter);
     --theme-font-body: 'Lato', sans-serif;
     --theme-font-heading: 'Lato', sans-serif;
+    --theme-font-size-adjust-body: none;
+    --theme-font-size-adjust-heading: none;
+    --theme-font-size-fallback-scale: 100%;
     --theme-navbar-toggler-icon-light: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
     --theme-navbar-toggler-icon-dark: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
     --theme-btn-close-filter: none;
@@ -322,6 +325,9 @@ a{
     --theme-text-muted: #4f6f57;
     --theme-font-body: 'Alegreya Sans', sans-serif;
     --theme-font-heading: 'Manrope', sans-serif;
+    --theme-font-size-adjust-body: 0.56;
+    --theme-font-size-adjust-heading: none;
+    --theme-font-size-fallback-scale: 112%;
     --theme-accent: #2f9e44;
     --theme-accent-contrast: #ffffff;
     --theme-border: #dce7d9;
@@ -382,6 +388,9 @@ a{
     --theme-text-muted: #7fb6c5;
     --theme-font-body: 'Alegreya Sans', sans-serif;
     --theme-font-heading: 'Space Grotesk', sans-serif;
+    --theme-font-size-adjust-body: 0.56;
+    --theme-font-size-adjust-heading: none;
+    --theme-font-size-fallback-scale: 112%;
     --theme-accent: #22d3ee;
     --theme-accent-contrast: #02121a;
     --theme-border: #0f3a4a;
@@ -399,6 +408,7 @@ body {
     background-color: var(--theme-bg);
     color: var(--theme-text);
     font-family: var(--theme-font-body);
+    font-size-adjust: var(--theme-font-size-adjust-body, none);
 }
 
 html[data-theme="concentration"] body {
@@ -416,6 +426,14 @@ h5,
 h6,
 .pp-struct-title {
     font-family: var(--theme-font-heading);
+    font-size-adjust: var(--theme-font-size-adjust-heading, none);
+}
+
+@supports not (font-size-adjust: 1) {
+    :root {
+        /* Fallback path for browsers without `font-size-adjust` support. */
+        font-size: var(--theme-font-size-fallback-scale, 100%);
+    }
 }
 
 html:not(.theme-ready) *,

@@ -51,6 +51,40 @@ Examples:
 
 Use these variables instead of hard-coded colors whenever possible.
 
+## Typography readability baseline
+
+Some fonts render visually smaller than others at the same `font-size` (low x-height).
+To avoid per-page patches, the app uses a global theme-level readability baseline in
+`public/css/app.css`.
+
+### Global tokens
+
+- `--theme-font-size-adjust-body`: applied on `body` via `font-size-adjust`.
+- `--theme-font-size-adjust-heading`: applied on headings (`h1..h6`, `.pp-struct-title`).
+- `--theme-font-size-fallback-scale`: fallback root scale when `font-size-adjust` is not supported.
+
+### Global application
+
+- `body` uses:
+  - `font-size-adjust: var(--theme-font-size-adjust-body, none);`
+- Headings use:
+  - `font-size-adjust: var(--theme-font-size-adjust-heading, none);`
+- Fallback:
+  - `@supports not (font-size-adjust: 1) { :root { font-size: var(--theme-font-size-fallback-scale, 100%); } }`
+
+### Theme tuning workflow
+
+When introducing a theme or changing its body font:
+
+1. Set `--theme-font-body` / `--theme-font-heading`.
+2. If readability is too small, set:
+   - `--theme-font-size-adjust-body` (example: `0.56`)
+   - optional `--theme-font-size-adjust-heading`
+   - matching fallback `--theme-font-size-fallback-scale` (example: `112%`)
+3. Validate across key pages (3P, cards, forms, auth pages) on desktop + mobile.
+
+Current Alegreya-based themes (`eco-green`, `deep-ocean`) use this mechanism.
+
 ## Assets
 
 Optional theme assets live in static images:
