@@ -57,8 +57,7 @@
 
 
     .likeIcon {
-        color: #000;
-        filter: brightness(0) saturate(100%) var(--pp-like-icon-filter, var(--theme-icon-filter-strong));
+        color: var(--pp-like-icon-color, var(--theme-text));
     }
 
     .likeIcon.filled {
@@ -72,6 +71,7 @@
     /* When liked */
     .like-button.isLiked .likeIcon.filled {
         display: inline;
+        color: var(--pp-like-icon-active-color, var(--pp-like-icon-color, var(--theme-text)));
     }
 
     .like-button.isLiked .likeIcon.notFilled {

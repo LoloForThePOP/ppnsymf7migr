@@ -6,7 +6,9 @@
 
         <div class="not-followed-display">
             
-            <img class="follow-icon icon-themed icon-strong" src="{{ asset('follow.svg', 'misc')}}" alt="an arrow towards right direction symbolising a following" width="22" height="22">
+            <svg class="follow-icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M4 12h12.17l-4.58 4.59L13 18l7-7-7-7-1.41 1.41L16.17 10H4z" fill="currentColor"/>
+            </svg>
 
             <span class="text">Suivre</span>
         
@@ -16,7 +18,9 @@
             
             <span class="text me-1">Suivi</span>
 
-            <img class="check-icon icon-themed icon-strong" src="{{ asset('check.svg', 'misc')}}" alt="a check icon symbolising followed" width="14" height="14">
+            <svg class="check-icon" width="14" height="14" viewBox="0 0 10 10" aria-hidden="true" focusable="false">
+                <path d="M8.39 1.33a.9.9 0 0 1 1.29 1.27L4.87 8.63a.9.9 0 0 1-1.3.02L.37 5.46a.9.9 0 1 1 1.28-1.28l2.53 2.52L8.37 1.36l.02-.03z" fill="currentColor"/>
+            </svg>
         
         </div>
 
@@ -68,10 +72,15 @@
         padding: var(--follow-button-padding, 1px 8px);
         border: 2px solid var(--follow-button-border, var(--theme-border));
         border-radius: var(--follow-button-radius, 50px);
-        color: var(--follow-button-text, var(--theme-text));
+        color: var(--follow-button-text, var(--pp-interaction-icon-color, var(--theme-text)));
         background-color: var(--follow-button-bg, transparent);
         transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
         cursor: pointer;
+    }
+
+    .follow-button .follow-icon,
+    .follow-button .check-icon {
+        color: var(--follow-button-icon-color, var(--pp-interaction-icon-color, var(--follow-button-text, var(--theme-text))));
     }
 
     

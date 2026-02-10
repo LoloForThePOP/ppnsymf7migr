@@ -121,19 +121,19 @@
             <div class="other-info-container">
                 <div class="stats">
                     <span class="stat-chunk">
-                        <img class="pp-card-icon" src="{{ asset('thumb_up.svg', 'misc')}}" alt="thumb-up icon">
+                        <img class="pp-card-stat-icon-image icon-themed" src="{{ asset('thumb_up.svg', 'misc')}}" alt="thumb-up icon">
                         {% set likes = options.likesCount is not null ? options.likesCount : presentation.likes|default([])|length %}
                         {{ likes }}
                     </span>
                     <span class="stat-chunk">
-                        <img class="pp-card-icon" src="{{ asset('comment.svg', 'misc')}}" alt="comment icon">
+                        <img class="pp-card-stat-icon-image icon-themed" src="{{ asset('comment.svg', 'misc')}}" alt="comment icon">
                         {% set comments = options.commentsCount is not null ? options.commentsCount : presentation.comments|default([])|length %}
                         {{ comments }}
                     </span>
                     {% if options.showViews %}
                         {% set views = presentation.extra.viewsCount ?? 0 %}
                         <span class="stat-chunk">
-                            <img class="pp-card-icon" src="{{ asset('eye.svg', 'misc')}}" alt="eye icon">
+                            <img class="pp-card-stat-icon-image icon-themed" src="{{ asset('eye.svg', 'misc')}}" alt="eye icon">
                             {{ views }}
                         </span>
                     {% endif %}

@@ -39,7 +39,9 @@
             
                 <button class="share-presentation-button btn" data-bs-toggle="modal" data-bs-target="#pp-share" type="button">
 
-                    <img class="icon icon-themed icon-strong" src="{{ asset('share.svg', 'misc')}}" alt="share icon" width="22" height="22">
+                    <svg class="icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M18 16a2.98 2.98 0 0 0-2.17.93L8.91 13a3.04 3.04 0 0 0 0-2l6.92-3.93A3 3 0 1 0 15 5a3.1 3.1 0 0 0 .02.33L8.1 9.27a3 3 0 1 0 0 5.46l6.92 3.94A2.91 2.91 0 0 0 15 19a3 3 0 1 0 3-3z" fill="currentColor"/>
+                    </svg>
                     
                     <div class="text">Partager</div>
                 
@@ -107,14 +109,14 @@
 
     }
 
-    #misc-struct-container .follow-button .not-followed-display img {
+    #misc-struct-container .follow-button .not-followed-display .follow-icon {
         width: 34px;
         height: 27px;
         margin-bottom: 3px;
         margin-right: 3px;
     }
 
-    #misc-struct-container .follow-button img.check-icon {
+    #misc-struct-container .follow-button .check-icon {
         width: 28px;
         height: 22px;
     }
@@ -148,12 +150,12 @@
         }
 
         
-        #misc-struct-container .follow-button .not-followed-display img {
+        #misc-struct-container .follow-button .not-followed-display .follow-icon {
 
             margin-right: 2px;
         }
 
-        #misc-struct-container .follow-button .followed-display img {
+        #misc-struct-container .follow-button .followed-display .check-icon {
             margin-left: 3px;
         }
 
@@ -178,12 +180,20 @@
         margin-right: 0;
     }
 
-    .share-presentation-button img,
+    .share-presentation-button .icon,
     .bookmark-presentation-button .bookmarkIcon{
 
         margin-right: 3px;
         margin-bottom: 1px;
 
+    }
+
+    .share-presentation-button .icon {
+        color: var(--pp-action-icon-color, currentColor);
+    }
+
+    .bookmark-presentation-button .bookmarkIcon {
+        color: var(--pp-action-icon-color, currentColor);
     }
 
     .bookmark-presentation-button .bookmarkIcon {

@@ -66,6 +66,7 @@ a{
     --pp-card-goal-color: var(--theme-accent);
     --pp-icon-filter: var(--theme-icon-filter);
     --pp-struct-icon-color: var(--theme-accent);
+    --pp-interaction-icon-color: var(--theme-text);
     --pp-accent-secondary: var(--theme-accent);
     --pp-tags-color: var(--theme-accent);
     --propon-logo-primary: #007300;
@@ -308,6 +309,8 @@ a{
     --pp-card-shadow: 0 12px 24px rgba(47, 184, 91, 0.18);
     --pp-title-color: #1f8f43;
     --pp-icon-filter: var(--theme-icon-filter);
+    --pp-struct-icon-color: var(--theme-highlight);
+    --pp-interaction-icon-color: var(--theme-sky);
     --theme-button-weight: 600;
 }
 
@@ -346,6 +349,8 @@ a{
     --pp-card-radius: 18px;
     --pp-card-shadow: 0 12px 24px rgba(236, 72, 153, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.7);
     --pp-title-color: #be185d;
+    --pp-struct-icon-color: var(--pp-title-color);
+    --pp-interaction-icon-color: var(--pp-title-color);
 }
 
 :root[data-theme="luxury-black"] {

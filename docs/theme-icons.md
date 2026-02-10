@@ -32,3 +32,35 @@ Theme filters are defined in `public/css/app.css`:
 - `--theme-icon-filter-strong`
 
 Adjust them per theme if a stronger or different contrast is needed.
+
+## Project Presentation Architecture
+
+To keep theming predictable in project presentation screens, we split icon rendering by context:
+
+- 3P interaction icons (`like`, `bookmark`, `share`, `follow`, `comment`): inline SVG with `currentColor`.
+- Card stats icons (`like`, `comment`, `views`): SVG assets via `<img>` + `icon-themed`.
+
+This avoids mixed behavior in one UI area and keeps color decisions explicit:
+
+- inline SVG relies on CSS variables and text color inheritance.
+- asset icons rely on the theme filter pipeline (`--theme-icon-filter`).
+
+## Card Stat Assets
+
+The card stat assets are normalized to monochrome `currentColor` sources:
+
+- `public/media/static/images/icons/miscellaneous/thumb_up.svg`
+- `public/media/static/images/icons/miscellaneous/comment.svg`
+- `public/media/static/images/icons/miscellaneous/eye.svg`
+
+Keep these files single-color only. Avoid editor metadata and hardcoded brand colors.
+
+## Release Visual Checklist
+
+Run this check before releasing theme/icon changes:
+
+1. Verify 3P interaction icons color-alignment in `retro-game`, `mario-love`, `dark`.
+2. Verify card stats icons are legible and balanced in the same themes.
+3. Verify active/inactive states: `bookmark`, `like`, `follow`.
+4. Verify share icon is not inheriting default link blue.
+5. Verify mobile + desktop layouts (cards and 3P header/misc blocks).
