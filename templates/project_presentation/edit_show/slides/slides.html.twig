@@ -58,6 +58,21 @@
 
 	<div id="slides" class="slideshow-container">
 
+		{% if countSlides > 0 %}
+			<button
+				id="slideshow-fullscreen-toggle"
+				class="slideshow-fullscreen-toggle"
+				type="button"
+				aria-label="Activer le plein ecran"
+				title="Plein ecran"
+			>
+				<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+					<path fill="currentColor" d="M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v4h4v2H4v-6zm14 0h2v6h-6v-2h4v-4z"></path>
+				</svg>
+				<span id="slideshow-fullscreen-label">Plein ecran</span>
+			</button>
+		{% endif %}
+
 		{% if countSlides == 0 %}
 
 			<div class="text-placeholder" data-bs-toggle="modal" data-bs-target="#addImageSlideFormModal">Ajoutez des images pour illustrer votre projet !</div>
@@ -111,7 +126,7 @@
 						
 					{# span is used because <br> is inserted into contenteditable html element if left empty #}
 
-					<span class="caption" data-text="Titre ou légende de l'image" data-edit='{"entity": "slide", "property": "caption", "id": {{slide.id}} }' data-slide-id="{{slide.id}}">{{ slide.caption[:1] | upper ~ slide.caption[1:] }}</span>
+					<span class="caption" data-text="Titre ou légende de l'image" data-edit='{"entity": "slide", "property": "caption", "id": {{slide.id}} }' data-slide-id="{{slide.id}}" data-has-licence="{{ slide.licence ? '1' : '0' }}">{{ slide.caption[:1] | upper ~ slide.caption[1:] }}</span>
 					
 				{% endfor %}
 
@@ -202,30 +217,23 @@
 
 	<script>
 		
-		// reducing caption container height when no slide with caption (see caption flag in _thumbnail_container.html.twig)
+		// Toggle caption area depending on the currently visible slide.
+		function updateCaptionContainerVisibility(currentIndex){
+			var captions = document.getElementsByClassName("caption");
+			var currentCaption = captions[currentIndex] || null;
+			var captionText = '';
+			var hasLicence = false;
 
-		function hasCaptions(){
-
-			var hasCaptionFlag = false;
-
-			$('.caption').each(function(){
-
-				if($.trim($(this).text()) !== ''){
-					hasCaptionFlag = true; 
-				}
-
-			});
-
-			if (!hasCaptionFlag) {
-
-				$('.caption-container').addClass('no-caption')
-
-			}else{
-
-				$('.caption-container').removeClass('no-caption');
-
+			if (currentCaption) {
+				captionText = $.trim($(currentCaption).text());
+				hasLicence = $(currentCaption).data('has-licence') == 1;
 			}
 
+			if (captionText !== '' || hasLicence) {
+				$('.caption-container').removeClass('no-caption');
+			} else {
+				$('.caption-container').addClass('no-caption');
+			}
 		}
 
 		
@@ -257,7 +265,7 @@
 
 		}
 
-		hasCaptions();
+		updateCaptionContainerVisibility(0);
 
 		
 
@@ -267,7 +275,141 @@
 	
     <script>
 
+		var isSlideshowFullscreen = false;
         var slideIndex = 1;
+
+		function isConsultationModeActive() {
+			var ppContainer = document.querySelector('.pp-container');
+			return !!(ppContainer && ppContainer.classList.contains('in-consultation-mode'));
+		}
+
+		function getFullscreenElement() {
+			return document.fullscreenElement || document.webkitFullscreenElement || null;
+		}
+
+		function requestFullscreenElement(element) {
+			if (!element) {
+				return Promise.resolve();
+			}
+			if (typeof element.requestFullscreen === 'function') {
+				return element.requestFullscreen();
+			}
+			if (typeof element.webkitRequestFullscreen === 'function') {
+				element.webkitRequestFullscreen();
+			}
+			return Promise.resolve();
+		}
+
+		function exitFullscreenElement() {
+			if (typeof document.exitFullscreen === 'function') {
+				return document.exitFullscreen();
+			}
+			if (typeof document.webkitExitFullscreen === 'function') {
+				document.webkitExitFullscreen();
+			}
+			return Promise.resolve();
+		}
+
+		function updateSlideshowFullscreenState() {
+			var slideshowRoot = document.getElementById('slides');
+			var fullscreenLabel = document.getElementById('slideshow-fullscreen-label');
+			var fullscreenButton = document.getElementById('slideshow-fullscreen-toggle');
+			var activeElement = getFullscreenElement();
+
+			isSlideshowFullscreen = !!(slideshowRoot && activeElement === slideshowRoot);
+			if (slideshowRoot) {
+				slideshowRoot.classList.toggle('is-slideshow-fullscreen', isSlideshowFullscreen);
+			}
+			if (fullscreenLabel) {
+				fullscreenLabel.textContent = isSlideshowFullscreen ? 'Quitter' : 'Plein ecran';
+			}
+			if (fullscreenButton) {
+				fullscreenButton.setAttribute('aria-label', isSlideshowFullscreen ? 'Quitter le plein ecran' : 'Activer le plein ecran');
+				fullscreenButton.setAttribute('title', isSlideshowFullscreen ? 'Quitter le plein ecran' : 'Plein ecran');
+			}
+		}
+
+		function toggleSlideshowFullscreen() {
+			var slideshowRoot = document.getElementById('slides');
+			if (!slideshowRoot) {
+				return;
+			}
+
+			if (isSlideshowFullscreen) {
+				exitFullscreenElement();
+			} else {
+				requestFullscreenElement(slideshowRoot);
+			}
+		}
+
+		function bindImageClickToFullscreen(slideshowRoot) {
+			if (!slideshowRoot) {
+				return;
+			}
+
+			slideshowRoot.addEventListener('click', function (event) {
+				if (isSlideshowFullscreen || event.defaultPrevented || !isConsultationModeActive()) {
+					return;
+				}
+
+				if (!event.target.closest('.image-slide-wrapper, .img-zoom-lens, .img-zoom-result')) {
+					return;
+				}
+
+				toggleSlideshowFullscreen();
+			});
+		}
+
+		document.addEventListener('fullscreenchange', function () {
+			updateSlideshowFullscreenState();
+			showSlides(slideIndex);
+		});
+
+		document.addEventListener('webkitfullscreenchange', function () {
+			updateSlideshowFullscreenState();
+			showSlides(slideIndex);
+		});
+
+		(function bindSlideshowFullscreen() {
+			var fullscreenButton = document.getElementById('slideshow-fullscreen-toggle');
+			var slideshowRoot = document.getElementById('slides');
+			if (!fullscreenButton) {
+				return;
+			}
+			var fullscreenSupported = !!(slideshowRoot && (slideshowRoot.requestFullscreen || slideshowRoot.webkitRequestFullscreen));
+			if (!fullscreenSupported) {
+				fullscreenButton.style.display = 'none';
+				return;
+			}
+
+			fullscreenButton.addEventListener('click', function () {
+				toggleSlideshowFullscreen();
+			});
+			bindImageClickToFullscreen(slideshowRoot);
+			updateSlideshowFullscreenState();
+		})();
+
+		document.addEventListener('keydown', function (event) {
+			if (event.defaultPrevented) {
+				return;
+			}
+			if (event.key !== 'f' && event.key !== 'F') {
+				return;
+			}
+
+			var target = event.target;
+			if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(target.tagName))) {
+				return;
+			}
+
+			var slideshowRoot = document.getElementById('slides');
+			if (!slideshowRoot) {
+				return;
+			}
+
+			event.preventDefault();
+			toggleSlideshowFullscreen();
+		});
 
         function plusSlides(n) {
 
@@ -309,15 +451,19 @@
             
             slides[slideIndex-1].style.display = "flex";
 
-            if(!tinyScreen && typeof killImageZoom === 'function' && typeof imageZoom === 'function'){
+            if(!tinyScreen && !isSlideshowFullscreen && typeof killImageZoom === 'function' && typeof imageZoom === 'function'){
 
                 killImageZoom(); //deleting previous lens
                 imageZoom("image-slide-wrapper-"+slides[slideIndex-1].id, "image-zoom-result");
+            } else if (typeof killImageZoom === 'function') {
+                killImageZoom();
             }
 
             if(typeof(captions[slideIndex-1]) != 'undefined'){
                 captions[slideIndex-1].style.display = "block";
             }
+
+			updateCaptionContainerVisibility(slideIndex - 1);
             
             dots[slideIndex-1].className += " active";
             thumbnail[slideIndex-1].className += " active";
