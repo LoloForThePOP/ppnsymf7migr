@@ -1,82 +1,53 @@
-/* Whole Presentation Container */
-
+/* ===== Layout containers ===== */
 .pp-container {
     margin-top: 50px;
     margin-bottom: 50px;
 }
 
-
-.pp-struct-container-wrapper{
-
+.pp-struct-container-wrapper {
     margin-bottom: 28px;
-
 }
 
-/* Each Structure Container*/
-
+/* ===== Structure cards ===== */
 .pp-struct-container {
-
     height: 100%;
-
     padding: 13px 12px 13px 12px;
     position: relative;
-
-    scroll-margin-top: 85px; /* Prevent anchors to be messed up by fixed horizontal navbar */
-    
+    scroll-margin-top: 85px; /* Prevent anchors from being hidden by fixed navbar. */
     background-color: var(--pp-card-bg);
     border: 1px solid var(--pp-card-border);
     border-radius: var(--pp-card-radius);
     box-shadow: var(--pp-card-shadow);
-    
-} 
-
-
-/* Slideshow container : removing horizontal padding and structure border by default (these are added in edition mode, see wysiwyg.css) */
-
-#slideshow-struct-container{
-    padding: 10px 12px 12px 10px;
-
 }
 
+/* Slideshow card base (edition mode may override in `wysiwyg.css`). */
 #slideshow-struct-container {
-	border: 1px solid var(--pp-card-border);
+    padding: 10px 12px 12px 10px;
+    border: 1px solid var(--pp-card-border);
 }
-
 
 .in-consultation-mode #text-description-struct-container {
-	display: flex;
-	align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .in-consultation-mode #slideshow-struct-container {
-	display: flex;
-	align-items: center;
+    display: flex;
+    align-items: center;
 }
 
-.in-consultation-mode #slideshow-struct-container .slideshow-container {
-	width: 100%;
-}
- 
-
-/* Each Structure Title Container (contains title + edit button) */
-
-.pp-struct-title-container{
-
+/* ===== Structure title ===== */
+.pp-struct-title-container {
     margin-top: 10px;
     margin-bottom: 32px;
     text-align: center;
-
 }
 
-/* Each Structure Title */
-
-.pp-struct-title{
-
+.pp-struct-title {
     display: inline;
     color: var(--pp-title-color);
     font-size: 1.8rem;
-    margin: 0px;
-
+    margin: 0;
 }
 
 html[data-theme="concentration"] body[data-theme-scope="presentation"] .pp-struct-title {
@@ -87,18 +58,15 @@ html[data-theme="concentration"] body[data-theme-scope="presentation"] .pp-struc
     border-color: color-mix(in srgb, var(--pp-card-border) 70%, transparent);
 }
 
-/* Each Structure Icon */
-
-.pp-struct-icon{
+/* ===== Structure icon ===== */
+.pp-struct-icon {
     display: inline-block;
     width: 22px;
-    height: 22px; 
-
-    margin-right : 7px;
+    height: 22px;
+    margin-right: 7px;
     margin-bottom: 5px;
     vertical-align: middle;
     line-height: 1;
-
     background-color: var(--pp-struct-icon-color, var(--theme-accent));
     background-image: var(--pp-struct-icon-url);
     background-repeat: no-repeat;
@@ -107,7 +75,7 @@ html[data-theme="concentration"] body[data-theme-scope="presentation"] .pp-struc
 }
 
 @supports ((-webkit-mask-image: url("")) or (mask-image: url(""))) {
-    .pp-struct-icon{
+    .pp-struct-icon {
         background-image: none;
         -webkit-mask-image: var(--pp-struct-icon-url);
         mask-image: var(--pp-struct-icon-url);
@@ -120,12 +88,12 @@ html[data-theme="concentration"] body[data-theme-scope="presentation"] .pp-struc
     }
 }
 
-/* Each Structure Content */
-
-.pp-struct-content{
+/* ===== Structure content ===== */
+.pp-struct-content {
     padding-left: 30px;
 }
 
+/* ===== Edition controls ===== */
 .pp-struct-toggle {
     position: absolute;
     top: 10px;
@@ -230,182 +198,110 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-cont
     border-color: var(--theme-accent);
 }
 
-
-
-/* Switch some links behaviors between edition and consultation mode  */
-
-.coverable-link{
-
+/* ===== Generic helpers ===== */
+.coverable-link {
     position: absolute;
-
-    top: 0; 
+    top: 0;
     left: 0;
-
     width: 100%;
     height: 100%;
-
     opacity: 0;
-
     z-index: 5;
-
 }
 
-/* Hide elements related to edition mode */
-
-.pp-edition-mode{
-
+.pp-edition-mode {
     display: none;
-    
 }
-
-/* Hide some other elements */
 
 .hide-element {
-
     display: none;
 }
 
-/* Show new lines in elements that have been content edited */
-
 [data-edit] {
-
     white-space: pre-wrap;
 }
 
 .show-more-button-container {
-	text-align: center;
+    text-align: center;
 }
-
 
 .show-more-button {
-	margin-left: 3px;
-	font-size: 15px;
-	color: var(--theme-text);
-	cursor: pointer;
+    margin-left: 3px;
+    font-size: 15px;
+    color: var(--theme-text);
+    cursor: pointer;
 }
 
-
-
-/* Slideshow in consultation mode */
-
-
-.in-consultation-mode .thumbnails-container {
-
-    display: none !important;
- 
- }
-
-.in-consultation-mode .caption-container {
-
-    width: 100%; /* Because now that thumbnail container is hidden, we need more space to center captions. */
- 
- }
-
-.in-consultation-mode .caption-container.no-caption{
-
-    display: none !important;
- 
-}
-
- /* Text Description in consultation mode */
-
- @media screen and (min-width: 992px) {
-
+/* ===== Consultation-only layout tweaks ===== */
+@media screen and (min-width: 992px) {
     .in-consultation-mode #text-description-struct-container {
-
         padding-top: 20px;
         padding-bottom: 20px;
-        
     }
-
 }
 
-
-/* Media queries */
-
+/* ===== Responsive ===== */
 @media screen and (max-width: 768px) {
-
-    .pp-container{
+    .pp-container {
         padding-left: 0;
         padding-right: 0;
         margin-top: 40px;
         margin-bottom: 22px;
     }
-            
-    .pp-struct-content{
+
+    .pp-struct-content {
         padding-left: 25px;
     }
-
 }
 
 @media screen and (max-width: 580px) {
-        
-    .pp-struct-container-wrapper{
-
-        margin-bottom: 0px;
-
+    .pp-struct-container-wrapper {
+        margin-bottom: 0;
     }
 
-    .pp-container{
-
+    .pp-container {
         margin-top: 24px;
         padding: 0;
-    
     }
 
     .pp-struct-container {
-
         height: unset;
         padding-top: 20px;
         margin-bottom: 17px;
-
     }
 
-    .pp-struct-title-container{
-
+    .pp-struct-title-container {
         margin-top: 0;
         margin-bottom: 18px;
-
     }
 
-    .pp-struct-title{
-
+    .pp-struct-title {
         font-size: 20px;
         color: var(--pp-title-color);
-
     }
 
-    .pp-struct-icon{
-
-        width:20px;
-        height:20px;
-
-        margin-right:5px;
+    .pp-struct-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
         margin-bottom: 4px;
-
     }
 
-    .pp-struct-content{
-        padding-left: 0px;
+    .pp-struct-content {
+        padding-left: 0;
     }
 
-    #slideshow-struct-container{
+    #slideshow-struct-container {
         border: none;
-        padding: 0px;
-    }
-
-    .in-consultation-mode .caption-container.no-caption{
-
-        display: block !important; /* We keep blank and visible to keep some vertical space (kind of "padding-top") */
-     
+        padding: 0;
     }
 
     #comments-struct-container {
         padding: 12px 7px 10px 7px;
     }
-
 }
 
+/* ===== Theme-specific presentation controls ===== */
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .page-info-btn,
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #misc-struct-container .report-problem-btn {
     background-color: var(--theme-surface-alt);
@@ -451,11 +347,11 @@ body[data-theme-scope="presentation"] .pp-source-meta__label {
     font-weight: 600;
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-struct-icon{
+html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-struct-icon {
     --pp-struct-icon-color: var(--theme-accent);
 }
 
-html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .pp-struct-icon{
+html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] .pp-struct-icon {
     --pp-struct-icon-color: var(--theme-highlight);
 }
 
@@ -500,7 +396,6 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #categor
 html[data-theme-variant="custom"][data-theme="retro-game"] body[data-theme-scope="presentation"] #categories-dropdown {
     color: var(--theme-sky);
 }
-
 
 html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .like-button {
     --pp-like-icon-color: var(--theme-text);
