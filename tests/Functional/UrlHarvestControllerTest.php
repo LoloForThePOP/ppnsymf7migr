@@ -16,10 +16,11 @@ final class UrlHarvestControllerTest extends WebTestCase
         $client = static::createClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
 
-        $admin = $this->createUser($em, ['ROLE_ADMIN']);
-        $client->loginUser($admin);
+        $scraper = $this->createUser($em, ['ROLE_SCRAPER']);
+        $client->loginUser($scraper);
 
         $client->request('POST', '/admin/project/harvest-urls', [
+            'action' => 'manual',
             'urls' => "http://127.0.0.1\n",
         ]);
 

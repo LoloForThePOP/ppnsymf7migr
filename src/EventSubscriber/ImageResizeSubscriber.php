@@ -59,15 +59,20 @@ final class ImageResizeSubscriber implements EventSubscriberInterface
             return;
         }
 
+        $rule = $this->rules[$mappingName];
         $fileSize = $file->getSize();
         if ($mappingName === 'project_logo_image'
             && is_int($fileSize)
             && $fileSize > 0
             && $fileSize <= self::LOGO_RESIZE_MIN_BYTES) {
-            return;
+            $dimensions = @getimagesize($file->getPathname());
+            if (is_array($dimensions)
+                && (int) $dimensions[0] <= $rule['max_width']
+                && (int) $dimensions[1] <= $rule['max_height']) {
+                return;
+            }
         }
 
-        $rule = $this->rules[$mappingName];
         $originalContent = null;
         if ($mappingName === 'project_logo_image') {
             $originalContent = @file_get_contents($file->getPathname());

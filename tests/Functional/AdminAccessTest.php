@@ -51,13 +51,26 @@ final class AdminAccessTest extends WebTestCase
         self::assertResponseStatusCodeSame(403);
     }
 
-    public function testAdminCanAccessHarvestScreen(): void
+    public function testAdminIsForbiddenFromHarvestScreen(): void
     {
         $client = static::createClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
 
         $admin = $this->createUser($em, ['ROLE_ADMIN']);
         $client->loginUser($admin);
+
+        $client->request('GET', '/admin/harvest');
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testScraperCanAccessHarvestScreen(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $scraper = $this->createUser($em, ['ROLE_SCRAPER']);
+        $client->loginUser($scraper);
 
         $client->request('GET', '/admin/harvest');
 
@@ -90,13 +103,26 @@ final class AdminAccessTest extends WebTestCase
         self::assertResponseStatusCodeSame(403);
     }
 
-    public function testAdminCanAccessProjectNormalize(): void
+    public function testAdminIsForbiddenFromProjectNormalize(): void
     {
         $client = static::createClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
 
         $admin = $this->createUser($em, ['ROLE_ADMIN']);
         $client->loginUser($admin);
+
+        $client->request('GET', '/admin/project/normalize');
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testScraperCanAccessProjectNormalize(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $scraper = $this->createUser($em, ['ROLE_SCRAPER']);
+        $client->loginUser($scraper);
 
         $client->request('GET', '/admin/project/normalize');
 
@@ -116,13 +142,26 @@ final class AdminAccessTest extends WebTestCase
         self::assertResponseStatusCodeSame(403);
     }
 
-    public function testAdminCanAccessWebpageNormalize(): void
+    public function testAdminIsForbiddenFromWebpageNormalize(): void
     {
         $client = static::createClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
 
         $admin = $this->createUser($em, ['ROLE_ADMIN']);
         $client->loginUser($admin);
+
+        $client->request('GET', '/admin/project/normalize-html');
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testScraperCanAccessWebpageNormalize(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $scraper = $this->createUser($em, ['ROLE_SCRAPER']);
+        $client->loginUser($scraper);
 
         $client->request('GET', '/admin/project/normalize-html');
 
@@ -142,13 +181,26 @@ final class AdminAccessTest extends WebTestCase
         self::assertResponseStatusCodeSame(403);
     }
 
-    public function testAdminCanAccessUrlHarvest(): void
+    public function testAdminIsForbiddenFromUrlHarvest(): void
     {
         $client = static::createClient();
         $em = $client->getContainer()->get(EntityManagerInterface::class);
 
         $admin = $this->createUser($em, ['ROLE_ADMIN']);
         $client->loginUser($admin);
+
+        $client->request('GET', '/admin/project/harvest-urls');
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testScraperCanAccessUrlHarvest(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $scraper = $this->createUser($em, ['ROLE_SCRAPER']);
+        $client->loginUser($scraper);
 
         $client->request('GET', '/admin/project/harvest-urls');
 

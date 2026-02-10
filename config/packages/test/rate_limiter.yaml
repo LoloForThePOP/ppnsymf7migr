@@ -8,3 +8,7 @@ framework:
             policy: 'sliding_window'
             limit: 2
             interval: '1 minute'
+        presentation_event:
+            policy: 'sliding_window'
+            limit: 2
+            interval: '1 minute'
