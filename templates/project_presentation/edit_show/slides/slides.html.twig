@@ -61,7 +61,7 @@
 		{% if countSlides > 0 %}
 			<button
 				id="slideshow-fullscreen-toggle"
-				class="slideshow-fullscreen-toggle"
+				class="slideshow-fullscreen-toggle pp-consultation-mode"
 				type="button"
 				aria-label="Activer le plein ecran"
 				title="Plein ecran"
@@ -69,7 +69,18 @@
 				<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
 					<path fill="currentColor" d="M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v4h4v2H4v-6zm14 0h2v6h-6v-2h4v-4z"></path>
 				</svg>
-				<span id="slideshow-fullscreen-label">Plein ecran</span>
+			</button>
+			<button
+				id="slideshow-fullscreen-exit"
+				class="slideshow-fullscreen-exit pp-consultation-mode"
+				type="button"
+				aria-label="Quitter le plein ecran"
+				title="Quitter le plein ecran"
+			>
+				<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+					<path fill="currentColor" d="M9 9H4V4h2v3h3v2zm11 0h-5V7h3V4h2v5zm-11 6v5H4v-5h2v3h3v2zm11 5h-5v-2h3v-3h2v5z"></path>
+				</svg>
+				Quitter le plein ecran
 			</button>
 		{% endif %}
 
@@ -222,14 +233,13 @@
 			var captions = document.getElementsByClassName("caption");
 			var currentCaption = captions[currentIndex] || null;
 			var captionText = '';
-			var hasLicence = false;
 
 			if (currentCaption) {
 				captionText = $.trim($(currentCaption).text());
-				hasLicence = $(currentCaption).data('has-licence') == 1;
 			}
 
-			if (captionText !== '' || hasLicence) {
+			// In consultation mode, only a real caption text should keep this area visible.
+			if (captionText !== '') {
 				$('.caption-container').removeClass('no-caption');
 			} else {
 				$('.caption-container').addClass('no-caption');
@@ -283,6 +293,10 @@
 			return !!(ppContainer && ppContainer.classList.contains('in-consultation-mode'));
 		}
 
+		function isTinyScreenForFullscreen() {
+			return window.matchMedia('(max-width: 768px)').matches;
+		}
+
 		function getFullscreenElement() {
 			return document.fullscreenElement || document.webkitFullscreenElement || null;
 		}
@@ -312,16 +326,12 @@
 
 		function updateSlideshowFullscreenState() {
 			var slideshowRoot = document.getElementById('slides');
-			var fullscreenLabel = document.getElementById('slideshow-fullscreen-label');
 			var fullscreenButton = document.getElementById('slideshow-fullscreen-toggle');
 			var activeElement = getFullscreenElement();
 
 			isSlideshowFullscreen = !!(slideshowRoot && activeElement === slideshowRoot);
 			if (slideshowRoot) {
 				slideshowRoot.classList.toggle('is-slideshow-fullscreen', isSlideshowFullscreen);
-			}
-			if (fullscreenLabel) {
-				fullscreenLabel.textContent = isSlideshowFullscreen ? 'Quitter' : 'Plein ecran';
 			}
 			if (fullscreenButton) {
 				fullscreenButton.setAttribute('aria-label', isSlideshowFullscreen ? 'Quitter le plein ecran' : 'Activer le plein ecran');
@@ -332,6 +342,11 @@
 		function toggleSlideshowFullscreen() {
 			var slideshowRoot = document.getElementById('slides');
 			if (!slideshowRoot) {
+				return;
+			}
+
+			// On tiny screens, keep slideshow in-page and avoid entering fullscreen.
+			if (isTinyScreenForFullscreen() && !isSlideshowFullscreen) {
 				return;
 			}
 
@@ -348,15 +363,35 @@
 			}
 
 			slideshowRoot.addEventListener('click', function (event) {
-				if (isSlideshowFullscreen || event.defaultPrevented || !isConsultationModeActive()) {
+				if (event.defaultPrevented || !isConsultationModeActive()) {
 					return;
 				}
 
-				if (!event.target.closest('.image-slide-wrapper, .img-zoom-lens, .img-zoom-result')) {
+				var clickedOnControl = event.target.closest('.slideshow-fullscreen-toggle, .slideshow-fullscreen-exit, .prev, .next');
+				if (clickedOnControl) {
 					return;
 				}
 
-				toggleSlideshowFullscreen();
+				var clickedOnImageMedia = event.target.closest('.image-slide-wrapper > img, .img-zoom-lens, .img-zoom-result');
+				var clickedOnVideoMedia = event.target.closest('.video-slide-wrapper iframe');
+
+				if (isSlideshowFullscreen) {
+					// In fullscreen, clicking outside media exits fullscreen.
+					if (!clickedOnImageMedia && !clickedOnVideoMedia) {
+						toggleSlideshowFullscreen();
+					}
+					return;
+				}
+
+				// On tiny screens, do not trigger fullscreen from image clicks.
+				if (isTinyScreenForFullscreen()) {
+					return;
+				}
+
+				// In normal mode, keep "click image to enter fullscreen".
+				if (clickedOnImageMedia) {
+					toggleSlideshowFullscreen();
+				}
 			});
 		}
 
@@ -372,6 +407,7 @@
 
 		(function bindSlideshowFullscreen() {
 			var fullscreenButton = document.getElementById('slideshow-fullscreen-toggle');
+			var fullscreenExitButton = document.getElementById('slideshow-fullscreen-exit');
 			var slideshowRoot = document.getElementById('slides');
 			if (!fullscreenButton) {
 				return;
@@ -379,12 +415,22 @@
 			var fullscreenSupported = !!(slideshowRoot && (slideshowRoot.requestFullscreen || slideshowRoot.webkitRequestFullscreen));
 			if (!fullscreenSupported) {
 				fullscreenButton.style.display = 'none';
+				if (fullscreenExitButton) {
+					fullscreenExitButton.style.display = 'none';
+				}
 				return;
 			}
 
 			fullscreenButton.addEventListener('click', function () {
 				toggleSlideshowFullscreen();
 			});
+			if (fullscreenExitButton) {
+				fullscreenExitButton.addEventListener('click', function () {
+					if (isSlideshowFullscreen) {
+						toggleSlideshowFullscreen();
+					}
+				});
+			}
 			bindImageClickToFullscreen(slideshowRoot);
 			updateSlideshowFullscreenState();
 		})();
