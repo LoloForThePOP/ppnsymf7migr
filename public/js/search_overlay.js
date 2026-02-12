@@ -78,6 +78,8 @@
   let hasPlacesInit = false;
   let remoteHistory = null;
   let historyLoaded = false;
+  let activeSuggestionIndex = -1;
+  let suggestionInputSeed = '';
 
   const debounce = (fn, wait = 250) => {
     let t = null;
@@ -231,8 +233,95 @@
     }
   };
 
+  const getSuggestionMainButtons = () => {
+    if (!suggestBoxEl) {
+      return [];
+    }
+    return Array.from(suggestBoxEl.querySelectorAll('.search-overlay__suggestions-item-main'));
+  };
+
+  const updateInputFromSuggestion = (value) => {
+    input.value = value;
+    syncTriggerInputs(value);
+    clearInputBtn?.classList.toggle('d-none', value.length === 0);
+  };
+
+  const resetSuggestionNavigation = ({ restoreInput = false } = {}) => {
+    const options = getSuggestionMainButtons();
+    options.forEach((btn) => {
+      btn.setAttribute('aria-selected', 'false');
+      btn.closest('.search-overlay__suggestions-item')?.classList.remove('is-active');
+    });
+    if (restoreInput && suggestionInputSeed) {
+      updateInputFromSuggestion(suggestionInputSeed);
+    }
+    activeSuggestionIndex = -1;
+    suggestionInputSeed = '';
+  };
+
+  const setSuggestionActiveIndex = (index) => {
+    const options = getSuggestionMainButtons();
+    if (options.length === 0) {
+      resetSuggestionNavigation();
+      return false;
+    }
+
+    options.forEach((btn) => {
+      btn.setAttribute('aria-selected', 'false');
+      btn.closest('.search-overlay__suggestions-item')?.classList.remove('is-active');
+    });
+
+    const safeIndex = Math.max(0, Math.min(index, options.length - 1));
+    activeSuggestionIndex = safeIndex;
+    const activeBtn = options[safeIndex];
+    const activeItem = activeBtn.closest('.search-overlay__suggestions-item');
+    activeBtn.setAttribute('aria-selected', 'true');
+    activeItem?.classList.add('is-active');
+    activeItem?.scrollIntoView({ block: 'nearest' });
+
+    const term = (activeBtn.dataset.suggestionTerm || activeBtn.textContent || '').trim();
+    if (term) {
+      updateInputFromSuggestion(term);
+    }
+
+    return true;
+  };
+
+  const navigateSuggestions = (direction) => {
+    const options = getSuggestionMainButtons();
+    if (options.length === 0) {
+      return false;
+    }
+    if (suggestBoxEl?.classList.contains('d-none')) {
+      suggestBoxEl.classList.remove('d-none');
+    }
+
+    if (activeSuggestionIndex === -1) {
+      suggestionInputSeed = input.value;
+      return setSuggestionActiveIndex(direction > 0 ? 0 : options.length - 1);
+    }
+
+    const nextIndex = activeSuggestionIndex + direction;
+    if (nextIndex < 0) {
+      resetSuggestionNavigation({ restoreInput: true });
+      return true;
+    }
+
+    return setSuggestionActiveIndex(nextIndex);
+  };
+
+  const selectActiveSuggestion = () => {
+    const options = getSuggestionMainButtons();
+    if (activeSuggestionIndex < 0 || activeSuggestionIndex >= options.length) {
+      return false;
+    }
+    options[activeSuggestionIndex].click();
+    return true;
+  };
+
   const renderRecentQueries = () => {
     if (!recentEl || !recentListEl || !suggestBoxEl) return;
+    resetSuggestionNavigation();
     if (suggestionsLocked) {
       recentEl.classList.add('d-none');
       if (suggestEl?.classList.contains('d-none')) {
@@ -260,12 +349,14 @@
       mainBtn.type = 'button';
       mainBtn.className = 'search-overlay__suggestions-item-main';
       mainBtn.textContent = term;
+      mainBtn.dataset.suggestionTerm = term;
+      mainBtn.setAttribute('aria-selected', 'false');
       mainBtn.addEventListener('click', () => {
         input.value = term;
         syncTriggerInputs(term);
         clearInputBtn?.classList.remove('d-none');
         performSearch(term, { page: 1 });
-        suggestBoxEl?.classList.add('d-none');
+        hideSuggestions();
       });
 
       const actions = document.createElement('div');
@@ -330,13 +421,15 @@
     suggestBoxEl.classList.remove('d-none');
   };
 
-  const hideSuggestions = () => {
+  const hideSuggestions = ({ restoreInput = false } = {}) => {
     if (!suggestBoxEl) return;
     suggestBoxEl.classList.add('d-none');
+    resetSuggestionNavigation({ restoreInput });
   };
 
   const renderSuggestions = (items, term) => {
     if (!suggestEl || !suggestListEl || !suggestBoxEl) return;
+    resetSuggestionNavigation();
     if (suggestionsLocked) {
       suggestEl.classList.add('d-none');
       if (recentEl?.classList.contains('d-none')) {
@@ -361,12 +454,14 @@
       btn.type = 'button';
       btn.className = 'search-overlay__suggestions-item-main';
       btn.textContent = term;
+      btn.dataset.suggestionTerm = term;
+      btn.setAttribute('aria-selected', 'false');
       btn.addEventListener('click', () => {
         input.value = term;
         syncTriggerInputs(term);
         clearInputBtn?.classList.remove('d-none');
         performSearch(term, { page: 1 });
-        suggestBoxEl?.classList.add('d-none');
+        hideSuggestions();
       });
 
       const actions = document.createElement('div');
@@ -1126,6 +1221,7 @@
 
   input.addEventListener('input', () => {
     suggestionsLocked = false;
+    resetSuggestionNavigation();
     syncTriggerInputs(input.value);
     clearInputBtn?.classList.toggle('d-none', input.value.length === 0);
     debouncedSearch(input.value);
@@ -1138,11 +1234,34 @@
     if (inputWrap?.contains(target) || suggestBoxEl.contains(target)) {
       return;
     }
-    hideSuggestions();
+    hideSuggestions({ restoreInput: true });
   });
 
   input.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowDown') {
+      if (navigateSuggestions(1)) {
+        event.preventDefault();
+      }
+      return;
+    }
+    if (event.key === 'ArrowUp') {
+      if (navigateSuggestions(-1)) {
+        event.preventDefault();
+      }
+      return;
+    }
+    if (event.key === 'Escape') {
+      if (suggestBoxEl && !suggestBoxEl.classList.contains('d-none')) {
+        event.preventDefault();
+        hideSuggestions({ restoreInput: true });
+      }
+      return;
+    }
     if (event.key === 'Enter') {
+      if (selectActiveSuggestion()) {
+        event.preventDefault();
+        return;
+      }
       suggestionsLocked = true;
       const term = input.value.trim();
       if (term.length >= minLength) {

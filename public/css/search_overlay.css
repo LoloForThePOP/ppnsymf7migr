@@ -482,9 +482,9 @@ body.search-overlay-open {
 }
 
 .search-overlay__suggestions-title {
-    color: var(--theme-text-muted);
-    font-size: 0.8rem;
-    font-weight: 600;
+    color: var(--theme-text);
+    font-size: clamp(0.88rem, 0.82rem + 0.18vw, 0.96rem);
+    font-weight: 700;
     margin-bottom: 6px;
 }
 
@@ -499,8 +499,10 @@ body.search-overlay-open {
     background: var(--theme-surface-alt);
     color: var(--theme-text);
     border-radius: 10px;
-    padding: 6px 10px;
-    font-size: 0.85rem;
+    padding: 8px 11px;
+    font-size: clamp(0.94rem, 0.9rem + 0.16vw, 1rem);
+    font-weight: 500;
+    line-height: 1.3;
     cursor: pointer;
     text-align: left;
     display: flex;
@@ -511,7 +513,17 @@ body.search-overlay-open {
 
 .search-overlay__suggestions-item:hover {
     border-color: var(--theme-accent);
-    color: var(--theme-accent);
+    color: var(--theme-title);
+}
+
+.search-overlay__suggestions-item.is-active {
+    border-color: var(--theme-accent);
+    color: var(--theme-title);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--theme-accent) 60%, transparent);
+}
+
+.search-overlay__suggestions-item.is-active .search-overlay__suggestions-item-main {
+    font-weight: 600;
 }
 
 .search-overlay__suggestions-item-main {
@@ -519,9 +531,26 @@ body.search-overlay-open {
     border: none;
     color: inherit;
     font: inherit;
+    font-weight: 500;
     padding: 0;
     text-align: left;
     flex: 1;
+}
+
+html[data-theme-tone="dark"] .search-overlay__suggestions {
+    background: color-mix(in srgb, var(--theme-surface) 78%, var(--theme-surface-alt) 22%);
+    border-color: color-mix(in srgb, var(--theme-border) 55%, var(--theme-text) 45%);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme-tone="dark"] .search-overlay__suggestions-title {
+    color: var(--theme-title);
+}
+
+html[data-theme-tone="dark"] .search-overlay__suggestions-item {
+    background: color-mix(in srgb, var(--theme-surface-alt) 84%, var(--theme-border) 16%);
+    border-color: color-mix(in srgb, var(--theme-border) 70%, var(--theme-text) 30%);
+    color: var(--theme-title);
 }
 
 .search-overlay__suggestions-actions {
