@@ -171,6 +171,71 @@ final class PresentationEventControllerTest extends WebTestCase
         self::assertSame(['channel' => 'linkedin'], $event->getMeta());
     }
 
+    public function testAcceptsRecommendationImpressionWithValidatedMeta(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $project = $this->createProject($em, $owner);
+        $client->loginUser($owner);
+
+        $client->request(
+            'POST',
+            sprintf('/pp/%s/event', $project->getStringId()),
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode([
+                'type' => 'rec_impression',
+                'meta' => [
+                    'placement' => 'home_logged',
+                    'position' => 3,
+                ],
+            ], JSON_THROW_ON_ERROR)
+        );
+
+        self::assertResponseIsSuccessful();
+        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertTrue($payload['ok'] ?? false);
+
+        $event = $em->getRepository(PresentationEvent::class)->findOneBy([
+            'projectPresentation' => $project,
+            'type' => PresentationEvent::TYPE_REC_IMPRESSION,
+        ]);
+        self::assertNotNull($event);
+        self::assertSame(['placement' => 'home_logged', 'position' => 3], $event->getMeta());
+    }
+
+    public function testRejectsRecommendationMetaWhenPositionIsInvalid(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $owner = $this->createUser($em);
+        $project = $this->createProject($em, $owner);
+        $client->loginUser($owner);
+
+        $client->request(
+            'POST',
+            sprintf('/pp/%s/event', $project->getStringId()),
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode([
+                'type' => 'rec_click',
+                'meta' => [
+                    'placement' => 'home_anon',
+                    'position' => 0,
+                ],
+            ], JSON_THROW_ON_ERROR)
+        );
+
+        self::assertResponseStatusCodeSame(400);
+        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame('invalid_meta', $payload['error'] ?? null);
+    }
+
     public function testPresentationEventRateLimiterReturnsTooManyRequests(): void
     {
         $client = static::createClient();

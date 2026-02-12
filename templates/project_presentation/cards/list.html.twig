@@ -1,7 +1,7 @@
 
 
 
-{% macro collection ( title="", items, class="", hideThreshold = "hide-335", icon = "", stats = {} ) %}
+{% macro collection ( title="", items, class="", hideThreshold = "hide-335", icon = "", stats = {}, recommendationPlacement = '' ) %}
     {% from 'project_presentation/cards/card.html.twig' import project_card %}
 
     <div class="titled-projects-container {{class}}">
@@ -36,6 +36,7 @@
                     showMeta: true,
                     likesCount: itemStats ? itemStats.likes : null,
                     commentsCount: itemStats ? itemStats.comments : null,
+                    recommendationTracking: recommendationPlacement ? { placement: recommendationPlacement, position: loop.index } : null,
                 }) }}   
 
      

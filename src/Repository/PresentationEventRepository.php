@@ -87,4 +87,59 @@ class PresentationEventRepository extends ServiceEntityRepository
 
         return count($rows);
     }
+
+    /**
+     * Returns event counts grouped by recommendation placement extracted from `meta`.
+     *
+     * @return array<string,int>
+     */
+    public function countRecommendationByPlacement(string $type, \DateTimeImmutable $start, \DateTimeImmutable $end): array
+    {
+        $rows = $this->createQueryBuilder('e')
+            ->select('e.meta AS meta')
+            ->andWhere('e.type = :type')
+            ->andWhere('e.createdAt BETWEEN :start AND :end')
+            ->setParameter('type', $type)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getArrayResult();
+
+        $counts = [];
+        foreach ($rows as $row) {
+            $meta = $this->normalizeMeta($row['meta'] ?? null);
+            $placement = $meta['placement'] ?? null;
+            if (!is_string($placement) || trim($placement) === '') {
+                continue;
+            }
+            $placement = strtolower(trim($placement));
+            $counts[$placement] = ($counts[$placement] ?? 0) + 1;
+        }
+
+        ksort($counts);
+
+        return $counts;
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    private function normalizeMeta(mixed $meta): array
+    {
+        if (is_array($meta)) {
+            return $meta;
+        }
+
+        if (is_string($meta) && $meta !== '') {
+            try {
+                $decoded = json_decode($meta, true, 32, JSON_THROW_ON_ERROR);
+            } catch (\JsonException) {
+                return [];
+            }
+
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        return [];
+    }
 }

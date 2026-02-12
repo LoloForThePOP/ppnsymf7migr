@@ -1,0 +1,120 @@
+
+Where do you want recs? Project page, homepage, profile, or search results? I'd say maybe not search results for now?
+
+How many cards? One row (6–12), carousel, or “See more”? Id' say one or two rows + maybe a show more button?
+
+Should it be personalized (logged-in users) or general? general: anon / logged in users.
+
+
+
+Notes for context: 
+
+- About embedding, here is some context: I use an ovh bare metal pro webhosting (no dedicated server) with mySQL, I use external service to compute embeddings (pay per call), that is why I limited calls, maybe we should delay this kind of semantic recos?
+
+- About curent website usage: it is a new version of the website with no ancient or current real usage: website currently doesn't have enough user interactions, it is a starting website, first mvp recs system is my current goal and then yes going to prod.
+
+- Please make the recs code highly modularized whilst efficient so that we can iterate and improve rec system with easyness.
+
+------------------------------------------------------------------------
+
+My ideas over previous interactions with AI about a recommandation system for the app:
+
+- Simple category intersections about user last seen projects (anonymous or logged in user)
+
+- Simple keywords based approach about user last seen projects (anonymous or logged in user) (maybe we can mix with above, you decide)
+
+Above might be ranked with some external signals (views, likes, follow, (+ share?)) 
+
+Content-based: same categories, overlapping keywords, TF‑IDF on title/goal/description.
+Popular fallback: recent + trending (views/likes).
+For logged-in users: projects followed/liked by similar users.
+
+
+4) Ranking (smarter ordering)
+
+Weighted score = content similarity + engagement + freshness.
+Example: 0.6*similarity + 0.25*engagement + 0.15*freshness.
+De-dup: exclude current project, already seen, or by same creator (optional).
+
+
+5) Diversity & safety
+
+Cap same category repetition.
+Mix in “adjacent” categories or long-tail items.
+Filter out unpublished/deleted.
+
+
+
+
+
+
+
+
+- Cold start: new user → suggest top projects by popularity + matching their stated interests (categories/keywords). New project → rely on content similarity to existing projects.
+
+- Safety/quality: filter by language, status OK, enough content/thumbnail. Avoid recommending the same project twice in nearby lists.
+
+- Maybe we can add an "Autour de vous" section in Homepage with proposition to user to localize or choose a place in Google place.
+
+- Specific categories idea: Maybe we can compute keywords with enough redudancy AND / OR categories intersections and then ask AI to taylor some insigths from these: AI creates a title with an emoji + a search query for each insight into our data so that when an user seems to have a browsing profile approaching an AI tailored specific category, we provide it to the user in Homepage or bellow 3P. EX. AI created "Transports de demain" or "Transports écologiques" from our data. Do you see what I mean?
+
+- Schema additions:
+
+user_preferences table: user_id, fav_categories (array/string), fav_keywords (array/string), embedding (vector if using pgvector), updated_at.
+user_interactions table: user_id, project_id, type (like, follow, view), created_at (you already have likes/follows; views can be a simple counter per project/user in a separate table or aggregated).
+If using pgvector, add a vector column for embedding.
+
+
+Capture signals:
+
+On like/follow: insert into user_interactions or reuse existing like/follow tables; also increment a per-user-project “score” if you maintain one.
+On view: increment a lightweight project_views table keyed by user_id/project_id or an anonymous session; optionally limit to one per session/day.
+Explicit interests: store selected categories/keywords in user_preferences.
+
+
+Over cookies design for anonymous users:
+
+
+For anonymous users, keep it lightweight, privacy-friendly, and short-lived:
+
+What to store: A small set of recent category/keyword signals and/or a temporary user embedding. For example:
+
+recent_categories: array of up to 5 category slugs.
+recent_keywords: array of up to 10 normalized keywords.
+Optionally temp_embedding: a vector serialized as a short JSON string (or base64) if you compute it client-side; keep it small (e.g., 64–128 dims) to fit cookie limits, or better store just categories/keywords and compute embedding server-side per request.
+A simple last_seen_projects: up to 5 project IDs to avoid repeating recommendations.
+Where: Prefer localStorage for size (5–10KB), fallback to a single cookie if you need server access. If you must use cookies, keep under ~2KB and mark as SameSite=Lax.
+
+TTL: Set/refresh (ex: 90 days). Allow easy reset/opt-out (respect consent requirements).
+
+How to use: On page load, read the stored categories/keywords and seed a temporary embedding server-side to fetch top-N similar projects. If nothing stored, fall back to popular/trending.
+
+Security/privacy: Don’t store PII or user-entered free text in the cookie/localStorage. Keep only non-identifying signals (category/keyword slugs, project IDs). Respect consent for tracking where applicable.
+
+Sync: If the user later logs in, optionally merge the local signals into their profile once, then clear the local store.
+
+This gives a no-login personalization hint without heavy tracking or storage.
+
+
+Use the DB for durable, multi-device preferences; use cookies/localStorage only for ephemeral, anonymous hints.
+
+DB (preferred): Store user interactions (likes/follows/views), explicit interests (selected categories/keywords), and maybe a precomputed user embedding. Pros: persistent, usable for collaborative filtering, and works across devices. Cons: requires auth or a stable user ID.
+
+Cookies/localStorage: For anonymous visitors, you can stash a few signals (recently viewed categories or a temporary user embedding). Pros: no login required; cons: device/browser-bound, easily cleared, privacy implications.
+
+Suggested approach:
+
+For logged-in users: record likes/follows/views in DB; save their explicit preferences; periodically compute a user embedding from these signals.
+For anonymous users: track recent views/categories in a short-lived cookie/localStorage to seed recommendations; once they log in, merge into their profile.
+Respect privacy: keep data minimal, provide opt-out/clear, and follow your consent model.
+This gives you robust recs for members and a lightweight fallback for guests.
+
+
+Freshness should be used somewhere.
+
+
+6) Feedback loop
+
+Track clicks on recommendations.
+Use CTR + dwell time to adjust weights.
+A/B test on homepage vs project page. Me: Why??

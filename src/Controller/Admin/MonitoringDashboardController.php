@@ -68,6 +68,25 @@ class MonitoringDashboardController extends AbstractController
         $sharesTotal = $eventRepository->countByType(PresentationEvent::TYPE_SHARE_OPEN, $start, $end)
             + $eventRepository->countByType(PresentationEvent::TYPE_SHARE_COPY, $start, $end)
             + $eventRepository->countByType(PresentationEvent::TYPE_SHARE_EXTERNAL, $start, $end);
+        $recommendationImpressions = $eventRepository->countByType(PresentationEvent::TYPE_REC_IMPRESSION, $start, $end);
+        $recommendationClicks = $eventRepository->countByType(PresentationEvent::TYPE_REC_CLICK, $start, $end);
+        $recommendationCtr = $recommendationImpressions > 0
+            ? round(($recommendationClicks / $recommendationImpressions) * 100, 2)
+            : 0.0;
+        $recommendationImpressionsByPlacement = $eventRepository->countRecommendationByPlacement(
+            PresentationEvent::TYPE_REC_IMPRESSION,
+            $start,
+            $end
+        );
+        $recommendationClicksByPlacement = $eventRepository->countRecommendationByPlacement(
+            PresentationEvent::TYPE_REC_CLICK,
+            $start,
+            $end
+        );
+        $recommendationPlacementStats = $this->buildRecommendationPlacementStats(
+            $recommendationImpressionsByPlacement,
+            $recommendationClicksByPlacement
+        );
 
         $newUsers = $this->countByRange($em, User::class, $start, $end);
         $newProjects = $this->countByRange($em, PPBase::class, $start, $end, [
@@ -123,6 +142,14 @@ class MonitoringDashboardController extends AbstractController
                 $eventRepository->countByTypeGroupedByDay(PresentationEvent::TYPE_SHARE_COPY, $start, $end),
                 $eventRepository->countByTypeGroupedByDay(PresentationEvent::TYPE_SHARE_EXTERNAL, $start, $end),
             ])
+        );
+        $dailyRecommendationImpressions = $this->seriesFromDayCounts(
+            $dateKeys,
+            $eventRepository->countByTypeGroupedByDay(PresentationEvent::TYPE_REC_IMPRESSION, $start, $end)
+        );
+        $dailyRecommendationClicks = $this->seriesFromDayCounts(
+            $dateKeys,
+            $eventRepository->countByTypeGroupedByDay(PresentationEvent::TYPE_REC_CLICK, $start, $end)
         );
 
         $distinctVisitors = $eventRepository->countDistinctVisitors($start, $end);
@@ -186,6 +213,9 @@ class MonitoringDashboardController extends AbstractController
                 'newFollows' => $newFollows,
                 'distinctVisitors' => $distinctVisitors,
                 'returningVisitors' => $returningVisitors,
+                'recommendationImpressions' => $recommendationImpressions,
+                'recommendationClicks' => $recommendationClicks,
+                'recommendationCtr' => $recommendationCtr,
             ],
             'series' => [
                 'users' => $dailyUsers,
@@ -197,13 +227,59 @@ class MonitoringDashboardController extends AbstractController
                 'follows' => $dailyFollows,
                 'views' => $dailyViews,
                 'shares' => $dailyShares,
+                'recommendationImpressions' => $dailyRecommendationImpressions,
+                'recommendationClicks' => $dailyRecommendationClicks,
             ],
             'categories' => $categoryRows,
             'latestUsers' => $latestUsers,
             'latestProjects' => $latestProjects,
             'latestComments' => $latestComments,
             'latestNews' => $latestNews,
+            'recommendationPlacementStats' => $recommendationPlacementStats,
         ]);
+    }
+
+    /**
+     * @param array<string,int> $impressionsByPlacement
+     * @param array<string,int> $clicksByPlacement
+     *
+     * @return array<int,array{placement:string,label:string,impressions:int,clicks:int,ctr:float}>
+     */
+    private function buildRecommendationPlacementStats(
+        array $impressionsByPlacement,
+        array $clicksByPlacement,
+    ): array {
+        $placements = array_values(array_unique(array_merge(
+            array_keys($impressionsByPlacement),
+            array_keys($clicksByPlacement)
+        )));
+        sort($placements);
+
+        $stats = [];
+        foreach ($placements as $placement) {
+            $impressions = (int) ($impressionsByPlacement[$placement] ?? 0);
+            $clicks = (int) ($clicksByPlacement[$placement] ?? 0);
+            $ctr = $impressions > 0 ? round(($clicks / $impressions) * 100, 2) : 0.0;
+
+            $stats[] = [
+                'placement' => $placement,
+                'label' => $this->recommendationPlacementLabel($placement),
+                'impressions' => $impressions,
+                'clicks' => $clicks,
+                'ctr' => $ctr,
+            ];
+        }
+
+        return $stats;
+    }
+
+    private function recommendationPlacementLabel(string $placement): string
+    {
+        return match ($placement) {
+            'home_logged' => 'Homepage connecté',
+            'home_anon' => 'Homepage anonyme',
+            default => $placement,
+        };
     }
 
     /**

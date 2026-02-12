@@ -37,6 +37,34 @@ class FollowRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @param int[] $presentationIds
+     *
+     * @return array<int, int>
+     */
+    public function countByPresentationIds(array $presentationIds): array
+    {
+        if ($presentationIds === []) {
+            return [];
+        }
+
+        $rows = $this->getEntityManager()->createQueryBuilder()
+            ->select('IDENTITY(f.projectPresentation) AS id', 'COUNT(f.id) AS total')
+            ->from(Follow::class, 'f')
+            ->where('f.projectPresentation IN (:ids)')
+            ->groupBy('f.projectPresentation')
+            ->setParameter('ids', $presentationIds)
+            ->getQuery()
+            ->getArrayResult();
+
+        $counts = [];
+        foreach ($rows as $row) {
+            $counts[(int) $row['id']] = (int) $row['total'];
+        }
+
+        return $counts;
+    }
+
     //    /**
     //     * @return Follow[] Returns an array of Follow objects
     //     */

@@ -34,4 +34,31 @@ class BookmarkRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @param int[] $presentationIds
+     *
+     * @return array<int, int>
+     */
+    public function countByPresentationIds(array $presentationIds): array
+    {
+        if ($presentationIds === []) {
+            return [];
+        }
+
+        $rows = $this->createQueryBuilder('b')
+            ->select('IDENTITY(b.projectPresentation) AS id', 'COUNT(b.id) AS total')
+            ->andWhere('b.projectPresentation IN (:ids)')
+            ->groupBy('b.projectPresentation')
+            ->setParameter('ids', $presentationIds)
+            ->getQuery()
+            ->getArrayResult();
+
+        $counts = [];
+        foreach ($rows as $row) {
+            $counts[(int) $row['id']] = (int) $row['total'];
+        }
+
+        return $counts;
+    }
 }

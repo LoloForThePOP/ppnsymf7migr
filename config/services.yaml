@@ -25,6 +25,27 @@ parameters:
     app.normalize_text.prompt_path: '%kernel.project_dir%/prompts/normalize_project_from_text.txt'
     app.normalize_html.prompt_path: '%kernel.project_dir%/prompts/normalize_project_from_html.txt'
     app.normalize_prompt.prompt_path: '%kernel.project_dir%/prompts/normalize_project_from_prompt.txt'
+    app.recommendation.homepage:
+        candidate_pool_limit: 180
+        max_per_category: 2
+        freshness_decay_days: 120
+        weights:
+            similarity:
+                category: 0.75
+                keyword: 0.25
+            personalized:
+                content: 0.60
+                engagement: 0.25
+                freshness: 0.15
+            non_personalized:
+                engagement: 0.65
+                freshness: 0.35
+            engagement_raw:
+                likes: 1.0
+                comments: 1.4
+                follows: 1.8
+                bookmarks: 1.1
+                views_log: 0.6
 
     
 services:
@@ -51,6 +72,10 @@ services:
         arguments:
             $defaultFrom: '%app.email.noreply%'
             $defaultContact: '%app.email.contact%'
+
+    App\Service\Recommendation\RecommendationEngine:
+        arguments:
+            $homepageRecommendationConfig: '%app.recommendation.homepage%'
 
     app.imagine.cache.resolver.format_extension:
         class: Liip\ImagineBundle\Imagine\Cache\Resolver\FormatExtensionResolver

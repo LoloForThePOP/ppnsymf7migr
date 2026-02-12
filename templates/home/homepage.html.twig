@@ -40,6 +40,7 @@
 {% block javascripts %}
 
   <script src="/js/show_more_less_button.js"></script>
+  <script src="/js/home_recommendation_tracking.js" defer></script>
   {% if app.user and addNewsForm %}
     <script src="/js/news_creation.js"></script>
   {% endif %}
@@ -106,6 +107,15 @@
             </style>
 
         </div>
+
+        {% endif %}
+
+
+        {% if not app.user and recommendedPresentations|length > 0 %}
+
+            <div class="container my-5">
+                {{ project_collection('À découvrir', recommendedPresentations, 'tab-result', 'hide-335', '', recommendedPresentationStats, 'home_anon') }}
+            </div>
 
         {% endif %}
 
