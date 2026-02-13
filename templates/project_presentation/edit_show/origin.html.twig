@@ -80,8 +80,6 @@
 {% block title %}{{OGTitle}}{% endblock %}
 
 {% block body %}
-
-
     {# statuses catalog and active statuses, needed in edit and display statuses partials #}
     {% set statusesCatalog = constant('App\\Enum\\ProjectStatuses::CATALOG') %}
     {% set thisProjectActiveStatuses = presentation.getStatuses() %}

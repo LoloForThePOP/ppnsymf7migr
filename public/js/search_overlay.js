@@ -1082,13 +1082,16 @@
 
       const title = document.createElement('div');
       title.className = 'search-result-card__title';
-      title.textContent = item.title || 'Projet sans titre';
+      const titleText = typeof item.title === 'string' ? item.title.trim() : '';
+      title.textContent = titleText;
 
       const goal = document.createElement('div');
       goal.className = 'search-result-card__goal';
       goal.textContent = item.goal || '';
 
-      body.appendChild(title);
+      if (titleText.length > 0) {
+        body.appendChild(title);
+      }
       body.appendChild(goal);
 
       link.appendChild(thumb);
