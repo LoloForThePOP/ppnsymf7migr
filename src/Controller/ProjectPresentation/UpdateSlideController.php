@@ -15,6 +15,7 @@ use App\Form\ProjectPresentation\ImageSlideType;
 use App\Form\ProjectPresentation\VideoSlideType;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 
 class UpdateSlideController extends AbstractController
 {
@@ -78,17 +79,25 @@ class UpdateSlideController extends AbstractController
         $form = $this->createForm(ImageSlideType::class, $slide);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $scoreService->scoreUpdate($presentation);
-            $manager->flush();
-            $cacheThumbnailService->updateThumbnail($presentation, true);
+        if ($form->isSubmitted()) {
+            $hasStoredImage = is_string($slide->getImagePath()) && trim($slide->getImagePath()) !== '';
+            $hasUploadedImage = $slide->getImageFile() !== null;
+            if (!$hasStoredImage && !$hasUploadedImage) {
+                $form->get('imageFile')->addError(new FormError('Veuillez choisir une image pour cette diapositive.'));
+            }
 
-            $this->addFlash('success', "✅ Modification effectuée");
+            if ($form->isValid()) {
+                $scoreService->scoreUpdate($presentation);
+                $manager->flush();
+                $cacheThumbnailService->updateThumbnail($presentation, true);
 
-            return $this->redirectToRoute('edit_show_project_presentation', [
-                'stringId'  => $presentation->getStringId(),
-                '_fragment' => 'slideshow-struct-container',
-            ]);
+                $this->addFlash('success', "✅ Modification effectuée");
+
+                return $this->redirectToRoute('edit_show_project_presentation', [
+                    'stringId'  => $presentation->getStringId(),
+                    '_fragment' => 'slideshow-struct-container',
+                ]);
+            }
         }
 
         return $this->render('project_presentation/edit_show/slides/update_image_slide.html.twig', [

@@ -16,8 +16,8 @@ class ImageSlideType extends AbstractType
         $builder
             // 🖼️ Image upload (Vich handles mapping + validation)
             ->add('imageFile', VichImageType::class, [
-                'label' => '🖼️ Choisir une image',
-                'required' => true,
+                'label' => '🖼️ Choisir une image (facultatif si vous souhaitez conserver l’actuelle)',
+                'required' => false,
                 'allow_delete' => false,
                 'download_uri' => false,
                 'download_label' => false,
