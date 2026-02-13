@@ -556,15 +556,43 @@
     moreBtn.textContent = loading ? 'Chargement...' : 'Afficher plus';
   };
 
-  const setLocationStatus = (message) => {
+  const setLocationStatus = (message, tone = '') => {
     if (!locationStatusEl) return;
-    locationStatusEl.textContent = message || '';
+    const text = typeof message === 'string' ? message.trim() : '';
+    locationStatusEl.textContent = text;
+
+    if (!text) {
+      delete locationStatusEl.dataset.state;
+      return;
+    }
+
+    if (tone) {
+      locationStatusEl.dataset.state = tone;
+    } else {
+      delete locationStatusEl.dataset.state;
+    }
   };
 
   const canSearch = (term) => term.length >= minLength || !!activeLocation;
 
   const updateLocationSummary = () => {
     return;
+  };
+
+  const formatLocationLabel = (location) => {
+    if (!location) return '';
+    if (location.source === 'me') {
+      return 'Autour de moi';
+    }
+    const label = typeof location.label === 'string' ? location.label.trim() : '';
+    return label || 'Lieu sélectionné';
+  };
+
+  const truncateText = (value, max = 42) => {
+    if (typeof value !== 'string') return '';
+    const clean = value.trim();
+    if (clean.length <= max) return clean;
+    return `${clean.slice(0, max - 3).trimEnd()}...`;
   };
 
   const updateRadiusLabel = (value) => {
@@ -586,9 +614,16 @@
       radiusInput.disabled = !(hasPending || !!activeLocation);
     }
     if (locationApplyBtn) {
-      const shouldEnable = hasPending || !!activeLocation;
-      locationApplyBtn.disabled = !shouldEnable;
-      locationApplyBtn.classList.toggle('is-hidden', !shouldEnable);
+      locationApplyBtn.disabled = !hasPending;
+      locationApplyBtn.classList.toggle('is-hidden', !hasPending);
+      if (hasPending) {
+        const pendingLabel = truncateText(formatLocationLabel(pendingLocation), 26);
+        locationApplyBtn.textContent = `Appliquer: ${pendingLabel}`;
+        locationApplyBtn.setAttribute('aria-label', `Appliquer la localisation (${formatLocationLabel(pendingLocation)})`);
+      } else {
+        locationApplyBtn.textContent = 'Appliquer la localisation';
+        locationApplyBtn.setAttribute('aria-label', 'Appliquer la localisation');
+      }
     }
     if (locationNoteEl) {
       const showNote = !!activeLocation;
@@ -599,7 +634,7 @@
       locationInputWrap.classList.toggle('is-hidden', !!hideInput);
     }
     if (locationActionsEl) {
-      const hasStatus = !!locationStatusEl?.textContent;
+      const hasStatus = !!(locationStatusEl?.textContent || '').trim();
       const isMeState = pendingLocation?.source === 'me' || activeLocation?.source === 'me';
       const showActions = !locationInputWrap?.classList.contains('is-hidden') || hasStatus || isMeState;
       locationActionsEl.classList.toggle('is-hidden', !showActions);
@@ -700,7 +735,7 @@
     autocomplete.addListener('place_changed', () => {
       const place = autocomplete.getPlace();
       if (!place || !place.geometry || !place.geometry.location) {
-        setLocationStatus('Lieu non reconnu.');
+        setLocationStatus('Lieu non reconnu.', 'error');
         return;
       }
       setLocationStatus('');
@@ -717,10 +752,10 @@
 
   const useCurrentLocation = () => {
     if (!navigator.geolocation) {
-      setLocationStatus('Géolocalisation indisponible.');
+      setLocationStatus('Géolocalisation indisponible.', 'error');
       return;
     }
-    setLocationStatus('Localisation en cours...');
+    setLocationStatus('Localisation en cours...', 'progress');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setLocationStatus('');
@@ -734,7 +769,7 @@
         syncLocationUI();
       },
       () => {
-        setLocationStatus('Autorisation refusée.');
+        setLocationStatus('Autorisation refusée.', 'error');
       },
       { enableHighAccuracy: false, timeout: 8000 }
     );
