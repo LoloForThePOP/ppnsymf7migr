@@ -67,6 +67,7 @@ a{
     --pp-card-shadow: 0 0 0 rgba(0, 0, 0, 0);
     --pp-title-color: #1e3a8a;
     --pp-card-goal-color: var(--theme-accent);
+    --pp-card-title-color: var(--theme-title);
     --pp-icon-filter: var(--theme-icon-filter);
     --pp-struct-icon-color: var(--theme-accent);
     --pp-interaction-icon-color: var(--theme-text);
@@ -188,8 +189,8 @@ a{
     --theme-surface-alt: #161b21;
     --theme-text: #e0f2fe;
     --theme-text-muted: #9ca3af;
-    --theme-font-body: 'Rajdhani', sans-serif;
-    --theme-font-heading: 'Oxanium', sans-serif;
+    --theme-font-body: 'Source Sans 3', sans-serif;
+    --theme-font-heading: 'Cinzel', serif;
     --theme-accent: #facc15;
     --theme-accent-contrast: #0b0d0f;
     --theme-border: #263238;
@@ -200,6 +201,7 @@ a{
     --pp-card-border: #1f2a33;
     --pp-card-shadow: 0 16px 32px rgba(250, 204, 21, 0.18);
     --pp-title-color: #facc15;
+    --pp-card-title-color: #f5f5f4;
     --pp-icon-filter: var(--theme-icon-filter);
     --theme-button-weight: 600;
 }
