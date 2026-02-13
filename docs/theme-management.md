@@ -125,3 +125,8 @@ If a palette icon is missing, the generic fallback is used.
 - Inspect `<html>`: `data-theme`, `data-theme-variant`, `data-theme-tone`.
 - Check that `:root[data-theme="..."]` overrides are loaded (app.css).
 - Confirm `public/js/theme_selector.js` runs after toggling a theme.
+
+## Related docs
+
+- `docs/article-ui-status.md`: current UI exposure status for Articles and quick restore steps.
+- `docs/README.md`: documentation index.

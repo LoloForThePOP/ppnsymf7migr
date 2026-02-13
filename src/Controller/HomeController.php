@@ -6,7 +6,6 @@ use App\Entity\PPBase;
 use App\Entity\News;
 use App\Entity\User;
 use App\Form\NewsType;
-use App\Repository\ArticleRepository;
 use App\Repository\CommentRepository;
 use App\Repository\FollowRepository;
 use App\Repository\PPBaseRepository;
@@ -21,7 +20,6 @@ final class HomeController extends AbstractController
     #[Route('/', name: 'homepage')]
     public function index(
         PPBaseRepository $ppBaseRepository,
-        ArticleRepository $articleRepository,
         CommentRepository $commentRepository,
         FollowRepository $followRepository,
         RecommendationEngine $recommendationEngine,
@@ -29,7 +27,6 @@ final class HomeController extends AbstractController
         $presentations = $ppBaseRepository->findLatestPublished(50);
         $presentationIds = array_map(static fn (PPBase $pp) => $pp->getId(), $presentations);
         $presentationStats = $ppBaseRepository->getEngagementCountsForIds($presentationIds);
-        $articles = $articleRepository->findBy([], ['createdAt' => 'DESC', 'id' => 'DESC']);
 
         /** @var \App\Entity\User|null $user */
         $user = $this->getUser();
@@ -94,7 +91,6 @@ final class HomeController extends AbstractController
         return $this->render('home/homepage.html.twig', [
             'presentations' => $presentations,
             'presentationStats' => $presentationStats,
-            'articles' => $articles,
             'creatorPresentations' => $creatorPresentations,
             'creatorPresentationStats' => $creatorPresentationStats,
             'continuePresentation' => $continuePresentation,
