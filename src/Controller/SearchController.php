@@ -135,12 +135,6 @@ class SearchController extends AbstractController
         ]);
     }
 
-    #[Route('/search/demo', name: 'search_demo', methods: ['GET'])]
-    public function demo(): JsonResponse|\Symfony\Component\HttpFoundation\Response
-    {
-        return $this->render('search/demo.html.twig');
-    }
-
     #[Route('/search/suggest', name: 'search_suggest', methods: ['GET'])]
     public function suggest(Request $request): JsonResponse
     {
