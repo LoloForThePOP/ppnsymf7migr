@@ -78,6 +78,24 @@
                     }
                 }) }}
             </div>
+
+            {% if presentation.customThumbnail is not empty %}
+                <div class="thumbnail-remove mt-4 text-center">
+                    <button
+                        type="submit"
+                        class="btn btn-outline-danger"
+                        name="remove_custom_thumbnail"
+                        value="1"
+                        formnovalidate
+                        onclick="return confirm('Supprimer la vignette personnalisée ? La vignette reviendra sur une image issue des slides, du logo, ou une vignette par défaut.');"
+                    >
+                        Supprimer la vignette personnalisée
+                    </button>
+                    <div class="thumbnail-remove__hint mt-2">
+                        Cette action retire uniquement la vignette personnalisée.
+                    </div>
+                </div>
+            {% endif %}
             
         </div>
 
@@ -209,6 +227,11 @@
                 background-color: color-mix(in srgb, var(--theme-accent) 25%, var(--theme-surface));
                 border: 1px solid var(--theme-border);
                 color: var(--theme-title);
+            }
+
+            .thumbnail-remove__hint{
+                font-size: 13px;
+                color: var(--theme-text-muted);
             }
             
             @media screen and (max-width: 580px) {
