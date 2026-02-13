@@ -588,7 +588,7 @@
     if (locationApplyBtn) {
       const shouldEnable = hasPending || !!activeLocation;
       locationApplyBtn.disabled = !shouldEnable;
-      locationApplyBtn.classList.remove('is-hidden');
+      locationApplyBtn.classList.toggle('is-hidden', !shouldEnable);
     }
     if (locationNoteEl) {
       const showNote = !!activeLocation;
