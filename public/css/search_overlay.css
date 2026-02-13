@@ -122,6 +122,32 @@ body.search-overlay-open {
     background: var(--theme-surface-alt);
 }
 
+@media (min-width: 581px) {
+    .search-overlay__header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) clamp(280px, 40vw, 520px) minmax(0, 1fr);
+        align-items: center;
+    }
+
+    .search-overlay__title {
+        grid-column: 1;
+        justify-self: start;
+    }
+
+    .search-overlay__input-wrap {
+        grid-column: 2;
+        width: 100%;
+        min-width: 0;
+        justify-self: stretch;
+    }
+
+    .search-overlay__close-btn {
+        grid-column: 3;
+        justify-self: end;
+        margin-left: 0;
+    }
+}
+
 .search-overlay__body {
     flex: 1;
     min-height: 0;
