@@ -5,7 +5,7 @@
    version="1.1"
    viewBox="-5 -10 74.241953 72.092306"
    id="svg18"
-   sodipodi:docname="color-palette-black-luxury.svg"
+   sodipodi:docname="color-palette-noir-luxury-black.svg"
    inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -36,34 +36,34 @@
      d="m 5.7876646,51.775822 c -4.81249999,-4.7831 -8.3271999,-11.025 -9.8871,-17.56 -1.1973,-5.0156 -1.2009,-10.932 -0.00986,-16.11 C -1.0541953,4.8258217 9.2497043,-5.6671781 22.545704,-9.0381781 c 3.1578,-0.80047 4.5201,-0.95371 8.5439,-0.96109 3.471,-0.0064 3.8801,0.02273 4.9202,0.34997 2.2648,0.71258 4.2824,2.4708 5.2905,4.6103 0.71676,1.5213 0.89489,2.3263998 1.0726,4.84819981 0.15991,2.26859999 0.17929,2.38219999 0.67568,3.95839999 0.68418,2.1725 1.83,4.1103 3.4166,5.7780998 1.7752,1.8660005 3.5431,3.0411005 5.8327,3.8766005 1.7532,0.63983 2.7857,0.81254 5.7756,0.96606 1.9652,0.10091 2.8057,0.21364 3.5378,0.47448 1.8296,0.65187 3.478,2.0143 4.5074,3.7257 16.419777,36.516844 -36.079458,57.183539 -60.3310194,33.18728 z m 33.5719994,-22.8703 c 3.0942,-0.79138 4.7067,-2.5548 5.0151,-5.4846 0.30778,-2.9241 -1.2538,-5.8157 -3.8241,-7.081 -1.4378,-0.70783 -2.5127,-0.96265 -4.5495,-1.0785 -4.1989,-0.2388 -7.6293,1.3622 -8.9456,4.1749 -1.2384,2.6464 -0.95056,5.6255 0.72344,7.4874 1.1076,1.2319 2.7298,1.9608 5.1128,2.2973 1.5838,0.22363 5.014,0.05629 6.4678,-0.31553 z"
      fill="#008000"
      id="path14"
-     style="fill:#9b802c;fill-opacity:1.0;stroke:none;stroke-opacity:1"
+     style="fill:#b49515;fill-opacity:1.0;stroke:none;stroke-opacity:1"
      sodipodi:nodetypes="ccccccccsccssccccccccccc" />
   <circle
-     cx="13.720595"
-     cy="30.864716"
+     cx="10.306996"
+     cy="30.117947"
      r="8.3500204"
      fill="#59f559"
      id="circle12-3-6-7-56"
-     style="fill:#d4af37;fill-opacity:1.0;stroke-width:1.38578" />
+     style="fill:#face1e;fill-opacity:1;stroke-width:1.38578" />
   <circle
-     cx="32.47047"
-     cy="46.607597"
-     r="8.3500204"
-     fill="#59f559"
-     id="circle12-3-6-7"
-     style="fill:#d4af37;fill-opacity:1.0;stroke-width:1.38578" />
-  <circle
-     cx="54.172474"
-     cy="35.581757"
+     cx="28.610001"
+     cy="47.099689"
      r="8.3500204"
      fill="#59f559"
      id="circle12-3-6-7-5"
-     style="fill:#d4af37;fill-opacity:1.0;stroke-width:1.38578" />
+     style="fill:#fad029;fill-opacity:1;stroke-width:1.38578" />
   <circle
-     cx="16.182713"
-     cy="6.9900064"
+     cx="52.698689"
+     cy="39.14904"
+     r="8.3500204"
+     fill="#59f559"
+     id="circle12-3-6-7-5-9"
+     style="fill:#fad233;fill-opacity:1;stroke-width:1.38578" />
+  <circle
+     cx="17.275698"
+     cy="6.4522419"
      r="8.183857"
      fill="#59f559"
      id="circle12-3-6-7-6-3"
-     style="fill:#d4af37;fill-opacity:1.0;stroke-width:1.3582" />
+     style="fill:#facc15;fill-opacity:1;stroke-width:1.3582" />
 </svg>

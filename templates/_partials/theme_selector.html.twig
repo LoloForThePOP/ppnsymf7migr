@@ -1,5 +1,7 @@
 {% set storedTheme = app.user and app.user.profile ? (app.user.profile.extra.theme|default('classic')) : 'classic' %}
-{% set currentTheme = storedTheme == 'light' ? 'classic' : storedTheme %}
+{% set allowedThemes = ['classic', 'mint', 'dark', 'neon', 'matrix', 'retro-game', 'eco-green', 'pink-lady', 'luxury-black', 'deep-ocean'] %}
+{% set normalizedTheme = storedTheme == 'light' ? 'classic' : storedTheme %}
+{% set currentTheme = normalizedTheme in allowedThemes ? normalizedTheme : 'classic' %}
 {% set dropdownId = dropdownId|default('themeDropdown') %}
 {% set wrapperClass = wrapperClass|default('d-inline-flex') %}
 {% set iconClass = iconClass|default('d-inline-block cursor-pointer me-1') %}
@@ -7,7 +9,7 @@
 {% set paletteIconTemplate = asset('color_palettes/color-palette--THEME.svg', 'misc') %}
 {% set paletteIconFallback = asset('color_palettes/color-palette--generic.svg', 'misc') %}
 {% set paletteIconSrc = paletteIconTemplate|replace({'THEME': currentTheme}) %}
-{% set darkThemes = ['dark', 'neon', 'cyberpunk', 'matrix', 'luxury-black', 'deep-ocean'] %}
+{% set darkThemes = ['dark', 'neon', 'matrix', 'luxury-black', 'deep-ocean'] %}
 {% set themeGroups = [
   {
     label: 'Classiques',
@@ -21,18 +23,14 @@
     label: 'Populaires',
     themes: [
       { id: 'retro-game', label: 'Mario love', preview: { bg: '#ecf9ff', surface: '#ffffff', accent: '#74d28a', text: '#1b2a3a', border: '#c2edd2' } },
-      { id: 'matrix', label: 'Matrix', preview: { bg: '#0a0f0c', surface: '#111a15', accent: '#2fbf71', text: '#e0f2e6', border: '#203629' } },
-      { id: 'deep-ocean', label: 'Dans l\'océan', preview: { bg: '#02121a', surface: '#06202c', accent: '#22d3ee', text: '#d1f5ff', border: '#0f3a4a' } },
       { id: 'pink-lady', label: 'Pink Lady', preview: { bg: '#fff3f7', surface: '#ffffff', accent: '#ec4899', text: '#4a1f2f', border: '#f5c2d4' } },
     ]
   },
   {
     label: 'Tendances',
     themes: [
-      { id: 'sunny-beach', label: 'Plage au soleil', preview: { bg: '#e7f8ff', surface: '#ffffff', accent: '#ffa700', text: '#1b2a3a', border: '#a8e6f0' } },
-      { id: 'luxury-black', label: 'Noir de Luxe', preview: { bg: '#0b0b0b', surface: '#141414', accent: '#d4af37', text: '#f5f5f4', border: '#2a2a2a' } },    
-      { id: 'neon', label: 'Néon', preview: { bg: '#0b0411', surface: '#160a20', accent: '#f72585', text: '#f5e9ff', border: '#3b1b4f' } },
-      { id: 'eco-green', label: 'Nature végétale', preview: { bg: '#f3f7f2', surface: '#ffffff', accent: '#2f9e44', text: '#1f3d2a', border: '#dce7d9' } },
+      { id: 'matrix', label: 'Matrix', preview: { bg: '#0a0f0c', surface: '#111a15', accent: '#2fbf71', text: '#e0f2e6', border: '#203629' } },
+      { id: 'neon', label: 'Néon cool', preview: { bg: '#0b0411', surface: '#160a20', accent: '#f72585', text: '#f5e9ff', border: '#3b1b4f' } },
 
 
     ]
@@ -40,11 +38,9 @@
   {
     label: 'Nouveautés',
     themes: [
-      { id: 'palm-beach', label: 'Plage à Palm Beach', preview: { bg: '#f4fffb', surface: '#ffffff', accent: '#ff7a59', text: '#0f3d3e', border: '#cdeee7' } },
-      { id: 'concentration', label: 'Concentration', preview: { bg: '#f6f7fb', surface: '#ffffff', accent: '#3b82f6', text: '#1e293b', border: '#e2e8f0' } },
-      { id: 'vaporwave', label: 'Synthé rétro', preview: { bg: '#f5e9ff', surface: '#fff1fb', accent: '#ff4fd8', text: '#4c1d95', border: '#e3c5ff' } },
-      { id: 'mint', label: 'Menthe', preview: { bg: '#f1fbf7', surface: '#f7fff9', accent: '#2da971', text: '#0f2f27', border: '#cfeede' } },
-      { id: 'cyberpunk', label: 'Cyberpunk', preview: { bg: '#0b0d0f', surface: '#111418', accent: '#facc15', text: '#e0f2fe', border: '#263238' } },
+      { id: 'deep-ocean', label: 'Dans l\'océan', preview: { bg: '#02121a', surface: '#06202c', accent: '#22d3ee', text: '#d1f5ff', border: '#0f3a4a' } },
+      { id: 'luxury-black', label: 'Noir de Luxe', preview: { bg: '#0b0d0f', surface: '#111418', accent: '#facc15', text: '#e0f2fe', border: '#263238' } },
+      { id: 'mint', label: 'Menthe douce', preview: { bg: '#f1fbf7', surface: '#f7fff9', accent: '#2da971', text: '#0f2f27', border: '#cfeede' } },
     ]
   }
 ] %}

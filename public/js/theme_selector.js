@@ -11,13 +11,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const optionsBySelector = selectors.map(function (selector) {
         return Array.from(selector.querySelectorAll('.js-theme-option'));
     });
+    const knownThemes = new Set(['classic']);
+    optionsBySelector.forEach(function (options) {
+        options.forEach(function (option) {
+            const theme = option.dataset.theme;
+            if (theme) {
+                knownThemes.add(theme);
+            }
+        });
+    });
 
     const normalizeTheme = function (theme) {
         if (!theme) {
             return 'classic';
         }
         theme = theme.toString().trim();
-        return theme === 'light' ? 'classic' : theme;
+        if (theme === 'light') {
+            return 'classic';
+        }
+        return knownThemes.has(theme) ? theme : 'classic';
     };
 
     const themeToneMap = new Map();

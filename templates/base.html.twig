@@ -3,9 +3,11 @@
 {% set showThemeSelector = showThemeSelector|default(true) %}
 {% set allowThemeSelection = showThemeSelector %}
 {% set storedTheme = allowThemeSelection and app.user and app.user.profile ? (app.user.profile.extra.theme|default('classic')) : 'classic' %}
-{% set resolvedTheme = storedTheme == 'light' ? 'classic' : storedTheme %}
+{% set allowedThemes = ['classic', 'mint', 'dark', 'neon', 'matrix', 'retro-game', 'eco-green', 'pink-lady', 'luxury-black', 'deep-ocean'] %}
+{% set normalizedTheme = storedTheme == 'light' ? 'classic' : storedTheme %}
+{% set resolvedTheme = normalizedTheme in allowedThemes ? normalizedTheme : 'classic' %}
 {% set themeVariant = resolvedTheme == 'classic' ? 'classic' : 'custom' %}
-{% set darkThemes = ['dark', 'neon', 'cyberpunk', 'matrix', 'luxury-black', 'deep-ocean'] %}
+{% set darkThemes = ['dark', 'neon', 'matrix', 'luxury-black', 'deep-ocean'] %}
 {% set themeTone = resolvedTheme in darkThemes ? 'dark' : 'light' %}
 
 <html class="is-loading" data-theme="{{ resolvedTheme }}" data-theme-variant="{{ themeVariant }}" data-theme-tone="{{ themeTone }}">
@@ -64,6 +66,10 @@
                         var storedTheme = localStorage.getItem('propon_theme');
                         if (storedTheme) {
                             if (storedTheme === 'light') {
+                                storedTheme = 'classic';
+                            }
+                            var allowedThemes = {{ allowedThemes|json_encode|raw }};
+                            if (allowedThemes.indexOf(storedTheme) === -1) {
                                 storedTheme = 'classic';
                             }
                             var variant = storedTheme === 'classic' ? 'classic' : 'custom';
@@ -148,33 +154,13 @@
                 var fontLinksByTheme = {
                     mint: ['family=Quicksand:wght@400;600;700'],
                     dark: ['family=Space+Grotesk:wght@400;600;700'],
-                    concentration: [
-                        'family=Source+Sans+3:wght@400;600;700',
-                        'family=Source+Serif+4:wght@400;600;700'
-                    ],
                     neon: [
                         'family=Space+Grotesk:wght@400;600;700',
                         'family=Orbitron:wght@400;600;700'
                     ],
-                    cyberpunk: [
-                        'family=Source+Sans+3:wght@400;600;700',
-                        'family=Cinzel:wght@400;600;700'
-                    ],
                     matrix: [
                         'family=IBM+Plex+Sans:wght@400;500;600;700',
                         'family=Space+Mono:wght@400;700'
-                    ],
-                    vaporwave: [
-                        'family=Quicksand:wght@400;600;700',
-                        'family=Quicksand:wght@200;300;400'
-                    ],
-                    'palm-beach': [
-                        'family=Quicksand:wght@400;600;700',
-                        'family=Manrope:wght@500;600;700'
-                    ],
-                    'sunny-beach': [
-                        'family=Sora:wght@400;500;600;700',
-                        'family=Chakra+Petch:wght@500;600;700'
                     ],
                     'retro-game': [
                         'family=Sora:wght@400;500;600;700',

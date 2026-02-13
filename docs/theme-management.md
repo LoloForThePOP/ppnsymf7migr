@@ -36,6 +36,14 @@ the same attributes before the page fully loads.
 `templates/_partials/theme_selector.html.twig` provides the theme list and marks each
 option with a `data-theme-tone="light|dark"` attribute.
 
+### Hidden but supported themes
+
+Some themes can stay supported in CSS/backend but be intentionally hidden from the
+selector UI. Current case:
+
+- `eco-green` (`Nature végétale`): hidden in selector, still accepted as a stored
+  theme value and still rendered by CSS tokens.
+
 ## CSS variables
 
 The core theme variables live in `public/css/app.css`:
