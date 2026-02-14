@@ -31,23 +31,7 @@
   const paginationEl = overlay.querySelector('.search-overlay__pagination');
   const triggers = Array.from(document.querySelectorAll('[data-search-trigger]'));
   const triggerInputs = triggers.filter((el) => el.tagName === 'INPUT');
-  const locationInput = overlay.querySelector('#search-location-input');
-  const locationApplyBtn = overlay.querySelector('[data-search-location-apply]');
-  const locationResetBtn = overlay.querySelector('[data-search-location-reset]');
-  const locationMeBtn = overlay.querySelector('[data-search-location-me]');
-  const locationStatusEl = overlay.querySelector('#search-location-status');
-  const locationInputClearBtn = overlay.querySelector('[data-search-location-clear-input]');
-  const locationNoteEl = overlay.querySelector('[data-search-location-note]');
-  const locationActionsEl = overlay.querySelector('.search-overlay__location-actions');
-  const locationSummaryEl = null;
-  const locationSummaryLabelEl = null;
-  const locationSummaryClearBtn = null;
-  const locationSummaryEditBtns = [];
-  const locationFieldsEl = overlay.querySelector('[data-search-location-fields]');
-  const locationInputWrap = locationInput?.closest('.search-overlay__location-input');
-  const radiusInput = overlay.querySelector('#search-radius-input');
-  const radiusValueEl = overlay.querySelector('#search-radius-value');
-  const radiusWrap = overlay.querySelector('[data-search-radius-wrap]');
+  const locationPickerRoot = overlay.querySelector('[data-search-location-picker]');
   const historyEnabled = overlay.dataset.searchHistoryEnabled === '1';
   const historyUrl = overlay.dataset.searchHistoryUrl;
   const historyToken = overlay.dataset.searchHistoryCsrf;
@@ -64,18 +48,13 @@
   let activeCategories = new Set();
   let activeController = null;
   let isLoading = false;
-  let pendingLocation = null;
   let activeLocation = null;
-  let isEditingLocation = false;
-  let pendingDirty = false;
-  const defaultRadius = 10;
-  let lastRadius = defaultRadius;
+  let locationPicker = null;
   const RECENT_KEY = 'searchRecentQueries';
   const RECENT_LIMIT = 5;
   const SUGGEST_LIMIT = 8;
   let suggestController = null;
   let suggestionsLocked = false;
-  let hasPlacesInit = false;
   let remoteHistory = null;
   let historyLoaded = false;
   let activeSuggestionIndex = -1;
@@ -131,6 +110,19 @@
     } catch {
       // ignore
     }
+  };
+
+  const syncActiveLocationFromPicker = () => {
+    if (!locationPicker) {
+      activeLocation = null;
+      return;
+    }
+    const pickerLocation = locationPicker.getActiveLocation();
+    activeLocation = pickerLocation
+      ? {
+          ...pickerLocation,
+        }
+      : null;
   };
 
   const normalizeRecentQueries = (queries) => {
@@ -556,224 +548,7 @@
     moreBtn.textContent = loading ? 'Chargement...' : 'Afficher plus';
   };
 
-  const setLocationStatus = (message, tone = '') => {
-    if (!locationStatusEl) return;
-    const text = typeof message === 'string' ? message.trim() : '';
-    locationStatusEl.textContent = text;
-
-    if (!text) {
-      delete locationStatusEl.dataset.state;
-      return;
-    }
-
-    if (tone) {
-      locationStatusEl.dataset.state = tone;
-    } else {
-      delete locationStatusEl.dataset.state;
-    }
-  };
-
   const canSearch = (term) => term.length >= minLength || !!activeLocation;
-
-  const updateLocationSummary = () => {
-    return;
-  };
-
-  const formatLocationLabel = (location) => {
-    if (!location) return '';
-    if (location.source === 'me') {
-      return 'Autour de moi';
-    }
-    const label = typeof location.label === 'string' ? location.label.trim() : '';
-    return label || 'Lieu sélectionné';
-  };
-
-  const truncateText = (value, max = 42) => {
-    if (typeof value !== 'string') return '';
-    const clean = value.trim();
-    if (clean.length <= max) return clean;
-    return `${clean.slice(0, max - 3).trimEnd()}...`;
-  };
-
-  const updateRadiusLabel = (value) => {
-    if (!radiusValueEl) return;
-    radiusValueEl.textContent = String(value);
-    if (Number.isFinite(Number(value))) {
-      lastRadius = Number(value);
-    }
-  };
-
-  const updateLocationUI = () => {
-    const hasPending = !!pendingLocation;
-    const summaryLocation = activeLocation?.source === 'me' || pendingLocation?.source === 'me';
-    if (radiusWrap) {
-      const shouldShowRadius = hasPending || !!activeLocation;
-      radiusWrap.classList.toggle('is-hidden', !shouldShowRadius);
-    }
-    if (radiusInput) {
-      radiusInput.disabled = !(hasPending || !!activeLocation);
-    }
-    if (locationApplyBtn) {
-      locationApplyBtn.disabled = !hasPending;
-      locationApplyBtn.classList.toggle('is-hidden', !hasPending);
-      if (hasPending) {
-        const pendingLabel = truncateText(formatLocationLabel(pendingLocation), 26);
-        locationApplyBtn.textContent = `Appliquer: ${pendingLabel}`;
-        locationApplyBtn.setAttribute('aria-label', `Appliquer la localisation (${formatLocationLabel(pendingLocation)})`);
-      } else {
-        locationApplyBtn.textContent = 'Appliquer la localisation';
-        locationApplyBtn.setAttribute('aria-label', 'Appliquer la localisation');
-      }
-    }
-    if (locationNoteEl) {
-      const showNote = !!activeLocation;
-      locationNoteEl.classList.toggle('d-none', !showNote);
-    }
-    if (locationInputWrap) {
-      const hideInput = pendingLocation?.source === 'me' || activeLocation?.source === 'me';
-      locationInputWrap.classList.toggle('is-hidden', !!hideInput);
-    }
-    if (locationActionsEl) {
-      const hasStatus = !!(locationStatusEl?.textContent || '').trim();
-      const isMeState = pendingLocation?.source === 'me' || activeLocation?.source === 'me';
-      const showActions = !locationInputWrap?.classList.contains('is-hidden') || hasStatus || isMeState;
-      locationActionsEl.classList.toggle('is-hidden', !showActions);
-    }
-    if (locationMeBtn) {
-      const hideMe = (!locationActionsEl || locationActionsEl.classList.contains('is-hidden'))
-        || pendingLocation?.source === 'place'
-        || activeLocation?.source === 'place';
-      locationMeBtn.classList.toggle('d-none', !!hideMe);
-      locationMeBtn.innerHTML = `<svg class="search-overlay__btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12 2c.55 0 1 .45 1 1v1.84c3.19.44 5.72 2.97 6.16 6.16H21c.55 0 1 .45 1 1s-.45 1-1 1h-1.84c-.44 3.19-2.97 5.72-6.16 6.16V21c0 .55-.45 1-1 1s-1-.45-1-1v-1.84c-3.19-.44-5.72-2.97-6.16-6.16H3c-.55 0-1-.45-1-1s.45-1 1-1h1.84c.44-3.19 2.97-5.72 6.16-6.16V3c0-.55.45-1 1-1Zm0 4.77A5.23 5.23 0 0 0 6.77 12 5.23 5.23 0 0 0 12 17.23 5.23 5.23 0 0 0 17.23 12 5.23 5.23 0 0 0 12 6.77Zm0 3.26a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg>${summaryLocation ? 'Autour de moi (activé)' : 'Autour de moi'}`;
-    }
-    if (locationInputClearBtn) {
-      const hasValue = !!locationInput?.value.trim();
-      const hideClear = !hasValue || locationInputWrap?.classList.contains('is-hidden');
-      locationInputClearBtn.classList.toggle('d-none', !!hideClear);
-    }
-  };
-
-  const syncLocationUI = () => {
-    updateLocationUI();
-  };
-
-  const setPendingLocation = (location, dirty = true) => {
-    pendingLocation = location
-      ? {
-          ...location,
-          radius: location.radius ?? pendingLocation?.radius ?? lastRadius,
-        }
-      : null;
-    pendingDirty = !!pendingLocation && dirty;
-    if (pendingLocation && locationInput && pendingLocation.label && pendingLocation.source !== 'me') {
-      locationInput.value = pendingLocation.label;
-    }
-    if (pendingLocation && radiusInput) {
-      radiusInput.value = String(pendingLocation.radius);
-      updateRadiusLabel(pendingLocation.radius);
-    }
-    syncLocationUI();
-  };
-
-  const applyLocation = () => {
-    if (pendingLocation) {
-      activeLocation = { ...pendingLocation };
-      pendingLocation = null;
-      pendingDirty = false;
-      isEditingLocation = false;
-    }
-    syncLocationUI();
-    const term = input.value.trim();
-    if (!canSearch(term)) {
-      setStatus('Tapez au moins 2 caracteres ou choisissez une localisation.');
-      return;
-    }
-    performSearch(term, { page: 1 });
-  };
-
-  const resetLocation = (keepRadius = false) => {
-    pendingLocation = null;
-    activeLocation = null;
-    pendingDirty = false;
-    isEditingLocation = false;
-    if (locationInput) {
-      locationInput.value = '';
-    }
-    if (radiusInput) {
-      const targetRadius = keepRadius ? lastRadius : defaultRadius;
-      radiusInput.value = String(targetRadius);
-      updateRadiusLabel(targetRadius);
-      if (!keepRadius) {
-        lastRadius = defaultRadius;
-      }
-    }
-    setLocationStatus('');
-    syncLocationUI();
-    const term = input.value.trim();
-    if (term.length >= minLength) {
-      performSearch(term, { page: 1 });
-    } else {
-      setStatus('Tapez au moins 2 caracteres.');
-      renderCategories([], []);
-      renderResults([]);
-      setCountLines('', '');
-      updatePagination();
-    }
-  };
-
-  const initPlacesAutocomplete = () => {
-    if (hasPlacesInit) return;
-    if (!locationInput) return;
-    if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
-      setTimeout(initPlacesAutocomplete, 250);
-      return;
-    }
-    hasPlacesInit = true;
-    const autocomplete = new google.maps.places.Autocomplete(locationInput, {
-      types: ['(regions)'],
-    });
-    autocomplete.addListener('place_changed', () => {
-      const place = autocomplete.getPlace();
-      if (!place || !place.geometry || !place.geometry.location) {
-        setLocationStatus('Lieu non reconnu.', 'error');
-        return;
-      }
-      setLocationStatus('');
-      setPendingLocation({
-        lat: place.geometry.location.lat(),
-        lng: place.geometry.location.lng(),
-        label: place.name || place.formatted_address || 'Lieu sélectionné',
-        source: 'place',
-      });
-        isEditingLocation = true;
-        syncLocationUI();
-    });
-  };
-
-  const useCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationStatus('Géolocalisation indisponible.', 'error');
-      return;
-    }
-    setLocationStatus('Localisation en cours...', 'progress');
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setLocationStatus('');
-        setPendingLocation({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-          label: 'Autour de moi',
-          source: 'me',
-        });
-        isEditingLocation = true;
-        syncLocationUI();
-      },
-      () => {
-        setLocationStatus('Autorisation refusée.', 'error');
-      },
-      { enableHighAccuracy: false, timeout: 8000 }
-    );
-  };
 
   const updatePagination = () => {
     if (!paginationEl || !moreBtn || !pageEl) return;
@@ -851,7 +626,7 @@
     } else if (recentEl) {
       recentEl.classList.add('d-none');
     }
-    syncLocationUI();
+    locationPicker?.syncUI();
   };
 
   const closeOverlay = () => {
@@ -1313,33 +1088,33 @@
     }
   });
 
-  locationInput?.addEventListener('input', () => {
-    setLocationStatus('');
-    pendingLocation = null;
-    pendingDirty = false;
-    syncLocationUI();
-  });
-
-  radiusInput?.addEventListener('input', () => {
-    const value = parseInt(radiusInput.value, 10);
-    updateRadiusLabel(value);
-    if (pendingLocation) {
-      pendingLocation.radius = value;
-      pendingDirty = true;
-    } else if (activeLocation) {
-      setPendingLocation({ ...activeLocation, radius: value }, true);
-    }
-  });
-
-  locationApplyBtn?.addEventListener('click', applyLocation);
-  locationResetBtn?.addEventListener('click', resetLocation);
-  locationMeBtn?.addEventListener('click', useCurrentLocation);
-
-  if (radiusInput) {
-    updateRadiusLabel(radiusInput.value || defaultRadius);
+  if (locationPickerRoot && window.ProponLocationPicker && typeof window.ProponLocationPicker.create === 'function') {
+    locationPicker = window.ProponLocationPicker.create(locationPickerRoot, {
+      onApply: () => {
+        syncActiveLocationFromPicker();
+        const term = input.value.trim();
+        if (!canSearch(term)) {
+          setStatus('Tapez au moins 2 caracteres ou choisissez une localisation.');
+          return;
+        }
+        performSearch(term, { page: 1 });
+      },
+      onReset: () => {
+        syncActiveLocationFromPicker();
+        const term = input.value.trim();
+        if (term.length >= minLength) {
+          performSearch(term, { page: 1 });
+        } else {
+          setStatus('Tapez au moins 2 caracteres.');
+          renderCategories([], []);
+          renderResults([]);
+          setCountLines('', '');
+          updatePagination();
+        }
+      },
+    });
+    syncActiveLocationFromPicker();
   }
-  syncLocationUI();
-  initPlacesAutocomplete();
 
   clearInputBtn?.addEventListener('click', clearSearch);
   clearFiltersBtn?.addEventListener('click', clearFilters);
@@ -1401,9 +1176,5 @@
         openOverlay('');
       });
     }
-  });
-  locationInputClearBtn?.addEventListener('click', (event) => {
-    event.preventDefault();
-    resetLocation(true);
   });
 })();

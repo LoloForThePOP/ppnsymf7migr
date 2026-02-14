@@ -1,0 +1,123 @@
+.home-around-you-prompt {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.home-around-you-prompt__body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.home-around-you-prompt__content {
+    min-width: 220px;
+    flex: 1 1 320px;
+}
+
+.home-around-you-prompt__title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+}
+
+.home-around-you-prompt__text {
+    margin: 0;
+    opacity: 0.9;
+}
+
+.home-around-you-prompt__action {
+    white-space: nowrap;
+}
+
+body.home-location-modal-open {
+    overflow: hidden;
+}
+
+.home-location-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 140;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+}
+
+.home-location-modal.d-none {
+    display: none !important;
+}
+
+.home-location-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.46);
+}
+
+.home-location-modal__card {
+    position: relative;
+    z-index: 1;
+    width: min(620px, 100%);
+    max-height: min(88vh, 760px);
+    overflow: auto;
+    border: 1px solid var(--theme-border);
+    border-radius: 18px;
+    padding: 16px;
+    background: var(--theme-bg);
+    color: var(--theme-text);
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.28);
+}
+
+.home-location-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.home-location-modal__title {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--theme-title);
+}
+
+.home-location-modal__close {
+    border: 1px solid var(--theme-border);
+    background: transparent;
+    color: var(--theme-text);
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.home-location-modal__close:hover {
+    border-color: var(--theme-accent);
+}
+
+.home-location-modal__intro {
+    margin: 10px 0 12px;
+    color: var(--theme-text-muted);
+    font-size: 0.92rem;
+}
+
+.home-location-modal__section {
+    margin-top: 0;
+}
+
+@media (max-width: 640px) {
+    .home-around-you-prompt__action {
+        width: 100%;
+    }
+
+    .home-location-modal {
+        padding: 10px;
+    }
+
+    .home-location-modal__card {
+        max-height: 94vh;
+        padding: 12px;
+    }
+}

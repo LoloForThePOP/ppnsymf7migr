@@ -21,6 +21,13 @@ Use this section as the quick reference before reading details.
   - Logged-in source: `user_preferences.fav_categories` (categories only).
   - Logged-in fallback: categories from user's recent created projects.
   - Anonymous source: `anon_pref_categories` cookie (categories only).
+- `NearbyLocationFeedBlockProvider`:
+  - Logged-in + anonymous source: `search_pref_location` cookie (lat/lng/radius).
+  - Fetches projects with places in a geographic bounding box.
+- `location_picker.js` + `search/_location_picker.html.twig`:
+  - One shared location picker UI/state module.
+  - Reused in search overlay and homepage `Autour de vous` modal.
+  - Persists `search_pref_location` (cookie + localStorage cache).
 - `FollowedProjectsFeedBlockProvider`:
   - Logged-in source: follow table (`follow`).
 - `TrendingFeedBlockProvider`:
@@ -63,9 +70,10 @@ Flow:
 Current providers (priority order):
 
 1. `CategoryAffinityFeedBlockProvider` (personalized by categories)
-2. `FollowedProjectsFeedBlockProvider` (logged only)
-3. `TrendingFeedBlockProvider` (general)
-4. `LatestPublishedFeedBlockProvider` (general fallback)
+2. `NearbyLocationFeedBlockProvider` (location-based)
+3. `FollowedProjectsFeedBlockProvider` (logged only)
+4. `TrendingFeedBlockProvider` (general)
+5. `LatestPublishedFeedBlockProvider` (general fallback)
 
 ## Recommandation Blocks (Homepage)
 
@@ -76,9 +84,10 @@ This section describes what users see on homepage depending on audience state.
 Expected blocks (in order, when data exists):
 
 1. `Basé sur vos catégories` (`category-affinity`)
-2. `Projets suivis` (`followed-projects`)
-3. `Tendance sur Propon` (`trending`)
-4. `Derniers projets présentés` (`latest`)
+2. `Autour de vous` (`around-you`)
+3. `Projets suivis` (`followed-projects`)
+4. `Tendance sur Propon` (`trending`)
+5. `Derniers projets présentés` (`latest`)
 
 Notes:
 
@@ -91,8 +100,9 @@ Notes:
 Expected blocks (in order, when data exists):
 
 1. `Selon vos centres d’intérêt récents` (`anon-category-affinity`)
-2. `Tendance sur Propon` (`trending`)
-3. `Derniers projets présentés` (`latest`)
+2. `Autour de vous` (`around-you`)
+3. `Tendance sur Propon` (`trending`)
+4. `Derniers projets présentés` (`latest`)
 
 Definition of opt-in here:
 
@@ -103,13 +113,15 @@ Definition of opt-in here:
 
 Expected blocks:
 
-1. `Tendance sur Propon` (`trending`)
-2. `Derniers projets présentés` (`latest`)
+1. `Autour de vous` (`around-you`) if `search_pref_location` exists
+2. `Tendance sur Propon` (`trending`)
+3. `Derniers projets présentés` (`latest`)
 
 Definition of opt-out here:
 
-- No anonymous hints are available (cookie absent/empty, storage cleared, or tracking disabled).
-- Homepage keeps only general, non-personalized blocks.
+- No anonymous category hints are available (`anon_pref_categories` absent/empty).
+- A location block can still appear if a search location cookie exists (`search_pref_location`).
+- Otherwise homepage keeps only general, non-personalized blocks.
 
 ### Block feed summary
 
@@ -125,6 +137,17 @@ Definition of opt-out here:
   - Audience: logged-in
   - Feed source: `follow` table (`findLatestFollowedPresentations`)
   - Provider: `FollowedProjectsFeedBlockProvider`
+- `around-you`
+  - Audience: logged-in + anonymous
+  - Feed source: `search_pref_location` cookie (lat/lng/radius), then `places` geoloc filters
+  - Provider: `NearbyLocationFeedBlockProvider`
+
+## Location UX Flow
+
+- Search overlay and homepage modal both use the same picker component (`search/_location_picker.html.twig` + `public/js/location_picker.js`).
+- When user applies or resets location, picker updates `search_pref_location`.
+- Homepage rail `Autour de vous` reads that location signal server-side via `HomeController`.
+- Homepage modal (`home_location_modal.js`) reloads page after apply/reset so rail updates immediately.
 - `trending`
   - Audience: logged-in + anonymous
   - Feed source: published projects + engagement/freshness scoring (likes/comments/views/time decay)

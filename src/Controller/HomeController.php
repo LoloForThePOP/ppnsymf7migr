@@ -60,11 +60,13 @@ final class HomeController extends AbstractController
         }
 
         $anonCategoryHints = $viewer ? [] : $this->extractAnonCategoryHints($request);
+        $locationHint = $this->extractHomepageLocationHint($request);
         $feedContext = new HomeFeedContext(
             viewer: $viewer,
             cardsPerBlock: $cardsPerBlock,
             maxBlocks: $viewer ? $maxBlocksLogged : $maxBlocksAnon,
             anonCategoryHints: $anonCategoryHints,
+            locationHint: $locationHint,
             creatorCapEnabled: $creatorCapEnabled,
             creatorCapPerBlock: $creatorCapPerBlock
         );
@@ -74,6 +76,7 @@ final class HomeController extends AbstractController
             'continuePresentation' => $continuePresentation,
             'recentComments' => $recentComments,
             'feedBlocks' => $feedBlocks,
+            'hasHomepageLocationHint' => $locationHint !== null,
             'addNewsForm' => $addNewsForm ? $addNewsForm->createView() : null,
         ]);
     }
@@ -101,5 +104,48 @@ final class HomeController extends AbstractController
         }
 
         return array_slice(array_keys($hints), 0, 8);
+    }
+
+    /**
+     * @return array{lat: float, lng: float, radius: float}|null
+     */
+    private function extractHomepageLocationHint(Request $request): ?array
+    {
+        $raw = trim((string) $request->cookies->get('search_pref_location', ''));
+        if ($raw === '') {
+            return null;
+        }
+
+        $decoded = rawurldecode($raw);
+        $parts = preg_split('/[|,]+/', $decoded) ?: [];
+        if (count($parts) < 2) {
+            return null;
+        }
+
+        $lat = filter_var($parts[0], FILTER_VALIDATE_FLOAT);
+        $lng = filter_var($parts[1], FILTER_VALIDATE_FLOAT);
+        $radius = count($parts) >= 3
+            ? filter_var($parts[2], FILTER_VALIDATE_FLOAT)
+            : 10.0;
+
+        if ($lat === false || $lng === false) {
+            return null;
+        }
+
+        $lat = (float) $lat;
+        $lng = (float) $lng;
+        if ($lat < -90.0 || $lat > 90.0 || $lng < -180.0 || $lng > 180.0) {
+            return null;
+        }
+
+        if ($radius === false) {
+            $radius = 10.0;
+        }
+
+        return [
+            'lat' => $lat,
+            'lng' => $lng,
+            'radius' => max(1.0, min(200.0, (float) $radius)),
+        ];
     }
 }

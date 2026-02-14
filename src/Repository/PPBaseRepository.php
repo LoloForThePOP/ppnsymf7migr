@@ -119,6 +119,47 @@ class PPBaseRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * @return PPBase[]
+     */
+    public function findPublishedNearLocation(
+        float $lat,
+        float $lng,
+        float $radiusKm,
+        int $limit = 24,
+        ?User $excludeCreator = null
+    ): array {
+        if ($lat < -90.0 || $lat > 90.0 || $lng < -180.0 || $lng > 180.0) {
+            return [];
+        }
+
+        $radiusKm = max(1.0, min(200.0, $radiusKm));
+        $bbox = $this->computeBoundingBox($lat, $lng, $radiusKm);
+
+        $qb = $this->createQueryBuilder('p')
+            ->select('DISTINCT p')
+            ->join('p.places', 'pl')
+            ->andWhere('p.isPublished = :published')
+            ->andWhere('(p.isDeleted IS NULL OR p.isDeleted = :notDeleted)')
+            ->andWhere('pl.geoloc.latitude BETWEEN :minLat AND :maxLat')
+            ->andWhere('pl.geoloc.longitude BETWEEN :minLng AND :maxLng')
+            ->setParameter('published', true)
+            ->setParameter('notDeleted', false)
+            ->setParameter('minLat', $bbox['minLat'])
+            ->setParameter('maxLat', $bbox['maxLat'])
+            ->setParameter('minLng', $bbox['minLng'])
+            ->setParameter('maxLng', $bbox['maxLng'])
+            ->orderBy('p.createdAt', 'DESC')
+            ->setMaxResults(max(1, $limit));
+
+        if ($excludeCreator instanceof User) {
+            $qb->andWhere('p.creator != :excludeCreator')
+                ->setParameter('excludeCreator', $excludeCreator);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
     //    /**
     //     * @return PPBase[] Returns an array of PPBase objects
     //     */
@@ -194,5 +235,23 @@ class PPBaseRepository extends ServiceEntityRepository
         }
 
         return $counts;
+    }
+
+    /**
+     * @return array{minLat: float, maxLat: float, minLng: float, maxLng: float}
+     */
+    private function computeBoundingBox(float $lat, float $lng, float $radiusKm): array
+    {
+        $earthRadiusKm = 6371.0;
+        $latRad = deg2rad($lat);
+        $latDelta = rad2deg($radiusKm / $earthRadiusKm);
+        $lngDelta = rad2deg($radiusKm / ($earthRadiusKm * max(0.0001, cos($latRad))));
+
+        return [
+            'minLat' => $lat - $latDelta,
+            'maxLat' => $lat + $latDelta,
+            'minLng' => $lng - $lngDelta,
+            'maxLng' => $lng + $lngDelta,
+        ];
     }
 }

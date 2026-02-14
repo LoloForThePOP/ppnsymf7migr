@@ -11,6 +11,7 @@
     <link href="/css/project_collection_by_themes_by_tabs.css" rel="stylesheet">
     <link href="/css/show_more_less_button.css" rel="stylesheet">
     <link href="/css/home_connected.css" rel="stylesheet">
+    <link href="/css/home_location_prompt.css" rel="stylesheet">
     {% if app.user and addNewsForm %}
         <link href="/css/create_news.css" rel="stylesheet">
     {% endif %}
@@ -40,6 +41,7 @@
 {% block javascripts %}
 
   <script src="/js/show_more_less_button.js"></script>
+  <script src="/js/home_location_modal.js" defer></script>
   {% if not app.user %}
     <script src="/js/home_anon_preferences.js" defer></script>
   {% endif %}
@@ -74,7 +76,7 @@
 
         {% if app.user %}
 
-            {% include "home/_connected_user_upper_display.html.twig" %}
+            {% include "home/_connected_user_upper_display.html.twig" with { hasHomepageLocationHint: hasHomepageLocationHint|default(false) } %}
 
         {% endif %}
 
@@ -114,12 +116,24 @@
 
 
         {% if not app.user %}
+            {% include "home/_around_you_prompt.html.twig" with { hasHomepageLocationHint: hasHomepageLocationHint|default(false) } %}
             {% for block in feedBlocks %}
+                {% set blockTitleAction = block.key == 'around-you'
+                    ? {
+                        label: 'Modifier',
+                        attrs: {
+                            'data-home-location-trigger': '',
+                            'aria-label': 'Modifier la localisation de la section Autour de vous'
+                        }
+                    }
+                    : {} %}
                 <div class="container my-5">
-                    {{ project_collection(block.title, block.items, '', 'hide-335', '', block.stats) }}
+                    {{ project_collection(block.title, block.items, '', 'hide-335', '', block.stats, blockTitleAction) }}
                 </div>
             {% endfor %}
         {% endif %}
+
+        {% include "home/_around_you_location_modal.html.twig" %}
 
 
         {# Last Moto #}

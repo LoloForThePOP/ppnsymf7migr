@@ -1,0 +1,34 @@
+<div id="home-location-modal" class="home-location-modal d-none" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="home-location-modal__backdrop" data-home-location-close></div>
+    <div class="home-location-modal__card" role="document" aria-labelledby="home-location-modal-title">
+        <div class="home-location-modal__header">
+            <h2 id="home-location-modal-title" class="home-location-modal__title">Autour de vous</h2>
+            <button class="home-location-modal__close" type="button" data-home-location-close>Fermer</button>
+        </div>
+
+        <p class="home-location-modal__intro">
+            Choisissez un lieu ou activez le bouton "Autour de moi".
+        </p>
+
+        <div class="search-overlay__filters-section home-location-modal__section" data-location-picker-scope>
+            <div class="search-overlay__filters-header">
+                <span class="search-overlay__filters-title">
+                    <svg class="search-overlay__section-icon search-overlay__section-icon--stroke" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 22s8.5-7.7 8.5-13.3a8.5 8.5 0 1 0-17 0c0 5.6 8.5 13.3 8.5 13.3Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                        <circle cx="12" cy="9" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Localisation
+                </span>
+                <button class="search-overlay__filters-clear" type="button" data-location-reset>Réinitialiser</button>
+            </div>
+
+            {% include "search/_location_picker.html.twig" with {
+                pickerId: 'home',
+                rootAttrs: {
+                    'data-location-picker': '',
+                    'data-home-location-picker': '1'
+                }
+            } %}
+        </div>
+    </div>
+</div>
