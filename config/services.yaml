@@ -25,6 +25,9 @@ parameters:
     app.normalize_text.prompt_path: '%kernel.project_dir%/prompts/normalize_project_from_text.txt'
     app.normalize_html.prompt_path: '%kernel.project_dir%/prompts/normalize_project_from_html.txt'
     app.normalize_prompt.prompt_path: '%kernel.project_dir%/prompts/normalize_project_from_prompt.txt'
+    app.home_feed.cards_per_block: 10
+    app.home_feed.max_blocks.logged: 6
+    app.home_feed.max_blocks.anon: 5
     
 services:
     # default configuration for services in *this* file

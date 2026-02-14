@@ -41,7 +41,18 @@
         {% endif %}
     {% endif %}
 
-    <article class="project-card position-relative text-reset">
+    {% set categoryTokens = [] %}
+    {% if presentation.categories is defined %}
+        {% for category in presentation.categories %}
+            {% set token = category.uniqueName is defined ? category.uniqueName|trim|lower : '' %}
+            {% if token and token not in categoryTokens %}
+                {% set categoryTokens = categoryTokens|merge([token]) %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    {% set categoryData = categoryTokens|join(',') %}
+
+    <article class="project-card position-relative text-reset" {% if categoryData %}data-pp-categories="{{ categoryData }}"{% endif %}>
         {% if options.link %}
             <a
                 class="stretched-link" style="z-index: 40;"

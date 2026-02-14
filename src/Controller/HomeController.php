@@ -4,11 +4,15 @@ namespace App\Controller;
 
 use App\Entity\PPBase;
 use App\Entity\News;
+use App\Entity\User;
 use App\Form\NewsType;
 use App\Repository\CommentRepository;
-use App\Repository\FollowRepository;
 use App\Repository\PPBaseRepository;
+use App\Service\HomeFeed\HomeFeedAssembler;
+use App\Service\HomeFeed\HomeFeedContext;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -17,66 +21,26 @@ final class HomeController extends AbstractController
 {
     #[Route('/', name: 'homepage')]
     public function index(
+        Request $request,
         PPBaseRepository $ppBaseRepository,
         CommentRepository $commentRepository,
-        FollowRepository $followRepository,
+        HomeFeedAssembler $homeFeedAssembler,
+        #[Autowire('%app.home_feed.cards_per_block%')] int $cardsPerBlock,
+        #[Autowire('%app.home_feed.max_blocks.logged%')] int $maxBlocksLogged,
+        #[Autowire('%app.home_feed.max_blocks.anon%')] int $maxBlocksAnon,
     ): Response {
-        $presentations = $ppBaseRepository->findLatestPublished(50);
-        $presentationIds = array_map(static fn (PPBase $pp) => $pp->getId(), $presentations);
-        $presentationStats = $ppBaseRepository->getEngagementCountsForIds($presentationIds);
-
         /** @var \App\Entity\User|null $user */
         $user = $this->getUser();
-        $creatorPresentations = [];
-        $creatorPresentationStats = [];
         $continuePresentation = null;
-        $recommendedPresentations = [];
-        $recommendedPresentationStats = [];
-        $followedPresentations = [];
-        $followedPresentationStats = [];
         $recentComments = [];
         $addNewsForm = null;
+        $viewer = $user instanceof User ? $user : null;
 
         if ($user) {
             $creatorPresentations = $ppBaseRepository->findLatestByCreator($user, 6);
-            $creatorPresentationStats = $ppBaseRepository->getEngagementCountsForIds(
-                array_map(static fn (PPBase $pp) => $pp->getId(), $creatorPresentations)
-            );
             $continuePresentation = $creatorPresentations[0] ?? null;
 
             $recentComments = $commentRepository->findLatestForCreatorProjects($user, 5);
-
-            $followedPresentations = $followRepository->findLatestFollowedPresentations($user, 6);
-            $followedPresentationStats = $ppBaseRepository->getEngagementCountsForIds(
-                array_map(static fn (PPBase $pp) => $pp->getId(), $followedPresentations)
-            );
-
-            $categoryNames = [];
-            foreach ($creatorPresentations as $presentation) {
-                foreach ($presentation->getCategories() as $category) {
-                    $uniqueName = $category->getUniqueName();
-                    if ($uniqueName) {
-                        $categoryNames[$uniqueName] = true;
-                    }
-                }
-            }
-            $categoryList = array_keys($categoryNames);
-
-            if ($categoryList !== []) {
-                $recommendedPresentations = $ppBaseRepository->findPublishedByCategoriesForCreator(
-                    $user,
-                    $categoryList,
-                    6
-                );
-            }
-
-            if ($recommendedPresentations === []) {
-                $recommendedPresentations = $ppBaseRepository->findLatestPublishedExcludingCreator($user, 6);
-            }
-
-            $recommendedPresentationStats = $ppBaseRepository->getEngagementCountsForIds(
-                array_map(static fn (PPBase $pp) => $pp->getId(), $recommendedPresentations)
-            );
 
             if ($continuePresentation && $this->isGranted('edit', $continuePresentation)) {
                 $addNewsForm = $this->createForm(
@@ -93,18 +57,45 @@ final class HomeController extends AbstractController
             }
         }
 
+        $anonCategoryHints = $viewer ? [] : $this->extractAnonCategoryHints($request);
+        $feedContext = new HomeFeedContext(
+            viewer: $viewer,
+            cardsPerBlock: $cardsPerBlock,
+            maxBlocks: $viewer ? $maxBlocksLogged : $maxBlocksAnon,
+            anonCategoryHints: $anonCategoryHints
+        );
+        $feedBlocks = $homeFeedAssembler->build($feedContext);
+
         return $this->render('home/homepage.html.twig', [
-            'presentations' => $presentations,
-            'presentationStats' => $presentationStats,
-            'creatorPresentations' => $creatorPresentations,
-            'creatorPresentationStats' => $creatorPresentationStats,
             'continuePresentation' => $continuePresentation,
-            'recommendedPresentations' => $recommendedPresentations,
-            'recommendedPresentationStats' => $recommendedPresentationStats,
-            'followedPresentations' => $followedPresentations,
-            'followedPresentationStats' => $followedPresentationStats,
             'recentComments' => $recentComments,
+            'feedBlocks' => $feedBlocks,
             'addNewsForm' => $addNewsForm ? $addNewsForm->createView() : null,
         ]);
+    }
+
+    /**
+     * @return string[]
+     */
+    private function extractAnonCategoryHints(Request $request): array
+    {
+        $raw = (string) $request->cookies->get('anon_pref_categories', '');
+        if ($raw === '') {
+            return [];
+        }
+
+        $parts = preg_split('/[,|]+/', $raw) ?: [];
+        $hints = [];
+
+        foreach ($parts as $part) {
+            $token = strtolower(trim($part));
+            if ($token === '' || !preg_match('/^[a-z0-9_-]{1,40}$/', $token)) {
+                continue;
+            }
+
+            $hints[$token] = true;
+        }
+
+        return array_slice(array_keys($hints), 0, 8);
     }
 }

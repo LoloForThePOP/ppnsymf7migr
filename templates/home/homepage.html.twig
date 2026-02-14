@@ -40,6 +40,9 @@
 {% block javascripts %}
 
   <script src="/js/show_more_less_button.js"></script>
+  {% if not app.user %}
+    <script src="/js/home_anon_preferences.js" defer></script>
+  {% endif %}
   {% if app.user and addNewsForm %}
     <script src="/js/news_creation.js"></script>
   {% endif %}
@@ -110,14 +113,13 @@
         {% endif %}
 
 
-        {# Last Presented Projects #}
-
-
-        <div class="container my-5">
-        
-            {{ project_collection('Derniers projets présentés', presentations, '', 'hide-335', '', presentationStats) }}
-            
-        </div>
+        {% if not app.user %}
+            {% for block in feedBlocks %}
+                <div class="container my-5">
+                    {{ project_collection(block.title, block.items, '', 'hide-335', '', block.stats) }}
+                </div>
+            {% endfor %}
+        {% endif %}
 
 
         {# Last Moto #}

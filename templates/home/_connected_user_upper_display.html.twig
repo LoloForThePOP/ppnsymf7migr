@@ -147,15 +147,8 @@
         </div>
     </div>
 
-    {% if creatorPresentations|length > 0 %}
-        {{ project_collection('Vos projets récents', creatorPresentations, 'connected-collection recent-projects', 'hide-335', '', creatorPresentationStats) }}
-    {% endif %}
-
-    {% if recommendedPresentations|length > 0 %}
-        {{ project_collection('À explorer pour vous', recommendedPresentations, 'connected-collection', 'hide-335', '', recommendedPresentationStats) }}
-    {% endif %}
-
-    {% if followedPresentations|length > 0 %}
-        {{ project_collection('Projets suivis', followedPresentations, 'connected-collection', 'hide-335', '', followedPresentationStats) }}
-    {% endif %}
+    {% for block in feedBlocks %}
+        {% set blockClass = 'connected-collection' ~ (loop.first ? ' recent-projects' : '') %}
+        {{ project_collection(block.title, block.items, blockClass, 'hide-335', '', block.stats) }}
+    {% endfor %}
 </div>
