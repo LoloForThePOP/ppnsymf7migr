@@ -28,6 +28,8 @@ parameters:
     app.home_feed.cards_per_block: 10
     app.home_feed.max_blocks.logged: 6
     app.home_feed.max_blocks.anon: 5
+    app.home_feed.creator_cap.enabled: false
+    app.home_feed.creator_cap.per_block: 2
     
 services:
     # default configuration for services in *this* file

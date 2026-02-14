@@ -60,7 +60,8 @@ Filter out unpublished/deleted.
 
 - Schema additions:
 
-user_preferences table: user_id, fav_categories (array/string), fav_keywords (array/string), embedding (vector if using pgvector), updated_at.
+user_preferences table: user_id, fav_categories (array/string), fav_keywords (array/string), embedding, updated_at.
+
 user_interactions table: user_id, project_id, type (like, follow, view), created_at (you already have likes/follows; views can be a simple counter per project/user in a separate table or aggregated).
 If using pgvector, add a vector column for embedding.
 

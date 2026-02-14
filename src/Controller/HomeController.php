@@ -28,6 +28,8 @@ final class HomeController extends AbstractController
         #[Autowire('%app.home_feed.cards_per_block%')] int $cardsPerBlock,
         #[Autowire('%app.home_feed.max_blocks.logged%')] int $maxBlocksLogged,
         #[Autowire('%app.home_feed.max_blocks.anon%')] int $maxBlocksAnon,
+        #[Autowire('%app.home_feed.creator_cap.enabled%')] bool $creatorCapEnabled,
+        #[Autowire('%app.home_feed.creator_cap.per_block%')] int $creatorCapPerBlock,
     ): Response {
         /** @var \App\Entity\User|null $user */
         $user = $this->getUser();
@@ -62,7 +64,9 @@ final class HomeController extends AbstractController
             viewer: $viewer,
             cardsPerBlock: $cardsPerBlock,
             maxBlocks: $viewer ? $maxBlocksLogged : $maxBlocksAnon,
-            anonCategoryHints: $anonCategoryHints
+            anonCategoryHints: $anonCategoryHints,
+            creatorCapEnabled: $creatorCapEnabled,
+            creatorCapPerBlock: $creatorCapPerBlock
         );
         $feedBlocks = $homeFeedAssembler->build($feedContext);
 

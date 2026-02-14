@@ -4,7 +4,9 @@ namespace App\Controller\ProjectPresentation;
 
 use App\Entity\Bookmark;
 use App\Entity\PPBase;
+use App\Entity\User;
 use App\Repository\BookmarkRepository;
+use App\Service\Recommendation\UserPreferenceUpdater;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,6 +27,7 @@ class BookmarkController extends AbstractController
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         EntityManagerInterface $manager,
         BookmarkRepository $bookmarkRepo,
+        UserPreferenceUpdater $userPreferenceUpdater,
         #[Autowire(service: 'limiter.bookmark_toggle_user')] RateLimiterFactory $bookmarkLimiter,
     ): JsonResponse {
         $user = $this->getUser();
@@ -57,6 +60,9 @@ class BookmarkController extends AbstractController
             $presentation->removeBookmark($existingBookmark);
             $manager->remove($existingBookmark);
             $manager->flush();
+            if ($user instanceof User) {
+                $userPreferenceUpdater->recomputeForUser($user, true);
+            }
 
             return new JsonResponse([
                 'code' => 200,
@@ -71,6 +77,9 @@ class BookmarkController extends AbstractController
         $presentation->addBookmark($bookmark);
         $manager->persist($bookmark);
         $manager->flush();
+        if ($user instanceof User) {
+            $userPreferenceUpdater->recomputeForUser($user, true);
+        }
 
         return new JsonResponse([
             'code' => 200,

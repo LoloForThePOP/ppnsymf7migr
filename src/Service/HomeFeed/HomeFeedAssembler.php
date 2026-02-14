@@ -32,7 +32,13 @@ final class HomeFeedAssembler
                 continue;
             }
 
-            $items = $this->dedupeItems($rawBlock->getItems(), $excludedProjectIds, $context->getCardsPerBlock());
+            $items = $this->dedupeItems(
+                $rawBlock->getItems(),
+                $excludedProjectIds,
+                $context->getCardsPerBlock(),
+                $context->isCreatorCapEnabled(),
+                $context->getCreatorCapPerBlock()
+            );
             if ($items === []) {
                 continue;
             }
@@ -58,9 +64,16 @@ final class HomeFeedAssembler
      *
      * @return PPBase[]
      */
-    private function dedupeItems(array $items, array &$excludedProjectIds, int $limit): array
+    private function dedupeItems(
+        array $items,
+        array &$excludedProjectIds,
+        int $limit,
+        bool $creatorCapEnabled,
+        int $creatorCapPerBlock
+    ): array
     {
         $selected = [];
+        $creatorCounts = [];
 
         foreach ($items as $item) {
             if (!$item instanceof PPBase) {
@@ -72,8 +85,22 @@ final class HomeFeedAssembler
                 continue;
             }
 
+            if ($creatorCapEnabled) {
+                $creatorId = $item->getCreator()?->getId();
+                if ($creatorId !== null && ($creatorCounts[$creatorId] ?? 0) >= $creatorCapPerBlock) {
+                    continue;
+                }
+            }
+
             $excludedProjectIds[$projectId] = true;
             $selected[] = $item;
+
+            if ($creatorCapEnabled) {
+                $creatorId = $item->getCreator()?->getId();
+                if ($creatorId !== null) {
+                    $creatorCounts[$creatorId] = ($creatorCounts[$creatorId] ?? 0) + 1;
+                }
+            }
 
             if (count($selected) >= $limit) {
                 break;
@@ -83,4 +110,3 @@ final class HomeFeedAssembler
         return $selected;
     }
 }
-

@@ -11,6 +11,7 @@ Quick entry points for the most-used internal docs.
 ## Recommendation
 
 - `docs/recommandation_system_ideas.txt`: raw ideas and roadmap notes.
+- `docs/recommandation-pipeline.md`: implemented homepage recommendation pipeline, caches, and operations.
 
 ## Data and Ingestion
 

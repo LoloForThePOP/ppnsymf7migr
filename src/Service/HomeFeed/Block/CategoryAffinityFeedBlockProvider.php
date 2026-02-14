@@ -2,7 +2,9 @@
 
 namespace App\Service\HomeFeed\Block;
 
+use App\Entity\User;
 use App\Repository\PPBaseRepository;
+use App\Repository\UserPreferenceRepository;
 use App\Service\HomeFeed\HomeFeedBlock;
 use App\Service\HomeFeed\HomeFeedBlockProviderInterface;
 use App\Service\HomeFeed\HomeFeedContext;
@@ -13,6 +15,7 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
 {
     public function __construct(
         private readonly PPBaseRepository $ppBaseRepository,
+        private readonly UserPreferenceRepository $userPreferenceRepository,
     ) {
     }
 
@@ -26,15 +29,11 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
                 return null;
             }
 
-            $creatorRecent = $this->ppBaseRepository->findLatestByCreator($viewer, 12);
-            $categories = [];
-            foreach ($creatorRecent as $project) {
-                foreach ($project->getCategories() as $category) {
-                    $slug = trim((string) $category->getUniqueName());
-                    if ($slug !== '') {
-                        $categories[$slug] = true;
-                    }
-                }
+            $categories = $this->userPreferenceRepository->findTopCategorySlugsForUser($viewer, 8);
+            $usedPreferenceCategories = $categories !== [];
+
+            if ($categories === []) {
+                $categories = $this->resolveCreatorCategories($viewer);
             }
 
             if ($categories === []) {
@@ -43,9 +42,20 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
 
             $items = $this->ppBaseRepository->findPublishedByCategoriesForCreator(
                 $viewer,
-                array_keys($categories),
+                $categories,
                 $fetchLimit
             );
+            if ($items === [] && $usedPreferenceCategories) {
+                $fallbackCategories = $this->resolveCreatorCategories($viewer);
+                if ($fallbackCategories !== []) {
+                    $items = $this->ppBaseRepository->findPublishedByCategoriesForCreator(
+                        $viewer,
+                        $fallbackCategories,
+                        $fetchLimit
+                    );
+                }
+            }
+
             if ($items === []) {
                 return null;
             }
@@ -75,5 +85,24 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
             true
         );
     }
-}
 
+    /**
+     * @return string[]
+     */
+    private function resolveCreatorCategories(User $viewer): array
+    {
+        $creatorRecent = $this->ppBaseRepository->findLatestByCreator($viewer, 12);
+        $categories = [];
+
+        foreach ($creatorRecent as $project) {
+            foreach ($project->getCategories() as $category) {
+                $slug = trim((string) $category->getUniqueName());
+                if ($slug !== '') {
+                    $categories[$slug] = true;
+                }
+            }
+        }
+
+        return array_keys($categories);
+    }
+}
