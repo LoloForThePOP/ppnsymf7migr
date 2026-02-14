@@ -20,8 +20,6 @@ class PresentationEventController extends AbstractController
         PresentationEvent::TYPE_SHARE_OPEN,
         PresentationEvent::TYPE_SHARE_COPY,
         PresentationEvent::TYPE_SHARE_EXTERNAL,
-        PresentationEvent::TYPE_REC_IMPRESSION,
-        PresentationEvent::TYPE_REC_CLICK,
     ];
 
     private const ALLOWED_SHARE_CHANNELS = [
@@ -34,8 +32,6 @@ class PresentationEventController extends AbstractController
         'x',
         'email',
     ];
-    private const MAX_RECOMMENDATION_POSITION = 48;
-
     private const MAX_PAYLOAD_BYTES = 2048;
 
     #[Route('/pp/{stringId}/event', name: 'pp_event', methods: ['POST'])]
@@ -122,10 +118,6 @@ class PresentationEventController extends AbstractController
             return $this->sanitizeShareExternalMeta($meta);
         }
 
-        if ($type === PresentationEvent::TYPE_REC_IMPRESSION || $type === PresentationEvent::TYPE_REC_CLICK) {
-            return $this->sanitizeRecommendationMeta($meta);
-        }
-
         return [];
     }
 
@@ -147,37 +139,6 @@ class PresentationEventController extends AbstractController
         }
 
         return ['channel' => $channel];
-    }
-
-    /**
-     * @param array<string,mixed> $meta
-     *
-     * @return array<string,string|int>|null
-     */
-    private function sanitizeRecommendationMeta(array $meta): ?array
-    {
-        $placement = $meta['placement'] ?? null;
-        if (!is_string($placement)) {
-            return null;
-        }
-        $placement = strtolower(trim($placement));
-        if ($placement === '' || !preg_match('/^[a-z0-9_-]{1,40}$/', $placement)) {
-            return null;
-        }
-
-        $positionRaw = $meta['position'] ?? null;
-        if (!is_int($positionRaw) && !(is_string($positionRaw) && ctype_digit($positionRaw))) {
-            return null;
-        }
-        $position = (int) $positionRaw;
-        if ($position < 1 || $position > self::MAX_RECOMMENDATION_POSITION) {
-            return null;
-        }
-
-        return [
-            'placement' => $placement,
-            'position' => $position,
-        ];
     }
 
     private function buildLimiterKey(Request $request, PPBase $presentation): string

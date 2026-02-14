@@ -19,8 +19,7 @@
         showBookmark: true,
         likesCount: null,
         commentsCount: null,
-        fallbackImageText: 'Aucune image',
-        recommendationTracking: null
+        fallbackImageText: 'Aucune image'
     } %}
     {% set options = defaults|merge(opts) %}
     {% set imageUrl = options.image %}
@@ -42,20 +41,7 @@
         {% endif %}
     {% endif %}
 
-    {% set recommendationTracking = options.recommendationTracking is iterable ? options.recommendationTracking : null %}
-    {% set recommendationPlacement = recommendationTracking and recommendationTracking.placement is defined ? recommendationTracking.placement : '' %}
-    {% set recommendationPosition = recommendationTracking and recommendationTracking.position is defined ? recommendationTracking.position : null %}
-    {% set recommendationTrackable = recommendationPlacement and recommendationPosition and presentation.stringId is defined and presentation.stringId %}
-
-    <article
-        class="project-card position-relative text-reset"
-        {% if recommendationTrackable %}
-            data-rec-track="1"
-            data-rec-placement="{{ recommendationPlacement }}"
-            data-rec-position="{{ recommendationPosition }}"
-            data-rec-event-url="{{ path('pp_event', {'stringId': presentation.stringId}) }}"
-        {% endif %}
-    >
+    <article class="project-card position-relative text-reset">
         {% if options.link %}
             <a
                 class="stretched-link" style="z-index: 40;"

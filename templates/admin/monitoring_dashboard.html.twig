@@ -65,11 +65,6 @@
             <div class="kpi-value">{{ stats.sharesTotal }}</div>
             <div class="kpi-sub">+{{ stats.newLikes }} likes · +{{ stats.newFollows }} follows</div>
         </div>
-        <div class="kpi-card">
-            <div class="kpi-label">Reco CTR</div>
-            <div class="kpi-value">{{ stats.recommendationCtr|number_format(2, ',', ' ') }}%</div>
-            <div class="kpi-sub">{{ stats.recommendationClicks }} clics / {{ stats.recommendationImpressions }} impressions</div>
-        </div>
     </div>
 
     <div class="row g-3 mb-4">
@@ -97,8 +92,7 @@
                                 {label: "Commentaires", data: series.comments, color: "#7b61ff"},
                                 {label: "Likes", data: series.likes, color: "#e6506d"},
                                 {label: "Follows", data: series.follows, color: "#3b82f6"},
-                                {label: "Partages", data: series.shares, color: "#6b7280"},
-                                {label: "Clics reco", data: series.recommendationClicks, color: "#0f766e"}
+                                {label: "Partages", data: series.shares, color: "#6b7280"}
                             ]|json_encode|raw }}'></canvas>
                 </div>
             </div>
@@ -110,8 +104,7 @@
                     <canvas class="js-line-chart" height="180"
                             data-labels='{{ dateLabels|json_encode|raw }}'
                             data-series='{{ [
-                                {label: "Vues 3P", data: series.views, color: "#0ea5e9"},
-                                {label: "Impressions reco", data: series.recommendationImpressions, color: "#334155"}
+                                {label: "Vues 3P", data: series.views, color: "#0ea5e9"}
                             ]|json_encode|raw }}'></canvas>
                 </div>
             </div>
@@ -169,45 +162,6 @@
                         </div>
                     </div>
                     <div class="text-muted small mt-2">Les données automatisées correspondent aux présentations avec source URL.</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-lg-12">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h2 class="h6">Recommandations par placement</h2>
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Placement</th>
-                                    <th scope="col" class="text-end">Impressions</th>
-                                    <th scope="col" class="text-end">Clics</th>
-                                    <th scope="col" class="text-end">CTR</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for row in recommendationPlacementStats %}
-                                    <tr>
-                                        <td>
-                                            <div class="fw-semibold">{{ row.label }}</div>
-                                            <div class="text-muted small">{{ row.placement }}</div>
-                                        </td>
-                                        <td class="text-end">{{ row.impressions }}</td>
-                                        <td class="text-end">{{ row.clicks }}</td>
-                                        <td class="text-end">{{ row.ctr|number_format(2, ',', ' ') }}%</td>
-                                    </tr>
-                                {% else %}
-                                    <tr>
-                                        <td colspan="4" class="text-muted">Aucune donnée de recommandation sur la période.</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </div>
         </div>

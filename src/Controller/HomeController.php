@@ -4,12 +4,10 @@ namespace App\Controller;
 
 use App\Entity\PPBase;
 use App\Entity\News;
-use App\Entity\User;
 use App\Form\NewsType;
 use App\Repository\CommentRepository;
 use App\Repository\FollowRepository;
 use App\Repository\PPBaseRepository;
-use App\Service\Recommendation\RecommendationEngine;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -22,7 +20,6 @@ final class HomeController extends AbstractController
         PPBaseRepository $ppBaseRepository,
         CommentRepository $commentRepository,
         FollowRepository $followRepository,
-        RecommendationEngine $recommendationEngine,
     ): Response {
         $presentations = $ppBaseRepository->findLatestPublished(50);
         $presentationIds = array_map(static fn (PPBase $pp) => $pp->getId(), $presentations);
@@ -54,6 +51,33 @@ final class HomeController extends AbstractController
                 array_map(static fn (PPBase $pp) => $pp->getId(), $followedPresentations)
             );
 
+            $categoryNames = [];
+            foreach ($creatorPresentations as $presentation) {
+                foreach ($presentation->getCategories() as $category) {
+                    $uniqueName = $category->getUniqueName();
+                    if ($uniqueName) {
+                        $categoryNames[$uniqueName] = true;
+                    }
+                }
+            }
+            $categoryList = array_keys($categoryNames);
+
+            if ($categoryList !== []) {
+                $recommendedPresentations = $ppBaseRepository->findPublishedByCategoriesForCreator(
+                    $user,
+                    $categoryList,
+                    6
+                );
+            }
+
+            if ($recommendedPresentations === []) {
+                $recommendedPresentations = $ppBaseRepository->findLatestPublishedExcludingCreator($user, 6);
+            }
+
+            $recommendedPresentationStats = $ppBaseRepository->getEngagementCountsForIds(
+                array_map(static fn (PPBase $pp) => $pp->getId(), $recommendedPresentations)
+            );
+
             if ($continuePresentation && $this->isGranted('edit', $continuePresentation)) {
                 $addNewsForm = $this->createForm(
                     NewsType::class,
@@ -68,25 +92,6 @@ final class HomeController extends AbstractController
                 $addNewsForm->get('presentationId')->setData($continuePresentation->getId());
             }
         }
-
-        $excludeRecommendationIds = array_map(
-            static fn (PPBase $pp): ?int => $pp->getId(),
-            $followedPresentations
-        );
-        $excludeRecommendationIds = array_values(
-            array_filter(
-                $excludeRecommendationIds,
-                static fn (?int $id): bool => $id !== null
-            )
-        );
-        $viewer = $user instanceof User ? $user : null;
-        $recommendationResult = $recommendationEngine->recommendHomepage(
-            $viewer,
-            6,
-            $excludeRecommendationIds
-        );
-        $recommendedPresentations = $recommendationResult->getItems();
-        $recommendedPresentationStats = $recommendationResult->getStats();
 
         return $this->render('home/homepage.html.twig', [
             'presentations' => $presentations,

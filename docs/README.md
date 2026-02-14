@@ -10,7 +10,6 @@ Quick entry points for the most-used internal docs.
 
 ## Recommendation
 
-- `docs/recommandation-pipeline.md`: recommendation pipeline and phase notes.
 - `docs/recommandation_system_ideas.txt`: raw ideas and roadmap notes.
 
 ## Data and Ingestion
