@@ -1732,15 +1732,10 @@ html[data-theme-variant="custom"] .last-moto {
 /* Global feedback call-to-action */
 
 .global-feedback-button {
-    position: fixed;
-    right: 18px;
-    bottom: 18px;
-    z-index: 1040;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     border-radius: 999px;
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
     font-weight: 700;
     font-size: 0.95rem;
     padding: 0.55rem 1rem;
@@ -1760,6 +1755,37 @@ html[data-theme-variant="custom"] .global-feedback-button {
 html[data-theme-variant="custom"] .global-feedback-button:hover,
 html[data-theme-variant="custom"] .global-feedback-button:focus {
     border-color: var(--theme-accent);
+}
+
+.global-feedback-button--floating {
+    display: none;
+}
+
+.global-feedback-inline-slot {
+    display: flex;
+    justify-content: center;
+    margin: 0.5rem 0 1rem;
+    padding: 0 0.75rem;
+}
+
+.global-feedback-button--inline {
+    width: min(100%, 360px);
+    justify-content: center;
+}
+
+@media (min-width: 992px) {
+    .global-feedback-inline-slot {
+        display: none;
+    }
+
+    .global-feedback-button--floating {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 1040;
+        display: inline-flex;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
+    }
 }
 
 
@@ -1861,8 +1887,6 @@ html[data-theme-variant="custom"] .global-feedback-button:focus {
     }
 
     .global-feedback-button {
-        right: 12px;
-        bottom: 12px;
         font-size: 0.88rem;
         padding: 0.5rem 0.85rem;
     }

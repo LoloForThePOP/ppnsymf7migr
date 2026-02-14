@@ -363,7 +363,7 @@
 
         </div>
 
-        {% include "_partials/global_feedback_button.html.twig" %}
+        {% include "_partials/global_feedback_button.html.twig" with { mode: 'floating' } %}
 
 
         <!--Main Content Container -->
@@ -453,6 +453,8 @@
         {# Footer #}
 
         {% block footer %}
+
+            {% include "_partials/global_feedback_button.html.twig" with { mode: 'inline' } %}
         
             {% include "_partials/footer.html.twig" %}
 
