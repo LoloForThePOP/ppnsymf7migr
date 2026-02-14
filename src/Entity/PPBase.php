@@ -975,6 +975,16 @@ class PPBase
         return $this;
     }
 
+    public function isScraped(): bool
+    {
+        if ($this->ingestion === null) {
+            return false;
+        }
+
+        return $this->ingestion->getSourceUrl() !== null
+            || $this->ingestion->getIngestedAt() !== null;
+    }
+
     /**
      * @return Collection<int, Need>
      */

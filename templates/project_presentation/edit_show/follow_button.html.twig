@@ -1,5 +1,9 @@
 {# Html buttons is rendered whether project is followed or not #}
 
+{% set hideFollowButton = presentation.isScraped %}
+
+{% if not hideFollowButton %}
+
 {% macro followButton (isFollowedClass = "") %}
 
     <div class="follow-button {{ isFollowedClass ? 'isFollowed' }} ">
@@ -144,3 +148,5 @@
     });
 
 </script>
+
+{% endif %}
