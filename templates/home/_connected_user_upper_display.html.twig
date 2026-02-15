@@ -147,19 +147,28 @@
         </div>
     </div>
 
-    {% include "home/_around_you_prompt.html.twig" with { hasHomepageLocationHint: hasHomepageLocationHint|default(false) } %}
-
     {% for block in feedBlocks %}
         {% set blockClass = 'connected-collection' ~ (loop.first ? ' recent-projects' : '') %}
+        {% set blockTitleMeta = block.key == 'around-you' ? homepageLocationSummaryInline|default('') : '' %}
+        {% set blockTitleInfo = block.key == 'around-you' ? homepageLocationSummaryInfo|default('') : '' %}
         {% set blockTitleAction = block.key == 'around-you'
             ? {
-                label: 'Modifier',
+                label: 'Modifier la localisation',
+                iconOnly: true,
                 attrs: {
                     'data-home-location-trigger': '',
                     'aria-label': 'Modifier la localisation de la section Autour de vous'
                 }
             }
             : {} %}
-        {{ project_collection(block.title, block.items, blockClass, 'hide-335', '', block.stats, blockTitleAction) }}
+        {% if block.key == 'around-you' %}
+            <div id="home-around-you-rail">
+                {{ project_collection(block.title, block.items, blockClass, 'hide-335', '', block.stats, blockTitleAction, blockTitleMeta, blockTitleInfo) }}
+            </div>
+        {% else %}
+            {{ project_collection(block.title, block.items, blockClass, 'hide-335', '', block.stats, blockTitleAction, blockTitleMeta, blockTitleInfo) }}
+        {% endif %}
     {% endfor %}
+
+    {% include "home/_around_you_prompt.html.twig" with { hasHomepageLocationHint: hasHomepageLocationHint|default(false) } %}
 </div>

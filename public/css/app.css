@@ -34,6 +34,80 @@ a{
 
 }
 
+/* Shared info hint tooltip (hover + keyboard focus), theme-aware and reusable. */
+.ui-info-hint {
+    width: var(--ui-info-hint-size, 1.5em);
+    height: var(--ui-info-hint-size, 1.5em);
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    background: transparent;
+    color: inherit;
+    font-size: var(--ui-info-hint-font-size, 0.46em);
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    opacity: var(--ui-info-hint-opacity, 0.88);
+    position: relative;
+    cursor: help;
+}
+
+.ui-info-hint__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ui-info-hint__tooltip {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 0.55rem);
+    transform: translateX(-50%) translateY(3px);
+    width: max-content;
+    max-width: min(80vw, 380px);
+    padding: 0.6rem 0.72rem;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+    background: color-mix(in srgb, var(--theme-bg) 88%, #000 12%);
+    color: color-mix(in srgb, var(--theme-text) 96%, var(--theme-bg) 4%);
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: left;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 40;
+    transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s ease;
+}
+
+.ui-info-hint__tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: color-mix(in srgb, var(--theme-bg) 88%, #000 12%) transparent transparent transparent;
+}
+
+.ui-info-hint:hover,
+.ui-info-hint:focus,
+.ui-info-hint:focus-visible {
+    opacity: 1;
+}
+
+.ui-info-hint:hover .ui-info-hint__tooltip,
+.ui-info-hint:focus .ui-info-hint__tooltip,
+.ui-info-hint:focus-visible .ui-info-hint__tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
 /* Theme variables */
 
 :root {

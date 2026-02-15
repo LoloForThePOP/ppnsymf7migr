@@ -43,6 +43,19 @@ html[data-theme-variant="custom"] .collection-title {
     align-items: center;
 }
 
+.collection-title-meta {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.5em;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--theme-text) 72%, var(--theme-bg) 28%);
+}
+
+.collection-title-info {
+    --ui-info-hint-font-size: 0.46em;
+    --ui-info-hint-opacity: 0.86;
+}
+
 .collection-title-action {
     display: inline-flex;
     align-items: center;
@@ -57,6 +70,13 @@ html[data-theme-variant="custom"] .collection-title {
     padding: 0.35rem 0.62rem;
     opacity: 0.88;
     transition: opacity 0.18s ease;
+}
+
+.collection-title-action.is-icon-only {
+    width: 1.95em;
+    height: 1.95em;
+    padding: 0;
+    justify-content: center;
 }
 
 .collection-title-action:hover,
@@ -90,6 +110,10 @@ html[data-theme-variant="custom"] .collection-title {
         margin-bottom: 20px;
         font-size: 20px;
         gap: 0.35rem;
+    }
+
+    .collection-title-meta {
+        font-size: 0.56em;
     }
 
     .collection-title-action {

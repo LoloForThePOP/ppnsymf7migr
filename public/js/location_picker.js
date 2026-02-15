@@ -9,9 +9,25 @@
     maxRadius: 200,
     storageKey: 'searchOverlayLocationV1',
     cookieKey: 'search_pref_location',
+    labelCookieKey: 'search_pref_location_label',
     cookieMaxAge: 60 * 60 * 24 * 30,
     loadPersisted: true,
     persistOnApply: true,
+  };
+
+  const buildOptions = (userOptions = {}) => {
+    const options = {
+      ...DEFAULT_OPTIONS,
+      ...userOptions,
+    };
+
+    options.defaultRadius = clamp(
+      Number(options.defaultRadius) || DEFAULT_OPTIONS.defaultRadius,
+      Number(options.minRadius) || DEFAULT_OPTIONS.minRadius,
+      Number(options.maxRadius) || DEFAULT_OPTIONS.maxRadius
+    );
+
+    return options;
   };
 
   const CURRENT_LOCATION_ICON = '<svg class="search-overlay__btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12 2c.55 0 1 .45 1 1v1.84c3.19.44 5.72 2.97 6.16 6.16H21c.55 0 1 .45 1 1s-.45 1-1 1h-1.84c-.44 3.19-2.97 5.72-6.16 6.16V21c0 .55-.45 1-1 1s-1-.45-1-1v-1.84c-3.19-.44-5.72-2.97-6.16-6.16H3c-.55 0-1-.45-1-1s.45-1 1-1h1.84c.44-3.19 2.97-5.72 6.16-6.16V3c0-.55.45-1 1-1Zm0 4.77A5.23 5.23 0 0 0 6.77 12 5.23 5.23 0 0 0 12 17.23 5.23 5.23 0 0 0 17.23 12 5.23 5.23 0 0 0 12 6.77Zm0 3.26a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg>';
@@ -35,6 +51,73 @@
     if (clean.length <= max) return clean;
     return `${clean.slice(0, max - 3).trimEnd()}...`;
   };
+
+  const sanitizeLocationLabel = (value, max = 120) => {
+    if (typeof value !== 'string') return '';
+    const singleLine = value.replace(/\s+/g, ' ').trim();
+    if (!singleLine) return '';
+    return singleLine.slice(0, max);
+  };
+
+  const areCloseCoordinates = (aLat, aLng, bLat, bLng, epsilon = 0.003) => (
+    Math.abs(Number(aLat) - Number(bLat)) <= epsilon && Math.abs(Number(aLng) - Number(bLng)) <= epsilon
+  );
+
+  let geocoderInstance = null;
+
+  const getGeocoder = () => {
+    if (geocoderInstance) {
+      return geocoderInstance;
+    }
+
+    if (typeof google === 'undefined' || !google.maps || !google.maps.Geocoder) {
+      return null;
+    }
+
+    geocoderInstance = new google.maps.Geocoder();
+    return geocoderInstance;
+  };
+
+  const extractReadableGeocodeLabel = (result) => {
+    if (!result || !Array.isArray(result.address_components)) {
+      return sanitizeLocationLabel(result?.formatted_address ?? '', 90);
+    }
+
+    const components = result.address_components;
+    const readComponent = (type) => components.find((item) => Array.isArray(item.types) && item.types.includes(type))?.long_name ?? '';
+
+    const locality = readComponent('locality') || readComponent('postal_town') || readComponent('administrative_area_level_2');
+    const region = readComponent('administrative_area_level_1');
+    const country = readComponent('country');
+
+    const parts = [locality, region, country].filter((part) => part && part.trim() !== '');
+    if (parts.length > 0) {
+      return sanitizeLocationLabel(parts.join(', '), 90);
+    }
+
+    return sanitizeLocationLabel(result.formatted_address ?? '', 90);
+  };
+
+  const resolveCoordinatesLabel = (lat, lng) => new Promise((resolve) => {
+    const geocoder = getGeocoder();
+    if (!geocoder) {
+      resolve('');
+      return;
+    }
+
+    geocoder.geocode(
+      { location: { lat: Number(lat), lng: Number(lng) } },
+      (results, status) => {
+        if (status !== 'OK' || !Array.isArray(results) || results.length === 0) {
+          resolve('');
+          return;
+        }
+
+        const preferred = results.find((result) => Array.isArray(result.types) && result.types.includes('locality')) || results[0];
+        resolve(extractReadableGeocodeLabel(preferred));
+      }
+    );
+  });
 
   const normalizeLocation = (location, options = DEFAULT_OPTIONS) => {
     if (!location || typeof location !== 'object') {
@@ -79,6 +162,22 @@
 
   const clearLocationCookie = (options) => {
     document.cookie = `${options.cookieKey}=; Path=/; Max-Age=0; SameSite=Lax`;
+    document.cookie = `${options.labelCookieKey}=; Path=/; Max-Age=0; SameSite=Lax`;
+  };
+
+  const readLocationLabelCookie = (options) => {
+    const escapedKey = escapeRegExp(options.labelCookieKey);
+    const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${escapedKey}=([^;]*)`));
+    if (!match || !match[1]) {
+      return '';
+    }
+
+    const decoded = decodeURIComponent(match[1]).trim();
+    if (!decoded) {
+      return '';
+    }
+
+    return decoded.slice(0, 120);
   };
 
   const parseLocationCookie = (options) => {
@@ -94,7 +193,7 @@
       return null;
     }
 
-    return normalizeLocation(
+    const parsed = normalizeLocation(
       {
         lat: parts[0],
         lng: parts[1],
@@ -103,6 +202,17 @@
       },
       options
     );
+
+    if (!parsed) {
+      return null;
+    }
+
+    const label = readLocationLabelCookie(options);
+    if (label) {
+      parsed.label = label;
+    }
+
+    return parsed;
   };
 
   const persistLocation = (location, options = DEFAULT_OPTIONS) => {
@@ -118,6 +228,12 @@
     }
 
     writeLocationCookie(normalized, options);
+    const label = (normalized.label || '').trim().slice(0, 120);
+    if (label) {
+      document.cookie = `${options.labelCookieKey}=${encodeURIComponent(label)}; Path=/; Max-Age=${options.cookieMaxAge}; SameSite=Lax`;
+    } else {
+      document.cookie = `${options.labelCookieKey}=; Path=/; Max-Age=0; SameSite=Lax`;
+    }
     return normalized;
   };
 
@@ -155,11 +271,7 @@
       return null;
     }
 
-    const options = {
-      ...DEFAULT_OPTIONS,
-      ...userOptions,
-    };
-    options.defaultRadius = clamp(Number(options.defaultRadius) || 10, options.minRadius, options.maxRadius);
+    const options = buildOptions(userOptions);
 
     const scope = root.closest('[data-location-picker-scope]') || root;
     const input = root.querySelector('[data-location-input]');
@@ -284,13 +396,9 @@
       emitState();
     };
 
-    const setPendingLocation = (location, { dirty = true } = {}) => {
+    const setPendingLocation = (location) => {
       if (!location) {
         state.pendingLocation = null;
-        if (!dirty) {
-          syncUi();
-          return;
-        }
         syncUi();
         return;
       }
@@ -319,6 +427,40 @@
       }
 
       syncUi();
+    };
+
+    const hydrateLabelFromCoordinates = (lat, lng) => {
+      resolveCoordinatesLabel(lat, lng).then((resolvedLabel) => {
+        const cleanLabel = sanitizeLocationLabel(resolvedLabel);
+        if (!cleanLabel) {
+          return;
+        }
+
+        let changed = false;
+
+        if (state.pendingLocation
+          && areCloseCoordinates(state.pendingLocation.lat, state.pendingLocation.lng, lat, lng)
+          && (state.pendingLocation.label.trim() === '' || state.pendingLocation.label === 'Autour de moi')
+        ) {
+          state.pendingLocation.label = cleanLabel;
+          changed = true;
+        }
+
+        if (state.activeLocation
+          && areCloseCoordinates(state.activeLocation.lat, state.activeLocation.lng, lat, lng)
+          && (state.activeLocation.label.trim() === '' || state.activeLocation.label === 'Autour de moi')
+        ) {
+          state.activeLocation.label = cleanLabel;
+          if (options.persistOnApply !== false) {
+            persistLocation(state.activeLocation, options);
+          }
+          changed = true;
+        }
+
+        if (changed) {
+          syncUi();
+        }
+      });
     };
 
     const applyPending = () => {
@@ -381,14 +523,17 @@
       setStatus('Localisation en cours...', 'progress');
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
           setStatus('');
           setPendingLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
+            lat,
+            lng,
             label: 'Autour de moi',
             source: 'me',
             radius: state.lastRadius,
           });
+          hydrateLabelFromCoordinates(lat, lng);
         },
         () => {
           setStatus('Autorisation refusée.', 'error');
@@ -493,6 +638,7 @@
         if (radiusInput) {
           radiusInput.value = String(persisted.radius);
         }
+
       }
     }
 

@@ -7,7 +7,6 @@
   const statusEl = overlay.querySelector('#search-overlay-status');
   const countEl = overlay.querySelector('#search-overlay-count');
   const countTotalEl = overlay.querySelector('#search-overlay-count-total');
-  const countLocationEl = overlay.querySelector('#search-overlay-count-location');
   const emptyEl = overlay.querySelector('#search-overlay-empty');
   const categoriesEl = overlay.querySelector('#search-overlay-categories');
   const suggestBoxEl = overlay.querySelector('[data-search-suggest-box]');
@@ -79,15 +78,12 @@
     }
   };
 
-  const setCountLines = (totalLabel, locationLabel) => {
+  const setCountLines = (totalLabel) => {
     if (countTotalEl) {
       countTotalEl.textContent = totalLabel || '';
     }
-    if (countLocationEl) {
-      countLocationEl.textContent = locationLabel || '';
-    }
     if (countEl) {
-      const hasContent = (totalLabel && totalLabel.length > 0) || (locationLabel && locationLabel.length > 0);
+      const hasContent = totalLabel && totalLabel.length > 0;
       countEl.classList.toggle('d-none', !hasContent);
     }
   };
@@ -614,7 +610,7 @@
       categoryCounts = [];
       currentPage = 1;
       setStatus('Tapez au moins 2 caracteres.');
-      setCountLines('', '');
+      setCountLines('');
       renderCategories([], []);
       renderResults([]);
       updatePagination();
@@ -701,7 +697,7 @@
     renderCategories([], []);
     renderResults([]);
     setStatus('Tapez au moins 2 caracteres.');
-    setCountLines('', '');
+    setCountLines('');
     setEmpty(false);
     updatePagination();
     renderRecentQueries();
@@ -913,7 +909,7 @@
 
   const applyCountLabel = () => {
     if (totalCount === 0) {
-      setCountLines('', '');
+      setCountLines('');
       return;
     }
     const plural = totalCount > 1 ? 's' : '';
@@ -930,7 +926,7 @@
       totalLabel += ` (${selectedText})`;
     }
 
-    setCountLines(totalLabel, '');
+    setCountLines(totalLabel);
   };
 
   const performSearch = (term, { page = 1, append = false } = {}) => {
@@ -993,7 +989,7 @@
         currentPage = 1;
         renderCategories([], []);
         renderResults([]);
-        setCountLines('', '');
+        setCountLines('');
         setEmpty(true, 'Une erreur est survenue.');
         updatePagination();
       })
@@ -1017,7 +1013,7 @@
       renderCategories([], []);
       renderResults([]);
       setStatus('Tapez au moins 2 caracteres ou choisissez une localisation.');
-      setCountLines('', '');
+      setCountLines('');
       setEmpty(false);
       updatePagination();
       renderRecentQueries();
@@ -1108,7 +1104,7 @@
           setStatus('Tapez au moins 2 caracteres.');
           renderCategories([], []);
           renderResults([]);
-          setCountLines('', '');
+          setCountLines('');
           updatePagination();
         }
       },

@@ -1,19 +1,23 @@
 {% set hasLocation = hasHomepageLocationHint|default(false) %}
 
-<section class="home-around-you-prompt card my-4">
-    <div class="card-body home-around-you-prompt__body">
-        <div class="home-around-you-prompt__content">
-            <div class="home-around-you-prompt__title">Autour de vous</div>
-            <p class="home-around-you-prompt__text">
-                {% if hasLocation %}
-                    Votre localisation est active. Vous pouvez la modifier à tout moment.
-                {% else %}
+{% if not hasLocation %}
+    <section class="home-around-you-prompt card my-5">
+        <div class="card-body home-around-you-prompt__body">
+            <div class="home-around-you-prompt__content">
+                <div class="home-around-you-prompt__eyebrow">Découverte locale</div>
+                <div class="home-around-you-prompt__title">
+                    <svg class="home-around-you-prompt__title-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 4.69 7 13 7 13s7-8.31 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"/>
+                    </svg>
+                    Autour de vous
+                </div>
+                <p class="home-around-you-prompt__text">
                     Activez votre localisation ou choisissez un lieu pour découvrir des projets proches.
-                {% endif %}
-            </p>
+                </p>
+            </div>
+            <button class="btn home-around-you-prompt__action" type="button" data-search-trigger>
+                Choisir un lieu
+            </button>
         </div>
-        <button class="btn btn-light home-around-you-prompt__action" type="button" data-home-location-trigger>
-            {{ hasLocation ? 'Modifier la localisation' : 'Choisir un lieu' }}
-        </button>
-    </div>
-</section>
+    </section>
+{% endif %}

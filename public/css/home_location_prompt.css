@@ -1,7 +1,11 @@
 .home-around-you-prompt {
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid color-mix(in srgb, var(--theme-border) 72%, var(--theme-accent) 28%);
+    border-radius: 16px;
+    background:
+        radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--theme-accent) 13%, transparent), transparent 58%),
+        radial-gradient(120% 140% at 100% 100%, color-mix(in srgb, var(--theme-title) 8%, transparent), transparent 62%),
+        color-mix(in srgb, var(--theme-surface) 88%, var(--theme-bg) 12%);
+    box-shadow: 0 14px 32px color-mix(in srgb, var(--theme-bg) 78%, transparent);
 }
 
 .home-around-you-prompt__body {
@@ -17,19 +21,53 @@
     flex: 1 1 320px;
 }
 
+.home-around-you-prompt__eyebrow {
+    margin-bottom: 0.2rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--theme-text-muted) 70%, var(--theme-accent) 30%);
+}
+
 .home-around-you-prompt__title {
-    font-size: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    font-size: 1.18rem;
     font-weight: 700;
     margin-bottom: 0.35rem;
+    color: var(--theme-title);
+}
+
+.home-around-you-prompt__title-icon {
+    width: 1.05rem;
+    height: 1.05rem;
+    color: var(--theme-accent);
 }
 
 .home-around-you-prompt__text {
     margin: 0;
-    opacity: 0.9;
+    color: color-mix(in srgb, var(--theme-text) 88%, var(--theme-text-muted) 12%);
+    line-height: 1.45;
 }
 
 .home-around-you-prompt__action {
+    border: 1px solid color-mix(in srgb, var(--theme-accent) 66%, var(--theme-border) 34%);
+    background: color-mix(in srgb, var(--theme-accent) 16%, var(--theme-surface) 84%);
+    color: var(--theme-title);
+    border-radius: 999px;
+    padding: 0.52rem 1rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
     white-space: nowrap;
+}
+
+.home-around-you-prompt__action:hover,
+.home-around-you-prompt__action:focus-visible {
+    border-color: var(--theme-accent);
+    background: color-mix(in srgb, var(--theme-accent) 24%, var(--theme-surface) 76%);
+    color: var(--theme-title);
 }
 
 body.home-location-modal-open {
@@ -110,6 +148,10 @@ body.home-location-modal-open {
 @media (max-width: 640px) {
     .home-around-you-prompt__action {
         width: 100%;
+    }
+
+    .home-around-you-prompt {
+        border-radius: 14px;
     }
 
     .home-location-modal {

@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\PPBase;
 use App\Entity\News;
 use App\Entity\User;
 use App\Form\NewsType;
@@ -10,6 +9,7 @@ use App\Repository\CommentRepository;
 use App\Repository\PPBaseRepository;
 use App\Service\HomeFeed\HomeFeedAssembler;
 use App\Service\HomeFeed\HomeFeedContext;
+use App\Service\HomeFeed\HomepageLocationContextResolver;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,6 +25,7 @@ final class HomeController extends AbstractController
         PPBaseRepository $ppBaseRepository,
         CommentRepository $commentRepository,
         HomeFeedAssembler $homeFeedAssembler,
+        HomepageLocationContextResolver $homepageLocationContextResolver,
         #[Autowire('%app.home_feed.cards_per_block%')] int $cardsPerBlock,
         #[Autowire('%app.home_feed.max_blocks.logged%')] int $maxBlocksLogged,
         #[Autowire('%app.home_feed.max_blocks.anon%')] int $maxBlocksAnon,
@@ -60,7 +61,9 @@ final class HomeController extends AbstractController
         }
 
         $anonCategoryHints = $viewer ? [] : $this->extractAnonCategoryHints($request);
-        $locationHint = $this->extractHomepageLocationHint($request);
+        $locationContext = $homepageLocationContextResolver->resolve($request);
+        $locationHint = $locationContext['hint'];
+        $homepageLocationSummary = $locationContext['summary'];
         $feedContext = new HomeFeedContext(
             viewer: $viewer,
             cardsPerBlock: $cardsPerBlock,
@@ -77,6 +80,8 @@ final class HomeController extends AbstractController
             'recentComments' => $recentComments,
             'feedBlocks' => $feedBlocks,
             'hasHomepageLocationHint' => $locationHint !== null,
+            'homepageLocationSummaryInline' => $homepageLocationSummary['inline'] ?? '',
+            'homepageLocationSummaryInfo' => $homepageLocationSummary['info'] ?? '',
             'addNewsForm' => $addNewsForm ? $addNewsForm->createView() : null,
         ]);
     }
@@ -104,48 +109,5 @@ final class HomeController extends AbstractController
         }
 
         return array_slice(array_keys($hints), 0, 8);
-    }
-
-    /**
-     * @return array{lat: float, lng: float, radius: float}|null
-     */
-    private function extractHomepageLocationHint(Request $request): ?array
-    {
-        $raw = trim((string) $request->cookies->get('search_pref_location', ''));
-        if ($raw === '') {
-            return null;
-        }
-
-        $decoded = rawurldecode($raw);
-        $parts = preg_split('/[|,]+/', $decoded) ?: [];
-        if (count($parts) < 2) {
-            return null;
-        }
-
-        $lat = filter_var($parts[0], FILTER_VALIDATE_FLOAT);
-        $lng = filter_var($parts[1], FILTER_VALIDATE_FLOAT);
-        $radius = count($parts) >= 3
-            ? filter_var($parts[2], FILTER_VALIDATE_FLOAT)
-            : 10.0;
-
-        if ($lat === false || $lng === false) {
-            return null;
-        }
-
-        $lat = (float) $lat;
-        $lng = (float) $lng;
-        if ($lat < -90.0 || $lat > 90.0 || $lng < -180.0 || $lng > 180.0) {
-            return null;
-        }
-
-        if ($radius === false) {
-            $radius = 10.0;
-        }
-
-        return [
-            'lat' => $lat,
-            'lng' => $lng,
-            'radius' => max(1.0, min(200.0, (float) $radius)),
-        ];
     }
 }

@@ -1018,8 +1018,7 @@ html[data-theme-tone="dark"] .search-overlay__suggestions-item {
         width: calc(100vw - 58px);
     }
 
-    .search-overlay__category-count,
-    .search-overlay__count-line--details {
+    .search-overlay__category-count {
         display: none;
     }
 }

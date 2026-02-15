@@ -76,7 +76,11 @@
 
         {% if app.user %}
 
-            {% include "home/_connected_user_upper_display.html.twig" with { hasHomepageLocationHint: hasHomepageLocationHint|default(false) } %}
+            {% include "home/_connected_user_upper_display.html.twig" with {
+                hasHomepageLocationHint: hasHomepageLocationHint|default(false),
+                homepageLocationSummaryInline: homepageLocationSummaryInline|default(''),
+                homepageLocationSummaryInfo: homepageLocationSummaryInfo|default('')
+            } %}
 
         {% endif %}
 
@@ -116,21 +120,24 @@
 
 
         {% if not app.user %}
-            {% include "home/_around_you_prompt.html.twig" with { hasHomepageLocationHint: hasHomepageLocationHint|default(false) } %}
             {% for block in feedBlocks %}
+                {% set blockTitleMeta = block.key == 'around-you' ? homepageLocationSummaryInline|default('') : '' %}
+                {% set blockTitleInfo = block.key == 'around-you' ? homepageLocationSummaryInfo|default('') : '' %}
                 {% set blockTitleAction = block.key == 'around-you'
                     ? {
-                        label: 'Modifier',
+                        label: 'Modifier la localisation',
+                        iconOnly: true,
                         attrs: {
                             'data-home-location-trigger': '',
                             'aria-label': 'Modifier la localisation de la section Autour de vous'
                         }
                     }
                     : {} %}
-                <div class="container my-5">
-                    {{ project_collection(block.title, block.items, '', 'hide-335', '', block.stats, blockTitleAction) }}
+                <div class="container my-5"{% if block.key == 'around-you' %} id="home-around-you-rail"{% endif %}>
+                    {{ project_collection(block.title, block.items, '', 'hide-335', '', block.stats, blockTitleAction, blockTitleMeta, blockTitleInfo) }}
                 </div>
             {% endfor %}
+            {% include "home/_around_you_prompt.html.twig" with { hasHomepageLocationHint: hasHomepageLocationHint|default(false) } %}
         {% endif %}
 
         {% include "home/_around_you_location_modal.html.twig" %}

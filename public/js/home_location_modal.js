@@ -47,10 +47,12 @@
     }
   };
 
-  const refreshHomeIfChanged = () => {
+  const refreshHomeIfChanged = (anchorId = '') => {
     const currentLocation = readPersistedLocation();
     if (serializeLocation(currentLocation) !== serializeLocation(locationBeforeOpen)) {
-      window.location.reload();
+      const url = new URL(window.location.href);
+      url.hash = anchorId ? `#${anchorId}` : '';
+      window.location.assign(url.toString());
     }
   };
 
@@ -62,7 +64,7 @@
     picker = window.ProponLocationPicker.create(pickerRoot, {
       onApply: () => {
         closeModal();
-        refreshHomeIfChanged();
+        refreshHomeIfChanged('home-around-you-rail');
       },
       onReset: () => {
         closeModal();

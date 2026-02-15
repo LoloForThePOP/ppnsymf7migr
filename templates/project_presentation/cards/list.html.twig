@@ -1,8 +1,9 @@
 
 
 
-{% macro collection ( title="", items, class="", hideThreshold = "hide-335", icon = "", stats = {}, titleAction = {} ) %}
+{% macro collection ( title="", items, class="", hideThreshold = "hide-335", icon = "", stats = {}, titleAction = {}, titleMeta = '', titleInfo = '' ) %}
     {% from 'project_presentation/cards/card.html.twig' import project_card %}
+    {% from '_partials/ui_helpers.html.twig' import info_hint %}
 
     <div class="titled-projects-container {{class}}">
 
@@ -15,11 +16,18 @@
             {% endif %}
             
             <span class="collection-title-text">{{ title }}</span>
+            {% if titleMeta %}
+                <span class="collection-title-meta">{{ titleMeta }}</span>
+            {% endif %}
+            {% if titleInfo %}
+                {{ info_hint(titleInfo, { class: 'collection-title-info' }) }}
+            {% endif %}
 
             {% set actionLabel = titleAction.label|default('') %}
-            {% if actionLabel %}
+            {% set actionIconOnly = titleAction.iconOnly|default(false) %}
+            {% if actionLabel or actionIconOnly %}
                 {% set actionAttrs = titleAction.attrs|default({}) %}
-                <button class="collection-title-action" type="button"
+                <button class="collection-title-action{{ actionIconOnly ? ' is-icon-only' : '' }}" type="button"
                     {% for attr, value in actionAttrs %}
                         {{- ' ' ~ attr }}="{{ value|e('html_attr') }}"
                     {% endfor %}
@@ -27,7 +35,11 @@
                     <svg class="collection-title-action-icon" viewBox="0 0 24 24" aria-hidden="true">
                         <path fill="currentColor" d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25Zm18.71-11.04a1 1 0 0 0 0-1.41L19.2 2.29a1 1 0 0 0-1.41 0l-1.84 1.84 3.75 3.75 2.01-1.67Z"/>
                     </svg>
-                    <span>{{ actionLabel }}</span>
+                    {% if actionIconOnly %}
+                        <span class="visually-hidden">{{ actionLabel|default('Modifier') }}</span>
+                    {% else %}
+                        <span>{{ actionLabel }}</span>
+                    {% endif %}
                 </button>
             {% endif %}
         

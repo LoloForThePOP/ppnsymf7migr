@@ -7,6 +7,7 @@ Quick entry points for the most-used internal docs.
 - `docs/article-ui-status.md`: current status of Article feature exposure in UI, with fast re-enable checklist.
 - `docs/theme-management.md`: theme architecture, selector behavior, variables, and tuning workflow.
 - `docs/theme-icons.md`: icon theming rules and implementation notes.
+- `docs/ui-tooltip-pattern.md`: shared custom tooltip baseline for inline info hints.
 
 ## Recommendation
 

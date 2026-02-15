@@ -1,0 +1,11 @@
+{% macro info_hint(text, options = {}) %}
+    {% set hintText = text|default('')|trim %}
+    {% if hintText %}
+        {% set extraClass = options.class|default('') %}
+        {% set iconText = options.icon|default('i') %}
+        <span class="ui-info-hint {{ extraClass }}" tabindex="0" role="note" aria-label="{{ hintText }}">
+            <span class="ui-info-hint__icon" aria-hidden="true">{{ iconText }}</span>
+            <span class="ui-info-hint__tooltip" role="tooltip">{{ hintText }}</span>
+        </span>
+    {% endif %}
+{% endmacro %}

@@ -9,6 +9,7 @@ Use this section as the quick reference before reading details.
 - `HomeController`:
   - Creates `HomeFeedContext` for current visitor.
   - Reads anon cookie `anon_pref_categories` when user is not logged in.
+  - Delegates homepage location hint parsing/summary to `HomepageLocationContextResolver`.
   - Calls feed assembly and passes blocks to homepage Twig.
 - `HomeFeedContext`:
   - Carries visitor type (logged-in or anon), cards/block, max blocks, anon category hints.
@@ -21,8 +22,12 @@ Use this section as the quick reference before reading details.
   - Logged-in source: `user_preferences.fav_categories` (categories only).
   - Logged-in fallback: categories from user's recent created projects.
   - Anonymous source: `anon_pref_categories` cookie (categories only).
+- `HomepageLocationContextResolver`:
+  - Reads `search_pref_location` + `search_pref_location_label` cookies.
+  - Validates location bounds and radius.
+  - Builds human-readable inline/info hints for `Autour de vous` header.
 - `NearbyLocationFeedBlockProvider`:
-  - Logged-in + anonymous source: `search_pref_location` cookie (lat/lng/radius).
+  - Logged-in + anonymous source: validated location hint from controller context (cookie-backed).
   - Fetches projects with places in a geographic bounding box.
 - `location_picker.js` + `search/_location_picker.html.twig`:
   - One shared location picker UI/state module.
@@ -141,13 +146,6 @@ Definition of opt-out here:
   - Audience: logged-in + anonymous
   - Feed source: `search_pref_location` cookie (lat/lng/radius), then `places` geoloc filters
   - Provider: `NearbyLocationFeedBlockProvider`
-
-## Location UX Flow
-
-- Search overlay and homepage modal both use the same picker component (`search/_location_picker.html.twig` + `public/js/location_picker.js`).
-- When user applies or resets location, picker updates `search_pref_location`.
-- Homepage rail `Autour de vous` reads that location signal server-side via `HomeController`.
-- Homepage modal (`home_location_modal.js`) reloads page after apply/reset so rail updates immediately.
 - `trending`
   - Audience: logged-in + anonymous
   - Feed source: published projects + engagement/freshness scoring (likes/comments/views/time decay)
@@ -156,6 +154,17 @@ Definition of opt-out here:
   - Audience: logged-in + anonymous
   - Feed source: latest published projects (excluding own projects for logged-in users)
   - Provider: `LatestPublishedFeedBlockProvider`
+
+## Location UX Flow
+
+- First-time location choice is guided from homepage prompt to search overlay (`data-search-trigger`).
+- Homepage rail header action (`Modifier`) opens the dedicated modal for updates (`data-home-location-trigger`).
+- Search overlay and homepage modal use the same picker component (`search/_location_picker.html.twig` + `public/js/location_picker.js`).
+- When user applies or resets location, picker updates `search_pref_location`.
+- Picker reverse-geocodes coordinates (Google Geocoder) to persist a readable place label when possible.
+- Homepage server reads that location signal via `HomepageLocationContextResolver`.
+- Homepage rail adds a lightweight context hint (`Basé sur votre localisation récente ... · Rayon ... km`) to avoid ambiguity.
+- Homepage modal (`home_location_modal.js`) reloads page after apply/reset so rail updates immediately.
 
 ## Anonymous Personalization
 
