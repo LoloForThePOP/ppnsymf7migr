@@ -4,6 +4,7 @@ namespace App\Controller\ProjectPresentation;
 
 use App\Entity\News;
 use App\Entity\PPBase;
+use App\Entity\User;
 use App\Form\NewsType;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\ProjectPresentation\LogoType;
@@ -21,6 +22,7 @@ use App\Form\ProjectPresentation\TextDescriptionType;
 use App\Form\ProjectPresentation\CategoriesKeywordsType;
 use App\Service\PresentationEventLogger;
 use App\Service\ProductTourService;
+use App\Service\Recommendation\UserCategoryPreferenceSignalUpdater;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Entity\PresentationEvent;
@@ -41,6 +43,7 @@ class EditShowController extends AbstractController
         EntityManagerInterface $em,
         ProductTourService $productTourService,
         PresentationEventLogger $eventLogger,
+        UserCategoryPreferenceSignalUpdater $userCategoryPreferenceSignalUpdater,
     ): Response
     {
         $showThemeSelectorTour = $productTourService->shouldShowAfterVisits(
@@ -77,6 +80,10 @@ class EditShowController extends AbstractController
         if ($id !== null && !in_array($id, $viewed, true)) {
             $presentation->getExtra()->incrementViews();
             $eventLogger->log($presentation, PresentationEvent::TYPE_VIEW);
+            $viewer = $this->getUser();
+            if ($viewer instanceof User) {
+                $userCategoryPreferenceSignalUpdater->onView($viewer, $presentation, false);
+            }
             $needsFlush = true;
             $viewed[] = $id;
             $session->set('pp_viewed_ids', $viewed);

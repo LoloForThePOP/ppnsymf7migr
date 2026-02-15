@@ -11,6 +11,7 @@ Should it be personalized (logged-in users) or general? general: anon / logged i
 
 Where do you want recs? Homepage.
 
+Simple keywords based approach about user last seen projects (anonymous or logged in user). This section would be called something like Domaines d'intérêt or so.
 
 ----------------------------------------------------------
 
@@ -31,7 +32,7 @@ user_preferences table: user_id, fav_categories (array/string), fav_keywords (ar
 
 My ideas over previous interactions with AI about a recommandation system for the app:
 
-- Simple keywords based approach about user last seen projects (anonymous or logged in user) (maybe we can mix with above, you decide)
+
 
 Above might be ranked with some external signals (views, likes, follow, (+ share?)) 
 
@@ -60,7 +61,7 @@ Filter out unpublished/deleted.
 
 - Safety/quality: filter by language, status OK, enough content/thumbnail. Avoid recommending the same project twice in nearby lists.
 
-- "Specific categories" idea: Maybe we can compute keywords with enough redudancy AND / OR categories intersections and then ask AI to taylor some insigths from these: AI creates a title with an emoji + a search query for each insight into our data so that when an user seems to have a browsing profile approaching an AI tailored specific category, we provide it to the user in Homepage or bellow 3P. EX. AI created "Transports de demain" or "Transports écologiques" from our data. Do you see what I mean?
+- "Specific keywords" idea: Maybe we can compute keywords with enough redudancy AND / OR categories intersections and then ask AI to taylor some insigths from these: AI creates a title with an emoji + a search query for each insight into our data so that when an user seems to have a browsing profile approaching an AI tailored specific category, we provide it to the user in Homepage or bellow 3P. EX. AI created "Transports de demain" or "Transports écologiques" from our data. Do you see what I mean?
 
 
 Capture signals:

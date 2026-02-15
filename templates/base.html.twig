@@ -483,6 +483,9 @@
         <script src="/js/location_picker.js"></script>
         <script src="/js/project_card_bookmark.js"></script>
         <script src="/js/search_overlay.js"></script>
+        {% if not app.user %}
+            <script src="/js/home_anon_preferences.js"></script>
+        {% endif %}
         
 
 

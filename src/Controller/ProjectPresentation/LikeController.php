@@ -7,7 +7,7 @@ use App\Entity\PPBase;
 use App\Entity\User;
 use App\Repository\LikeRepository;
 use App\Service\AssessPPScoreService;
-use App\Service\Recommendation\UserPreferenceUpdater;
+use App\Service\Recommendation\UserCategoryPreferenceSignalUpdater;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,7 +32,7 @@ class LikeController extends AbstractController
         EntityManagerInterface $manager,
         LikeRepository $likeRepo,
         AssessPPScoreService $scoreService,
-        UserPreferenceUpdater $userPreferenceUpdater,
+        UserCategoryPreferenceSignalUpdater $userCategoryPreferenceSignalUpdater,
         #[Autowire(service: 'limiter.like_toggle_user')] RateLimiterFactory $likeLimiter,
     ): JsonResponse {
 
@@ -70,10 +70,10 @@ class LikeController extends AbstractController
             $presentation->removeLike($existingLike);
             $manager->remove($existingLike);
             $scoreService->scoreUpdate($presentation);
-            $manager->flush();
             if ($user instanceof User) {
-                $userPreferenceUpdater->recomputeForUser($user, true);
+                $userCategoryPreferenceSignalUpdater->onLike($user, $presentation, false, false);
             }
+            $manager->flush();
 
             return new JsonResponse([
                 'code' => 200,
@@ -91,10 +91,10 @@ class LikeController extends AbstractController
         $presentation->addLike($like);
         $manager->persist($like);
         $scoreService->scoreUpdate($presentation);
-        $manager->flush();
         if ($user instanceof User) {
-            $userPreferenceUpdater->recomputeForUser($user, true);
+            $userCategoryPreferenceSignalUpdater->onLike($user, $presentation, true, false);
         }
+        $manager->flush();
 
         return new JsonResponse([
             'code' => 200,

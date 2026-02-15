@@ -6,7 +6,7 @@ use App\Entity\Bookmark;
 use App\Entity\PPBase;
 use App\Entity\User;
 use App\Repository\BookmarkRepository;
-use App\Service\Recommendation\UserPreferenceUpdater;
+use App\Service\Recommendation\UserCategoryPreferenceSignalUpdater;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,7 +27,7 @@ class BookmarkController extends AbstractController
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         EntityManagerInterface $manager,
         BookmarkRepository $bookmarkRepo,
-        UserPreferenceUpdater $userPreferenceUpdater,
+        UserCategoryPreferenceSignalUpdater $userCategoryPreferenceSignalUpdater,
         #[Autowire(service: 'limiter.bookmark_toggle_user')] RateLimiterFactory $bookmarkLimiter,
     ): JsonResponse {
         $guard = $this->guardBookmarkMutation($request, $presentation, $bookmarkLimiter);
@@ -42,12 +42,18 @@ class BookmarkController extends AbstractController
         ]);
 
         if ($existingBookmark) {
-            $this->removeBookmark($presentation, $existingBookmark, $manager, $user, $userPreferenceUpdater);
+            $this->removeBookmark(
+                $presentation,
+                $existingBookmark,
+                $manager,
+                $user,
+                $userCategoryPreferenceSignalUpdater
+            );
 
             return $this->successResponse($bookmarkRepo, $presentation, 'removed', 'Bookmark removed.');
         }
 
-        $this->addBookmark($presentation, $manager, $user, $userPreferenceUpdater);
+        $this->addBookmark($presentation, $manager, $user, $userCategoryPreferenceSignalUpdater);
 
         return $this->successResponse($bookmarkRepo, $presentation, 'created', 'Bookmarked.');
     }
@@ -59,7 +65,7 @@ class BookmarkController extends AbstractController
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
         EntityManagerInterface $manager,
         BookmarkRepository $bookmarkRepo,
-        UserPreferenceUpdater $userPreferenceUpdater,
+        UserCategoryPreferenceSignalUpdater $userCategoryPreferenceSignalUpdater,
         #[Autowire(service: 'limiter.bookmark_toggle_user')] RateLimiterFactory $bookmarkLimiter,
     ): JsonResponse {
         $guard = $this->guardBookmarkMutation($request, $presentation, $bookmarkLimiter);
@@ -76,7 +82,7 @@ class BookmarkController extends AbstractController
             return $this->successResponse($bookmarkRepo, $presentation, 'already_exists', 'Already bookmarked.');
         }
 
-        $this->addBookmark($presentation, $manager, $user, $userPreferenceUpdater);
+        $this->addBookmark($presentation, $manager, $user, $userCategoryPreferenceSignalUpdater);
 
         return $this->successResponse($bookmarkRepo, $presentation, 'created', 'Bookmarked.');
     }
@@ -114,13 +120,13 @@ class BookmarkController extends AbstractController
         PPBase $presentation,
         EntityManagerInterface $manager,
         User $user,
-        UserPreferenceUpdater $userPreferenceUpdater,
+        UserCategoryPreferenceSignalUpdater $userCategoryPreferenceSignalUpdater,
     ): void {
         $bookmark = (new Bookmark())->setUser($user);
         $presentation->addBookmark($bookmark);
         $manager->persist($bookmark);
+        $userCategoryPreferenceSignalUpdater->onBookmark($user, $presentation, true, false);
         $manager->flush();
-        $userPreferenceUpdater->recomputeForUser($user, true);
     }
 
     private function removeBookmark(
@@ -128,12 +134,12 @@ class BookmarkController extends AbstractController
         Bookmark $bookmark,
         EntityManagerInterface $manager,
         User $user,
-        UserPreferenceUpdater $userPreferenceUpdater,
+        UserCategoryPreferenceSignalUpdater $userCategoryPreferenceSignalUpdater,
     ): void {
         $presentation->removeBookmark($bookmark);
         $manager->remove($bookmark);
+        $userCategoryPreferenceSignalUpdater->onBookmark($user, $presentation, false, false);
         $manager->flush();
-        $userPreferenceUpdater->recomputeForUser($user, true);
     }
 
     private function successResponse(

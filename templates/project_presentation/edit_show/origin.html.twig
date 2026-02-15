@@ -125,6 +125,16 @@
     {% set presentationCategories = presentation.categories %}
 
     {% set countCategories = presentationCategories | length %}
+    {% set presentationCategoryTokens = [] %}
+    {% if presentationCategories %}
+        {% for category in presentationCategories %}
+            {% set token = category.uniqueName is defined ? category.uniqueName|trim|lower : '' %}
+            {% if token and token not in presentationCategoryTokens %}
+                {% set presentationCategoryTokens = presentationCategoryTokens|merge([token]) %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    {% set presentationCategoryData = presentationCategoryTokens|join(',') %}
 
     {% set countComments = presentation.comments | length %}
 
@@ -174,7 +184,12 @@
         {% include 'project_presentation/edit_show/share_modal.html.twig' %}
     
 
-    <div class="pp-container {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}} container">
+    <div
+        class="pp-container {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}} container"
+        data-pp-view-track="1"
+        data-pp-view-id="{{ presentation.stringId ?: presentation.id }}"
+        {% if presentationCategoryData %}data-pp-categories="{{ presentationCategoryData }}"{% endif %}
+    >
 
 
         {% if userPresenter %}

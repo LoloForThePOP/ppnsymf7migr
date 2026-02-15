@@ -938,6 +938,16 @@
       const card = document.createElement('article');
       card.className = 'search-result-card';
 
+      const categoryTokens = Array.isArray(item.categories)
+        ? item.categories
+            .map((category) => String(category?.uniqueName || '').trim().toLowerCase())
+            .filter((slug) => /^[a-z0-9_-]{1,40}$/.test(slug))
+        : [];
+      const uniqueCategoryTokens = Array.from(new Set(categoryTokens));
+      if (uniqueCategoryTokens.length > 0) {
+        card.setAttribute('data-pp-categories', uniqueCategoryTokens.join(','));
+      }
+
       const link = document.createElement('a');
       link.href = item.url || '#';
       link.addEventListener('click', () => {

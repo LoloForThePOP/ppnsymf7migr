@@ -29,7 +29,9 @@ final class RecomputeUserPreferencesCommand extends Command
     {
         $this
             ->addOption('user-id', null, InputOption::VALUE_REQUIRED, 'Recalculer un seul utilisateur (id)')
-            ->addOption('limit', null, InputOption::VALUE_REQUIRED, 'Limiter le nombre d’utilisateurs traités', 200);
+            ->addOption('limit', null, InputOption::VALUE_REQUIRED, 'Limiter le nombre d’utilisateurs traités', 200)
+            ->addOption('all', null, InputOption::VALUE_NONE, 'Recalculer tous les utilisateurs (mode batch).')
+            ->addOption('batch-size', null, InputOption::VALUE_REQUIRED, 'Taille de lot en mode --all', 500);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -37,6 +39,21 @@ final class RecomputeUserPreferencesCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $userId = $input->getOption('user-id');
         $limit = max(1, (int) $input->getOption('limit'));
+        $all = (bool) $input->getOption('all');
+        $batchSize = max(50, (int) $input->getOption('batch-size'));
+
+        if ($all && $userId !== null && $userId !== '') {
+            $io->error('Les options --all et --user-id sont incompatibles.');
+
+            return Command::INVALID;
+        }
+
+        if ($all) {
+            $processed = $this->recomputeAllUsers($batchSize, $io);
+            $io->success(sprintf('user_preferences recalculé(s) (mode --all): %d', $processed));
+
+            return Command::SUCCESS;
+        }
 
         $users = $this->loadUsers($userId, $limit);
         if ($users === []) {
@@ -60,6 +77,46 @@ final class RecomputeUserPreferencesCommand extends Command
         $io->success(sprintf('user_preferences recalculé(s): %d', $processed));
 
         return Command::SUCCESS;
+    }
+
+    private function recomputeAllUsers(int $batchSize, SymfonyStyle $io): int
+    {
+        $repo = $this->entityManager->getRepository(User::class);
+        $processed = 0;
+        $lastId = 0;
+
+        while (true) {
+            $users = $repo->createQueryBuilder('u')
+                ->andWhere('u.id > :lastId')
+                ->setParameter('lastId', $lastId)
+                ->orderBy('u.id', 'ASC')
+                ->setMaxResults($batchSize)
+                ->getQuery()
+                ->getResult();
+
+            if ($users === []) {
+                break;
+            }
+
+            foreach ($users as $user) {
+                if (!$user instanceof User) {
+                    continue;
+                }
+
+                $this->userPreferenceUpdater->recomputeForUser($user, false);
+                $processed++;
+                $lastId = max($lastId, (int) $user->getId());
+            }
+
+            $this->entityManager->flush();
+            $this->entityManager->clear();
+
+            if (($processed % $batchSize) === 0) {
+                $io->writeln(sprintf('Progression --all: %d utilisateurs traités...', $processed));
+            }
+        }
+
+        return $processed;
     }
 
     /**

@@ -40,13 +40,16 @@ Use this section as the quick reference before reading details.
 - `LatestPublishedFeedBlockProvider`:
   - General source: latest published projects fallback.
 - `home_anon_preferences.js`:
-  - Tracks anon card clicks.
+  - Tracks anon 3P views (primary) and card clicks (secondary).
   - Stores category signals in localStorage.
   - Syncs top categories into cookie `anon_pref_categories`.
+- `UserCategoryPreferenceSignalUpdater`:
+  - Applies incremental category score deltas for logged users (like/follow/bookmark/view).
+  - Applies lightweight time decay before each update so old category signals fade naturally.
 - `UserPreferenceUpdater`:
   - Rebuilds `user_preferences` cache from source-of-truth interactions.
   - Stores both category and keyword scores.
-  - Homepage block rendering currently uses categories only.
+  - Used as batch/safety recompute path (including keyword scoring for future rails).
 
 ## Goals
 
@@ -170,10 +173,13 @@ Definition of opt-out here:
 
 Anonymous hints are intentionally lightweight:
 
-- Browser stores category signals in localStorage: `public/js/home_anon_preferences.js`
+- Browser stores category signals in localStorage: `public/js/home_anon_preferences.js` (loaded for anon users from `templates/base.html.twig`).
+- Primary signal is anonymous 3P page view (once per presentation per browser session).
+- Secondary signal is anonymous card click (homepage + search overlay, low weight, once per card target per session).
 - Top category slugs are mirrored into cookie `anon_pref_categories`.
 - Backend reads the cookie in `HomeController` and injects hints into `HomeFeedContext`.
 - Category-affinity block uses these hints when available.
+- Category-affinity rails (anonymous and logged-in) now use a diversified recent pool (shuffled within bounded windows) to avoid static repeated cards.
 
 If no anon hints exist, homepage still renders general blocks (`trending`, `latest`).
 
@@ -211,15 +217,21 @@ Recompute service:
 - `src/Service/Recommendation/UserPreferenceUpdater.php`
   - Aggregates likes/follows/bookmarks/views with weights.
   - Writes normalized top category/keyword scores to `user_preferences`.
+- `src/Service/Recommendation/UserCategoryPreferenceSignalUpdater.php`
+  - Updates `fav_categories` incrementally on each logged interaction signal.
+  - Applies a simple half-life decay before each write.
 
 Commands:
 
-- `bin/console app:recompute-user-preferences [--user-id=ID] [--limit=200]`
+- `bin/console app:recompute-user-preferences [--user-id=ID] [--limit=200] [--all] [--batch-size=500]`
 - `bin/console app:compute-user-embeddings [--user-id=ID] [--limit=200] [--cooldown-hours=6] [--force]`
 
 Interactive actions:
 
-- Like/Follow/Bookmark controllers trigger preference recomputation for the acting user.
+- Like/Follow/Bookmark controllers apply incremental category updates for the acting user.
+- Logged-in 3P first view per session applies an incremental category update.
+- Full keyword/category rebuild remains available via recompute command (batch safety pass).
+- Production schedule helper: `bin/nightly_recompute_user_preferences.sh` (see `docs/recompute-user-preferences-schedule.md`).
 
 ## Creator Cap (Disabled by Default)
 

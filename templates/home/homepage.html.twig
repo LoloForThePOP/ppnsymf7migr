@@ -42,9 +42,6 @@
 
   <script src="/js/show_more_less_button.js"></script>
   <script src="/js/home_location_modal.js" defer></script>
-  {% if not app.user %}
-    <script src="/js/home_anon_preferences.js" defer></script>
-  {% endif %}
   {% if app.user and addNewsForm %}
     <script src="/js/news_creation.js"></script>
   {% endif %}

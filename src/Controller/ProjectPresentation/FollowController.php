@@ -7,7 +7,7 @@ use App\Entity\PPBase;
 use App\Entity\User;
 use App\Repository\FollowRepository;
 use App\Service\AssessPPScoreService;
-use App\Service\Recommendation\UserPreferenceUpdater;
+use App\Service\Recommendation\UserCategoryPreferenceSignalUpdater;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,7 +32,7 @@ class FollowController extends AbstractController
         EntityManagerInterface $manager,
         FollowRepository $followRepo,
         AssessPPScoreService $scoreService,
-        UserPreferenceUpdater $userPreferenceUpdater,
+        UserCategoryPreferenceSignalUpdater $userCategoryPreferenceSignalUpdater,
         #[Autowire(service: 'limiter.follow_toggle_user')] RateLimiterFactory $followLimiter,
     ): JsonResponse {
 
@@ -70,10 +70,10 @@ class FollowController extends AbstractController
             $presentation->removeFollower($existingFollow);
             $manager->remove($existingFollow);
             $scoreService->scoreUpdate($presentation);
-            $manager->flush();
             if ($user instanceof User) {
-                $userPreferenceUpdater->recomputeForUser($user, true);
+                $userCategoryPreferenceSignalUpdater->onFollow($user, $presentation, false, false);
             }
+            $manager->flush();
 
             return new JsonResponse([
                 'code' => 200,
@@ -90,10 +90,10 @@ class FollowController extends AbstractController
         $presentation->addFollower($follow);
         $manager->persist($follow);
         $scoreService->scoreUpdate($presentation);
-        $manager->flush();
         if ($user instanceof User) {
-            $userPreferenceUpdater->recomputeForUser($user, true);
+            $userCategoryPreferenceSignalUpdater->onFollow($user, $presentation, true, false);
         }
+        $manager->flush();
 
         return new JsonResponse([
             'code' => 200,

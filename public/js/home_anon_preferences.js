@@ -1,9 +1,15 @@
 (function () {
     var STORAGE_KEY = "pp_anon_profile_v1";
     var COOKIE_KEY = "anon_pref_categories";
+    var SESSION_TRACKED_VIEWS_KEY = "pp_anon_viewed_presentations_v1";
+    var SESSION_TRACKED_CLICKS_KEY = "pp_anon_clicked_cards_v1";
     var MAX_BUCKETS = 20;
     var MAX_COOKIE_CATEGORIES = 6;
     var COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
+    var SESSION_MAX_ITEMS = 400;
+    var CLICK_WEIGHT = 1;
+    var VIEW_WEIGHT = 4;
+    var memorySessionMaps = {};
 
     function safeParseProfile(raw) {
         if (!raw) {
@@ -24,7 +30,7 @@
                 }
                 var value = Number(source[key] || 0);
                 if (Number.isFinite(value) && value > 0) {
-                    counts[key] = Math.min(500, Math.round(value));
+                    counts[key] = Math.min(500, Math.round(value * 1000) / 1000);
                 }
             });
 
@@ -37,18 +43,106 @@
         }
     }
 
+    function safeParseSessionMap(raw) {
+        if (!raw) {
+            return {};
+        }
+
+        try {
+            var parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== "object") {
+                return {};
+            }
+
+            var map = {};
+            Object.keys(parsed).forEach(function (key) {
+                if (!key || key.length > 220) {
+                    return;
+                }
+
+                var timestamp = Number(parsed[key] || 0);
+                if (Number.isFinite(timestamp) && timestamp > 0) {
+                    map[key] = timestamp;
+                }
+            });
+
+            return map;
+        } catch (error) {
+            return {};
+        }
+    }
+
     function readProfile() {
-        return safeParseProfile(localStorage.getItem(STORAGE_KEY));
+        try {
+            return safeParseProfile(localStorage.getItem(STORAGE_KEY));
+        } catch (error) {
+            return { counts: {}, updatedAt: Date.now() };
+        }
     }
 
     function saveProfile(profile) {
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify({
-                counts: profile.counts,
-                updatedAt: Date.now()
-            })
-        );
+        try {
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify({
+                    counts: profile.counts,
+                    updatedAt: Date.now()
+                })
+            );
+        } catch (error) {
+            // ignore storage failures
+        }
+    }
+
+    function readSessionMap(storageKey) {
+        try {
+            return safeParseSessionMap(sessionStorage.getItem(storageKey));
+        } catch (error) {
+            return memorySessionMaps[storageKey] || {};
+        }
+    }
+
+    function saveSessionMap(storageKey, map) {
+        try {
+            sessionStorage.setItem(storageKey, JSON.stringify(map));
+        } catch (error) {
+            memorySessionMaps[storageKey] = map;
+        }
+    }
+
+    function trimSessionMap(map) {
+        var keys = Object.keys(map);
+        if (keys.length <= SESSION_MAX_ITEMS) {
+            return map;
+        }
+
+        keys.sort(function (a, b) {
+            return Number(map[b] || 0) - Number(map[a] || 0);
+        });
+
+        var keep = {};
+        keys.slice(0, SESSION_MAX_ITEMS).forEach(function (key) {
+            keep[key] = map[key];
+        });
+
+        return keep;
+    }
+
+    function markSessionUnique(storageKey, token) {
+        var normalizedToken = String(token || "").trim().toLowerCase();
+        if (!normalizedToken) {
+            return false;
+        }
+
+        var map = readSessionMap(storageKey);
+        if (Object.prototype.hasOwnProperty.call(map, normalizedToken)) {
+            return false;
+        }
+
+        map[normalizedToken] = Date.now();
+        map = trimSessionMap(map);
+        saveSessionMap(storageKey, map);
+        return true;
     }
 
     function sortedCategories(profile) {
@@ -98,51 +192,110 @@
             "; SameSite=Lax";
     }
 
-    function applyCardCategories(profile, cardElement) {
-        if (!cardElement) {
-            return false;
-        }
-
-        var raw = (cardElement.getAttribute("data-pp-categories") || "").trim();
-        if (!raw) {
+    function applyCategories(profile, rawCategoryTokens, weight) {
+        if (!rawCategoryTokens || weight <= 0) {
             return false;
         }
 
         var updated = false;
-        raw.split(",").forEach(function (token) {
+        rawCategoryTokens.split(",").forEach(function (token) {
             var slug = token.trim().toLowerCase();
             if (!/^[a-z0-9_-]{1,40}$/.test(slug)) {
                 return;
             }
 
             var current = Number(profile.counts[slug] || 0);
-            profile.counts[slug] = current + 1;
+            profile.counts[slug] = current + weight;
             updated = true;
         });
 
         return updated;
     }
 
+    function persistProfile(profile) {
+        trimProfile(profile);
+        saveProfile(profile);
+        syncCookie(profile);
+    }
+
+    function resolveLinkToken(link) {
+        var rawHref = "";
+        if (link && typeof link.getAttribute === "function") {
+            rawHref = String(link.getAttribute("href") || "");
+        }
+        if (!rawHref && link && typeof link.href === "string") {
+            rawHref = link.href;
+        }
+        rawHref = rawHref.trim();
+        if (!rawHref) {
+            return "";
+        }
+        if (rawHref === "#" || rawHref.indexOf("javascript:") === 0) {
+            return "";
+        }
+
+        try {
+            var url = new URL(rawHref, window.location.origin);
+            return "card:" + url.pathname.toLowerCase();
+        } catch (error) {
+            return "card:" + rawHref.slice(0, 200).toLowerCase();
+        }
+    }
+
+    function trackPresentationView(profile) {
+        var trackRoot = document.querySelector("[data-pp-view-track='1'][data-pp-view-id]");
+        if (!trackRoot) {
+            return;
+        }
+
+        var viewId = String(trackRoot.getAttribute("data-pp-view-id") || "").trim();
+        if (!viewId) {
+            return;
+        }
+
+        if (!markSessionUnique(SESSION_TRACKED_VIEWS_KEY, "pp:" + viewId)) {
+            return;
+        }
+
+        var categoryTokens = String(trackRoot.getAttribute("data-pp-categories") || "").trim();
+        if (!applyCategories(profile, categoryTokens, VIEW_WEIGHT)) {
+            return;
+        }
+
+        persistProfile(profile);
+    }
+
     function bindTracking() {
         var profile = readProfile();
         syncCookie(profile);
+        trackPresentationView(profile);
 
         document.addEventListener(
             "click",
             function (event) {
-                var link = event.target.closest(".project-card a.stretched-link[href]");
+                var link = event.target.closest(
+                    ".project-card a.stretched-link[href], .search-result-card a[href]"
+                );
                 if (!link) {
                     return;
                 }
 
-                var card = link.closest(".project-card");
-                if (!applyCardCategories(profile, card)) {
+                var categoriesSource = link.closest("[data-pp-categories]");
+                if (!categoriesSource) {
                     return;
                 }
 
-                trimProfile(profile);
-                saveProfile(profile);
-                syncCookie(profile);
+                var linkToken = resolveLinkToken(link);
+                if (linkToken && !markSessionUnique(SESSION_TRACKED_CLICKS_KEY, linkToken)) {
+                    return;
+                }
+
+                var rawCategories = String(categoriesSource.getAttribute("data-pp-categories") || "").trim();
+                if (!applyCategories(profile, rawCategories, CLICK_WEIGHT)) {
+                    return;
+                }
+
+                persistProfile(profile);
             },
             true
         );
@@ -154,4 +307,3 @@
         bindTracking();
     }
 })();
-

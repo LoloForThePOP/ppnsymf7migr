@@ -13,6 +13,13 @@ use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 #[AsTaggedItem(priority: 320)]
 final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderInterface
 {
+    private const FETCH_MULTIPLIER = 10;
+    private const MIN_FETCH = 72;
+    private const PRIMARY_POOL_MULTIPLIER = 6;
+    private const PRIMARY_POOL_MIN = 36;
+    private const SECONDARY_POOL_MULTIPLIER = 2;
+    private const SECONDARY_POOL_MIN = 12;
+
     public function __construct(
         private readonly PPBaseRepository $ppBaseRepository,
         private readonly UserPreferenceRepository $userPreferenceRepository,
@@ -21,8 +28,6 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
 
     public function provide(HomeFeedContext $context): ?HomeFeedBlock
     {
-        $fetchLimit = max(24, $context->getCardsPerBlock() * 4);
-
         if ($context->isLoggedIn()) {
             $viewer = $context->getViewer();
             if ($viewer === null) {
@@ -40,6 +45,10 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
                 return null;
             }
 
+            $fetchLimit = max(
+                self::MIN_FETCH,
+                $context->getCardsPerBlock() * self::FETCH_MULTIPLIER
+            );
             $items = $this->ppBaseRepository->findPublishedByCategoriesForCreator(
                 $viewer,
                 $categories,
@@ -59,6 +68,7 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
             if ($items === []) {
                 return null;
             }
+            $items = $this->diversifyItems($items, $context->getCardsPerBlock());
 
             return new HomeFeedBlock(
                 'category-affinity',
@@ -73,10 +83,12 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
             return null;
         }
 
+        $fetchLimit = max(self::MIN_FETCH, $context->getCardsPerBlock() * self::FETCH_MULTIPLIER);
         $items = $this->ppBaseRepository->findPublishedByCategories($anonCategoryHints, $fetchLimit);
         if ($items === []) {
             return null;
         }
+        $items = $this->diversifyItems($items, $context->getCardsPerBlock());
 
         return new HomeFeedBlock(
             'anon-category-affinity',
@@ -84,6 +96,50 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
             $items,
             true
         );
+    }
+
+    /**
+     * Keeps the rail relevant (recent pool first) while avoiding an always-identical top slice.
+     *
+     * @param array<int,mixed> $items
+     *
+     * @return array<int,mixed>
+     */
+    private function diversifyItems(array $items, int $cardsPerBlock): array
+    {
+        $count = count($items);
+        if ($count <= $cardsPerBlock) {
+            return $items;
+        }
+
+        $primaryPoolSize = min(
+            $count,
+            max(
+                self::PRIMARY_POOL_MIN,
+                $cardsPerBlock * self::PRIMARY_POOL_MULTIPLIER
+            )
+        );
+        $primaryPool = array_slice($items, 0, $primaryPoolSize);
+        shuffle($primaryPool);
+
+        $remaining = array_slice($items, $primaryPoolSize);
+        if ($remaining === []) {
+            return $primaryPool;
+        }
+
+        $secondaryPoolSize = min(
+            count($remaining),
+            max(
+                self::SECONDARY_POOL_MIN,
+                $cardsPerBlock * self::SECONDARY_POOL_MULTIPLIER
+            )
+        );
+        $secondaryPool = array_slice($remaining, 0, $secondaryPoolSize);
+        shuffle($secondaryPool);
+
+        $tail = array_slice($remaining, $secondaryPoolSize);
+
+        return array_merge($primaryPool, $secondaryPool, $tail);
     }
 
     /**
