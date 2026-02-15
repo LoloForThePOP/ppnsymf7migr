@@ -131,6 +131,11 @@
     {% set likesCount = presentation.likes | length %}
 
     {% set pageInfo %}
+        {% set sourceUrl = presentation.ingestion ? presentation.ingestion.sourceUrl : null %}
+        {% set ingestedAt = presentation.ingestion ? presentation.ingestion.ingestedAt : null %}
+        {% set sourceCreatedAt = presentation.ingestion ? presentation.ingestion.sourceCreatedAt : null %}
+        {% set sourceUpdatedAt = presentation.ingestion ? presentation.ingestion.sourceUpdatedAt : null %}
+        {% set hasAutomationInfo = sourceUrl or ingestedAt or sourceCreatedAt or sourceUpdatedAt %}
 
         <li class="mb-1">
             Page créée le {{ presentation.createdAt ? presentation.createdAt|date('Y - m - d') : 'N/A' }}.
@@ -139,6 +144,25 @@
         <li class="mb-1">
             Par {{ presentation.creator ? presentation.creator.username : 'Non renseigné' }}.
         </li>
+
+        {% if hasAutomationInfo %}
+            <li class="mb-1">
+                Présentation automatisée — veuillez vérifier les informations importantes.
+            </li>
+        {% endif %}
+
+        {% if sourceCreatedAt or sourceUpdatedAt %}
+            <li class="mb-1">
+                Source :
+                {% if sourceCreatedAt %}
+                    créé le {{ sourceCreatedAt|date('d/m/Y') }}
+                {% endif %}
+                {% if sourceUpdatedAt %}
+                    {% if sourceCreatedAt %} · {% endif %}
+                    mis à jour le {{ sourceUpdatedAt|date('d/m/Y') }}
+                {% endif %}
+            </li>
+        {% endif %}
 
         <li>
             <p class="text-muted mb-1">Propon souhaite vous fournir une information fiable mais ne peut garantir l'exactitude ou la complétude des informations présentées.</p>

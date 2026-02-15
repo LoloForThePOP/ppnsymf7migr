@@ -133,21 +133,6 @@
 
 <div class="pp-upper-box pp-struct-container row is-expanded" data-pp-default-expanded="true" data-pp-collapse="disabled" data-tour="pp-hero"> 
 
-    {% set sourceCreatedAt = presentation.ingestion ? presentation.ingestion.sourceCreatedAt : null %}
-    {% set sourceUpdatedAt = presentation.ingestion ? presentation.ingestion.sourceUpdatedAt : null %}
-    {% if sourceCreatedAt or sourceUpdatedAt %}
-        <div class="col-12 pp-source-meta">
-            <span class="pp-source-meta__label">Source :</span>
-            {% if sourceCreatedAt %}
-                créé le {{ sourceCreatedAt|date('d/m/Y') }}
-            {% endif %}
-            {% if sourceUpdatedAt %}
-                {% if sourceCreatedAt %} · {% endif %}
-                mis à jour le {{ sourceUpdatedAt|date('d/m/Y') }}
-            {% endif %}
-        </div>
-    {% endif %}
-
     <div class="left-col-md container col-lg-9 d-md-flex align-items-center">
 
         {# Status & Title Displayed at the top (only for small screens) #}

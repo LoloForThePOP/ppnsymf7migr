@@ -5,13 +5,11 @@ Maybe we can add an "Autour de vous" section in Homepage with proposition to use
 
 Simple category intersections about user last seen projects (anonymous or logged in user)
 
-
 How many cards? One row (6–12), carousel, or “See more”? Id' say one or two rows + maybe a show more button?
 
 Should it be personalized (logged-in users) or general? general: anon / logged in users
 
 Where do you want recs? Homepage.
-
 
 
 ----------------------------------------------------------
@@ -58,27 +56,23 @@ Mix in “adjacent” categories or long-tail items.
 Filter out unpublished/deleted.
 
 
-
 - Cold start: new user → suggest top projects by popularity + matching their stated interests (categories/keywords). New project → rely on content similarity to existing projects.
 
 - Safety/quality: filter by language, status OK, enough content/thumbnail. Avoid recommending the same project twice in nearby lists.
 
 - "Specific categories" idea: Maybe we can compute keywords with enough redudancy AND / OR categories intersections and then ask AI to taylor some insigths from these: AI creates a title with an emoji + a search query for each insight into our data so that when an user seems to have a browsing profile approaching an AI tailored specific category, we provide it to the user in Homepage or bellow 3P. EX. AI created "Transports de demain" or "Transports écologiques" from our data. Do you see what I mean?
 
-- Schema additions:
-
 
 Capture signals:
 
 On like/follow: insert into user_interactions or reuse existing like/follow tables; also increment a per-user-project “score” if you maintain one.
+
 On view: increment a lightweight project_views table keyed by user_id/project_id or an anonymous session; optionally limit to one per session/day.
+
 Explicit interests: store selected categories/keywords in user_preferences.
 
 
 Over cookies design for anonymous users:
-
-
-For anonymous users, keep it lightweight, privacy-friendly, and short-lived:
 
 What to store: A small set of recent category/keyword signals and/or a temporary user embedding. For example:
 
@@ -103,15 +97,12 @@ Use the DB for durable, multi-device preferences; use cookies/localStorage only 
 
 DB (preferred): Store user interactions (likes/follows/views), explicit interests (selected categories/keywords), and maybe a precomputed user embedding. Pros: persistent, usable for collaborative filtering, and works across devices. Cons: requires auth or a stable user ID.
 
-Cookies/localStorage: For anonymous visitors, you can stash a few signals (recently viewed categories or a temporary user embedding). Pros: no login required; cons: device/browser-bound, easily cleared, privacy implications.
 
 Suggested approach:
 
 For logged-in users: record likes/follows/views in DB; save their explicit preferences; periodically compute a user embedding from these signals.
-For anonymous users: track recent views/categories in a short-lived cookie/localStorage to seed recommendations; once they log in, merge into their profile.
-Respect privacy: keep data minimal, provide opt-out/clear, and follow your consent model.
-This gives you robust recs for members and a lightweight fallback for guests.
 
+For anonymous users: track recent views/categories in a short-lived cookie/localStorage to seed recommendations; once they log in, merge into their profile.
 
 Freshness should be used somewhere.
 

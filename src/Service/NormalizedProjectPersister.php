@@ -681,9 +681,10 @@ class NormalizedProjectPersister
         $seen = [];
 
         // For JeVeuxAider imports, always keep the source page as a website entry.
+        // Contact details are now exposed via that source page link instead of business cards.
         if ($this->isJeVeuxAiderSource($sourceUrl) && is_string($sourceUrl) && $sourceUrl !== '') {
             $websites[] = [
-                'title' => 'Page JeVeuxAider.gouv',
+                'title' => 'Page JeVeuxAider.gouv (infos de contact)',
                 'url' => $sourceUrl,
             ];
         }
@@ -732,12 +733,16 @@ class NormalizedProjectPersister
 
     private function attachBusinessCards(PPBase $pp, array $cards, ?string $sourceUrl = null): void
     {
+        // Privacy rule: JeVeuxAider contact details must stay on source page link only.
+        if ($this->isJeVeuxAiderSource($sourceUrl)) {
+            return;
+        }
+
         $cards = array_slice($cards, 0, 2);
         if ($cards === []) {
             return;
         }
 
-        $isJeVeuxAider = $this->isJeVeuxAiderSource($sourceUrl);
         $oc = $pp->getOtherComponents();
         foreach ($cards as $entry) {
             if (!is_array($entry)) {
@@ -750,9 +755,6 @@ class NormalizedProjectPersister
             $website1 = $this->stringValue($entry['website1'] ?? null);
             $website2 = $this->stringValue($entry['website2'] ?? null);
             $postalMail = $this->stringValue($entry['postalMail'] ?? null);
-            if ($isJeVeuxAider) {
-                $postalMail = $this->normalizeJeVeuxAiderPostalMail($postalMail);
-            }
             $remarks = $this->stringValue($entry['remarks'] ?? null);
 
             if ($title === null && $email1 === null && $tel1 === null && $website1 === null && $website2 === null && $postalMail === null && $remarks === null) {
@@ -772,116 +774,6 @@ class NormalizedProjectPersister
         }
 
         $pp->setOtherComponents($oc);
-    }
-
-    /**
-     * JeVeuxAider pages often repeat the city line before the "ZIP City" line.
-     */
-    private function normalizeJeVeuxAiderPostalMail(?string $postalMail): ?string
-    {
-        if ($postalMail === null) {
-            return null;
-        }
-
-        $lines = preg_split('/\r\n|\r|\n/', trim($postalMail));
-        if (!is_array($lines)) {
-            return $postalMail;
-        }
-
-        $lines = array_values(array_filter(array_map('trim', $lines), static fn(string $line) => $line !== ''));
-        if ($lines === []) {
-            return null;
-        }
-
-        $normalized = [];
-        $count = count($lines);
-        for ($i = 0; $i < $count; $i++) {
-            $line = $this->normalizeJeVeuxAiderPostalLine($lines[$i]);
-            $next = $lines[$i + 1] ?? null;
-            $nextPostal = $next !== null ? $this->parsePostalLine($next) : null;
-            if ($nextPostal !== null
-                && !$this->lineHasDigits($line)
-                && $this->normalizeCity($line) === $this->normalizeCity($nextPostal['city'])) {
-                continue;
-            }
-
-            $postal = $this->parsePostalLine($line);
-            if ($postal !== null && $normalized !== []) {
-                $prev = $normalized[count($normalized) - 1];
-                if (!$this->lineHasDigits($prev)
-                    && $this->normalizeCity($prev) === $this->normalizeCity($postal['city'])) {
-                    array_pop($normalized);
-                }
-            }
-
-            $normalized[] = $line;
-        }
-
-        if ($normalized === []) {
-            return null;
-        }
-
-        return implode("\n", $normalized);
-    }
-
-    /**
-     * @return array{zip:string,city:string}|null
-     */
-    private function parsePostalLine(string $line): ?array
-    {
-        if (!preg_match('/^(\d{5})\s+(.+)$/u', $line, $matches)) {
-            return null;
-        }
-
-        return [
-            'zip' => $matches[1],
-            'city' => $matches[2],
-        ];
-    }
-
-    private function lineHasDigits(string $line): bool
-    {
-        return preg_match('/\d/', $line) === 1;
-    }
-
-    private function normalizeJeVeuxAiderPostalLine(string $line): string
-    {
-        $trimmed = trim($line);
-        if ($trimmed === '') {
-            return $line;
-        }
-
-        $match = null;
-        if (preg_match('/^(.+?)\s*,\s*(\d{5}\s+.+)$/u', $trimmed, $match) !== 1) {
-            if (preg_match('/^(.+?)\s+(\d{5}\s+.+)$/u', $trimmed, $match) !== 1) {
-                return $line;
-            }
-        }
-
-        $prefix = trim($match[1]);
-        $postalPart = trim($match[2]);
-
-        if ($prefix === '' || $this->lineHasDigits($prefix)) {
-            return $line;
-        }
-
-        $postal = $this->parsePostalLine($postalPart);
-        if ($postal === null) {
-            return $line;
-        }
-
-        if ($this->normalizeCity($prefix) === $this->normalizeCity($postal['city'])) {
-            return $postalPart;
-        }
-
-        return $line;
-    }
-
-    private function normalizeCity(string $value): string
-    {
-        $value = mb_strtolower($value);
-        $value = preg_replace('/\s+/', ' ', $value) ?? $value;
-        return trim($value);
     }
 
     private function isJeVeuxAiderSource(?string $sourceUrl): bool

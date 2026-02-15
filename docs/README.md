@@ -18,3 +18,4 @@ Quick entry points for the most-used internal docs.
 
 - `docs/scraping-architecture.md`: scraping architecture and related queues.
 - `docs/image-resize-pipeline.md`: image resize lifecycle and processing path.
+- `docs/jeveuxaider-business-cards-archive.md`: archived JeVeuxAider contact display move (`business_cards` -> source-page link).

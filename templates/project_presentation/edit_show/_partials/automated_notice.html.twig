@@ -1,9 +1,11 @@
 {% set ingestion = presentation.ingestion ?? null %}
 {% set sourceUrl = ingestion ? ingestion.sourceUrl : null %}
 {% set ingestedAt = ingestion ? ingestion.ingestedAt : null %}
+{% set sourceCreatedAt = ingestion ? ingestion.sourceCreatedAt : null %}
+{% set sourceUpdatedAt = ingestion ? ingestion.sourceUpdatedAt : null %}
 {% set safeSourceUrl = sourceUrl|safe_href %}
 
-{% if sourceUrl or ingestedAt %}
+{% if sourceUrl or ingestedAt or sourceCreatedAt or sourceUpdatedAt %}
     <div class="pp-automation-notice mt-4">
         <div class="pp-automation-header">
             <div class="pp-automation-top">
@@ -21,16 +23,29 @@
                 </summary>
                 <div class="pp-automation-body">
                     {% if sourceUrl %}
-                        Source :
-                        {% if safeSourceUrl %}
-                            <a href="{{ safeSourceUrl }}" target="_blank" rel="noopener">{{ sourceUrl|truncate(60) }}</a>
-                        {% else %}
-                            {{ sourceUrl|truncate(60) }}
-                        {% endif %}
+                        <div>
+                            URL source :
+                            {% if safeSourceUrl %}
+                                <a href="{{ safeSourceUrl }}" target="_blank" rel="noopener">{{ sourceUrl|truncate(60) }}</a>
+                            {% else %}
+                                {{ sourceUrl|truncate(60) }}
+                            {% endif %}
+                        </div>
                     {% endif %}
-                    {% if sourceUrl and ingestedAt %} - {% endif %}
+                    {% if sourceCreatedAt or sourceUpdatedAt %}
+                        <div>
+                            Données source :
+                            {% if sourceCreatedAt %}
+                                créé le {{ sourceCreatedAt|date('d/m/Y') }}
+                            {% endif %}
+                            {% if sourceUpdatedAt %}
+                                {% if sourceCreatedAt %} · {% endif %}
+                                mis à jour le {{ sourceUpdatedAt|date('d/m/Y') }}
+                            {% endif %}
+                        </div>
+                    {% endif %}
                     {% if ingestedAt %}
-                        Importé le {{ ingestedAt|date('d/m/Y') }}
+                        <div>Importé le {{ ingestedAt|date('d/m/Y') }}</div>
                     {% endif %}
                 </div>
             </details>
