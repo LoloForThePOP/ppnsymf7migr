@@ -1,17 +1,21 @@
 (function () {
-    var STORAGE_KEY = "pp_anon_profile_v1";
-    var COOKIE_KEY = "anon_pref_categories";
+    var CATEGORY_STORAGE_KEY = "pp_anon_profile_v1";
+    var KEYWORD_STORAGE_KEY = "pp_anon_keywords_v1";
+    var CATEGORY_COOKIE_KEY = "anon_pref_categories";
+    var KEYWORD_COOKIE_KEY = "anon_pref_keywords";
     var SESSION_TRACKED_VIEWS_KEY = "pp_anon_viewed_presentations_v1";
     var SESSION_TRACKED_CLICKS_KEY = "pp_anon_clicked_cards_v1";
-    var MAX_BUCKETS = 20;
+    var MAX_CATEGORY_BUCKETS = 20;
+    var MAX_KEYWORD_BUCKETS = 40;
     var MAX_COOKIE_CATEGORIES = 6;
+    var MAX_COOKIE_KEYWORDS = 8;
     var COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
     var SESSION_MAX_ITEMS = 400;
     var CLICK_WEIGHT = 1;
     var VIEW_WEIGHT = 4;
     var memorySessionMaps = {};
 
-    function safeParseProfile(raw) {
+    function safeParseProfile(raw, keyRegex) {
         if (!raw) {
             return { counts: {}, updatedAt: Date.now() };
         }
@@ -25,7 +29,7 @@
             var counts = {};
             var source = parsed.counts || {};
             Object.keys(source).forEach(function (key) {
-                if (!/^[a-z0-9_-]{1,40}$/.test(key)) {
+                if (!keyRegex.test(key)) {
                     return;
                 }
                 var value = Number(source[key] || 0);
@@ -72,18 +76,18 @@
         }
     }
 
-    function readProfile() {
+    function readProfile(storageKey, keyRegex) {
         try {
-            return safeParseProfile(localStorage.getItem(STORAGE_KEY));
+            return safeParseProfile(localStorage.getItem(storageKey), keyRegex);
         } catch (error) {
             return { counts: {}, updatedAt: Date.now() };
         }
     }
 
-    function saveProfile(profile) {
+    function saveProfile(storageKey, profile) {
         try {
             localStorage.setItem(
-                STORAGE_KEY,
+                storageKey,
                 JSON.stringify({
                     counts: profile.counts,
                     updatedAt: Date.now()
@@ -145,7 +149,7 @@
         return true;
     }
 
-    function sortedCategories(profile) {
+    function sortedBuckets(profile) {
         return Object.keys(profile.counts)
             .map(function (key) {
                 return { key: key, score: Number(profile.counts[key] || 0) };
@@ -158,22 +162,22 @@
             });
     }
 
-    function trimProfile(profile) {
-        var sorted = sortedCategories(profile);
-        if (sorted.length <= MAX_BUCKETS) {
+    function trimProfile(profile, maxBuckets) {
+        var sorted = sortedBuckets(profile);
+        if (sorted.length <= maxBuckets) {
             return;
         }
 
         var keep = {};
-        sorted.slice(0, MAX_BUCKETS).forEach(function (row) {
+        sorted.slice(0, maxBuckets).forEach(function (row) {
             keep[row.key] = row.score;
         });
         profile.counts = keep;
     }
 
-    function syncCookie(profile) {
-        var top = sortedCategories(profile)
-            .slice(0, MAX_COOKIE_CATEGORIES)
+    function syncCookie(profile, cookieKey, maxCookieItems) {
+        var top = sortedBuckets(profile)
+            .slice(0, maxCookieItems)
             .map(function (row) {
                 return row.key;
             });
@@ -184,7 +188,7 @@
 
         var value = encodeURIComponent(top.join(","));
         document.cookie =
-            COOKIE_KEY +
+            cookieKey +
             "=" +
             value +
             "; Path=/; Max-Age=" +
@@ -212,10 +216,85 @@
         return updated;
     }
 
-    function persistProfile(profile) {
-        trimProfile(profile);
-        saveProfile(profile);
-        syncCookie(profile);
+    function singularizeKeywordWord(word) {
+        if (!word || word.length <= 3) {
+            return word;
+        }
+        if (/ies$/.test(word) && word.length > 4) {
+            return word.slice(0, -3) + "y";
+        }
+        if (/(us|is|ss)$/.test(word)) {
+            return word;
+        }
+        if (/s$/.test(word)) {
+            return word.slice(0, -1);
+        }
+        return word;
+    }
+
+    function normalizeKeywordToken(rawKeyword) {
+        var keyword = String(rawKeyword || "").trim().toLowerCase();
+        if (!keyword) {
+            return "";
+        }
+
+        if (typeof keyword.normalize === "function") {
+            keyword = keyword.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+
+        keyword = keyword
+            .replace(/[’'`´]/g, " ")
+            .replace(/[_-]/g, " ")
+            .replace(/[^a-z0-9\s]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+
+        if (!keyword) {
+            return "";
+        }
+
+        keyword = keyword
+            .split(" ")
+            .map(singularizeKeywordWord)
+            .join(" ")
+            .trim();
+
+        if (!keyword || keyword.length < 2 || keyword.length > 60) {
+            return "";
+        }
+
+        keyword = keyword.replace(/\s+/g, "-");
+        if (!/^[a-z0-9_-]{2,60}$/.test(keyword)) {
+            return "";
+        }
+
+        return keyword;
+    }
+
+    function applyKeywords(profile, rawKeywordTokens, weight) {
+        if (!rawKeywordTokens || weight <= 0) {
+            return false;
+        }
+
+        var updated = false;
+        rawKeywordTokens.split(/[,;|]+/).forEach(function (token) {
+            var keyword = normalizeKeywordToken(token);
+            if (!keyword) {
+                return;
+            }
+
+            var current = Number(profile.counts[keyword] || 0);
+            profile.counts[keyword] = current + weight;
+            updated = true;
+        });
+
+        return updated;
+    }
+
+    function persistProfile(profile, storageKey, maxBuckets, cookieKey, maxCookieItems) {
+        trimProfile(profile, maxBuckets);
+        saveProfile(storageKey, profile);
+        syncCookie(profile, cookieKey, maxCookieItems);
     }
 
     function resolveLinkToken(link) {
@@ -242,7 +321,7 @@
         }
     }
 
-    function trackPresentationView(profile) {
+    function trackPresentationView(categoryProfile, keywordProfile) {
         var trackRoot = document.querySelector("[data-pp-view-track='1'][data-pp-view-id]");
         if (!trackRoot) {
             return;
@@ -258,17 +337,39 @@
         }
 
         var categoryTokens = String(trackRoot.getAttribute("data-pp-categories") || "").trim();
-        if (!applyCategories(profile, categoryTokens, VIEW_WEIGHT)) {
-            return;
+        var keywordTokens = String(trackRoot.getAttribute("data-pp-keywords") || "").trim();
+
+        var categoryUpdated = applyCategories(categoryProfile, categoryTokens, VIEW_WEIGHT);
+        var keywordUpdated = applyKeywords(keywordProfile, keywordTokens, VIEW_WEIGHT);
+
+        if (categoryUpdated) {
+            persistProfile(
+                categoryProfile,
+                CATEGORY_STORAGE_KEY,
+                MAX_CATEGORY_BUCKETS,
+                CATEGORY_COOKIE_KEY,
+                MAX_COOKIE_CATEGORIES
+            );
         }
 
-        persistProfile(profile);
+        if (keywordUpdated) {
+            persistProfile(
+                keywordProfile,
+                KEYWORD_STORAGE_KEY,
+                MAX_KEYWORD_BUCKETS,
+                KEYWORD_COOKIE_KEY,
+                MAX_COOKIE_KEYWORDS
+            );
+        }
     }
 
     function bindTracking() {
-        var profile = readProfile();
-        syncCookie(profile);
-        trackPresentationView(profile);
+        var categoryProfile = readProfile(CATEGORY_STORAGE_KEY, /^[a-z0-9_-]{1,40}$/);
+        var keywordProfile = readProfile(KEYWORD_STORAGE_KEY, /^[a-z0-9_-]{2,60}$/);
+
+        syncCookie(categoryProfile, CATEGORY_COOKIE_KEY, MAX_COOKIE_CATEGORIES);
+        syncCookie(keywordProfile, KEYWORD_COOKIE_KEY, MAX_COOKIE_KEYWORDS);
+        trackPresentationView(categoryProfile, keywordProfile);
 
         document.addEventListener(
             "click",
@@ -280,8 +381,8 @@
                     return;
                 }
 
-                var categoriesSource = link.closest("[data-pp-categories]");
-                if (!categoriesSource) {
+                var signalSource = link.closest("[data-pp-categories], [data-pp-keywords]");
+                if (!signalSource) {
                     return;
                 }
 
@@ -290,12 +391,30 @@
                     return;
                 }
 
-                var rawCategories = String(categoriesSource.getAttribute("data-pp-categories") || "").trim();
-                if (!applyCategories(profile, rawCategories, CLICK_WEIGHT)) {
-                    return;
+                var rawCategories = String(signalSource.getAttribute("data-pp-categories") || "").trim();
+                var rawKeywords = String(signalSource.getAttribute("data-pp-keywords") || "").trim();
+                var categoryUpdated = applyCategories(categoryProfile, rawCategories, CLICK_WEIGHT);
+                var keywordUpdated = applyKeywords(keywordProfile, rawKeywords, CLICK_WEIGHT);
+
+                if (categoryUpdated) {
+                    persistProfile(
+                        categoryProfile,
+                        CATEGORY_STORAGE_KEY,
+                        MAX_CATEGORY_BUCKETS,
+                        CATEGORY_COOKIE_KEY,
+                        MAX_COOKIE_CATEGORIES
+                    );
                 }
 
-                persistProfile(profile);
+                if (keywordUpdated) {
+                    persistProfile(
+                        keywordProfile,
+                        KEYWORD_STORAGE_KEY,
+                        MAX_KEYWORD_BUCKETS,
+                        KEYWORD_COOKIE_KEY,
+                        MAX_COOKIE_KEYWORDS
+                    );
+                }
             },
             true
         );

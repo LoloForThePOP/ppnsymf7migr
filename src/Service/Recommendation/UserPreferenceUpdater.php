@@ -28,6 +28,7 @@ final class UserPreferenceUpdater
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPreferenceRepository $userPreferenceRepository,
+        private readonly KeywordNormalizer $keywordNormalizer,
     ) {
     }
 
@@ -225,40 +226,7 @@ final class UserPreferenceUpdater
      */
     private function extractKeywords(?string $rawKeywords): array
     {
-        $rawKeywords = trim((string) $rawKeywords);
-        if ($rawKeywords === '') {
-            return [];
-        }
-
-        $parts = preg_split('/[,;|]+/', $rawKeywords) ?: [];
-        $keywords = [];
-
-        foreach ($parts as $part) {
-            $keyword = mb_strtolower(trim($part));
-            if ($keyword === '') {
-                continue;
-            }
-
-            $keyword = preg_replace('/\s+/', ' ', $keyword) ?? '';
-            if ($keyword === '') {
-                continue;
-            }
-
-            if (mb_strlen($keyword) < 2 || mb_strlen($keyword) > 60) {
-                continue;
-            }
-
-            if (!preg_match('/^[\p{L}\p{N}\s\-_]+$/u', $keyword)) {
-                continue;
-            }
-
-            $keywords[$keyword] = true;
-            if (count($keywords) >= self::KEYWORDS_PER_PRESENTATION_LIMIT) {
-                break;
-            }
-        }
-
-        return array_keys($keywords);
+        return $this->keywordNormalizer->normalizeRawKeywords($rawKeywords, self::KEYWORDS_PER_PRESENTATION_LIMIT);
     }
 
     /**

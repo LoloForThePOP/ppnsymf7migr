@@ -8,6 +8,7 @@ final class HomeFeedContext
 {
     /**
      * @param string[] $anonCategoryHints
+     * @param string[] $anonKeywordHints
      * @param array{lat: float, lng: float, radius: float}|null $locationHint
      */
     public function __construct(
@@ -15,6 +16,7 @@ final class HomeFeedContext
         private readonly int $cardsPerBlock = 10,
         private readonly int $maxBlocks = 6,
         private readonly array $anonCategoryHints = [],
+        private readonly array $anonKeywordHints = [],
         private readonly ?array $locationHint = null,
         private readonly bool $creatorCapEnabled = false,
         private readonly int $creatorCapPerBlock = 2,
@@ -47,6 +49,14 @@ final class HomeFeedContext
     public function getAnonCategoryHints(): array
     {
         return array_slice(array_values(array_unique($this->anonCategoryHints)), 0, 8);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getAnonKeywordHints(): array
+    {
+        return array_slice(array_values(array_unique($this->anonKeywordHints)), 0, 16);
     }
 
     /**

@@ -61,6 +61,7 @@ final class HomeController extends AbstractController
         }
 
         $anonCategoryHints = $viewer ? [] : $this->extractAnonCategoryHints($request);
+        $anonKeywordHints = $viewer ? [] : $this->extractAnonKeywordHints($request);
         $locationContext = $homepageLocationContextResolver->resolve($request);
         $locationHint = $locationContext['hint'];
         $homepageLocationSummary = $locationContext['summary'];
@@ -69,6 +70,7 @@ final class HomeController extends AbstractController
             cardsPerBlock: $cardsPerBlock,
             maxBlocks: $viewer ? $maxBlocksLogged : $maxBlocksAnon,
             anonCategoryHints: $anonCategoryHints,
+            anonKeywordHints: $anonKeywordHints,
             locationHint: $locationHint,
             creatorCapEnabled: $creatorCapEnabled,
             creatorCapPerBlock: $creatorCapPerBlock
@@ -109,5 +111,30 @@ final class HomeController extends AbstractController
         }
 
         return array_slice(array_keys($hints), 0, 8);
+    }
+
+    /**
+     * @return string[]
+     */
+    private function extractAnonKeywordHints(Request $request): array
+    {
+        $raw = urldecode((string) $request->cookies->get('anon_pref_keywords', ''));
+        if ($raw === '') {
+            return [];
+        }
+
+        $parts = preg_split('/[,|]+/u', $raw) ?: [];
+        $hints = [];
+
+        foreach ($parts as $part) {
+            $token = strtolower(trim($part));
+            if ($token === '' || !preg_match('/^[a-z0-9_-]{2,60}$/', $token)) {
+                continue;
+            }
+
+            $hints[$token] = true;
+        }
+
+        return array_slice(array_keys($hints), 0, 16);
     }
 }

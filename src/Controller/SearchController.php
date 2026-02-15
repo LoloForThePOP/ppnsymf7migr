@@ -130,6 +130,7 @@ class SearchController extends AbstractController
                 'id' => $pp->getId(),
                 'title' => $pp->getTitle(),
                 'goal' => $pp->getGoal(),
+                'keywords' => $pp->getKeywords(),
                 'stringId' => $stringId,
                 'url' => $url,
                 'createdAt' => $pp->getCreatedAt()?->format(DATE_ATOM),

@@ -11,9 +11,12 @@ use Doctrine\ORM\EntityManagerInterface;
 final class UserCategoryPreferenceSignalUpdater
 {
     private const MAX_STORED_CATEGORIES = 40;
+    private const MAX_STORED_KEYWORDS = 120;
     private const MAX_CATEGORY_SCORE = 500.0;
+    private const MAX_KEYWORD_SCORE = 500.0;
     private const MIN_RETAINED_SCORE = 0.05;
     private const DECAY_HALF_LIFE_DAYS = 60.0;
+    private const KEYWORDS_PER_PRESENTATION_LIMIT = 12;
 
     // Kept aligned with UserPreferenceUpdater interaction weights.
     private const WEIGHT_LIKE = 3.0;
@@ -24,6 +27,7 @@ final class UserCategoryPreferenceSignalUpdater
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPreferenceRepository $userPreferenceRepository,
+        private readonly KeywordNormalizer $keywordNormalizer,
     ) {
     }
 
@@ -59,7 +63,8 @@ final class UserCategoryPreferenceSignalUpdater
         }
 
         $categorySlugs = $this->extractCategorySlugs($presentation);
-        if ($categorySlugs === []) {
+        $keywordTokens = $this->extractKeywordTokens($presentation);
+        if ($categorySlugs === [] && $keywordTokens === []) {
             return;
         }
 
@@ -69,24 +74,52 @@ final class UserCategoryPreferenceSignalUpdater
             $this->entityManager->persist($preference);
         }
 
-        $scores = $this->applyDecay($preference->getFavCategories(), $preference->getUpdatedAt());
-        $deltaPerCategory = $weight / max(1, count($categorySlugs));
+        $categoryScores = $this->applyDecay($preference->getFavCategories(), $preference->getUpdatedAt());
+        if ($categorySlugs !== []) {
+            $deltaPerCategory = $weight / max(1, count($categorySlugs));
 
-        foreach ($categorySlugs as $slug) {
-            $next = ((float) ($scores[$slug] ?? 0.0)) + $deltaPerCategory;
+            foreach ($categorySlugs as $slug) {
+                $next = ((float) ($categoryScores[$slug] ?? 0.0)) + $deltaPerCategory;
 
-            if ($next < self::MIN_RETAINED_SCORE) {
-                unset($scores[$slug]);
-                continue;
+                if ($next < self::MIN_RETAINED_SCORE) {
+                    unset($categoryScores[$slug]);
+                    continue;
+                }
+
+                $categoryScores[$slug] = min(self::MAX_CATEGORY_SCORE, $next);
             }
-
-            $scores[$slug] = min(self::MAX_CATEGORY_SCORE, $next);
         }
 
-        $scores = $this->sortAndTruncate($scores);
+        $keywordScores = $this->applyDecay($preference->getFavKeywords(), $preference->getUpdatedAt());
+        if ($keywordTokens !== []) {
+            $deltaPerKeyword = $weight / max(1, count($keywordTokens));
+
+            foreach ($keywordTokens as $keyword) {
+                $next = ((float) ($keywordScores[$keyword] ?? 0.0)) + $deltaPerKeyword;
+
+                if ($next < self::MIN_RETAINED_SCORE) {
+                    unset($keywordScores[$keyword]);
+                    continue;
+                }
+
+                $keywordScores[$keyword] = min(self::MAX_KEYWORD_SCORE, $next);
+            }
+        }
+
+        $categoryScores = $this->sortAndTruncate(
+            $categoryScores,
+            self::MAX_STORED_CATEGORIES,
+            '/^[a-z0-9_-]{1,40}$/'
+        );
+        $keywordScores = $this->sortAndTruncate(
+            $keywordScores,
+            self::MAX_STORED_KEYWORDS,
+            '/^[\p{L}\p{N}\s\-_]{2,60}$/u'
+        );
 
         $preference
-            ->setFavCategories($scores)
+            ->setFavCategories($categoryScores)
+            ->setFavKeywords($keywordScores)
             ->refreshUpdatedAt();
 
         if ($flush) {
@@ -140,14 +173,14 @@ final class UserCategoryPreferenceSignalUpdater
      *
      * @return array<string,float>
      */
-    private function sortAndTruncate(array $scores): array
+    private function sortAndTruncate(array $scores, int $limit, string $pattern): array
     {
         if ($scores === []) {
             return [];
         }
 
         foreach ($scores as $slug => $score) {
-            if (!preg_match('/^[a-z0-9_-]{1,40}$/', (string) $slug) || !is_numeric($score) || (float) $score <= 0.0) {
+            if (!preg_match($pattern, (string) $slug) || !is_numeric($score) || (float) $score <= 0.0) {
                 unset($scores[$slug]);
                 continue;
             }
@@ -161,7 +194,7 @@ final class UserCategoryPreferenceSignalUpdater
 
         arsort($scores, SORT_NUMERIC);
 
-        return array_slice($scores, 0, self::MAX_STORED_CATEGORIES, true);
+        return array_slice($scores, 0, max(1, $limit), true);
     }
 
     /**
@@ -181,5 +214,16 @@ final class UserCategoryPreferenceSignalUpdater
         }
 
         return array_keys($slugs);
+    }
+
+    /**
+     * @return string[]
+     */
+    private function extractKeywordTokens(PPBase $presentation): array
+    {
+        return $this->keywordNormalizer->normalizeRawKeywords(
+            $presentation->getKeywords(),
+            self::KEYWORDS_PER_PRESENTATION_LIMIT
+        );
     }
 }

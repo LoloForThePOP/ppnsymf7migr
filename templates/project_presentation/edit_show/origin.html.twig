@@ -135,6 +135,7 @@
         {% endfor %}
     {% endif %}
     {% set presentationCategoryData = presentationCategoryTokens|join(',') %}
+    {% set presentationKeywordData = presentation.keywords|default('')|trim %}
 
     {% set countComments = presentation.comments | length %}
 
@@ -189,6 +190,7 @@
         data-pp-view-track="1"
         data-pp-view-id="{{ presentation.stringId ?: presentation.id }}"
         {% if presentationCategoryData %}data-pp-categories="{{ presentationCategoryData }}"{% endif %}
+        {% if presentationKeywordData %}data-pp-keywords="{{ presentationKeywordData }}"{% endif %}
     >
 
 

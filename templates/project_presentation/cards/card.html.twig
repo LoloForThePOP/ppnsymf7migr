@@ -65,8 +65,9 @@
         {% endfor %}
     {% endif %}
     {% set categoryData = categoryTokens|join(',') %}
+    {% set keywordData = presentation.keywords|default('')|trim %}
 
-    <article class="project-card position-relative text-reset" {% if categoryData %}data-pp-categories="{{ categoryData }}"{% endif %}>
+    <article class="project-card position-relative text-reset" {% if categoryData %}data-pp-categories="{{ categoryData }}"{% endif %} {% if keywordData %}data-pp-keywords="{{ keywordData }}"{% endif %}>
         {% if options.link %}
             <a
                 class="stretched-link" style="z-index: 40;"

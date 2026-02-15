@@ -30,6 +30,20 @@ parameters:
     app.home_feed.max_blocks.anon: 5
     app.home_feed.creator_cap.enabled: false
     app.home_feed.creator_cap.per_block: 2
+    app.recommendation.keyword.stopwords:
+        - projet
+        - projets
+        - initiative
+        - initiatives
+        - association
+        - associations
+        - plateforme
+        - general
+    app.recommendation.keyword.aliases:
+        film: ['films', 'cinema', 'cinemas']
+        ia: ['ai', 'intelligence artificielle']
+        climat: ['climatique', 'climatiques']
+        ecologie: ['ecologique', 'ecologiques', 'environnemental', 'environnementaux']
     
 services:
     # default configuration for services in *this* file

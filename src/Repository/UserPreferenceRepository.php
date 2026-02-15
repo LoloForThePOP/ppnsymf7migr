@@ -53,4 +53,37 @@ class UserPreferenceRepository extends ServiceEntityRepository
 
         return $slugs;
     }
+
+    /**
+     * @return array<string,float>
+     */
+    public function findTopKeywordScoresForUser(User $user, int $limit = 40): array
+    {
+        $limit = max(1, min($limit, 120));
+        $preference = $this->findOneBy(['user' => $user]);
+        if (!$preference instanceof UserPreference) {
+            return [];
+        }
+
+        $scored = $preference->getFavKeywords();
+        if ($scored === []) {
+            return [];
+        }
+
+        arsort($scored, SORT_NUMERIC);
+        $keywords = [];
+
+        foreach ($scored as $keyword => $score) {
+            if (!is_string($keyword) || !is_numeric($score) || (float) $score <= 0.0) {
+                continue;
+            }
+
+            $keywords[$keyword] = (float) $score;
+            if (count($keywords) >= $limit) {
+                break;
+            }
+        }
+
+        return $keywords;
+    }
 }

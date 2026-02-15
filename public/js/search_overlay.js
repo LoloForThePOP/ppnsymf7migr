@@ -947,6 +947,10 @@
       if (uniqueCategoryTokens.length > 0) {
         card.setAttribute('data-pp-categories', uniqueCategoryTokens.join(','));
       }
+      const keywordTokens = typeof item.keywords === 'string' ? item.keywords.trim() : '';
+      if (keywordTokens.length > 0) {
+        card.setAttribute('data-pp-keywords', keywordTokens);
+      }
 
       const link = document.createElement('a');
       link.href = item.url || '#';
