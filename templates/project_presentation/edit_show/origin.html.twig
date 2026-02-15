@@ -1,4 +1,5 @@
 {% extends 'base.html.twig' %}
+{% from 'project_presentation/cards/list.html.twig' import collection as project_collection %}
 
 {% set showThemeSelector = true %}
 
@@ -58,6 +59,8 @@
 
     <link href="/css/project_presentation_page.css" rel="stylesheet">
     <link href="/css/comments.css" rel="stylesheet">
+    <link href="/css/project_card.css" rel="stylesheet">
+    <link href="/css/titled_project_collection.css" rel="stylesheet">
     <link href="/css/show_more_less_button.css" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
 
@@ -438,6 +441,14 @@
         </div>
 
         {% include 'project_presentation/edit_show/_partials/automated_notice.html.twig' %}
+
+        {% if not userPresenter and relatedBottomBlocks|default([]) is not empty %}
+            <section class="pp-related-rails mt-5">
+                {% for block in relatedBottomBlocks %}
+                    {{ project_collection(block.title, block.items, 'pp-related-collection', 'hide-335', '', block.stats|default({})) }}
+                {% endfor %}
+            </section>
+        {% endif %}
 
         {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN') %}
             <div class="container d-inline-flex px-0 mt-3">

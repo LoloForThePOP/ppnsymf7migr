@@ -22,6 +22,7 @@ use App\Form\ProjectPresentation\TextDescriptionType;
 use App\Form\ProjectPresentation\CategoriesKeywordsType;
 use App\Service\PresentationEventLogger;
 use App\Service\ProductTourService;
+use App\Service\HomeFeed\PresentationRelatedFeedBuilder;
 use App\Service\Recommendation\UserCategoryPreferenceSignalUpdater;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -43,6 +44,7 @@ class EditShowController extends AbstractController
         EntityManagerInterface $em,
         ProductTourService $productTourService,
         PresentationEventLogger $eventLogger,
+        PresentationRelatedFeedBuilder $presentationRelatedFeedBuilder,
         UserCategoryPreferenceSignalUpdater $userCategoryPreferenceSignalUpdater,
     ): Response
     {
@@ -68,6 +70,7 @@ class EditShowController extends AbstractController
                 $this->buildEditShowContext($presentation, [
                     'showThemeSelectorTour' => $showThemeSelectorTour,
                     'showPPEditIntroTour' => $showPPEditIntroTour,
+                    'relatedBottomBlocks' => [],
                 ])
             );
         }
@@ -97,6 +100,7 @@ class EditShowController extends AbstractController
             'userPresenter' => false, //flaging whether user can edit presentation
             'userAdmin' => $this->isGranted('ROLE_ADMIN'), //flagging whether user is an admin
             'showThemeSelectorTour' => $showThemeSelectorTour,
+            'relatedBottomBlocks' => $presentationRelatedFeedBuilder->buildForPresentation($presentation),
         ]);
 
     }

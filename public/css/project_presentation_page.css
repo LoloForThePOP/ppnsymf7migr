@@ -403,3 +403,34 @@ html[data-theme-variant="custom"][data-theme="luxury-black"] body[data-theme-sco
 html[data-theme-variant="custom"][data-theme="deep-ocean"] body[data-theme-scope="presentation"] .question-container:hover {
     background-color: var(--theme-surface-alt);
 }
+
+/* ===== Related rails (consultation mode) ===== */
+.pp-related-rails {
+    margin-bottom: 12px;
+}
+
+.pp-related-rails .titled-projects-container {
+    margin-top: 34px;
+    margin-bottom: 34px;
+}
+
+.pp-related-rails .collection-title {
+    justify-content: flex-start;
+    margin-bottom: 22px;
+    font-size: clamp(1.2rem, 1.6vw, 1.55rem);
+}
+
+.pp-related-rails .collection-container {
+    justify-content: flex-start;
+}
+
+@media screen and (max-width: 580px) {
+    .pp-related-rails .titled-projects-container {
+        margin-top: 10px;
+        margin-bottom: 22px;
+    }
+
+    .pp-related-rails .collection-title {
+        margin-bottom: 14px;
+    }
+}
