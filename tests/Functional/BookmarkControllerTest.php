@@ -72,6 +72,41 @@ final class BookmarkControllerTest extends WebTestCase
         self::assertSame('removed', $payload['action'] ?? null);
     }
 
+    public function testAddOnlyEndpointCreatesAndKeepsExistingBookmark(): void
+    {
+        $client = static::createClient();
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+
+        $creator = $this->createUser($em);
+        $project = $this->createProject($em, $creator);
+        $user = $this->createUser($em);
+
+        $client->loginUser($user);
+        $token = $this->getCsrfToken($client, 'bookmark' . $project->getStringId());
+
+        $client->request('POST', sprintf('/project/%s/bookmark/add', $project->getStringId()), [
+            '_token' => $token,
+        ]);
+
+        self::assertResponseIsSuccessful();
+        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame('created', $payload['action'] ?? null);
+
+        $client->request('POST', sprintf('/project/%s/bookmark/add', $project->getStringId()), [
+            '_token' => $token,
+        ]);
+
+        self::assertResponseIsSuccessful();
+        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame('already_exists', $payload['action'] ?? null);
+
+        $repo = $em->getRepository(Bookmark::class);
+        self::assertCount(1, $repo->findBy([
+            'projectPresentation' => $project,
+            'user' => $user,
+        ]));
+    }
+
     public function testBookmarksPageRequiresAuthentication(): void
     {
         $client = static::createClient();

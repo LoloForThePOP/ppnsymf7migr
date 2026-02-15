@@ -753,6 +753,56 @@ html[data-theme-tone="dark"] .search-overlay__suggestions-item {
     height: 14px;
 }
 
+.search-result-card__bookmark {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    border: 1px solid var(--theme-border, #d5dde7);
+    background: color-mix(in srgb, var(--theme-bg) 72%, transparent);
+    color: var(--theme-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    padding: 0;
+    z-index: 3;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.search-result-card__bookmark:hover {
+    background: color-mix(in srgb, var(--theme-bg) 88%, transparent);
+    border-color: color-mix(in srgb, var(--theme-accent) 38%, var(--theme-border));
+    color: var(--theme-accent);
+    transform: translateY(-1px);
+}
+
+.search-result-card__bookmark:disabled,
+.search-result-card__bookmark.is-loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.search-result-card__bookmark .bookmarkIcon {
+    width: 13px;
+    height: 13px;
+}
+
+.search-result-card__bookmark .bookmarkIcon.filled {
+    display: none;
+}
+
+.search-result-card__bookmark.is-bookmarked .bookmarkIcon.filled {
+    display: inline;
+}
+
+.search-result-card__bookmark.is-bookmarked .bookmarkIcon.notFilled {
+    display: none;
+}
+
 .search-overlay__map-modal {
     position: fixed;
     inset: 0;

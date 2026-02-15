@@ -1,7 +1,7 @@
 
 
 
-{% macro collection ( title="", items, class="", hideThreshold = "hide-335", icon = "", stats = {}, titleAction = {}, titleMeta = '', titleInfo = '' ) %}
+{% macro collection ( title="", items, class="", hideThreshold = "hide-335", icon = "", stats = {}, titleAction = {}, titleMeta = '', titleInfo = '', cardOptions = {} ) %}
     {% from 'project_presentation/cards/card.html.twig' import project_card %}
     {% from '_partials/ui_helpers.html.twig' import info_hint %}
 
@@ -53,7 +53,7 @@
 
                 {# Project presentation card #}
 
-                {{ project_card(item, {
+                {% set baseCardOptions = {
                     image: item.extra.cacheThumbnailUrl is defined ? item.extra.cacheThumbnailUrl : null,
                     fallbackImageText: item.goal|default('Aucune image'),
                     fetchImagesLink: (is_granted('ROLE_ADMIN') and item.stringId is defined) ? path('project_fetch_images', {'stringId': item.stringId}) : null,
@@ -63,7 +63,8 @@
                     showMeta: true,
                     likesCount: itemStats ? itemStats.likes : null,
                     commentsCount: itemStats ? itemStats.comments : null,
-                }) }}   
+                } %}
+                {{ project_card(item, baseCardOptions|merge(cardOptions|default({}))) }}   
 
      
             {% endfor %}

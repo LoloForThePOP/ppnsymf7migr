@@ -19,12 +19,13 @@
         {% import "project_presentation/cards/list.html.twig" as cardList %}
         {% block javascripts %}<script src="/js/show_more_less_button.js"></script>{% endblock %}
         {{ cardList.collection(
-            presentations|length ~ ' projet' ~ (presentations|length > 1 ? 's' : '') ~ ' sauvegardé' ~ (presentations|length > 1 ? 's' : ''),
-            presentations,
-            'tab-result',
-            'hide-335',
-            '',
-            presentationStats|default({})
+            title = presentations|length ~ ' projet' ~ (presentations|length > 1 ? 's' : '') ~ ' sauvegardé' ~ (presentations|length > 1 ? 's' : ''),
+            items = presentations,
+            class = 'tab-result',
+            hideThreshold = 'hide-335',
+            icon = '',
+            stats = presentationStats|default({}),
+            cardOptions = { bookmarkMode: 'toggle' }
         ) }}
     {% else %}
         <div class="theme-panel p-4 rounded text-center">

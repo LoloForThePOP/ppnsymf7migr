@@ -78,6 +78,111 @@
     }
   };
 
+  const createBookmarkIconsMarkup = () => `
+    <svg class="bookmarkIcon notFilled" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M6 3.75A2.25 2.25 0 0 0 3.75 6v13.5c0 .6.68.95 1.17.6L12 15.95l7.08 4.15a.75.75 0 0 0 1.17-.6V6A2.25 2.25 0 0 0 18 3.75H6Zm0 1.5h12c.41 0 .75.34.75.75v12.2l-6.37-3.73a.75.75 0 0 0-.76 0l-6.37 3.73V6c0-.41.34-.75.75-.75Z" fill="currentColor"></path>
+    </svg>
+    <svg class="bookmarkIcon filled" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M6 3.75A2.25 2.25 0 0 0 3.75 6v13.5c0 .6.68.95 1.17.6L12 15.95l7.08 4.15a.75.75 0 0 0 1.17-.6V6A2.25 2.25 0 0 0 18 3.75H6Z" fill="currentColor"></path>
+    </svg>
+  `;
+
+  const setBookmarkButtonState = (button, isBookmarked) => {
+    const active = !!isBookmarked;
+    button.classList.toggle('is-bookmarked', active);
+    const label = active ? 'Déjà dans vos marque-pages' : 'Ajouter aux marque-pages';
+    button.setAttribute('aria-label', label);
+    button.setAttribute('title', label);
+  };
+
+  const addBookmark = async (button) => {
+    if (button.dataset.loading === '1' || button.dataset.saved === '1') {
+      return;
+    }
+    const url = button.dataset.bookmarkUrl;
+    const token = button.dataset.bookmarkToken;
+    if (!url || !token) {
+      return;
+    }
+
+    button.dataset.loading = '1';
+    button.disabled = true;
+    button.classList.add('is-loading');
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: new URLSearchParams({ _token: token }),
+      });
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        if (response.status === 403 && payload && payload.error === 'Authentication required') {
+          window.location.assign('/login');
+        }
+        return;
+      }
+      if (!payload || (payload.action !== 'created' && payload.action !== 'already_exists')) {
+        return;
+      }
+
+      if (payload.action === 'created' || payload.action === 'already_exists') {
+        button.dataset.saved = '1';
+        button.disabled = true;
+        setBookmarkButtonState(button, true);
+        return;
+      }
+    } catch {
+      // Keep silent to avoid noisy UX in fast search flows.
+    } finally {
+      button.dataset.loading = '0';
+      if (button.dataset.saved !== '1') {
+        button.disabled = false;
+      }
+      button.classList.remove('is-loading');
+    }
+  };
+
+  const createBookmarkControl = (item) => {
+    if (!item || !item.bookmark || item.bookmark.enabled !== true) {
+      return null;
+    }
+
+    if (item.bookmark.isAuthenticated) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'search-result-card__bookmark search-result-card__bookmark--toggle';
+      button.dataset.bookmarkUrl = item.bookmark.url || '';
+      button.dataset.bookmarkToken = item.bookmark.token || '';
+      button.innerHTML = createBookmarkIconsMarkup();
+      setBookmarkButtonState(button, false);
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        addBookmark(button);
+      });
+      return button;
+    }
+
+    const loginUrl = item.bookmark.loginUrl || '/login';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'search-result-card__bookmark search-result-card__bookmark--login';
+    button.setAttribute('aria-label', 'Se connecter pour enregistrer ce projet');
+    button.setAttribute('title', 'Se connecter pour enregistrer ce projet');
+    button.innerHTML = createBookmarkIconsMarkup();
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      window.location.assign(loginUrl);
+    });
+    return button;
+  };
+
   const setCountLines = (totalLabel) => {
     if (countTotalEl) {
       countTotalEl.textContent = totalLabel || '';
@@ -881,6 +986,11 @@
           openMapModal(item);
         });
         thumb.appendChild(mapBtn);
+      }
+
+      const bookmarkControl = createBookmarkControl(item);
+      if (bookmarkControl) {
+        thumb.appendChild(bookmarkControl);
       }
 
       const body = document.createElement('div');

@@ -31,6 +31,13 @@ Migration: `migrations/Version20260203164000.php`
     - `ROLE_USER` requis
     - CSRF token: `bookmark{stringId}`
     - rate limiter: `bookmark_toggle_user`
+- Add-only AJAX (idempotent):
+  - Route: `ajax_bookmark_pp_add`
+  - URL: `POST /project/{stringId}/bookmark/add`
+  - Contrôleur: `src/Controller/ProjectPresentation/BookmarkController.php`
+  - Réponse:
+    - `created` si ajout réalisé
+    - `already_exists` si déjà présent
 - Page "Mes marque-pages":
   - Route: `user_bookmarks_index`
   - URL: `/my-bookmarks`
@@ -42,6 +49,12 @@ Migration: `migrations/Version20260203164000.php`
 - Bouton bookmark sur les cards:
   - `templates/project_presentation/cards/card.html.twig`
   - CSS: `public/css/project_card.css`
+  - JS (cards génériques): `public/js/project_card_bookmark.js`
+  - Mode par défaut: `add-only` (ajout, pas de retrait inline)
+  - Le retrait inline reste possible avec `bookmarkMode: 'toggle'` (ex: page dédiée marque-pages / 3P).
+- Search overlay:
+  - JS dédié: `public/js/search_overlay.js`
+  - Consomme l'endpoint `ajax_bookmark_pp_add` (add-only) pour éviter le coût de synchronisation de l'état bookmark dans les résultats.
 - Lien vers "Mes marque-pages":
   - Menu utilisateur navbar: `templates/_partials/header_navbar.html.twig`
   - Page profil (si c'est son propre profil): `templates/user/profile/index.html.twig`

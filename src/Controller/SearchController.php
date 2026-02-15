@@ -2,18 +2,21 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Service\ProjectSearchService;
 use Vich\UploaderBundle\Templating\Helper\UploaderHelper;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class SearchController extends AbstractController
 {
     public function __construct(
         private readonly ProjectSearchService $searchService,
         private readonly UploaderHelper $uploaderHelper,
+        private readonly CsrfTokenManagerInterface $csrfTokenManager,
     )
     {
     }
@@ -74,9 +77,12 @@ class SearchController extends AbstractController
         $pages = $result['pages'];
         $totalBase = $result['totalBase'] ?? $total;
         $categoryCounts = $result['categoryCounts'] ?? [];
+        $currentUser = $this->getUser();
+        $viewer = $currentUser instanceof User ? $currentUser : null;
+        $loginUrl = $this->generateUrl('app_login');
 
         $uploader = $this->uploaderHelper;
-        $payload = array_map(function ($pp) use ($uploader) {
+        $payload = array_map(function ($pp) use ($uploader, $viewer, $loginUrl) {
             /** @var \App\Entity\PPBase $pp */
             $thumb = null;
             if (method_exists($pp, 'getExtra') && $pp->getExtra()?->getCacheThumbnailUrl()) {
@@ -84,7 +90,8 @@ class SearchController extends AbstractController
             } elseif (method_exists($pp, 'getLogo') && $pp->getLogo()) {
                 $thumb = $uploader->asset($pp, 'logoFile');
             }
-            $url = $pp->getStringId() ? $this->generateUrl('edit_show_project_presentation', ['stringId' => $pp->getStringId()]) : null;
+            $stringId = $pp->getStringId();
+            $url = $stringId ? $this->generateUrl('edit_show_project_presentation', ['stringId' => $stringId]) : null;
             $categories = [];
             foreach ($pp->getCategories() as $category) {
                 $categories[] = [
@@ -109,16 +116,33 @@ class SearchController extends AbstractController
                     break;
                 }
             }
+
+            $canBookmark = $stringId !== null && $stringId !== '';
+            $isAuthenticated = $viewer !== null;
+            $bookmarkUrl = $canBookmark && $isAuthenticated
+                ? $this->generateUrl('ajax_bookmark_pp_add', ['stringId' => $stringId])
+                : null;
+            $bookmarkToken = $canBookmark && $isAuthenticated
+                ? $this->csrfTokenManager->getToken('bookmark' . $stringId)->getValue()
+                : null;
+
             return [
                 'id' => $pp->getId(),
                 'title' => $pp->getTitle(),
                 'goal' => $pp->getGoal(),
-                'stringId' => $pp->getStringId(),
+                'stringId' => $stringId,
                 'url' => $url,
                 'createdAt' => $pp->getCreatedAt()?->format(DATE_ATOM),
                 'thumbnail' => $thumb,
                 'categories' => $categories,
                 'location' => $location,
+                'bookmark' => [
+                    'enabled' => $canBookmark,
+                    'isAuthenticated' => $isAuthenticated,
+                    'url' => $bookmarkUrl,
+                    'token' => $bookmarkToken,
+                    'loginUrl' => $isAuthenticated ? null : $loginUrl,
+                ],
             ];
         }, $results);
 
