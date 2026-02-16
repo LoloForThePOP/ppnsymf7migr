@@ -7,7 +7,6 @@ This doc explains how theme selection, storage, and CSS variables work in the ap
 Theme state is exposed as data attributes on `<html>` and `<body>`:
 
 - `data-theme`: the active theme id (ex: `classic`, `dark`, `mint`).
-- `data-theme-variant`: `classic` for the legacy theme, `custom` for all others.
 - `data-theme-tone`: `light` or `dark` (used to scope dark-friendly overrides).
 - `body[data-theme-scope]`: `presentation` when the user is on a 3P page, `default` elsewhere.
 
@@ -17,7 +16,7 @@ Theme state is exposed as data attributes on `<html>` and `<body>`:
 
 `templates/base.html.twig` sets:
 
-- `data-theme` and `data-theme-variant` based on the user profile or `classic`.
+- `data-theme` based on the user profile or `classic`.
 - `data-theme-tone` based on a `darkThemes` list (same list is reused on the client).
 
 It also has a small script for anonymous users that reads `localStorage` and replays
@@ -28,7 +27,7 @@ the same attributes before the page fully loads.
 `public/js/theme_selector.js` is the runtime controller:
 
 - Normalizes `light` => `classic`.
-- Sets `data-theme`, `data-theme-variant`, and `data-theme-tone`.
+- Sets `data-theme` and `data-theme-tone`.
 - Updates the theme selector UI.
 - Persists the choice to `localStorage` for anonymous users.
 - Sends the choice to the backend for authenticated users (via `user_theme_update`).
@@ -58,6 +57,17 @@ Examples:
 - `--pp-*` variables for project presentation pages
 
 Use these variables instead of hard-coded colors whenever possible.
+
+## Color ownership rules
+
+To avoid color conflicts when themes evolve:
+
+- Do not use Bootstrap `text-*` utility classes (`text-white`, `text-dark`, `text-secondary`, etc.) as the color source on themed interactive components.
+- Avoid color variant utility classes (`btn-success`, `btn-danger`, etc.) for themed CTAs unless the intent is explicitly non-themed status signaling.
+- Prefer semantic classes per component (`.create-presentation-button`, `.news-card-edit-link`, etc.) and map colors from theme tokens (`--theme-*`).
+- Keep utility classes for layout/spacing (`d-*`, `mb-*`, `text-center`, `text-decoration-none`, etc.).
+
+Rationale: utility color classes and token-driven theming can override each other unpredictably (especially with selector specificity and `!important`), which causes regressions during refactors.
 
 ## Typography readability baseline
 
@@ -122,7 +132,7 @@ If a palette icon is missing, the generic fallback is used.
 
 ## Debug checklist
 
-- Inspect `<html>`: `data-theme`, `data-theme-variant`, `data-theme-tone`.
+- Inspect `<html>`: `data-theme`, `data-theme-tone`.
 - Check that `:root[data-theme="..."]` overrides are loaded (app.css).
 - Confirm `public/js/theme_selector.js` runs after toggling a theme.
 

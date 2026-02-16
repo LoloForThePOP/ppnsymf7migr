@@ -65,7 +65,7 @@
     
 }
 
-html[data-theme-variant="custom"] #managePlacesModal #projectPlacesTable {
+#managePlacesModal #projectPlacesTable {
     --bs-table-bg: var(--theme-surface);
     --bs-table-color: var(--theme-text);
     --bs-table-border-color: var(--theme-border);
@@ -76,13 +76,13 @@ html[data-theme-variant="custom"] #managePlacesModal #projectPlacesTable {
     color: var(--theme-text);
 }
 
-html[data-theme-variant="custom"] #managePlacesModal #projectPlacesTable thead th {
+#managePlacesModal #projectPlacesTable thead th {
     background-color: var(--theme-surface-alt);
     color: var(--theme-title);
 }
 
-html[data-theme-variant="custom"] #managePlacesModal #projectPlacesTable tbody td,
-html[data-theme-variant="custom"] #managePlacesModal #projectPlacesTable tbody th {
+#managePlacesModal #projectPlacesTable tbody td,
+#managePlacesModal #projectPlacesTable tbody th {
     color: var(--theme-text);
 }
 

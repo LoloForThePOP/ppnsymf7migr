@@ -1,61 +1,61 @@
-html[data-theme-variant="custom"] .tox-tinymce {
+html[data-theme] .tox-tinymce {
     border-color: var(--theme-border);
     background-color: var(--theme-surface);
 }
 
-html[data-theme-variant="custom"] .tox {
+html[data-theme] .tox {
     color: var(--theme-text);
     --tox-private-color-black: var(--theme-text);
 }
 
-html[data-theme-variant="custom"] .tox .tox-toolbar-overlord {
+html[data-theme] .tox .tox-toolbar-overlord {
     background-color: var(--theme-border);
 }
 
-html[data-theme-variant="custom"] .tox .tox-editor-header,
-html[data-theme-variant="custom"] .tox .tox-toolbar__primary,
-html[data-theme-variant="custom"] .tox .tox-menubar,
-html[data-theme-variant="custom"] .tox .tox-toolbar,
-html[data-theme-variant="custom"] .tox .tox-statusbar {
+html[data-theme] .tox .tox-editor-header,
+html[data-theme] .tox .tox-toolbar__primary,
+html[data-theme] .tox .tox-menubar,
+html[data-theme] .tox .tox-toolbar,
+html[data-theme] .tox .tox-statusbar {
     background-color: var(--theme-surface);
     border-color: var(--theme-border);
     color: var(--theme-text);
 }
 
-html[data-theme-variant="custom"] .tox .tox-toolbar,
-html[data-theme-variant="custom"] .tox .tox-toolbar__primary,
-html[data-theme-variant="custom"] .tox .tox-toolbar__overflow {
+html[data-theme] .tox .tox-toolbar,
+html[data-theme] .tox .tox-toolbar__primary,
+html[data-theme] .tox .tox-toolbar__overflow {
     background: var(--theme-surface) !important;
 }
 
-html[data-theme-variant="custom"] .tox .tox-toolbar__group:not(:last-of-type) {
+html[data-theme] .tox .tox-toolbar__group:not(:last-of-type) {
     border-color: var(--theme-border);
 }
 
-html[data-theme-variant="custom"] .tox .tox-tbtn,
-html[data-theme-variant="custom"] .tox .tox-mbtn {
+html[data-theme] .tox .tox-tbtn,
+html[data-theme] .tox .tox-mbtn {
     color: var(--theme-text);
     background-color: transparent;
 }
 
-html[data-theme-variant="custom"] .tox .tox-tbtn svg,
-html[data-theme-variant="custom"] .tox .tox-mbtn svg {
+html[data-theme] .tox .tox-tbtn svg,
+html[data-theme] .tox .tox-mbtn svg {
     fill: currentColor !important;
 }
 
-html[data-theme-variant="custom"] .tox .tox-tbtn:hover {
+html[data-theme] .tox .tox-tbtn:hover {
     background-color: var(--theme-surface-alt);
 }
 
-html[data-theme-variant="custom"] .tox .tox-statusbar__path-item,
-html[data-theme-variant="custom"] .tox .tox-statusbar__wordcount {
+html[data-theme] .tox .tox-statusbar__path-item,
+html[data-theme] .tox .tox-statusbar__wordcount {
     color: var(--theme-text-muted);
 }
 
-html[data-theme-variant="custom"] .tox .tox-edit-area__iframe {
+html[data-theme] .tox .tox-edit-area__iframe {
     background-color: var(--theme-surface);
 }
 
-.tox .tox-promotion {
+html[data-theme] .tox .tox-promotion {
     display: none !important;
 }

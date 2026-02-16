@@ -203,7 +203,7 @@
     }
 }
 
-html[data-theme-variant="custom"] .static-manifesto {
+.static-manifesto {
     --manifesto-title-color: var(--theme-title);
     --manifesto-accent: var(--theme-accent);
     --manifesto-card-border: var(--theme-border);

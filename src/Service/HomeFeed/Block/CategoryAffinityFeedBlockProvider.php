@@ -4,6 +4,7 @@ namespace App\Service\HomeFeed\Block;
 
 use App\Entity\User;
 use App\Repository\PPBaseRepository;
+use App\Service\HomeFeed\HomeFeedCollectionUtils;
 use App\Repository\UserPreferenceRepository;
 use App\Service\HomeFeed\HomeFeedBlock;
 use App\Service\HomeFeed\HomeFeedBlockProviderInterface;
@@ -13,8 +14,10 @@ use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 #[AsTaggedItem(priority: 320)]
 final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderInterface
 {
-    private const FETCH_MULTIPLIER = 10;
-    private const MIN_FETCH = 72;
+    private const WINDOW_FETCH_MULTIPLIER = 8;
+    private const WINDOW_FETCH_MIN = 64;
+    private const WINDOW_OFFSETS = [0, 180, 720];
+    private const MERGED_CANDIDATE_LIMIT = 900;
     private const PRIMARY_POOL_MULTIPLIER = 6;
     private const PRIMARY_POOL_MIN = 36;
     private const SECONDARY_POOL_MULTIPLIER = 2;
@@ -45,23 +48,12 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
                 return null;
             }
 
-            $fetchLimit = max(
-                self::MIN_FETCH,
-                $context->getCardsPerBlock() * self::FETCH_MULTIPLIER
-            );
-            $items = $this->ppBaseRepository->findPublishedByCategoriesForCreator(
-                $viewer,
-                $categories,
-                $fetchLimit
-            );
+            $fetchLimit = max(self::WINDOW_FETCH_MIN, $context->getCardsPerBlock() * self::WINDOW_FETCH_MULTIPLIER);
+            $items = $this->collectCategoryCandidates($categories, $fetchLimit, $viewer);
             if ($items === [] && $usedPreferenceCategories) {
                 $fallbackCategories = $this->resolveCreatorCategories($viewer);
                 if ($fallbackCategories !== []) {
-                    $items = $this->ppBaseRepository->findPublishedByCategoriesForCreator(
-                        $viewer,
-                        $fallbackCategories,
-                        $fetchLimit
-                    );
+                    $items = $this->collectCategoryCandidates($fallbackCategories, $fetchLimit, $viewer);
                 }
             }
 
@@ -83,8 +75,8 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
             return null;
         }
 
-        $fetchLimit = max(self::MIN_FETCH, $context->getCardsPerBlock() * self::FETCH_MULTIPLIER);
-        $items = $this->ppBaseRepository->findPublishedByCategories($anonCategoryHints, $fetchLimit);
+        $fetchLimit = max(self::WINDOW_FETCH_MIN, $context->getCardsPerBlock() * self::WINDOW_FETCH_MULTIPLIER);
+        $items = $this->collectCategoryCandidates($anonCategoryHints, $fetchLimit, null);
         if ($items === []) {
             return null;
         }
@@ -96,6 +88,43 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
             $items,
             true
         );
+    }
+
+    /**
+     * @param string[] $categories
+     *
+     * @return array<int,mixed>
+     */
+    private function collectCategoryCandidates(array $categories, int $windowLimit, ?User $excludeCreator): array
+    {
+        $batches = [];
+
+        foreach (self::WINDOW_OFFSETS as $offset) {
+            $batch = $this->ppBaseRepository->findPublishedByCategoriesWindow(
+                $categories,
+                $windowLimit,
+                $offset,
+                $excludeCreator
+            );
+            if ($batch === []) {
+                break;
+            }
+
+            $batches[] = $batch;
+            if (count($batch) < $windowLimit) {
+                break;
+            }
+        }
+
+        if ($batches === []) {
+            return [];
+        }
+
+        $merged = HomeFeedCollectionUtils::mergeUniquePresentations(...$batches);
+
+        return count($merged) > self::MERGED_CANDIDATE_LIMIT
+            ? array_slice($merged, 0, self::MERGED_CANDIDATE_LIMIT)
+            : $merged;
     }
 
     /**

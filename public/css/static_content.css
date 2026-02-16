@@ -39,24 +39,24 @@
     color: var(--theme-accent-static, var(--theme-accent));
 }
 
-html[data-theme-variant="custom"] .static-content {
+.static-content {
     color: var(--theme-text);
 }
 
-html[data-theme-variant="custom"] .static-content h1,
-html[data-theme-variant="custom"] .static-content h2,
-html[data-theme-variant="custom"] .static-content h3 {
+.static-content h1,
+.static-content h2,
+.static-content h3 {
     color: var(--theme-title);
 }
 
-html[data-theme-variant="custom"] .static-content a {
+.static-content a {
     color: var(--theme-accent);
 }
 
-html[data-theme-variant="custom"] .static-content a:hover {
+.static-content a:hover {
     color: var(--theme-text);
 }
 
-html[data-theme-variant="custom"] .static-content .static-accent-title {
+.static-content .static-accent-title {
     color: var(--theme-accent-static, var(--theme-accent));
 }

@@ -60,7 +60,7 @@
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--jbtr-accent) 80%, transparent);
 }
 
-html[data-theme-variant="custom"] .jumbotron{
+.jumbotron{
     --jbtr-title-color: var(--theme-title);
     --jbtr-accent: var(--theme-accent);
     --jbtr-accent-soft: var(--theme-surface-alt);

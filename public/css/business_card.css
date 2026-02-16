@@ -36,7 +36,7 @@
     margin-bottom: 4px;
 }
 
-html[data-theme-variant="custom"] .btn-light.btn-add-bc {
+.btn-light.btn-add-bc {
     border-color: var(--theme-accent);
 }
 
@@ -59,32 +59,32 @@ form[name="business_card"] .contact-icon-title {
     margin-top: 1px;
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] form[name="business_card"] .contact-icon,
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] form[name="business_card"] .contact-icon-title {
+body[data-theme-scope="presentation"] form[name="business_card"] .contact-icon,
+body[data-theme-scope="presentation"] form[name="business_card"] .contact-icon-title {
     filter: brightness(0) saturate(100%) var(--theme-contact-icon-filter);
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .bc-content-wrapper,
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .bc-content-wrapper a {
+body[data-theme-scope="presentation"] .bc-content-wrapper,
+body[data-theme-scope="presentation"] .bc-content-wrapper a {
     color: var(--theme-text);
 }
 
-html[data-theme-variant="classic"] body[data-theme-scope="presentation"] .bc-content-wrapper a {
+html[data-theme="classic"] body[data-theme-scope="presentation"] .bc-content-wrapper a {
     color: var(--theme-text);
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .bc-content-wrapper a:hover,
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .bc-content-wrapper a:focus {
+body[data-theme-scope="presentation"] .bc-content-wrapper a:hover,
+body[data-theme-scope="presentation"] .bc-content-wrapper a:focus {
     color: var(--theme-accent);
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #add_business_card_form_modal .form-control,
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #add_business_card_form_modal textarea {
+body[data-theme-scope="presentation"] #add_business_card_form_modal .form-control,
+body[data-theme-scope="presentation"] #add_business_card_form_modal textarea {
     background-color: var(--theme-surface-alt);
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #add_business_card_form_modal .form-control::placeholder,
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] #add_business_card_form_modal textarea::placeholder {
+body[data-theme-scope="presentation"] #add_business_card_form_modal .form-control::placeholder,
+body[data-theme-scope="presentation"] #add_business_card_form_modal textarea::placeholder {
     color: var(--theme-text-muted) !important;
     opacity: 0.9;
 }

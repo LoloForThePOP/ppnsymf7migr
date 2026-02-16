@@ -17,7 +17,7 @@
     --pp-create-upload-color: #094171;
 }
 
-html[data-theme-variant="custom"] #createPPModal.create-pp-modal {
+#createPPModal.create-pp-modal {
     --pp-create-title: var(--theme-accent);
     --pp-create-surface: var(--theme-surface);
     --pp-create-surface-alt: var(--theme-surface-alt);
@@ -50,16 +50,16 @@ html[data-theme-variant="custom"] #createPPModal.create-pp-modal {
     color: var(--pp-create-title);
 }
 
-html[data-theme-variant="custom"] #createPPModal.create-pp-modal .box-title {
+#createPPModal.create-pp-modal .box-title {
     color: var(--theme-accent);
 }
 
-html[data-theme-variant="custom"] #createPPModal.create-pp-modal .propon-logo {
+#createPPModal.create-pp-modal .propon-logo {
     --propon-logo-primary: var(--pp-create-accent);
     --propon-logo-secondary: var(--pp-create-accent);
 }
 
-html[data-theme-variant="custom"] #createPPModal.create-pp-modal .propon-logo .propon-logo-secondary {
+#createPPModal.create-pp-modal .propon-logo .propon-logo-secondary {
     opacity: 0.7;
 }
 
@@ -203,11 +203,11 @@ html[data-theme-variant="custom"] #createPPModal.create-pp-modal .propon-logo .p
     color: var(--theme-text);
 }
 
-html[data-theme-variant="custom"] #createPPModal.create-pp-modal .selected-category {
+#createPPModal.create-pp-modal .selected-category {
     background-color: var(--theme-surface-alt);
 }
 
-html[data-theme-variant="custom"] #createPPModal.create-pp-modal .text-muted {
+#createPPModal.create-pp-modal .text-muted {
     color: var(--pp-create-muted) !important;
 }
 

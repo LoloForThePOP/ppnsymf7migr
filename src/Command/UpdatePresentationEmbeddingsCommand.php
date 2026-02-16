@@ -22,11 +22,17 @@ use Symfony\Component\Console\Style\SymfonyStyle;
     Basic run (default 50 items, cooldown 6h, K=10):
     bin/console app:compute-presentation-embeddings
 
+    Process only eligible static candidates (scraped or score >= min score), missing first:
+    bin/console app:compute-presentation-embeddings --min-score=12
+
     Force recompute for one presentation:
     bin/console app:compute-presentation-embeddings --presentation-id=123 --force
 
     Recompute embeddings only (no neighbors):
     bin/console app:compute-presentation-embeddings --no-neighbors
+
+    One-shot backfill for missing eligible embeddings:
+    bin/console app:compute-presentation-embeddings --missing-only --min-score=12
     
     Include unpublished items:
     bin/console app:compute-presentation-embeddings --include-unpublished
@@ -56,7 +62,11 @@ class UpdatePresentationEmbeddingsCommand extends Command
             ->addOption('no-neighbors', null, InputOption::VALUE_NONE, 'Ne pas recalculer les voisins')
             ->addOption('k', null, InputOption::VALUE_REQUIRED, 'Nombre de voisins à conserver', 10)
             ->addOption('include-unpublished', null, InputOption::VALUE_NONE, 'Inclure les présentations non publiées')
-            ->addOption('include-deleted', null, InputOption::VALUE_NONE, 'Inclure les présentations supprimées');
+            ->addOption('include-deleted', null, InputOption::VALUE_NONE, 'Inclure les présentations supprimées')
+            ->addOption('min-score', null, InputOption::VALUE_REQUIRED, 'Score minimal pour marquer une présentation comme éligible "once".', 12)
+            ->addOption('include-ineligible', null, InputOption::VALUE_NONE, 'Inclure les présentations non scrapées sous le score minimal.')
+            ->addOption('missing-only', null, InputOption::VALUE_NONE, 'Traiter uniquement les présentations sans embedding pour le modèle courant.')
+            ->addOption('allow-eligible-recompute', null, InputOption::VALUE_NONE, 'Autoriser le recalcul des présentations éligibles déjà embedées.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -76,11 +86,24 @@ class UpdatePresentationEmbeddingsCommand extends Command
         $k = max(1, (int) $input->getOption('k'));
         $includeUnpublished = (bool) $input->getOption('include-unpublished');
         $includeDeleted = (bool) $input->getOption('include-deleted');
+        $minScore = max(0, (int) $input->getOption('min-score'));
+        $includeIneligible = (bool) $input->getOption('include-ineligible');
+        $missingOnly = (bool) $input->getOption('missing-only');
+        $allowEligibleRecompute = (bool) $input->getOption('allow-eligible-recompute');
 
         $model = $this->embeddingService->getModel();
         $dims = $this->embeddingService->getDimensions();
 
-        $presentations = $this->loadPresentations($presentationId, $includeUnpublished, $includeDeleted, $limit);
+        $presentations = $this->loadPresentations(
+            $presentationId,
+            $includeUnpublished,
+            $includeDeleted,
+            $limit,
+            $model,
+            $minScore,
+            $includeIneligible,
+            $missingOnly
+        );
         if ($presentations === []) {
             $io->warning('Aucune présentation à traiter.');
             return Command::SUCCESS;
@@ -94,8 +117,27 @@ class UpdatePresentationEmbeddingsCommand extends Command
         $embeddingRepo = $this->em->getRepository(PresentationEmbedding::class);
         $updatedPresentationIds = [];
         $processed = 0;
+        $skippedFrozen = 0;
+        $skippedIneligible = 0;
+        $skippedAlreadyEmbedded = 0;
 
         foreach ($presentations as $presentation) {
+            $isEligibleStatic = $this->isEligibleForStaticEmbedding($presentation, $minScore);
+            if (!$includeIneligible && !$isEligibleStatic) {
+                $skippedIneligible++;
+                continue;
+            }
+
+            $existing = $embeddingRepo->findOneBy([
+                'presentation' => $presentation,
+                'model' => $model,
+            ]);
+
+            if ($missingOnly && $existing instanceof PresentationEmbedding && !$force) {
+                $skippedAlreadyEmbedded++;
+                continue;
+            }
+
             $text = $this->textBuilder->buildText($presentation);
             if ($text === '') {
                 $io->writeln(sprintf('Presentation %d: texte vide, ignorée.', $presentation->getId()));
@@ -103,12 +145,12 @@ class UpdatePresentationEmbeddingsCommand extends Command
             }
 
             $hash = $this->textBuilder->hashText($text, true);
-            $existing = $embeddingRepo->findOneBy([
-                'presentation' => $presentation,
-                'model' => $model,
-            ]);
+            if ($existing instanceof PresentationEmbedding && !$force) {
+                if ($isEligibleStatic && !$allowEligibleRecompute) {
+                    $skippedFrozen++;
+                    continue;
+                }
 
-            if ($existing && !$force) {
                 if (hash_equals($existing->getContentHash(), $hash)) {
                     $io->writeln(sprintf('Presentation %d: hash inchangé.', $presentation->getId()));
                     continue;
@@ -126,7 +168,7 @@ class UpdatePresentationEmbeddingsCommand extends Command
                 continue;
             }
 
-            if (!$existing) {
+            if (!$existing instanceof PresentationEmbedding) {
                 $existing = new PresentationEmbedding($presentation, $result->model);
                 $this->em->persist($existing);
             }
@@ -149,7 +191,13 @@ class UpdatePresentationEmbeddingsCommand extends Command
             $this->recomputeNeighbors($updatedPresentationIds, $model, $dims, $k, $includeUnpublished, $includeDeleted, $io);
         }
 
-        $io->success(sprintf('Embeddings mis à jour: %d', $processed));
+        $io->success(sprintf(
+            'Embeddings mis à jour: %d (figés: %d, inéligibles ignorés: %d, déjà embedés/missing-only: %d)',
+            $processed,
+            $skippedFrozen,
+            $skippedIneligible,
+            $skippedAlreadyEmbedded
+        ));
 
         return Command::SUCCESS;
     }
@@ -157,7 +205,16 @@ class UpdatePresentationEmbeddingsCommand extends Command
     /**
      * @return PPBase[]
      */
-    private function loadPresentations(?string $presentationId, bool $includeUnpublished, bool $includeDeleted, int $limit): array
+    private function loadPresentations(
+        ?string $presentationId,
+        bool $includeUnpublished,
+        bool $includeDeleted,
+        int $limit,
+        string $model,
+        int $minScore,
+        bool $includeIneligible,
+        bool $missingOnly
+    ): array
     {
         $repo = $this->em->getRepository(PPBase::class);
 
@@ -166,20 +223,48 @@ class UpdatePresentationEmbeddingsCommand extends Command
             return $presentation ? [$presentation] : [];
         }
 
-        $qb = $repo->createQueryBuilder('p');
+        $qb = $repo->createQueryBuilder('p')
+            ->leftJoin(
+                PresentationEmbedding::class,
+                'e',
+                'WITH',
+                'e.presentation = p AND e.model = :model'
+            )
+            ->setParameter('model', $model)
+            ->addSelect('CASE WHEN e.model IS NULL THEN 0 ELSE 1 END AS HIDDEN embedding_rank');
 
         if (!$includeDeleted) {
-            $qb->andWhere('p.isDeleted = false');
+            $qb->andWhere('(p.isDeleted = false OR p.isDeleted IS NULL)');
         }
 
         if (!$includeUnpublished) {
             $qb->andWhere('p.isPublished = true');
         }
 
-        $qb->orderBy('p.id', 'ASC')
+        if (!$includeIneligible) {
+            $qb->andWhere(
+                '(p.score >= :minScore OR p.ingestion.sourceUrl IS NOT NULL OR p.ingestion.ingestedAt IS NOT NULL)'
+            )->setParameter('minScore', $minScore);
+        }
+
+        if ($missingOnly) {
+            $qb->andWhere('e.model IS NULL');
+        }
+
+        $qb->orderBy('embedding_rank', 'ASC')
+            ->addOrderBy('p.updatedAt', 'DESC')
             ->setMaxResults($limit);
 
         return $qb->getQuery()->getResult();
+    }
+
+    private function isEligibleForStaticEmbedding(PPBase $presentation, int $minScore): bool
+    {
+        if ($presentation->isScraped()) {
+            return true;
+        }
+
+        return ((int) ($presentation->getScore() ?? 0)) >= $minScore;
     }
 
     private function recomputeNeighbors(

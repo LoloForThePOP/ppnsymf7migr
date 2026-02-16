@@ -6,11 +6,10 @@
 {% set allowedThemes = ['classic', 'mint', 'dark', 'neon', 'matrix', 'retro-game', 'eco-green', 'pink-lady', 'luxury-black', 'deep-ocean'] %}
 {% set normalizedTheme = storedTheme == 'light' ? 'classic' : storedTheme %}
 {% set resolvedTheme = normalizedTheme in allowedThemes ? normalizedTheme : 'classic' %}
-{% set themeVariant = resolvedTheme == 'classic' ? 'classic' : 'custom' %}
 {% set darkThemes = ['dark', 'neon', 'matrix', 'luxury-black', 'deep-ocean'] %}
 {% set themeTone = resolvedTheme in darkThemes ? 'dark' : 'light' %}
 
-<html class="is-loading" data-theme="{{ resolvedTheme }}" data-theme-variant="{{ themeVariant }}" data-theme-tone="{{ themeTone }}">
+<html class="is-loading" data-theme="{{ resolvedTheme }}" data-theme-tone="{{ themeTone }}">
 
     <head>
 
@@ -72,11 +71,9 @@
                             if (allowedThemes.indexOf(storedTheme) === -1) {
                                 storedTheme = 'classic';
                             }
-                            var variant = storedTheme === 'classic' ? 'classic' : 'custom';
                             var darkThemes = {{ darkThemes|json_encode|raw }};
                             var tone = darkThemes.indexOf(storedTheme) !== -1 ? 'dark' : 'light';
                             document.documentElement.setAttribute('data-theme', storedTheme);
-                            document.documentElement.setAttribute('data-theme-variant', variant);
                             document.documentElement.setAttribute('data-theme-tone', tone);
                         }
                     } catch (e) {}

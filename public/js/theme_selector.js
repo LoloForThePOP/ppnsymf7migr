@@ -94,7 +94,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const applyTheme = function (theme) {
         const resolved = normalizeTheme(theme);
         root.setAttribute('data-theme', resolved);
-        root.setAttribute('data-theme-variant', resolved === 'classic' ? 'classic' : 'custom');
         root.setAttribute('data-theme-tone', resolveTone(resolved));
         selectors.forEach(function (selector) {
             selector.dataset.currentTheme = resolved;

@@ -3,15 +3,26 @@
 namespace App\Service\HomeFeed\Block;
 
 use App\Entity\PPBase;
+use App\Entity\User;
 use App\Repository\PPBaseRepository;
 use App\Service\HomeFeed\HomeFeedBlock;
 use App\Service\HomeFeed\HomeFeedBlockProviderInterface;
+use App\Service\HomeFeed\HomeFeedCollectionUtils;
 use App\Service\HomeFeed\HomeFeedContext;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 
 #[AsTaggedItem(priority: 220)]
 final class TrendingFeedBlockProvider implements HomeFeedBlockProviderInterface
 {
+    private const WINDOW_FETCH_MULTIPLIER = 14;
+    private const WINDOW_FETCH_MIN = 120;
+    private const WINDOW_OFFSETS = [0, 400, 1400];
+    private const MERGED_CANDIDATE_LIMIT = 1200;
+    private const FRESHNESS_DECAY_DAYS = 30.0;
+    private const FRESHNESS_WEIGHT = 2.5;
+    private const SHUFFLE_WINDOW_MULTIPLIER = 10;
+    private const SHUFFLE_WINDOW_MIN = 80;
+
     public function __construct(
         private readonly PPBaseRepository $ppBaseRepository,
     ) {
@@ -19,20 +30,8 @@ final class TrendingFeedBlockProvider implements HomeFeedBlockProviderInterface
 
     public function provide(HomeFeedContext $context): ?HomeFeedBlock
     {
-        $fetchLimit = max(180, $context->getCardsPerBlock() * 24);
-        $candidates = $this->ppBaseRepository->findLatestPublished($fetchLimit);
-        if ($candidates === []) {
-            return null;
-        }
-
-        $viewer = $context->getViewer();
-        if ($viewer !== null) {
-            $viewerId = $viewer->getId();
-            $candidates = array_values(array_filter(
-                $candidates,
-                static fn (PPBase $item): bool => $item->getCreator()?->getId() !== $viewerId
-            ));
-        }
+        $fetchLimit = max(self::WINDOW_FETCH_MIN, $context->getCardsPerBlock() * self::WINDOW_FETCH_MULTIPLIER);
+        $candidates = $this->collectCandidates($fetchLimit, $context->getViewer());
 
         if ($candidates === []) {
             return null;
@@ -59,7 +58,7 @@ final class TrendingFeedBlockProvider implements HomeFeedBlockProviderInterface
             $ageSeconds = max(0, $now->getTimestamp() - $createdAt->getTimestamp());
             $ageDays = $ageSeconds / 86400;
 
-            $freshnessBoost = exp(-$ageDays / 14.0) * 5.0;
+            $freshnessBoost = exp(-$ageDays / self::FRESHNESS_DECAY_DAYS) * self::FRESHNESS_WEIGHT;
             $score = ($likes * 1.0)
                 + ($comments * 1.8)
                 + (log(1.0 + $views) * 1.2)
@@ -96,6 +95,12 @@ final class TrendingFeedBlockProvider implements HomeFeedBlockProviderInterface
             static fn (array $row): PPBase => $row['item'],
             $rows
         );
+        $rankedItems = HomeFeedCollectionUtils::shuffleTopWindow(
+            $rankedItems,
+            $context->getCardsPerBlock(),
+            self::SHUFFLE_WINDOW_MULTIPLIER,
+            self::SHUFFLE_WINDOW_MIN
+        );
 
         return new HomeFeedBlock(
             'trending',
@@ -104,5 +109,34 @@ final class TrendingFeedBlockProvider implements HomeFeedBlockProviderInterface
             false
         );
     }
-}
 
+    /**
+     * @return PPBase[]
+     */
+    private function collectCandidates(int $windowFetchLimit, ?User $excludeCreator): array
+    {
+        $batches = [];
+
+        foreach (self::WINDOW_OFFSETS as $offset) {
+            $batch = $this->ppBaseRepository->findLatestPublishedWindow($windowFetchLimit, $offset, $excludeCreator);
+            if ($batch === []) {
+                break;
+            }
+
+            $batches[] = $batch;
+            if (count($batch) < $windowFetchLimit) {
+                break;
+            }
+        }
+
+        if ($batches === []) {
+            return [];
+        }
+
+        $merged = HomeFeedCollectionUtils::mergeUniquePresentations(...$batches);
+
+        return count($merged) > self::MERGED_CANDIDATE_LIMIT
+            ? array_slice($merged, 0, self::MERGED_CANDIDATE_LIMIT)
+            : $merged;
+    }
+}

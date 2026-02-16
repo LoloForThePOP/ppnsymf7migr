@@ -102,7 +102,7 @@
     border-radius: 6px;
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .in-edition-mode .edit-hoverable-item:hover {
+body[data-theme-scope="presentation"] .in-edition-mode .edit-hoverable-item:hover {
     background-color: color-mix(in srgb, var(--theme-accent) 12%, var(--theme-surface));
 }
 
@@ -162,14 +162,14 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .in-edit
     border: 1px solid var(--theme-accent);
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .plus-btn {
+body[data-theme-scope="presentation"] .plus-btn {
     background-color: var(--theme-surface-alt);
     border-color: var(--theme-accent);
     color: var(--theme-text);
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .plus-btn:hover,
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .plus-btn:focus {
+body[data-theme-scope="presentation"] .plus-btn:hover,
+body[data-theme-scope="presentation"] .plus-btn:focus {
     background-color: var(--theme-surface);
 }
 
@@ -228,14 +228,14 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .plus-bt
     margin: 0;
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info-tooltip {
+body[data-theme-scope="presentation"] .pp-info-tooltip {
     background-color: var(--theme-surface-alt);
     border-color: var(--theme-accent);
     color: var(--theme-text);
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info-tooltip:hover,
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info-tooltip:focus {
+body[data-theme-scope="presentation"] .pp-info-tooltip:hover,
+body[data-theme-scope="presentation"] .pp-info-tooltip:focus {
     background-color: var(--theme-surface);
     border-color: var(--theme-accent);
 }
@@ -325,14 +325,14 @@ html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .pp-info
     border-color: color-mix(in srgb, var(--bs-danger, #dc3545) 70%, #000) !important;
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .delete-button {
+body[data-theme-scope="presentation"] .delete-button {
     background-color: var(--theme-accent) !important;
     border-color: var(--theme-accent) !important;
     color: var(--theme-accent-contrast) !important;
 }
 
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .delete-button:hover,
-html[data-theme-variant="custom"] body[data-theme-scope="presentation"] .delete-button:focus {
+body[data-theme-scope="presentation"] .delete-button:hover,
+body[data-theme-scope="presentation"] .delete-button:focus {
     filter: brightness(0.92);
 }
 

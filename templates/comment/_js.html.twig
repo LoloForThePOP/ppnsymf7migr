@@ -90,17 +90,7 @@
             var hasContent = this.value.trim().length > 0;
 
             $form.toggleClass('is-filled', hasContent);
-
-            if (document.documentElement.getAttribute('data-theme-variant') === 'custom') {
-                $("button", $form).css('background-color', '');
-                return;
-            }
-
-            var rootStyles = getComputedStyle(document.documentElement);
-            var idleColor = rootStyles.getPropertyValue('--theme-surface-alt').trim() || getComputedStyle(document.body).backgroundColor;
-            var activeColor = rootStyles.getPropertyValue('--theme-accent').trim() || getComputedStyle(document.body).color;
-            var buttonColor = hasContent ? activeColor : idleColor;
-            $("button", $form).css('background-color', buttonColor);
+            $("button", $form).css('background-color', '');
 
         });
 

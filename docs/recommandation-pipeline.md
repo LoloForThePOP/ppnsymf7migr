@@ -147,35 +147,49 @@ Definition of opt-out here:
 - `category-affinity`
   - Audience: logged-in
   - Feed source: `user_preferences.fav_categories`, fallback to creator recent categories
+  - Candidate strategy: category windows (`offset` slices) + in-memory diversification
   - Provider: `CategoryAffinityFeedBlockProvider`
 - `anon-category-affinity`
   - Audience: anonymous with hints
   - Feed source: `anon_pref_categories` cookie (fed from localStorage signals)
+  - Candidate strategy: category windows (`offset` slices) + in-memory diversification
   - Provider: `CategoryAffinityFeedBlockProvider`
 - `followed-projects`
   - Audience: logged-in
   - Feed source: `follow` table (`findLatestFollowedPresentations`)
+  - Candidate strategy: recent follows + top-window shuffle to avoid fixed rails
   - Provider: `FollowedProjectsFeedBlockProvider`
 - `domain-interest`
   - Audience: logged-in
-  - Feed source: `user_preferences.fav_keywords` (weighted keyword overlap against latest pool)
+  - Feed source: `user_preferences.fav_keywords` (weighted keyword overlap against a keyword-matching candidate pool merged with recent published)
   - Provider: `KeywordAffinityFeedBlockProvider`
 - `anon-domain-interest`
   - Audience: anonymous with hints
-  - Feed source: `anon_pref_keywords` cookie (weighted overlap against latest pool)
+  - Feed source: `anon_pref_keywords` cookie (weighted overlap against a keyword-matching candidate pool merged with recent published)
   - Provider: `KeywordAffinityFeedBlockProvider`
 - `around-you`
   - Audience: logged-in + anonymous
   - Feed source: `search_pref_location` cookie (lat/lng/radius), then `places` geoloc filters
+  - Candidate strategy: location-filtered pool + top-window shuffle
   - Provider: `NearbyLocationFeedBlockProvider`
 - `trending`
   - Audience: logged-in + anonymous
   - Feed source: published projects + engagement/freshness scoring (likes/comments/views/time decay)
+  - Candidate strategy: stratified recency windows (`offset` slices) + lower freshness weight + top-window shuffle
   - Provider: `TrendingFeedBlockProvider`
 - `latest`
   - Audience: logged-in + anonymous
   - Feed source: latest published projects (excluding own projects for logged-in users)
+  - Candidate strategy: larger recent pool + top-window shuffle
   - Provider: `LatestPublishedFeedBlockProvider`
+
+### Recency/Staticity Guards
+
+- Category rails (`category-affinity`, `anon-category-affinity`) now blend multiple recency windows (`offset` slices), then shuffle bounded pools.
+- Keyword rails (`domain-interest`, `anon-domain-interest`) use keyword-matching candidate pools merged with recent projects, then diversify.
+- `trending` now scores a stratified candidate pool (recent + older windows), with reduced freshness dominance and shuffled top window.
+- `around-you`, `followed-projects`, and `latest` use bounded top-window shuffle to avoid fixed repeated first cards.
+- Dedupe across rails remains in `HomeFeedAssembler`: a project shown in one rail is excluded from later rails on the same render.
 
 ## Location UX Flow
 
@@ -231,6 +245,11 @@ Optional embedding cache is now available:
 
 The schema mirrors `presentation_embeddings` format to keep both pipelines aligned.
 
+Current computation modes:
+
+- `centroid` (default): builds each user vector as a weighted centroid of interacted project embeddings (`like`/`follow`/`bookmark` + recent `view` signals).
+- `text` (compatibility mode): builds user vectors from cached `user_preferences` text (`categories + keywords`) through embedding API calls.
+
 ## Recompute Services and Commands
 
 Recompute service:
@@ -246,7 +265,7 @@ Recompute service:
 Commands:
 
 - `bin/console app:recompute-user-preferences [--user-id=ID] [--limit=200] [--all] [--batch-size=500]`
-- `bin/console app:compute-user-embeddings [--user-id=ID] [--limit=200] [--cooldown-hours=6] [--force]`
+- `bin/console app:compute-user-embeddings [--mode=centroid|text] [--user-id=ID] [--limit=200] [--cooldown-hours=6] [--force]`
 
 Interactive actions:
 
