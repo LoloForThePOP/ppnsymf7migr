@@ -4,6 +4,8 @@ namespace App\Service\HomeFeed;
 
 use App\Entity\PPBase;
 use App\Repository\PPBaseRepository;
+use App\Repository\PresentationNeighborRepository;
+use App\Service\AI\PresentationEmbeddingService;
 use App\Service\HomeFeed\Block\CategoryAffinityFeedBlockProvider;
 use App\Service\HomeFeed\Block\KeywordAffinityFeedBlockProvider;
 use App\Service\Recommendation\KeywordNormalizer;
@@ -13,12 +15,16 @@ final class PresentationRelatedFeedBuilder
 {
     private const MAX_BLOCKS = 2;
     private const KEYWORD_HINT_LIMIT = 16;
+    private const SIMILAR_BLOCK_KEY = 'related-neighbors';
+    private const SIMILAR_BLOCK_TITLE = 'Projets similaires';
 
     public function __construct(
         private readonly CategoryAffinityFeedBlockProvider $categoryAffinityProvider,
         private readonly KeywordAffinityFeedBlockProvider $keywordAffinityProvider,
         private readonly KeywordNormalizer $keywordNormalizer,
         private readonly PPBaseRepository $ppBaseRepository,
+        private readonly PresentationNeighborRepository $presentationNeighborRepository,
+        private readonly PresentationEmbeddingService $presentationEmbeddingService,
         #[Autowire('%app.home_feed.cards_per_block%')]
         private readonly int $cardsPerBlock,
     ) {
@@ -29,6 +35,30 @@ final class PresentationRelatedFeedBuilder
      */
     public function buildForPresentation(PPBase $presentation): array
     {
+        $blocks = [];
+        $currentId = $presentation->getId();
+        $excluded = $currentId !== null ? [$currentId => true] : [];
+
+        $neighborItems = $this->presentationNeighborRepository->findNeighborPresentations(
+            $presentation,
+            $this->presentationEmbeddingService->getModel(),
+            $this->cardsPerBlock
+        );
+        $neighborItems = $this->dedupeAndLimitItems($neighborItems, $excluded, $this->cardsPerBlock);
+        if ($neighborItems !== []) {
+            $blocks[] = new HomeFeedBlock(
+                self::SIMILAR_BLOCK_KEY,
+                self::SIMILAR_BLOCK_TITLE,
+                $neighborItems,
+                false,
+                $this->ppBaseRepository->getEngagementCountsForIds($this->extractItemIds($neighborItems))
+            );
+        }
+
+        if (count($blocks) >= self::MAX_BLOCKS) {
+            return $blocks;
+        }
+
         $categoryHints = $this->extractCategoryHints($presentation);
         $keywordHints = $this->keywordNormalizer->normalizeRawKeywords(
             $presentation->getKeywords(),
@@ -36,7 +66,7 @@ final class PresentationRelatedFeedBuilder
         );
 
         if ($categoryHints === [] && $keywordHints === []) {
-            return [];
+            return $blocks;
         }
 
         $context = new HomeFeedContext(
@@ -50,11 +80,11 @@ final class PresentationRelatedFeedBuilder
             creatorCapPerBlock: 2
         );
 
-        $currentId = $presentation->getId();
-        $excluded = $currentId !== null ? [$currentId => true] : [];
-        $blocks = [];
-
         foreach ([$this->categoryAffinityProvider, $this->keywordAffinityProvider] as $provider) {
+            if (count($blocks) >= self::MAX_BLOCKS) {
+                break;
+            }
+
             $rawBlock = $provider->provide($context);
             if (!$rawBlock instanceof HomeFeedBlock) {
                 continue;
@@ -157,4 +187,3 @@ final class PresentationRelatedFeedBuilder
         };
     }
 }
-

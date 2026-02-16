@@ -58,6 +58,10 @@ Use this section as the quick reference before reading details.
 - `KeywordNormalizer`:
   - Normalizes keywords for matching (lowercase, accents stripped, simple singularization, stopwords, aliases).
   - Used in recommendation keyword scoring to improve match quality with low compute cost.
+- `PresentationRelatedFeedBuilder`:
+  - Builds bottom rails for 3P pages.
+  - Prioritizes `presentation_neighbors` (`Projets similaires`) for the active embedding model.
+  - Falls back to category/keyword affinity rails when neighbor data is missing/insufficient.
 
 ## Goals
 
@@ -91,6 +95,22 @@ Current providers (priority order):
 4. `FollowedProjectsFeedBlockProvider` (logged only)
 5. `TrendingFeedBlockProvider` (general)
 6. `LatestPublishedFeedBlockProvider` (general fallback)
+
+## 3P Bottom Rails
+
+Entry point:
+
+- `src/Service/HomeFeed/PresentationRelatedFeedBuilder.php`
+
+Order (max 2 blocks):
+
+1. `Projets similaires` (`related-neighbors`) from `presentation_neighbors` using current embedding model.
+2. Category/keyword fallback (`Dans les mêmes catégories`, `Domaines proches`) with global dedupe.
+
+Notes:
+
+- Neighbor retrieval filters out unpublished/deleted projects at read time.
+- If no row exists for the active model, retrieval falls back to any available model for resilience.
 
 ## Recommandation Blocks (Homepage)
 

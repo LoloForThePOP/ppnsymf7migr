@@ -2,9 +2,10 @@
 
 namespace App\Entity;
 
+use App\Repository\PresentationNeighborRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: PresentationNeighborRepository::class)]
 #[ORM\Table(
     name: 'presentation_neighbors',
     uniqueConstraints: [
