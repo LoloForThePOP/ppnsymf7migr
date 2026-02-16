@@ -29,9 +29,8 @@
 
 }
 
-
-.read-more {
-    margin-left: 47%;
+.collection-container.hide-too-long.hide-335 {
+    max-height: 358px;
 }
 
 .collection-title {
@@ -134,4 +133,10 @@
 
     }
 
+}
+
+@media screen and (min-width: 581px) and (max-width: 810px) {
+    .collection-container.hide-too-long.hide-335 {
+        max-height: 250px;
+    }
 }

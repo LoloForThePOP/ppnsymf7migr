@@ -421,28 +421,23 @@ html[data-theme="deep-ocean"] body[data-theme-scope="presentation"] .question-co
 }
 
 .pp-related-rails .collection-container {
-    justify-content: flex-start;
+    justify-content: center;
+    gap: 18px;
 }
 
-@media screen and (min-width: 581px) {
-    /* 3P related rails should not be vertically clipped: show cards directly. */
-    .pp-related-rails .hide-too-long {
-        max-height: none !important;
-        height: auto;
-        overflow: visible;
-    }
-
-    .pp-related-rails .read-more {
-        display: none !important;
-    }
+.pp-related-rails .collection-container > .project-card {
+    margin-bottom: 0;
 }
 
 @media screen and (min-width: 1280px) {
-    /* Use more horizontal room on large screens for related rails. */
     .pp-related-rails {
-        width: min(1500px, calc(100vw - 56px));
+        width: min(1600px, calc(100vw - 48px));
         margin-left: 50%;
         transform: translateX(-50%);
+    }
+
+    .pp-related-rails .collection-container > .project-card {
+        width: clamp(220px, calc((100% - 72px) / 5), 300px);
     }
 }
 
@@ -454,5 +449,9 @@ html[data-theme="deep-ocean"] body[data-theme-scope="presentation"] .question-co
 
     .pp-related-rails .collection-title {
         margin-bottom: 14px;
+    }
+
+    .pp-related-rails .read-more {
+        display: none !important;
     }
 }

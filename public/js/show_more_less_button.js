@@ -7,23 +7,18 @@
 
 // Create Variables
 var allOSB = [];
-var mxh = '';
 
 window.onload = function() {
   // Set Variables
   allOSB = document.getElementsByClassName("hide-too-long");
   
   if (allOSB.length > 0) {
-    mxh = window.getComputedStyle(allOSB[0]).getPropertyValue('max-height');
-    mxh = parseInt(mxh.replace('px', ''));
-    
     // Add read-more button to each hide too long section
     for (var i = 0; i < allOSB.length; i++) {
-      var el = document.createElement("a");
+      var el = document.createElement("button");
       el.innerHTML = "Afficher +";
       el.setAttribute("type", "button");
       el.setAttribute("class", "read-more read-more--hidden");
-      el.setAttribute("src", "#");
       
       insertAfter(allOSB[i], el);
     }
@@ -49,11 +44,19 @@ window.onresize = function() {
 function updateReadMore() {
   if (allOSB.length > 0) {
     for (var i = 0; i < allOSB.length; i++) {
-      if (allOSB[i].scrollHeight > mxh + 50) {
+      var currentMaxHeight = window.getComputedStyle(allOSB[i]).getPropertyValue('max-height');
+      currentMaxHeight = parseInt(currentMaxHeight.replace('px', ''), 10);
+
+      if (!Number.isFinite(currentMaxHeight) || currentMaxHeight <= 0) {
+        allOSB[i].nextElementSibling.className = "read-more read-more--hidden";
+        continue;
+      }
+
+      if (allOSB[i].scrollHeight > currentMaxHeight + 16) {
         if (allOSB[i].hasAttribute("style")) {
           updateHeight(allOSB[i]);
         }
-        allOSB[i].nextElementSibling.className = "read-more btn btn-primary btn-sm mt-2";
+        allOSB[i].nextElementSibling.className = "read-more";
       } else {
         allOSB[i].nextElementSibling.className = "read-more read-more--hidden";
       }
