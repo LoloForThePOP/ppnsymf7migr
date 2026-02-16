@@ -266,6 +266,10 @@ Commands:
 
 - `bin/console app:recompute-user-preferences [--user-id=ID] [--limit=200] [--all] [--batch-size=500]`
 - `bin/console app:compute-user-embeddings [--mode=centroid|text] [--user-id=ID] [--limit=200] [--cooldown-hours=6] [--force]`
+- `bin/console app:compute-presentation-embeddings [--limit=50] [--k=30] [--min-score=12] [--missing-only] [--force]`
+  - Computes/updates `presentation_embeddings` (API calls) and refreshes neighbors for updated presentations.
+- `bin/console app:compute-presentation-neighbors [--k=30] [--presentation-id=ID] [--limit=0]`
+  - Recomputes `presentation_neighbors` from stored vectors only (no embedding API call), useful for 3P recommendation refresh.
 
 Interactive actions:
 

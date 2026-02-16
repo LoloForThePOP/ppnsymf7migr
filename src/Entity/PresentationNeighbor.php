@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
         new ORM\UniqueConstraint(name: 'uniq_neighbor', columns: ['presentation_id', 'neighbor_id', 'model']),
     ],
     indexes: [
-        new ORM\Index(name: 'idx_presentation_model', columns: ['presentation_id', 'model', 'rank']),
+        new ORM\Index(name: 'idx_presentation_model', columns: ['presentation_id', 'model', '`rank`']),
         new ORM\Index(name: 'idx_neighbor', columns: ['neighbor_id']),
     ]
 )]
@@ -28,7 +28,7 @@ class PresentationNeighbor
     private string $model;
 
     #[ORM\Id]
-    #[ORM\Column(name: 'rank', type: 'smallint')]
+    #[ORM\Column(name: '`rank`', type: 'smallint')]
     private int $rank;
 
     #[ORM\ManyToOne(targetEntity: PPBase::class)]

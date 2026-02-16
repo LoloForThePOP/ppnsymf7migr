@@ -29,7 +29,7 @@ class UserEmbedding
     private mixed $vector;
 
     #[ORM\Column(type: 'binary', length: 32)]
-    private string $contentHash;
+    private mixed $contentHash;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
@@ -111,7 +111,19 @@ class UserEmbedding
 
     public function getContentHash(): string
     {
-        return $this->contentHash;
+        if (is_resource($this->contentHash)) {
+            $metadata = stream_get_meta_data($this->contentHash);
+            if (is_array($metadata) && !($metadata['seekable'] ?? false)) {
+                $contents = stream_get_contents($this->contentHash);
+                return $contents === false ? '' : $contents;
+            }
+
+            rewind($this->contentHash);
+            $contents = stream_get_contents($this->contentHash);
+            return $contents === false ? '' : $contents;
+        }
+
+        return (string) $this->contentHash;
     }
 
     public function setContentHash(string $contentHash): self
