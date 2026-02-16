@@ -192,6 +192,7 @@
         class="pp-container {{userPresenter ? 'in-edition-mode' : 'in-consultation-mode'}} container"
         data-pp-view-track="1"
         data-pp-view-id="{{ presentation.stringId ?: presentation.id }}"
+        {% if presentation.id %}data-pp-view-db-id="{{ presentation.id }}"{% endif %}
         {% if presentationCategoryData %}data-pp-categories="{{ presentationCategoryData }}"{% endif %}
         {% if presentationKeywordData %}data-pp-keywords="{{ presentationKeywordData }}"{% endif %}
     >

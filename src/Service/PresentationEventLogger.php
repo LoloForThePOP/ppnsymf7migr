@@ -59,6 +59,8 @@ class PresentationEventLogger
             PresentationEvent::TYPE_SHARE_OPEN,
             PresentationEvent::TYPE_SHARE_COPY,
             PresentationEvent::TYPE_SHARE_EXTERNAL,
+            PresentationEvent::TYPE_HOME_FEED_IMPRESSION,
+            PresentationEvent::TYPE_HOME_FEED_CLICK,
         ];
     }
 

@@ -124,6 +124,7 @@ class MonitoringDashboardController extends AbstractController
                 $eventRepository->countByTypeGroupedByDay(PresentationEvent::TYPE_SHARE_EXTERNAL, $start, $end),
             ])
         );
+        $homeFeedMetrics = $eventRepository->getHomepageFeedMetricsByBlock($start, $end);
 
         $distinctVisitors = $eventRepository->countDistinctVisitors($start, $end);
         $returningVisitors = $eventRepository->countReturningVisitors($start, $end);
@@ -203,6 +204,7 @@ class MonitoringDashboardController extends AbstractController
             'latestProjects' => $latestProjects,
             'latestComments' => $latestComments,
             'latestNews' => $latestNews,
+            'homeFeedMetrics' => $homeFeedMetrics,
         ]);
     }
 

@@ -42,6 +42,7 @@
 
   <script src="/js/show_more_less_button.js"></script>
   <script src="/js/home_location_modal.js" defer></script>
+  <script src="/js/home_feed_metrics.js" defer></script>
   {% if app.user and addNewsForm %}
     <script src="/js/news_creation.js"></script>
   {% endif %}
@@ -130,7 +131,12 @@
                         }
                     }
                     : {} %}
-                <div class="container my-5"{% if block.key == 'around-you' %} id="home-around-you-rail"{% endif %}>
+                <div
+                    class="container my-5"
+                    data-home-feed-block-key="{{ block.key }}"
+                    data-home-feed-block-position="{{ loop.index }}"
+                    {% if block.key == 'around-you' %}id="home-around-you-rail"{% endif %}
+                >
                     {{ project_collection(block.title, block.items, '', 'hide-335', '', block.stats, blockTitleAction, blockTitleMeta, blockTitleInfo) }}
                 </div>
             {% endfor %}

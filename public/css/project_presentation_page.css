@@ -424,6 +424,28 @@ html[data-theme="deep-ocean"] body[data-theme-scope="presentation"] .question-co
     justify-content: flex-start;
 }
 
+@media screen and (min-width: 581px) {
+    /* 3P related rails should not be vertically clipped: show cards directly. */
+    .pp-related-rails .hide-too-long {
+        max-height: none !important;
+        height: auto;
+        overflow: visible;
+    }
+
+    .pp-related-rails .read-more {
+        display: none !important;
+    }
+}
+
+@media screen and (min-width: 1280px) {
+    /* Use more horizontal room on large screens for related rails. */
+    .pp-related-rails {
+        width: min(1500px, calc(100vw - 56px));
+        margin-left: 50%;
+        transform: translateX(-50%);
+    }
+}
+
 @media screen and (max-width: 580px) {
     .pp-related-rails .titled-projects-container {
         margin-top: 10px;

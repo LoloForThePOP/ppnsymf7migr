@@ -111,6 +111,58 @@
         </div>
     </div>
 
+    {% set homeFeedBlockLabels = {
+        'neighbor-affinity': 'Parce que vous avez consulté',
+        'anon-neighbor-affinity': 'Parce que vous avez consulté (anon)',
+        'category-affinity': 'Basé sur vos catégories',
+        'anon-category-affinity': 'Selon vos centres d’intérêt récents',
+        'domain-interest': 'Domaines d’intérêt',
+        'anon-domain-interest': 'Domaines d’intérêt (anon)',
+        'around-you': 'Autour de vous',
+        'followed-projects': 'Projets suivis',
+        'trending': 'Tendance sur Propon',
+        'latest': 'Derniers projets présentés'
+    } %}
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-12">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6">CTR des rails homepage</h2>
+                    <div class="text-muted small mb-2">Impressions et clics des cartes par bloc (période sélectionnée).</div>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Bloc</th>
+                                    <th scope="col">Clé</th>
+                                    <th scope="col" class="text-end">Impressions</th>
+                                    <th scope="col" class="text-end">Clics</th>
+                                    <th scope="col" class="text-end">CTR</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in homeFeedMetrics %}
+                                    <tr>
+                                        <td>{{ homeFeedBlockLabels[row.block]|default(row.block) }}</td>
+                                        <td><code>{{ row.block }}</code></td>
+                                        <td class="text-end">{{ row.impressions }}</td>
+                                        <td class="text-end">{{ row.clicks }}</td>
+                                        <td class="text-end">{{ row.ctr|number_format(2, ',', ' ') }}%</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-muted">Pas encore de données pour les rails homepage.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-3 mb-4">
         <div class="col-lg-7">
             <div class="card h-100">

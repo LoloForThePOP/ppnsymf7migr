@@ -1,14 +1,17 @@
 (function () {
     var CATEGORY_STORAGE_KEY = "pp_anon_profile_v1";
     var KEYWORD_STORAGE_KEY = "pp_anon_keywords_v1";
+    var RECENT_VIEWS_STORAGE_KEY = "pp_anon_recent_views_v1";
     var CATEGORY_COOKIE_KEY = "anon_pref_categories";
     var KEYWORD_COOKIE_KEY = "anon_pref_keywords";
+    var RECENT_VIEWS_COOKIE_KEY = "anon_pref_recent_views";
     var SESSION_TRACKED_VIEWS_KEY = "pp_anon_viewed_presentations_v1";
     var SESSION_TRACKED_CLICKS_KEY = "pp_anon_clicked_cards_v1";
     var MAX_CATEGORY_BUCKETS = 20;
     var MAX_KEYWORD_BUCKETS = 40;
     var MAX_COOKIE_CATEGORIES = 6;
     var MAX_COOKIE_KEYWORDS = 8;
+    var MAX_RECENT_VIEW_IDS = 12;
     var COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
     var SESSION_MAX_ITEMS = 400;
     var CLICK_WEIGHT = 1;
@@ -321,6 +324,76 @@
         }
     }
 
+    function readRecentViewIds() {
+        try {
+            var raw = localStorage.getItem(RECENT_VIEWS_STORAGE_KEY);
+            if (!raw) {
+                return [];
+            }
+
+            var parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed)) {
+                return [];
+            }
+
+            var ids = [];
+            parsed.forEach(function (value) {
+                var token = String(value || "").trim();
+                if (!/^[1-9][0-9]{0,9}$/.test(token)) {
+                    return;
+                }
+                if (ids.indexOf(token) === -1) {
+                    ids.push(token);
+                }
+            });
+
+            return ids.slice(0, MAX_RECENT_VIEW_IDS);
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function saveRecentViewIds(ids) {
+        try {
+            localStorage.setItem(
+                RECENT_VIEWS_STORAGE_KEY,
+                JSON.stringify(ids.slice(0, MAX_RECENT_VIEW_IDS))
+            );
+        } catch (error) {
+            // ignore storage failures
+        }
+    }
+
+    function syncRecentViewIdsCookie(ids) {
+        if (!ids || ids.length === 0) {
+            return;
+        }
+
+        var value = encodeURIComponent(ids.slice(0, MAX_RECENT_VIEW_IDS).join(","));
+        document.cookie =
+            RECENT_VIEWS_COOKIE_KEY +
+            "=" +
+            value +
+            "; Path=/; Max-Age=" +
+            COOKIE_MAX_AGE_SECONDS +
+            "; SameSite=Lax";
+    }
+
+    function rememberRecentPresentationId(rawId) {
+        var id = String(rawId || "").trim();
+        if (!/^[1-9][0-9]{0,9}$/.test(id)) {
+            return;
+        }
+
+        var current = readRecentViewIds().filter(function (value) {
+            return value !== id;
+        });
+        current.unshift(id);
+        current = current.slice(0, MAX_RECENT_VIEW_IDS);
+        saveRecentViewIds(current);
+        syncRecentViewIdsCookie(current);
+    }
+
     function trackPresentationView(categoryProfile, keywordProfile) {
         var trackRoot = document.querySelector("[data-pp-view-track='1'][data-pp-view-id]");
         if (!trackRoot) {
@@ -338,6 +411,8 @@
 
         var categoryTokens = String(trackRoot.getAttribute("data-pp-categories") || "").trim();
         var keywordTokens = String(trackRoot.getAttribute("data-pp-keywords") || "").trim();
+        var dbViewId = String(trackRoot.getAttribute("data-pp-view-db-id") || "").trim();
+        rememberRecentPresentationId(dbViewId);
 
         var categoryUpdated = applyCategories(categoryProfile, categoryTokens, VIEW_WEIGHT);
         var keywordUpdated = applyKeywords(keywordProfile, keywordTokens, VIEW_WEIGHT);
@@ -366,9 +441,11 @@
     function bindTracking() {
         var categoryProfile = readProfile(CATEGORY_STORAGE_KEY, /^[a-z0-9_-]{1,40}$/);
         var keywordProfile = readProfile(KEYWORD_STORAGE_KEY, /^[a-z0-9_-]{2,60}$/);
+        var recentViewIds = readRecentViewIds();
 
         syncCookie(categoryProfile, CATEGORY_COOKIE_KEY, MAX_COOKIE_CATEGORIES);
         syncCookie(keywordProfile, KEYWORD_COOKIE_KEY, MAX_COOKIE_KEYWORDS);
+        syncRecentViewIdsCookie(recentViewIds);
         trackPresentationView(categoryProfile, keywordProfile);
 
         document.addEventListener(

@@ -75,6 +75,7 @@ final class PresentationRelatedFeedBuilder
             maxBlocks: self::MAX_BLOCKS,
             anonCategoryHints: $categoryHints,
             anonKeywordHints: $keywordHints,
+            anonRecentViewIds: [],
             locationHint: null,
             creatorCapEnabled: false,
             creatorCapPerBlock: 2

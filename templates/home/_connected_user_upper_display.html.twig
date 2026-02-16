@@ -162,11 +162,17 @@
             }
             : {} %}
         {% if block.key == 'around-you' %}
-            <div id="home-around-you-rail">
+            <div
+                id="home-around-you-rail"
+                data-home-feed-block-key="{{ block.key }}"
+                data-home-feed-block-position="{{ loop.index }}"
+            >
                 {{ project_collection(block.title, block.items, blockClass, 'hide-335', '', block.stats, blockTitleAction, blockTitleMeta, blockTitleInfo) }}
             </div>
         {% else %}
-            {{ project_collection(block.title, block.items, blockClass, 'hide-335', '', block.stats, blockTitleAction, blockTitleMeta, blockTitleInfo) }}
+            <div data-home-feed-block-key="{{ block.key }}" data-home-feed-block-position="{{ loop.index }}">
+                {{ project_collection(block.title, block.items, blockClass, 'hide-335', '', block.stats, blockTitleAction, blockTitleMeta, blockTitleInfo) }}
+            </div>
         {% endif %}
     {% endfor %}
 

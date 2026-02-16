@@ -22,6 +22,10 @@ Use this section as the quick reference before reading details.
   - Logged-in source: `user_preferences.fav_categories` (categories only).
   - Logged-in fallback: categories from user's recent created projects.
   - Anonymous source: `anon_pref_categories` cookie (categories only).
+- `NeighborAffinityFeedBlockProvider`:
+  - Logged-in source: recent viewed projects (`presentation_event`), then recent follows/bookmarks as seed fallback.
+  - Anonymous source: `anon_pref_recent_views` cookie (recent viewed project ids).
+  - Retrieves candidates from `presentation_neighbors` and aggregates by seed recency + neighbor rank.
 - `KeywordAffinityFeedBlockProvider`:
   - Logged-in source: `user_preferences.fav_keywords` (normalized keyword scores).
   - Anonymous source: `anon_pref_keywords` cookie (recent keyword hints).
@@ -46,8 +50,16 @@ Use this section as the quick reference before reading details.
 - `home_anon_preferences.js`:
   - Tracks anon 3P views (primary) and card clicks (secondary).
   - Stores category and keyword signals in localStorage.
+  - Stores recent viewed project ids for anon neighbor seeding.
   - Syncs top categories into cookie `anon_pref_categories`.
   - Syncs top keywords into cookie `anon_pref_keywords`.
+- `home_feed_metrics.js`:
+  - Tracks homepage card impressions/clicks per block.
+  - Sends telemetry to `pp_event` (`home_feed_impression`, `home_feed_click`) with block metadata.
+  - Used for CTR by rail in admin monitoring.
+- `MonitoringDashboardController`:
+  - Reads homepage rail impressions/clicks grouped by block from `presentation_event.meta`.
+  - Displays CTR table per block in `/admin/monitoring`.
 - `UserCategoryPreferenceSignalUpdater`:
   - Applies incremental category/keyword score deltas for logged users (like/follow/bookmark/view).
   - Applies lightweight time decay before each update so old signals fade naturally.
@@ -90,11 +102,12 @@ Flow:
 Current providers (priority order):
 
 1. `CategoryAffinityFeedBlockProvider` (personalized by categories)
-2. `KeywordAffinityFeedBlockProvider` (personalized by keywords)
-3. `NearbyLocationFeedBlockProvider` (location-based)
-4. `FollowedProjectsFeedBlockProvider` (logged only)
-5. `TrendingFeedBlockProvider` (general)
-6. `LatestPublishedFeedBlockProvider` (general fallback)
+2. `NeighborAffinityFeedBlockProvider` (personalized by nearest neighbors from recent seeds)
+3. `KeywordAffinityFeedBlockProvider` (personalized by keywords)
+4. `NearbyLocationFeedBlockProvider` (location-based)
+5. `FollowedProjectsFeedBlockProvider` (logged only)
+6. `TrendingFeedBlockProvider` (general)
+7. `LatestPublishedFeedBlockProvider` (general fallback)
 
 ## 3P Bottom Rails
 
@@ -121,11 +134,12 @@ This section describes what users see on homepage depending on audience state.
 Expected blocks (in order, when data exists):
 
 1. `Basé sur vos catégories` (`category-affinity`)
-2. `Domaines d’intérêt` (`domain-interest`)
-3. `Autour de vous` (`around-you`)
-4. `Projets suivis` (`followed-projects`)
-5. `Tendance sur Propon` (`trending`)
-6. `Derniers projets présentés` (`latest`)
+2. `Parce que vous avez consulté` (`neighbor-affinity`)
+3. `Domaines d’intérêt` (`domain-interest`)
+4. `Autour de vous` (`around-you`)
+5. `Projets suivis` (`followed-projects`)
+6. `Tendance sur Propon` (`trending`)
+7. `Derniers projets présentés` (`latest`)
 
 Notes:
 
@@ -138,10 +152,11 @@ Notes:
 Expected blocks (in order, when data exists):
 
 1. `Selon vos centres d’intérêt récents` (`anon-category-affinity`)
-2. `Domaines d’intérêt` (`anon-domain-interest`)
-3. `Autour de vous` (`around-you`)
-4. `Tendance sur Propon` (`trending`)
-5. `Derniers projets présentés` (`latest`)
+2. `Parce que vous avez consulté` (`anon-neighbor-affinity`)
+3. `Domaines d’intérêt` (`anon-domain-interest`)
+4. `Autour de vous` (`around-you`)
+5. `Tendance sur Propon` (`trending`)
+6. `Derniers projets présentés` (`latest`)
 
 Definition of opt-in here:
 
@@ -183,10 +198,20 @@ Definition of opt-out here:
   - Audience: logged-in
   - Feed source: `user_preferences.fav_keywords` (weighted keyword overlap against a keyword-matching candidate pool merged with recent published)
   - Provider: `KeywordAffinityFeedBlockProvider`
+- `neighbor-affinity`
+  - Audience: logged-in
+  - Feed source: recent views (`presentation_event`), then follow/bookmark fallback seeds
+  - Candidate strategy: aggregate nearest neighbors from `presentation_neighbors` across seed projects, then shuffle top window
+  - Provider: `NeighborAffinityFeedBlockProvider`
 - `anon-domain-interest`
   - Audience: anonymous with hints
   - Feed source: `anon_pref_keywords` cookie (weighted overlap against a keyword-matching candidate pool merged with recent published)
   - Provider: `KeywordAffinityFeedBlockProvider`
+- `anon-neighbor-affinity`
+  - Audience: anonymous with recent views
+  - Feed source: `anon_pref_recent_views` cookie
+  - Candidate strategy: aggregate nearest neighbors from `presentation_neighbors` across seed projects, then shuffle top window
+  - Provider: `NeighborAffinityFeedBlockProvider`
 - `around-you`
   - Audience: logged-in + anonymous
   - Feed source: `search_pref_location` cookie (lat/lng/radius), then `places` geoloc filters
@@ -228,12 +253,15 @@ Anonymous hints are intentionally lightweight:
 
 - Browser stores category signals in localStorage: `public/js/home_anon_preferences.js` (loaded for anon users from `templates/base.html.twig`).
 - Browser stores keyword signals in localStorage: `public/js/home_anon_preferences.js`.
+- Browser stores recent viewed project ids in localStorage: `public/js/home_anon_preferences.js`.
 - Primary signal is anonymous 3P page view (once per presentation per browser session).
 - Secondary signal is anonymous card click (homepage + search overlay, low weight, once per card target per session).
 - Top category slugs are mirrored into cookie `anon_pref_categories`.
 - Top keyword hints are mirrored into cookie `anon_pref_keywords`.
+- Recent viewed project ids are mirrored into cookie `anon_pref_recent_views`.
 - Backend reads the cookie in `HomeController` and injects hints into `HomeFeedContext`.
 - Category-affinity and keyword-affinity blocks use these hints when available.
+- Neighbor-affinity block uses recent view id hints when available.
 - Category-affinity rails (anonymous and logged-in) now use a diversified recent pool (shuffled within bounded windows) to avoid static repeated cards.
 
 If no anon hints exist, homepage still renders general blocks (`trending`, `latest`).

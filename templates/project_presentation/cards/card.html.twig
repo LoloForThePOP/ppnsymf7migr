@@ -66,8 +66,15 @@
     {% endif %}
     {% set categoryData = categoryTokens|join(',') %}
     {% set keywordData = presentation.keywords|default('')|trim %}
+    {% set eventUrl = presentation is defined and presentation.stringId is defined ? path('pp_event', {'stringId': presentation.stringId}) : '' %}
 
-    <article class="project-card position-relative text-reset" {% if categoryData %}data-pp-categories="{{ categoryData }}"{% endif %} {% if keywordData %}data-pp-keywords="{{ keywordData }}"{% endif %}>
+    <article
+        class="project-card position-relative text-reset"
+        {% if categoryData %}data-pp-categories="{{ categoryData }}"{% endif %}
+        {% if keywordData %}data-pp-keywords="{{ keywordData }}"{% endif %}
+        {% if presentation.stringId is defined %}data-pp-string-id="{{ presentation.stringId }}"{% endif %}
+        {% if eventUrl %}data-pp-event-url="{{ eventUrl }}"{% endif %}
+    >
         {% if options.link %}
             <a
                 class="stretched-link" style="z-index: 40;"

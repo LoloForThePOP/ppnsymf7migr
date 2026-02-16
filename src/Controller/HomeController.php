@@ -62,6 +62,7 @@ final class HomeController extends AbstractController
 
         $anonCategoryHints = $viewer ? [] : $this->extractAnonCategoryHints($request);
         $anonKeywordHints = $viewer ? [] : $this->extractAnonKeywordHints($request);
+        $anonRecentViewIds = $viewer ? [] : $this->extractAnonRecentViewIds($request);
         $locationContext = $homepageLocationContextResolver->resolve($request);
         $locationHint = $locationContext['hint'];
         $homepageLocationSummary = $locationContext['summary'];
@@ -71,6 +72,7 @@ final class HomeController extends AbstractController
             maxBlocks: $viewer ? $maxBlocksLogged : $maxBlocksAnon,
             anonCategoryHints: $anonCategoryHints,
             anonKeywordHints: $anonKeywordHints,
+            anonRecentViewIds: $anonRecentViewIds,
             locationHint: $locationHint,
             creatorCapEnabled: $creatorCapEnabled,
             creatorCapPerBlock: $creatorCapPerBlock
@@ -136,5 +138,33 @@ final class HomeController extends AbstractController
         }
 
         return array_slice(array_keys($hints), 0, 16);
+    }
+
+    /**
+     * @return int[]
+     */
+    private function extractAnonRecentViewIds(Request $request): array
+    {
+        $raw = (string) $request->cookies->get('anon_pref_recent_views', '');
+        if ($raw === '') {
+            return [];
+        }
+
+        $parts = preg_split('/[,|]+/', $raw) ?: [];
+        $ids = [];
+
+        foreach ($parts as $part) {
+            $token = trim($part);
+            if ($token === '' || !preg_match('/^[1-9][0-9]{0,9}$/', $token)) {
+                continue;
+            }
+
+            $id = (int) $token;
+            if ($id > 0) {
+                $ids[$id] = true;
+            }
+        }
+
+        return array_slice(array_keys($ids), 0, 12);
     }
 }

@@ -38,6 +38,21 @@ class PresentationNeighborRepository extends ServiceEntityRepository
     /**
      * @return PPBase[]
      */
+    public function findNeighborPresentationsById(int $presentationId, string $model, int $limit = 12): array
+    {
+        if ($presentationId <= 0) {
+            return [];
+        }
+
+        /** @var PPBase $presentation */
+        $presentation = $this->getEntityManager()->getReference(PPBase::class, $presentationId);
+
+        return $this->findNeighborPresentations($presentation, $model, $limit);
+    }
+
+    /**
+     * @return PPBase[]
+     */
     private function fetchNeighborPresentations(PPBase $presentation, int $limit, ?string $model): array
     {
         $qb = $this->createQueryBuilder('n')
@@ -85,4 +100,3 @@ class PresentationNeighborRepository extends ServiceEntityRepository
         return $selected;
     }
 }
-

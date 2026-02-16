@@ -20,6 +20,8 @@ class PresentationEventController extends AbstractController
         PresentationEvent::TYPE_SHARE_OPEN,
         PresentationEvent::TYPE_SHARE_COPY,
         PresentationEvent::TYPE_SHARE_EXTERNAL,
+        PresentationEvent::TYPE_HOME_FEED_IMPRESSION,
+        PresentationEvent::TYPE_HOME_FEED_CLICK,
     ];
 
     private const ALLOWED_SHARE_CHANNELS = [
@@ -32,6 +34,9 @@ class PresentationEventController extends AbstractController
         'x',
         'email',
     ];
+    private const ALLOWED_FEED_PLACEMENTS = [
+        'homepage',
+    ];
     private const MAX_PAYLOAD_BYTES = 2048;
 
     #[Route('/pp/{stringId}/event', name: 'pp_event', methods: ['POST'])]
@@ -42,12 +47,6 @@ class PresentationEventController extends AbstractController
         PresentationEventLogger $eventLogger,
         #[Autowire(service: 'limiter.presentation_event')] RateLimiterFactory $eventLimiter,
     ): JsonResponse {
-        $limiterKey = $this->buildLimiterKey($request, $presentation);
-        $limit = $eventLimiter->create($limiterKey)->consume(1);
-        if (!$limit->isAccepted()) {
-            return $this->json(['ok' => false, 'error' => 'rate_limited'], 429);
-        }
-
         $payload = $this->extractPayload($request);
         if ($payload === null) {
             return $this->json(['ok' => false, 'error' => 'invalid_payload'], 400);
@@ -69,6 +68,12 @@ class PresentationEventController extends AbstractController
         $safeMeta = $this->sanitizeMeta($type, $meta);
         if ($safeMeta === null) {
             return $this->json(['ok' => false, 'error' => 'invalid_meta'], 400);
+        }
+
+        $limiterKey = $this->buildLimiterKey($request, $presentation, $type, $safeMeta);
+        $limit = $eventLimiter->create($limiterKey)->consume(1);
+        if (!$limit->isAccepted()) {
+            return $this->json(['ok' => false, 'error' => 'rate_limited'], 429);
         }
 
         $event = $eventLogger->log($presentation, $type, $safeMeta, true);
@@ -118,6 +123,10 @@ class PresentationEventController extends AbstractController
             return $this->sanitizeShareExternalMeta($meta);
         }
 
+        if ($type === PresentationEvent::TYPE_HOME_FEED_IMPRESSION || $type === PresentationEvent::TYPE_HOME_FEED_CLICK) {
+            return $this->sanitizeHomeFeedMeta($meta);
+        }
+
         return [];
     }
 
@@ -141,7 +150,10 @@ class PresentationEventController extends AbstractController
         return ['channel' => $channel];
     }
 
-    private function buildLimiterKey(Request $request, PPBase $presentation): string
+    /**
+     * @param array<string,string|int> $safeMeta
+     */
+    private function buildLimiterKey(Request $request, PPBase $presentation, string $type, array $safeMeta): string
     {
         $actor = 'anon';
         $user = $this->getUser();
@@ -151,8 +163,62 @@ class PresentationEventController extends AbstractController
             $actor = 'ip:' . (string) $request->getClientIp();
         }
 
+        if ($type === PresentationEvent::TYPE_HOME_FEED_IMPRESSION || $type === PresentationEvent::TYPE_HOME_FEED_CLICK) {
+            $placement = isset($safeMeta['placement']) && is_string($safeMeta['placement'])
+                ? $safeMeta['placement']
+                : 'homepage';
+
+            return $actor . '|home-feed:' . $placement;
+        }
+
         $presentationId = $presentation->getStringId() ?: (string) $presentation->getId();
 
         return $actor . '|pp:' . $presentationId;
+    }
+
+    /**
+     * @param array<string,mixed> $meta
+     *
+     * @return array<string,string|int>|null
+     */
+    private function sanitizeHomeFeedMeta(array $meta): ?array
+    {
+        $block = $meta['block'] ?? null;
+        if (!is_string($block)) {
+            return null;
+        }
+
+        $block = trim(strtolower($block));
+        if ($block === '' || !preg_match('/^[a-z0-9_-]{2,80}$/', $block)) {
+            return null;
+        }
+
+        $placement = strtolower(trim((string) ($meta['placement'] ?? 'homepage')));
+        if (!in_array($placement, self::ALLOWED_FEED_PLACEMENTS, true)) {
+            return null;
+        }
+
+        $clean = [
+            'placement' => $placement,
+            'block' => $block,
+        ];
+
+        $blockPosition = $meta['block_position'] ?? null;
+        if (is_numeric($blockPosition)) {
+            $value = (int) $blockPosition;
+            if ($value >= 1 && $value <= 20) {
+                $clean['block_position'] = $value;
+            }
+        }
+
+        $cardPosition = $meta['card_position'] ?? null;
+        if (is_numeric($cardPosition)) {
+            $value = (int) $cardPosition;
+            if ($value >= 1 && $value <= 50) {
+                $clean['card_position'] = $value;
+            }
+        }
+
+        return $clean;
     }
 }

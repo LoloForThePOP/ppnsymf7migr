@@ -17,6 +17,8 @@ class PresentationEvent
     public const TYPE_SHARE_OPEN = 'share_open';
     public const TYPE_SHARE_COPY = 'share_copy';
     public const TYPE_SHARE_EXTERNAL = 'share_external';
+    public const TYPE_HOME_FEED_IMPRESSION = 'home_feed_impression';
+    public const TYPE_HOME_FEED_CLICK = 'home_feed_click';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
