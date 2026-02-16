@@ -145,6 +145,54 @@
 
         {% include "home/_around_you_location_modal.html.twig" %}
 
+        {% if homeFeedDiagnostics is defined and homeFeedDiagnostics and homeFeedDiagnostics.enabled %}
+            <details class="container my-4 p-3 border rounded bg-body-tertiary">
+                <summary class="fw-semibold">
+                    Home feed debug:
+                    {{ homeFeedDiagnostics.totals.durationMs|number_format(2, '.', ' ') }} ms,
+                    {{ homeFeedDiagnostics.totals.queryCount }} requêtes SQL,
+                    {{ homeFeedDiagnostics.totals.queryMs|number_format(3, '.', ' ') }} ms SQL
+                </summary>
+
+                <div class="table-responsive mt-3">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Provider</th>
+                                <th scope="col">Bloc</th>
+                                <th scope="col">Brut</th>
+                                <th scope="col">Retenu</th>
+                                <th scope="col">Accepté</th>
+                                <th scope="col">Durée (ms)</th>
+                                <th scope="col">SQL</th>
+                                <th scope="col">SQL ms</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in homeFeedDiagnostics.entries %}
+                                <tr>
+                                    <td>{{ row.provider }}</td>
+                                    <td>
+                                        {% if row.blockKey %}
+                                            <code>{{ row.blockKey }}</code>
+                                        {% else %}
+                                            <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ row.rawItems }}</td>
+                                    <td>{{ row.selectedItems }}</td>
+                                    <td>{{ row.accepted ? 'oui' : 'non' }}</td>
+                                    <td>{{ row.durationMs|number_format(2, '.', ' ') }}</td>
+                                    <td>{{ row.queryCount }}</td>
+                                    <td>{{ row.queryMs|number_format(3, '.', ' ') }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        {% endif %}
+
 
         {# Last Moto #}
 

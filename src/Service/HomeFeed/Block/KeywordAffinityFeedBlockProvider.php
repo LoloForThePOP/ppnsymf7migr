@@ -19,8 +19,8 @@ final class KeywordAffinityFeedBlockProvider implements HomeFeedBlockProviderInt
     private const PROFILE_LIMIT_ANON = 16;
     private const CANDIDATE_FETCH_MULTIPLIER_LOGGED = 30;
     private const CANDIDATE_FETCH_MIN_LOGGED = 240;
-    private const CANDIDATE_FETCH_MULTIPLIER_ANON = 60;
-    private const CANDIDATE_FETCH_MIN_ANON = 480;
+    private const CANDIDATE_FETCH_MULTIPLIER_ANON = 24;
+    private const CANDIDATE_FETCH_MIN_ANON = 180;
     private const KEYWORDS_PER_PRESENTATION_LIMIT = 12;
     private const MIN_PROFILE_KEYWORDS = 3;
     private const MIN_MATCHED_MIN = 6;
@@ -31,8 +31,9 @@ final class KeywordAffinityFeedBlockProvider implements HomeFeedBlockProviderInt
     private const QUERY_TERMS_LIMIT_LOGGED = 10;
     private const QUERY_TERMS_LIMIT_ANON = 8;
     private const KEYWORD_CANDIDATE_LIMIT_LOGGED = 1000;
-    private const KEYWORD_CANDIDATE_LIMIT_ANON = 1200;
-    private const MERGED_CANDIDATE_LIMIT = 1800;
+    private const KEYWORD_CANDIDATE_LIMIT_ANON = 300;
+    private const MERGED_CANDIDATE_LIMIT_LOGGED = 1800;
+    private const MERGED_CANDIDATE_LIMIT_ANON = 450;
 
     public function __construct(
         private readonly PPBaseRepository $ppBaseRepository,
@@ -113,8 +114,12 @@ final class KeywordAffinityFeedBlockProvider implements HomeFeedBlockProviderInt
 
         $merged = HomeFeedCollectionUtils::mergeUniquePresentations($keywordPool, $recent);
 
-        return count($merged) > self::MERGED_CANDIDATE_LIMIT
-            ? array_slice($merged, 0, self::MERGED_CANDIDATE_LIMIT)
+        $mergedLimit = $isLoggedIn
+            ? self::MERGED_CANDIDATE_LIMIT_LOGGED
+            : self::MERGED_CANDIDATE_LIMIT_ANON;
+
+        return count($merged) > $mergedLimit
+            ? array_slice($merged, 0, $mergedLimit)
             : $merged;
     }
 
@@ -256,16 +261,22 @@ final class KeywordAffinityFeedBlockProvider implements HomeFeedBlockProviderInt
     {
         $rows = [];
         $now = new \DateTimeImmutable();
+        $normalizedKeywordsCache = [];
 
         foreach ($candidates as $candidate) {
             if (!$candidate instanceof PPBase) {
                 continue;
             }
 
-            $projectKeywords = $this->keywordNormalizer->normalizeRawKeywords(
-                $candidate->getKeywords(),
-                self::KEYWORDS_PER_PRESENTATION_LIMIT
-            );
+            $rawKeywords = trim((string) $candidate->getKeywords());
+            $projectKeywords = $normalizedKeywordsCache[$rawKeywords] ?? null;
+            if (!is_array($projectKeywords)) {
+                $projectKeywords = $this->keywordNormalizer->normalizeRawKeywords(
+                    $rawKeywords,
+                    self::KEYWORDS_PER_PRESENTATION_LIMIT
+                );
+                $normalizedKeywordsCache[$rawKeywords] = $projectKeywords;
+            }
 
             if ($projectKeywords === []) {
                 continue;

@@ -1,0 +1,7 @@
+services:
+    App\Service\HomeFeed\Diagnostics\DoctrineHomeFeedDiagnosticsCollector:
+        arguments:
+            $debugDataHolder: '@doctrine.debug_data_holder'
+
+    App\Service\HomeFeed\Diagnostics\HomeFeedDiagnosticsCollectorInterface: '@App\Service\HomeFeed\Diagnostics\DoctrineHomeFeedDiagnosticsCollector'
+

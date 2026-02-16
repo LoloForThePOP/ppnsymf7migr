@@ -8,47 +8,67 @@
 // Create Variables
 var allOSB = [];
 
-window.onload = function() {
-  // Set Variables
-  allOSB = document.getElementsByClassName("hide-too-long");
-  
-  if (allOSB.length > 0) {
-    // Add read-more button to each hide too long section
-    for (var i = 0; i < allOSB.length; i++) {
-      var el = document.createElement("button");
-      el.innerHTML = "Afficher +";
-      el.setAttribute("type", "button");
-      el.setAttribute("class", "read-more read-more--hidden");
-      
-      insertAfter(allOSB[i], el);
-    }
+function hasReadMoreButton(section) {
+  var next = section.nextElementSibling;
+  return !!(next && next.classList && next.classList.contains("read-more"));
+}
+
+function bindReadMore(button) {
+  if (!button || button.dataset.boundReadMore === "1") {
+    return;
   }
 
-  // Add click function to buttons
-  var readMoreButtons = document.getElementsByClassName("read-more");
-  for (var i = 0; i < readMoreButtons.length; i++) {
-    readMoreButtons[i].addEventListener("click", function() { 
-      revealThis(this);
-    }, false);
-  }
-  
-  // Update buttons so only the needed ones show
-  updateReadMore();
+  button.addEventListener("click", function() {
+    revealThis(button);
+  }, false);
+  button.dataset.boundReadMore = "1";
 }
-// Update on resize
-window.onresize = function() {
-  updateReadMore();
+
+function ensureReadMoreButton(section) {
+  if (hasReadMoreButton(section)) {
+    bindReadMore(section.nextElementSibling);
+    return;
+  }
+
+  var el = document.createElement("button");
+  el.innerHTML = "Afficher +";
+  el.setAttribute("type", "button");
+  el.setAttribute("class", "read-more read-more--hidden");
+  bindReadMore(el);
+  insertAfter(section, el);
+}
+
+function refreshTrackedSections(root) {
+  var scope = root && typeof root.querySelectorAll === "function" ? root : document;
+  var nodes = scope.querySelectorAll(".hide-too-long");
+
+  for (var i = 0; i < nodes.length; i++) {
+    var section = nodes[i];
+    if (allOSB.indexOf(section) === -1) {
+      allOSB.push(section);
+    }
+    ensureReadMoreButton(section);
+  }
 }
 
 // show only the necessary read-more buttons
 function updateReadMore() {
   if (allOSB.length > 0) {
     for (var i = 0; i < allOSB.length; i++) {
+      if (!allOSB[i] || !allOSB[i].isConnected) {
+        continue;
+      }
+
+      var button = allOSB[i].nextElementSibling;
+      if (!button || !button.classList || !button.classList.contains("read-more")) {
+        continue;
+      }
+
       var currentMaxHeight = window.getComputedStyle(allOSB[i]).getPropertyValue('max-height');
       currentMaxHeight = parseInt(currentMaxHeight.replace('px', ''), 10);
 
       if (!Number.isFinite(currentMaxHeight) || currentMaxHeight <= 0) {
-        allOSB[i].nextElementSibling.className = "read-more read-more--hidden";
+        button.className = "read-more read-more--hidden";
         continue;
       }
 
@@ -56,9 +76,9 @@ function updateReadMore() {
         if (allOSB[i].hasAttribute("style")) {
           updateHeight(allOSB[i]);
         }
-        allOSB[i].nextElementSibling.className = "read-more";
+        button.className = "read-more";
       } else {
-        allOSB[i].nextElementSibling.className = "read-more read-more--hidden";
+        button.className = "read-more read-more--hidden";
       }
     }
   }
@@ -84,3 +104,18 @@ function updateHeight(el) {
 function insertAfter(referenceNode, newNode) {
   referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 }
+
+function initShowMoreLess(root) {
+  refreshTrackedSections(root);
+  updateReadMore();
+}
+
+window.initShowMoreLess = initShowMoreLess;
+
+window.addEventListener("load", function() {
+  initShowMoreLess(document);
+});
+
+window.addEventListener("resize", function() {
+  updateReadMore();
+});

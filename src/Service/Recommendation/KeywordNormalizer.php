@@ -8,6 +8,7 @@ final class KeywordNormalizer
 {
     private const MIN_LENGTH = 2;
     private const MAX_LENGTH = 60;
+    private const NORMALIZE_CACHE_MAX = 5000;
 
     /**
      * @var array<string,bool>
@@ -18,6 +19,13 @@ final class KeywordNormalizer
      * @var array<string,string>
      */
     private array $aliasIndex = [];
+
+    /**
+     * @var array<string,string>
+     */
+    private array $normalizeForIndexCache = [];
+
+    private ?\Transliterator $accentTransliterator = null;
 
     /**
      * @param string[]              $stopwords
@@ -121,9 +129,14 @@ final class KeywordNormalizer
 
     private function normalizeForIndex(string $value): string
     {
+        if (array_key_exists($value, $this->normalizeForIndexCache)) {
+            return $this->normalizeForIndexCache[$value];
+        }
+
+        $rawValue = $value;
         $value = trim($value);
         if ($value === '') {
-            return '';
+            return $this->rememberNormalized($rawValue, '');
         }
 
         $value = strip_tags($value);
@@ -136,20 +149,20 @@ final class KeywordNormalizer
         $value = preg_replace('/\s+/u', ' ', trim($value)) ?? '';
 
         if ($value === '') {
-            return '';
+            return $this->rememberNormalized($rawValue, '');
         }
 
         $value = $this->singularizePhrase($value);
         if ($value === '') {
-            return '';
+            return $this->rememberNormalized($rawValue, '');
         }
 
         $length = mb_strlen($value);
         if ($length < self::MIN_LENGTH || $length > self::MAX_LENGTH) {
-            return '';
+            return $this->rememberNormalized($rawValue, '');
         }
 
-        return $value;
+        return $this->rememberNormalized($rawValue, $value);
     }
 
     private function singularizePhrase(string $value): string
@@ -203,13 +216,14 @@ final class KeywordNormalizer
 
     private function stripAccents(string $value): string
     {
-        if (class_exists(\Transliterator::class)) {
-            $trans = \Transliterator::create('NFD; [:Nonspacing Mark:] Remove; NFC;');
-            if ($trans instanceof \Transliterator) {
-                $stripped = $trans->transliterate($value);
-                if (is_string($stripped)) {
-                    return $stripped;
-                }
+        if ($this->accentTransliterator === null && class_exists(\Transliterator::class)) {
+            $this->accentTransliterator = \Transliterator::create('NFD; [:Nonspacing Mark:] Remove; NFC;');
+        }
+
+        if ($this->accentTransliterator instanceof \Transliterator) {
+            $stripped = $this->accentTransliterator->transliterate($value);
+            if (is_string($stripped)) {
+                return $stripped;
             }
         }
 
@@ -219,5 +233,16 @@ final class KeywordNormalizer
         }
 
         return $value;
+    }
+
+    private function rememberNormalized(string $raw, string $normalized): string
+    {
+        if (count($this->normalizeForIndexCache) >= self::NORMALIZE_CACHE_MAX) {
+            array_shift($this->normalizeForIndexCache);
+        }
+
+        $this->normalizeForIndexCache[$raw] = $normalized;
+
+        return $normalized;
     }
 }

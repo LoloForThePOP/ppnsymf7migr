@@ -2,6 +2,7 @@
 
 namespace App\Service\HomeFeed\Block;
 
+use App\Entity\PPBase;
 use App\Entity\User;
 use App\Repository\PPBaseRepository;
 use App\Service\HomeFeed\HomeFeedCollectionUtils;
@@ -9,14 +10,20 @@ use App\Repository\UserPreferenceRepository;
 use App\Service\HomeFeed\HomeFeedBlock;
 use App\Service\HomeFeed\HomeFeedBlockProviderInterface;
 use App\Service\HomeFeed\HomeFeedContext;
+use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 
 #[AsTaggedItem(priority: 320)]
 final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderInterface
 {
-    private const WINDOW_FETCH_MULTIPLIER = 8;
-    private const WINDOW_FETCH_MIN = 64;
-    private const WINDOW_OFFSETS = [0, 180, 720];
+    private const ANON_CACHE_KEY_PREFIX = 'home_feed_anon_category_affinity_v1_';
+    private const WINDOW_FETCH_MULTIPLIER_LOGGED = 8;
+    private const WINDOW_FETCH_MIN_LOGGED = 64;
+    private const WINDOW_FETCH_MULTIPLIER_ANON = 1;
+    private const WINDOW_FETCH_MIN_ANON = 16;
+    private const WINDOW_OFFSETS_LOGGED = [0, 180, 720];
+    private const WINDOW_OFFSETS_ANON = [0];
     private const MERGED_CANDIDATE_LIMIT = 900;
     private const PRIMARY_POOL_MULTIPLIER = 6;
     private const PRIMARY_POOL_MIN = 36;
@@ -26,6 +33,10 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
     public function __construct(
         private readonly PPBaseRepository $ppBaseRepository,
         private readonly UserPreferenceRepository $userPreferenceRepository,
+        #[Autowire(service: 'cache.app')]
+        private readonly CacheItemPoolInterface $cache,
+        #[Autowire('%app.home_feed.category_affinity.anon_cache_ttl_seconds%')]
+        private readonly int $anonCategoryCacheTtlSeconds,
     ) {
     }
 
@@ -48,12 +59,20 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
                 return null;
             }
 
-            $fetchLimit = max(self::WINDOW_FETCH_MIN, $context->getCardsPerBlock() * self::WINDOW_FETCH_MULTIPLIER);
-            $items = $this->collectCategoryCandidates($categories, $fetchLimit, $viewer);
+            $fetchLimit = max(
+                self::WINDOW_FETCH_MIN_LOGGED,
+                $context->getCardsPerBlock() * self::WINDOW_FETCH_MULTIPLIER_LOGGED
+            );
+            $items = $this->collectCategoryCandidates($categories, $fetchLimit, $viewer, self::WINDOW_OFFSETS_LOGGED);
             if ($items === [] && $usedPreferenceCategories) {
                 $fallbackCategories = $this->resolveCreatorCategories($viewer);
                 if ($fallbackCategories !== []) {
-                    $items = $this->collectCategoryCandidates($fallbackCategories, $fetchLimit, $viewer);
+                    $items = $this->collectCategoryCandidates(
+                        $fallbackCategories,
+                        $fetchLimit,
+                        $viewer,
+                        self::WINDOW_OFFSETS_LOGGED
+                    );
                 }
             }
 
@@ -75,8 +94,11 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
             return null;
         }
 
-        $fetchLimit = max(self::WINDOW_FETCH_MIN, $context->getCardsPerBlock() * self::WINDOW_FETCH_MULTIPLIER);
-        $items = $this->collectCategoryCandidates($anonCategoryHints, $fetchLimit, null);
+        $fetchLimit = max(
+            self::WINDOW_FETCH_MIN_ANON,
+            $context->getCardsPerBlock() * self::WINDOW_FETCH_MULTIPLIER_ANON
+        );
+        $items = $this->collectAnonCategoryCandidates($anonCategoryHints, $fetchLimit);
         if ($items === []) {
             return null;
         }
@@ -92,14 +114,19 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
 
     /**
      * @param string[] $categories
+     * @param int[] $windowOffsets
      *
      * @return array<int,mixed>
      */
-    private function collectCategoryCandidates(array $categories, int $windowLimit, ?User $excludeCreator): array
-    {
+    private function collectCategoryCandidates(
+        array $categories,
+        int $windowLimit,
+        ?User $excludeCreator,
+        array $windowOffsets
+    ): array {
         $batches = [];
 
-        foreach (self::WINDOW_OFFSETS as $offset) {
+        foreach ($windowOffsets as $offset) {
             $batch = $this->ppBaseRepository->findPublishedByCategoriesWindow(
                 $categories,
                 $windowLimit,
@@ -125,6 +152,90 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
         return count($merged) > self::MERGED_CANDIDATE_LIMIT
             ? array_slice($merged, 0, self::MERGED_CANDIDATE_LIMIT)
             : $merged;
+    }
+
+    /**
+     * @param string[] $categories
+     *
+     * @return array<int,mixed>
+     */
+    private function collectAnonCategoryCandidates(array $categories, int $windowLimit): array
+    {
+        $cacheItem = $this->cache->getItem($this->buildAnonCacheKey($categories, $windowLimit));
+
+        if ($cacheItem->isHit()) {
+            $cachedIds = $this->normalizeCachedIds($cacheItem->get());
+            if ($cachedIds !== []) {
+                return $this->ppBaseRepository->findPublishedByIdsPreserveOrder($cachedIds);
+            }
+        }
+
+        $items = $this->collectCategoryCandidates($categories, $windowLimit, null, self::WINDOW_OFFSETS_ANON);
+
+        $cachedIds = [];
+        foreach ($items as $item) {
+            if (!$item instanceof PPBase) {
+                continue;
+            }
+
+            $itemId = $item->getId();
+            if ($itemId === null || $itemId <= 0) {
+                continue;
+            }
+
+            $cachedIds[] = $itemId;
+        }
+
+        $cacheItem->set($cachedIds);
+        $cacheItem->expiresAfter(max(30, $this->anonCategoryCacheTtlSeconds));
+        $this->cache->save($cacheItem);
+
+        return $items;
+    }
+
+    /**
+     * @return int[]
+     */
+    private function normalizeCachedIds(mixed $raw): array
+    {
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $ids = [];
+        foreach ($raw as $value) {
+            $id = (int) $value;
+            if ($id <= 0 || isset($ids[$id])) {
+                continue;
+            }
+
+            $ids[$id] = true;
+        }
+
+        return array_keys($ids);
+    }
+
+    /**
+     * @param string[] $categories
+     */
+    private function buildAnonCacheKey(array $categories, int $windowLimit): string
+    {
+        $normalized = [];
+        foreach ($categories as $category) {
+            $slug = trim((string) $category);
+            if ($slug === '') {
+                continue;
+            }
+
+            $normalized[$slug] = true;
+        }
+
+        $slugs = array_keys($normalized);
+        sort($slugs, SORT_STRING);
+
+        $payload = implode('|', $slugs) . ':' . max(1, $windowLimit);
+
+        return self::ANON_CACHE_KEY_PREFIX . hash('sha256', $payload);
     }
 
     /**

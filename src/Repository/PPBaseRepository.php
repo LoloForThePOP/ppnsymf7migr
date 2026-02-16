@@ -6,6 +6,8 @@ use App\Entity\Comment;
 use App\Entity\Like;
 use App\Entity\PPBase;
 use App\Entity\User;
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -38,33 +40,74 @@ class PPBaseRepository extends ServiceEntityRepository
         int $offset = 0,
         ?User $excludeCreator = null
     ): array {
-        $qb = $this->createQueryBuilder('p')
-            ->select('DISTINCT p')
+        if ($categories === []) {
+            return $this->findLatestPublishedWindow($limit, $offset, $excludeCreator);
+        }
+
+        $ids = $this->findPublishedIdsByCategoriesWindow($categories, $limit, $offset, $excludeCreator);
+        if ($ids === []) {
+            return [];
+        }
+
+        return $this->findPublishedByIdsPreserveOrder($ids);
+    }
+
+    /**
+     * @param int[] $ids
+     *
+     * @return PPBase[]
+     */
+    public function findPublishedByIdsPreserveOrder(array $ids): array
+    {
+        $orderedIds = [];
+        foreach ($ids as $rawId) {
+            $id = (int) $rawId;
+            if ($id <= 0 || isset($orderedIds[$id])) {
+                continue;
+            }
+
+            $orderedIds[$id] = true;
+        }
+
+        if ($orderedIds === []) {
+            return [];
+        }
+
+        $normalizedIds = array_keys($orderedIds);
+        $items = $this->createQueryBuilder('p')
+            ->andWhere('p.id IN (:ids)')
             ->andWhere('p.isPublished = :published')
-            ->andWhere('(p.isDeleted IS NULL OR p.isDeleted = :notDeleted)')
+            ->andWhere('p.isDeleted = :notDeleted')
+            ->setParameter('ids', $normalizedIds)
             ->setParameter('published', true)
             ->setParameter('notDeleted', false)
-            ->orderBy('p.createdAt', 'DESC');
+            ->getQuery()
+            ->getResult();
 
-        if ($categories !== []) {
-            $qb->join('p.categories', 'c')
-                ->andWhere('c.uniqueName IN (:cats)')
-                ->setParameter('cats', $categories);
+        $itemsById = [];
+        foreach ($items as $item) {
+            if (!$item instanceof PPBase) {
+                continue;
+            }
+
+            $itemId = $item->getId();
+            if ($itemId === null) {
+                continue;
+            }
+
+            $itemsById[$itemId] = $item;
         }
 
-        if ($excludeCreator instanceof User) {
-            $qb->andWhere('p.creator != :excludeCreator')
-               ->setParameter('excludeCreator', $excludeCreator);
+        $orderedItems = [];
+        foreach ($normalizedIds as $id) {
+            if (!isset($itemsById[$id])) {
+                continue;
+            }
+
+            $orderedItems[] = $itemsById[$id];
         }
 
-        $offset = max(0, $offset);
-        if ($offset > 0) {
-            $qb->setFirstResult($offset);
-        }
-
-        $qb->setMaxResults(max(1, $limit));
-
-        return $qb->getQuery()->getResult();
+        return $orderedItems;
     }
 
     /**
@@ -96,7 +139,7 @@ class PPBaseRepository extends ServiceEntityRepository
 
         $qb = $this->createQueryBuilder('p')
             ->andWhere('p.isPublished = :published')
-            ->andWhere('(p.isDeleted IS NULL OR p.isDeleted = :notDeleted)')
+            ->andWhere('p.isDeleted = :notDeleted')
             ->andWhere('p.keywords IS NOT NULL')
             ->setParameter('published', true)
             ->setParameter('notDeleted', false)
@@ -112,7 +155,7 @@ class PPBaseRepository extends ServiceEntityRepository
         $index = 0;
         foreach (array_keys($normalizedTerms) as $term) {
             $param = 'kw' . $index++;
-            $orX->add($qb->expr()->like('LOWER(p.keywords)', ':' . $param));
+            $orX->add($qb->expr()->like('p.keywords', ':' . $param));
             $qb->setParameter($param, '%' . str_replace(' ', '%', $term) . '%');
         }
 
@@ -136,7 +179,7 @@ class PPBaseRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('p')
             ->andWhere('p.isPublished = :published')
-            ->andWhere('p.isDeleted IS NULL OR p.isDeleted = :notDeleted')
+            ->andWhere('p.isDeleted = :notDeleted')
             ->setParameter('published', true)
             ->setParameter('notDeleted', false)
             ->orderBy('p.createdAt', 'DESC');
@@ -164,7 +207,7 @@ class PPBaseRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('p')
             ->andWhere('p.creator = :creator')
-            ->andWhere('p.isDeleted IS NULL OR p.isDeleted = :notDeleted')
+            ->andWhere('p.isDeleted = :notDeleted')
             ->setParameter('creator', $creator)
             ->setParameter('notDeleted', false)
             ->addSelect('COALESCE(p.updatedAt, p.createdAt) AS HIDDEN activityAt')
@@ -212,7 +255,7 @@ class PPBaseRepository extends ServiceEntityRepository
             ->select('DISTINCT p')
             ->join('p.places', 'pl')
             ->andWhere('p.isPublished = :published')
-            ->andWhere('(p.isDeleted IS NULL OR p.isDeleted = :notDeleted)')
+            ->andWhere('p.isDeleted = :notDeleted')
             ->andWhere('pl.geoloc.latitude BETWEEN :minLat AND :maxLat')
             ->andWhere('pl.geoloc.longitude BETWEEN :minLng AND :maxLng')
             ->setParameter('published', true)
@@ -232,30 +275,33 @@ class PPBaseRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    //    /**
-    //     * @return PPBase[] Returns an array of PPBase objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * Preloads categories for the provided presentations to avoid per-card lazy-loading queries.
+     *
+     * @param int[] $ids
+     */
+    public function warmupCategoriesForIds(array $ids): void
+    {
+        $normalizedIds = [];
+        foreach ($ids as $rawId) {
+            $id = (int) $rawId;
+            if ($id > 0) {
+                $normalizedIds[$id] = true;
+            }
+        }
 
-    //    public function findOneBySomeField($value): ?PPBase
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        if ($normalizedIds === []) {
+            return;
+        }
+
+        $this->createQueryBuilder('p')
+            ->select('p', 'c')
+            ->leftJoin('p.categories', 'c')
+            ->andWhere('p.id IN (:ids)')
+            ->setParameter('ids', array_keys($normalizedIds))
+            ->getQuery()
+            ->getResult();
+    }
 
     public function remove(PPBase $entity, bool $flush = false): void
     {
@@ -325,5 +371,76 @@ class PPBaseRepository extends ServiceEntityRepository
             'minLng' => $lng - $lngDelta,
             'maxLng' => $lng + $lngDelta,
         ];
+    }
+
+    /**
+     * @param string[] $categories
+     *
+     * @return int[]
+     */
+    private function findPublishedIdsByCategoriesWindow(
+        array $categories,
+        int $limit,
+        int $offset,
+        ?User $excludeCreator
+    ): array {
+        $normalizedCategories = array_values(array_filter(array_unique(array_map(
+            static fn (string $slug): string => trim($slug),
+            $categories
+        ))));
+        if ($normalizedCategories === []) {
+            return [];
+        }
+
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = <<<SQL
+            SELECT p.id
+            FROM ppbase p
+            WHERE p.is_published = :published
+              AND p.is_deleted = :notDeleted
+              AND EXISTS (
+                    SELECT 1
+                    FROM category_ppbase cp
+                    INNER JOIN category c ON c.id = cp.category_id
+                    WHERE cp.ppbase_id = p.id
+                      AND c.unique_name IN (:categories)
+              )
+        SQL;
+
+        $params = [
+            'published' => 1,
+            'notDeleted' => 0,
+            'categories' => $normalizedCategories,
+            'limit' => max(1, $limit),
+            'offset' => max(0, $offset),
+        ];
+        $types = [
+            'published' => ParameterType::INTEGER,
+            'notDeleted' => ParameterType::INTEGER,
+            'categories' => ArrayParameterType::STRING,
+            'limit' => ParameterType::INTEGER,
+            'offset' => ParameterType::INTEGER,
+        ];
+
+        if ($excludeCreator instanceof User) {
+            $creatorId = $excludeCreator->getId();
+            if ($creatorId !== null) {
+                $sql .= ' AND p.creator_id != :excludeCreatorId';
+                $params['excludeCreatorId'] = $creatorId;
+                $types['excludeCreatorId'] = ParameterType::INTEGER;
+            }
+        }
+
+        $sql .= ' ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset';
+
+        $rows = $conn->executeQuery($sql, $params, $types)->fetchFirstColumn();
+        if ($rows === []) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map(
+            static fn (mixed $raw): int => (int) $raw,
+            $rows
+        ), static fn (int $id): bool => $id > 0));
     }
 }

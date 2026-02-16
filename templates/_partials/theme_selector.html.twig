@@ -108,9 +108,6 @@
     {% endfor %}
     <li><hr class="dropdown-divider"></li>
     <li>
-      <a class="dropdown-item" href="{{ path('static_page', { slug: 'submit_theme' }) }}">Proposer un thème</a>
-    </li>
-    <li>
       <span class="dropdown-item-text text-muted">
         {% if app.user %}
           Votre préférence de thème est enregistrée sur votre compte.
@@ -118,6 +115,9 @@
           Votre préférence de thème est enregistrée sur cet appareil, créez un compte pour la conserver sur différents appareils.
         {% endif %}
       </span>
+    </li>
+    <li>
+      <a class="dropdown-item" href="{{ path('static_page', { slug: 'submit_theme' }) }}">Proposer un thème</a>
     </li>
   </ul>
 </li>

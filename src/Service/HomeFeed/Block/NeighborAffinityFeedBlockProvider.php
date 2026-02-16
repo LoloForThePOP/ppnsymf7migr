@@ -18,12 +18,13 @@ use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 final class NeighborAffinityFeedBlockProvider implements HomeFeedBlockProviderInterface
 {
     private const LOGGED_SEED_LIMIT = 8;
-    private const ANON_SEED_LIMIT = 8;
-    private const PER_SEED_NEIGHBOR_LIMIT_MULTIPLIER = 2;
-    private const PER_SEED_NEIGHBOR_LIMIT_MIN = 12;
+    private const ANON_SEED_LIMIT = 6;
+    private const PER_SEED_NEIGHBOR_LIMIT_MULTIPLIER = 1;
+    private const PER_SEED_NEIGHBOR_LIMIT_MIN = 8;
     private const MIN_UNIQUE_RESULTS = 6;
     private const SHUFFLE_WINDOW_MULTIPLIER = 6;
     private const SHUFFLE_WINDOW_MIN = 36;
+    private const MAX_RANKED_RESULTS = 96;
 
     public function __construct(
         private readonly PresentationNeighborRepository $presentationNeighborRepository,
@@ -56,13 +57,31 @@ final class NeighborAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
         $presentationsById = [];
         $seedSet = array_fill_keys($seedIds, true);
         $viewerId = $context->getViewer()?->getId();
+        $neighborsBySeed = $this->presentationNeighborRepository->findNeighborPresentationsForSeeds(
+            $seedIds,
+            $model,
+            $perSeedLimit
+        );
 
-        foreach ($seedIds as $seedIndex => $seedId) {
-            $neighbors = $this->presentationNeighborRepository->findNeighborPresentationsById(
-                $seedId,
-                $model,
+        $missingSeedIds = array_values(array_filter(
+            $seedIds,
+            static fn (int $seedId): bool => !isset($neighborsBySeed[$seedId])
+        ));
+        if ($missingSeedIds !== []) {
+            $fallbackNeighborsBySeed = $this->presentationNeighborRepository->findNeighborPresentationsForSeeds(
+                $missingSeedIds,
+                '',
                 $perSeedLimit
             );
+            foreach ($fallbackNeighborsBySeed as $seedId => $neighbors) {
+                if (!isset($neighborsBySeed[$seedId])) {
+                    $neighborsBySeed[$seedId] = $neighbors;
+                }
+            }
+        }
+
+        foreach ($seedIds as $seedIndex => $seedId) {
+            $neighbors = $neighborsBySeed[$seedId] ?? [];
             if ($neighbors === []) {
                 continue;
             }
@@ -93,7 +112,8 @@ final class NeighborAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
         arsort($scoresByPresentation, SORT_NUMERIC);
 
         $rankedItems = [];
-        foreach (array_keys($scoresByPresentation) as $presentationId) {
+        $rankedIds = array_slice(array_keys($scoresByPresentation), 0, self::MAX_RANKED_RESULTS);
+        foreach ($rankedIds as $presentationId) {
             if (!isset($presentationsById[$presentationId])) {
                 continue;
             }

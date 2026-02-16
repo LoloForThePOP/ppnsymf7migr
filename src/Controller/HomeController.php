@@ -31,6 +31,7 @@ final class HomeController extends AbstractController
         #[Autowire('%app.home_feed.max_blocks.anon%')] int $maxBlocksAnon,
         #[Autowire('%app.home_feed.creator_cap.enabled%')] bool $creatorCapEnabled,
         #[Autowire('%app.home_feed.creator_cap.per_block%')] int $creatorCapPerBlock,
+        #[Autowire('%kernel.debug%')] bool $kernelDebug,
     ): Response {
         /** @var \App\Entity\User|null $user */
         $user = $this->getUser();
@@ -78,6 +79,7 @@ final class HomeController extends AbstractController
             creatorCapPerBlock: $creatorCapPerBlock
         );
         $feedBlocks = $homeFeedAssembler->build($feedContext);
+        $feedDiagnostics = $kernelDebug ? $homeFeedAssembler->getLastDiagnostics() : null;
 
         return $this->render('home/homepage.html.twig', [
             'continuePresentation' => $continuePresentation,
@@ -87,6 +89,7 @@ final class HomeController extends AbstractController
             'homepageLocationSummaryInline' => $homepageLocationSummary['inline'] ?? '',
             'homepageLocationSummaryInfo' => $homepageLocationSummary['info'] ?? '',
             'addNewsForm' => $addNewsForm ? $addNewsForm->createView() : null,
+            'homeFeedDiagnostics' => $feedDiagnostics,
         ]);
     }
 

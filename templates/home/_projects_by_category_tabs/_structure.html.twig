@@ -1,108 +1,247 @@
 {# User can display projects by categories (tabs navigation) #}
 {# Ex: user can select the "history" tab (displaying some projects about history); the "environment" tab; and so on #}
 
+{% set tabDefinitions = [
+    { id: 'v-all', label: 'Tous les projets', category: 'all', tabindex: 0 },
+    { id: 'v-history', label: 'Histoire', category: 'history', tabindex: 1 },
+    { id: 'v-space', label: 'Aéronautique', category: 'space', tabindex: 2 },
+    { id: 'v-numeric', label: 'Numérique', category: 'software', tabindex: 3 },
+    { id: 'v-inform', label: 'Informer - Apprendre', category: 'inform', tabindex: 4 },
+    { id: 'v-environment', label: 'Environnement', category: 'environment', tabindex: 5 },
+    { id: 'v-humane', label: 'Solidarité', category: 'humane', tabindex: 6 },
+    { id: 'v-db', label: 'Bases de Données', category: 'data', tabindex: 7 }
+] %}
+
 <div class="project-by-categories">
 
     {# Tabs Navigation Buttons by project Categories #}
 
     <div class="nav" id="v-tab" role="tablist" aria-orientation="vertical">
-
-        <a class="nav-link selected" href="#" id="v-all-tab" data-bs-toggle="pill" data-bs-target="#v-all" type="button" role="tab" aria-controls="v-all" aria-selected="false">Tous les projets
-            
-        </a>
-
-        <a class="nav-link " href="#" id="v-history-tab" data-bs-toggle="pill" data-bs-target="#v-history" type="button" role="tab" aria-controls="v-history" aria-selected="false">Histoire
-            
-        </a>
-
-        <a class="nav-link " href="#" id="v-space-tab" data-bs-toggle="pill" data-bs-target="#v-space" type="button" role="tab" aria-controls="v-space" aria-selected="false">Aéronautique
-            
-        </a>
-
-        <a class="nav-link " href="#" id="v-numeric-tab" data-bs-toggle="pill" data-bs-target="#v-numeric" type="button" role="tab" aria-controls="v-numeric" aria-selected="false">Numérique</a>
-
-        <a class="nav-link " href="#" id="v-inform-tab" data-bs-toggle="pill" data-bs-target="#v-inform" type="button" role="tab" aria-controls="v-inform" aria-selected="false">Informer - Apprendre
-            
-        </a>
-
-        <a class="nav-link " href="#" id="v-environment-tab" data-bs-toggle="pill" data-bs-target="#v-environment" type="button" role="tab" aria-controls="v-environment" aria-selected="false">Environnement
-        
-        </a>
-
-        <a class="nav-link " href="#" id="v-humane-tab" data-bs-toggle="pill" data-bs-target="#v-humane" type="button" role="tab" aria-controls="v-humane" aria-selected="false">Solidarité
-            
-        </a>
-
-        <a class="nav-link " href="#" id="v-db-tab" data-bs-toggle="pill" data-bs-target="#v-db" type="button" role="tab" aria-controls="v-db" aria-selected="false">Bases de Données
-            
-        </a>
+        {% for tab in tabDefinitions %}
+            <button
+                class="nav-link"
+                id="{{ tab.id }}-tab"
+                data-bs-target="#{{ tab.id }}"
+                data-tab-category="{{ tab.category }}"
+                type="button"
+                role="tab"
+                aria-controls="{{ tab.id }}"
+                aria-selected="false"
+            >
+                {{ tab.label }}
+            </button>
+        {% endfor %}
 
     </div>
 
-    {# Tabs Contents #}
-    {# Making some calls to backend in order to retrieve projects sorted by categories #}
+    {# Tabs Contents loaded async on demand (including first tab). #}
 
     <div class="tab-content" id="v-tabContent">
-
-        <div class="tab-pane fade" id="v-all" role="tabpanel" aria-labelledby="" tabindex="0">
-            {% cache "catAllPP" ttl(86400) %}
-                {{ render(path('category_tab', {category: 'all'})) }}
-            {% endcache %}
-        </div>
-
-        <div class="tab-pane fade" id="v-history" role="tabpanel" aria-labelledby="" tabindex="0">
-            {% cache "cat0" ttl(86400) %}
-                {{ render(path('category_tab', {category: 'history'})) }}
-            {% endcache %}
-        </div>
-
-        <div class="tab-pane fade" id="v-numeric" role="tabpanel" aria-labelledby="" tabindex="1">
-            {% cache "cat1" ttl(86400) %}
-                {{ render(path('category_tab', {category: 'software'})) }}
-            {% endcache %}
-        </div>
-
-        <div class="tab-pane fade" id="v-inform" role="tabpanel" aria-labelledby="" tabindex="2">
-            {% cache "cat2" ttl(86400) %}
-                {{ render(path('category_tab', {category: 'inform'})) }}
-            {% endcache %}
-        </div>
-
-        <div class="tab-pane fade" id="v-space" role="tabpanel" aria-labelledby="" tabindex="3">
-            {% cache "cat3" ttl(86400) %}
-                {{ render(path('category_tab', {category: 'space'})) }}
-            {% endcache %}
-        </div>
-
-        <div class="tab-pane fade" id="v-environment" role="tabpanel" aria-labelledby="" tabindex="4">
-            {% cache "cat4" ttl(86400) %}
-                {{ render(path('category_tab', {category: 'environment'})) }}
-            {% endcache %}
-        </div>
-
-        <div class="tab-pane fade" id="v-humane" role="tabpanel" aria-labelledby="" tabindex="5">
-            {% cache "cat5" ttl(86400) %}
-                {{ render(path('category_tab', {category: 'humane'})) }}
-            {% endcache %}
-        </div>
-
-        <div class="tab-pane fade" id="v-db" role="tabpanel" aria-labelledby="" tabindex="6">
-            {% cache "cat6" ttl(86400) %}
-                {{ render(path('category_tab', {category: 'data'})) }}
-            {% endcache %}
-        </div>
-
+        {% for tab in tabDefinitions %}
+            <div
+                class="tab-pane"
+                id="{{ tab.id }}"
+                role="tabpanel"
+                tabindex="{{ tab.tabindex }}"
+                data-tab-category="{{ tab.category }}"
+                data-tab-loaded="0"
+                aria-labelledby="{{ tab.id }}-tab"
+            >
+                <div class="small text-muted py-2 px-1">Sélectionnez une catégorie pour charger les projets.</div>
+            </div>
+        {% endfor %}
     </div>
 
 </div>
 
 <script>
+    (function () {
+        var root = document.querySelector('.project-by-categories');
+        if (!root) {
+            return;
+        }
 
-    // Highlight current selected tab
+        var routeTemplate = '{{ path('category_tab', {category: '__CATEGORY__'})|e('js') }}';
+        var tabLinks = root.querySelectorAll('.nav-link[data-bs-target]');
+        var tabContent = root.querySelector('.tab-content');
+        var activeRequestByPane = new WeakMap();
 
-    $('.project-by-categories .nav-link').on('click', function(){
-        $(".project-by-categories .nav-link").removeClass('selected');
-        $(this).addClass('selected');
-    });
+        function setSelectedLink(activeLink) {
+            tabLinks.forEach(function (link) {
+                var isActive = link === activeLink;
+                link.classList.toggle('selected', isActive);
+                link.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+        }
+
+        function setActivePane(activePane) {
+            var panes = root.querySelectorAll('.tab-pane');
+            panes.forEach(function (pane) {
+                var isActivePane = pane === activePane;
+                if (!isActivePane) {
+                    pane.classList.remove('show');
+                    pane.classList.remove('active');
+                    return;
+                }
+
+                pane.classList.add('active');
+                if (typeof window.requestAnimationFrame === 'function') {
+                    window.requestAnimationFrame(function () {
+                        pane.classList.add('show');
+                    });
+                    return;
+                }
+                pane.classList.add('show');
+            });
+        }
+
+        function setSelectedTab(activeLink, activePane) {
+            setSelectedLink(activeLink);
+            setActivePane(activePane);
+        }
+
+        function resolvePane(link) {
+            if (!link) {
+                return null;
+            }
+            var target = link.getAttribute('data-bs-target') || '';
+            if (!target || target.charAt(0) !== '#') {
+                return null;
+            }
+            return root.querySelector(target);
+        }
+
+        function lockTabContentHeight() {
+            if (!tabContent) {
+                return function () {};
+            }
+
+            var activePane = root.querySelector('.tab-pane.show.active');
+            var lockHeight = activePane ? activePane.offsetHeight : tabContent.offsetHeight;
+            if (lockHeight > 0) {
+                tabContent.style.minHeight = lockHeight + 'px';
+            }
+
+            return function release() {
+                if (!tabContent) {
+                    return;
+                }
+                if (typeof window.requestAnimationFrame === 'function') {
+                    window.requestAnimationFrame(function () {
+                        tabContent.style.minHeight = '';
+                    });
+                    return;
+                }
+                tabContent.style.minHeight = '';
+            };
+        }
+
+        function refreshPaneLayout(pane) {
+            if (!pane || typeof window.initShowMoreLess !== 'function') {
+                return;
+            }
+
+            window.initShowMoreLess(pane);
+            if (typeof window.requestAnimationFrame === 'function') {
+                window.requestAnimationFrame(function () {
+                    window.initShowMoreLess(pane);
+                });
+            }
+        }
+
+        function loadPane(pane, done) {
+            if (!pane) {
+                if (typeof done === 'function') {
+                    done();
+                }
+                return;
+            }
+            var status = pane.getAttribute('data-tab-loaded');
+            if (status === '1' || status === 'loading') {
+                if (typeof done === 'function') {
+                    done();
+                }
+                return;
+            }
+
+            var category = pane.getAttribute('data-tab-category') || '';
+            if (!category) {
+                if (typeof done === 'function') {
+                    done();
+                }
+                return;
+            }
+
+            var url = routeTemplate.replace('__CATEGORY__', encodeURIComponent(category));
+            pane.setAttribute('data-tab-loaded', 'loading');
+            pane.innerHTML = '<div class="small text-muted py-2 px-1">Chargement...</div>';
+            var requestToken = Date.now().toString(36) + Math.random().toString(36).slice(2);
+            activeRequestByPane.set(pane, requestToken);
+
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('Unable to load tab content.');
+                    }
+                    return response.text();
+                })
+                .then(function (html) {
+                    if (activeRequestByPane.get(pane) !== requestToken) {
+                        return;
+                    }
+                    pane.innerHTML = html;
+                    pane.setAttribute('data-tab-loaded', '1');
+                    refreshPaneLayout(pane);
+                    if (typeof done === 'function') {
+                        done();
+                    }
+                })
+                .catch(function () {
+                    if (activeRequestByPane.get(pane) !== requestToken) {
+                        return;
+                    }
+                    pane.innerHTML = '<div class="small text-danger py-2 px-1">Impossible de charger cette catégorie pour le moment.</div>';
+                    pane.setAttribute('data-tab-loaded', '0');
+                    if (typeof done === 'function') {
+                        done();
+                    }
+                });
+        }
+
+        tabLinks.forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                var pane = resolvePane(link);
+                if (!pane) {
+                    return;
+                }
+
+                var status = pane.getAttribute('data-tab-loaded');
+                var activePane = root.querySelector('.tab-pane.show.active');
+                var releaseHeight = lockTabContentHeight();
+
+                if (status === '1') {
+                    setSelectedTab(link, pane);
+                    refreshPaneLayout(pane);
+                    releaseHeight();
+                    return;
+                }
+
+                if (!activePane || activePane === pane) {
+                    setSelectedTab(link, pane);
+                    loadPane(pane, releaseHeight);
+                    return;
+                }
+
+                // Keep current pane visible while loading the next one to avoid layout flashing.
+                setSelectedLink(link);
+                loadPane(pane, function () {
+                    setSelectedTab(link, pane);
+                    refreshPaneLayout(pane);
+                    releaseHeight();
+                });
+            });
+        });
+    })();
 
 </script>

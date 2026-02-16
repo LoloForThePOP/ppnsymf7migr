@@ -14,14 +14,14 @@ use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 #[AsTaggedItem(priority: 220)]
 final class TrendingFeedBlockProvider implements HomeFeedBlockProviderInterface
 {
-    private const WINDOW_FETCH_MULTIPLIER = 14;
-    private const WINDOW_FETCH_MIN = 120;
-    private const WINDOW_OFFSETS = [0, 400, 1400];
-    private const MERGED_CANDIDATE_LIMIT = 1200;
+    private const WINDOW_FETCH_MULTIPLIER = 8;
+    private const WINDOW_FETCH_MIN = 60;
+    private const WINDOW_OFFSETS = [0];
+    private const MERGED_CANDIDATE_LIMIT = 700;
     private const FRESHNESS_DECAY_DAYS = 30.0;
     private const FRESHNESS_WEIGHT = 2.5;
-    private const SHUFFLE_WINDOW_MULTIPLIER = 10;
-    private const SHUFFLE_WINDOW_MIN = 80;
+    private const SHUFFLE_WINDOW_MULTIPLIER = 8;
+    private const SHUFFLE_WINDOW_MIN = 56;
 
     public function __construct(
         private readonly PPBaseRepository $ppBaseRepository,

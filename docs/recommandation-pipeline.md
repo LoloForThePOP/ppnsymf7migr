@@ -187,7 +187,7 @@ Definition of opt-out here:
 - `anon-category-affinity`
   - Audience: anonymous with hints
   - Feed source: `anon_pref_categories` cookie (fed from localStorage signals)
-  - Candidate strategy: category windows (`offset` slices) + in-memory diversification
+  - Candidate strategy: category windows (`offset` slices) + short TTL candidate-id cache (to reduce repeated SQL) + in-memory diversification
   - Provider: `CategoryAffinityFeedBlockProvider`
 - `followed-projects`
   - Audience: logged-in
@@ -220,7 +220,7 @@ Definition of opt-out here:
 - `trending`
   - Audience: logged-in + anonymous
   - Feed source: published projects + engagement/freshness scoring (likes/comments/views/time decay)
-  - Candidate strategy: stratified recency windows (`offset` slices) + lower freshness weight + top-window shuffle
+  - Candidate strategy: recent candidate pool + lower freshness weight + top-window shuffle
   - Provider: `TrendingFeedBlockProvider`
 - `latest`
   - Audience: logged-in + anonymous
@@ -231,8 +231,9 @@ Definition of opt-out here:
 ### Recency/Staticity Guards
 
 - Category rails (`category-affinity`, `anon-category-affinity`) now blend multiple recency windows (`offset` slices), then shuffle bounded pools.
+- Anonymous category rail uses a short cache (`app.home_feed.category_affinity.anon_cache_ttl_seconds`) to avoid recomputing the same candidate pool on every request.
 - Keyword rails (`domain-interest`, `anon-domain-interest`) use keyword-matching candidate pools merged with recent projects, then diversify.
-- `trending` now scores a stratified candidate pool (recent + older windows), with reduced freshness dominance and shuffled top window.
+- `trending` scores a bounded recent candidate pool with reduced freshness dominance and shuffled top window.
 - `around-you`, `followed-projects`, and `latest` use bounded top-window shuffle to avoid fixed repeated first cards.
 - Dedupe across rails remains in `HomeFeedAssembler`: a project shown in one rail is excluded from later rails on the same render.
 

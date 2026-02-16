@@ -12,8 +12,8 @@ use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 #[AsTaggedItem(priority: 140)]
 final class LatestPublishedFeedBlockProvider implements HomeFeedBlockProviderInterface
 {
-    private const FETCH_MULTIPLIER = 12;
-    private const FETCH_MIN = 120;
+    private const FETCH_MULTIPLIER = 8;
+    private const FETCH_MIN = 80;
     private const SHUFFLE_WINDOW_MULTIPLIER = 8;
     private const SHUFFLE_WINDOW_MIN = 64;
 
