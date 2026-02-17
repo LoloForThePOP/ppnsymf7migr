@@ -135,6 +135,7 @@ a{
     --theme-btn-close-filter: none;
     --theme-button-weight: 700;
     --theme-home-cta-text: var(--theme-accent-contrast);
+    --theme-feedback-button-text: var(--theme-accent-contrast);
 
     --pp-card-bg: #ffffff;
     --pp-card-border: #dee2e6;
@@ -161,6 +162,7 @@ a{
     --theme-accent: green;
     --theme-accent-contrast: #0b0f16;
     --theme-home-cta-text: #ffffff;
+    --theme-feedback-button-text: #ffffff;
     --theme-accent-warm: #ffa500;
     --theme-accent-static: #3f8f5b;
     --theme-border: #e5e7eb;
@@ -1741,12 +1743,16 @@ label:active:after {
     font-size: 0.95rem;
     padding: 0.55rem 1rem;
     text-decoration: none;
+    line-height: 1.1;
+    color: var(--theme-feedback-button-text);
 }
 
 .global-feedback-button__icon {
     width: 1.1rem;
     height: 1.1rem;
     flex: 0 0 auto;
+    display: block;
+    align-self: center;
 }
 
 .global-feedback-button {
@@ -1756,6 +1762,7 @@ label:active:after {
 .global-feedback-button:hover,
 .global-feedback-button:focus {
     border-color: var(--theme-accent);
+    color: var(--theme-feedback-button-text);
 }
 
 .global-feedback-button--floating {

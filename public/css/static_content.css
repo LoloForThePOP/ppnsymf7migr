@@ -60,3 +60,25 @@
 .static-content .static-accent-title {
     color: var(--theme-accent-static, var(--theme-accent));
 }
+
+/* Contact page submit button can tune contrast independently from global validate buttons. */
+.contact-us-page-container .btn-validate {
+    background-color: var(--contact-submit-bg, var(--theme-accent));
+    border-color: var(--contact-submit-bg, var(--theme-accent));
+    color: var(--contact-submit-text, var(--theme-accent-contrast));
+}
+
+.contact-us-page-container .btn-validate:hover,
+.contact-us-page-container .btn-validate:focus,
+.contact-us-page-container .btn-validate:active {
+    background-color: var(--contact-submit-bg-hover, color-mix(in srgb, var(--contact-submit-bg, var(--theme-accent)) 86%, var(--theme-surface) 14%));
+    border-color: var(--contact-submit-bg-hover, color-mix(in srgb, var(--contact-submit-bg, var(--theme-accent)) 86%, var(--theme-surface) 14%));
+    color: var(--contact-submit-text, var(--theme-accent-contrast));
+    filter: none;
+}
+
+html[data-theme="classic"] .contact-us-page-container {
+    --contact-submit-bg: #2da971;
+    --contact-submit-bg-hover: #258d5e;
+    --contact-submit-text: #ffffff;
+}
