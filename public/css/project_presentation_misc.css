@@ -1,0 +1,190 @@
+#misc-struct-container {
+    --follow-button-border: var(--pp-action-border);
+    --follow-button-text: var(--pp-action-text);
+    --follow-button-bg: var(--pp-action-bg);
+}
+
+#misc-struct-container .flex-wrapper {
+    row-gap: 0.9rem;
+    padding-block: 0.9rem;
+}
+
+#misc-struct-container .misc-primary-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+    row-gap: 0.65rem;
+}
+
+#misc-page-info-dropdown-content {
+    max-width: 360px;
+}
+
+#misc-struct-container .follow-button {
+    padding: 8px 16px;
+    margin-right: 18px;
+    border: 2px solid var(--pp-action-border);
+    border-radius: 33px;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--pp-action-text);
+    background-color: var(--pp-action-bg);
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+#misc-struct-container .follow-button .not-followed-display .follow-icon {
+    width: 34px;
+    height: 27px;
+    margin-bottom: 3px;
+    margin-right: 3px;
+}
+
+#misc-struct-container .follow-button .check-icon {
+    width: 28px;
+    height: 22px;
+}
+
+#misc-struct-container .follow-button .followed-display .text {
+    margin-right: 5px;
+    margin-left: 6px;
+}
+
+#misc-struct-container .report-problem-btn,
+#misc-struct-container .page-info-btn {
+    border-radius: 11px;
+}
+
+@media (max-width: 575px) {
+    #misc-struct-container .follow-button {
+        padding: 8px 16px;
+        margin-right: 18px;
+        font-size: 15px;
+    }
+
+    #misc-struct-container .follow-button .followed-display .text {
+        margin-right: 2px;
+    }
+
+    #misc-struct-container .follow-button .not-followed-display .follow-icon {
+        margin-right: 2px;
+    }
+
+    #misc-struct-container .follow-button .followed-display .check-icon {
+        margin-left: 3px;
+    }
+}
+
+#misc-struct-container .share-presentation-button,
+#misc-struct-container .bookmark-presentation-button {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    margin-right: 18px;
+    border: 2px solid var(--pp-action-border);
+    border-radius: 33px;
+    color: var(--pp-action-text);
+    background-color: var(--pp-action-bg);
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+#misc-struct-container .share-presentation-button {
+    margin-right: 0;
+}
+
+.misc-automation-warning {
+    font-size: 0.92rem;
+    color: var(--theme-text-muted);
+    max-width: 720px;
+}
+
+.misc-secondary-actions {
+    margin-top: 0.35rem;
+}
+
+#misc-struct-container .share-presentation-button .icon,
+#misc-struct-container .bookmark-presentation-button .bookmarkIcon {
+    margin-right: 3px;
+    margin-bottom: 1px;
+}
+
+#misc-struct-container .share-presentation-button .icon {
+    color: var(--pp-action-icon-color, currentColor);
+}
+
+#misc-struct-container .bookmark-presentation-button .bookmarkIcon {
+    color: var(--pp-action-icon-color, currentColor);
+}
+
+#misc-struct-container .bookmark-presentation-button .bookmarkIcon {
+    width: 22px;
+    height: 22px;
+}
+
+#misc-struct-container .bookmark-presentation-button .bookmarkIcon.filled {
+    display: none;
+}
+
+#misc-struct-container .bookmark-presentation-button.isBookmarked .bookmarkIcon.filled {
+    display: inline;
+}
+
+#misc-struct-container .bookmark-presentation-button.isBookmarked .bookmarkIcon.notFilled {
+    display: none;
+}
+
+#misc-struct-container .share-presentation-button .text,
+#misc-struct-container .bookmark-presentation-button .text {
+    display: inline-block;
+    font-size: 22px;
+    margin-bottom: 3px;
+    padding-left: 5px;
+    color: inherit;
+}
+
+@media screen and (min-width: 992px) {
+    #misc-struct-container .flex-wrapper {
+        padding-block: 2.2rem;
+    }
+}
+
+@media screen and (max-width: 580px) {
+    #misc-struct-container .flex-wrapper {
+        row-gap: 0.75rem;
+        padding-block: 0.2rem;
+    }
+
+    #misc-struct-container .share-presentation-button,
+    #misc-struct-container .bookmark-presentation-button {
+        padding: 6px 13px;
+    }
+
+    #misc-struct-container .share-presentation-button .icon,
+    #misc-struct-container .bookmark-presentation-button .bookmarkIcon {
+        width: 22px;
+    }
+
+    #misc-struct-container .share-presentation-button .text,
+    #misc-struct-container .bookmark-presentation-button .text {
+        font-size: 15px;
+    }
+
+    .misc-secondary-actions {
+        margin-top: 0.15rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+    }
+
+    .misc-secondary-actions .page-info-btn,
+    .misc-secondary-actions .report-problem-btn {
+        margin: 0 !important;
+    }
+
+    .misc-secondary-actions .page-info-btn {
+        margin-bottom: 1rem !important;
+    }
+
+    .misc-secondary-actions .report-problem-btn {
+        display: inline-flex;
+    }
+}

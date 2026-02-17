@@ -1876,11 +1876,6 @@ label:active:after {
         text-align: center !important;
     }
 
-    .sm-border-none{
-
-        border: none !important;
-    }
-
     .sm-center-modal{
         
         display: flex;

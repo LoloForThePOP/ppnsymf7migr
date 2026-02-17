@@ -58,6 +58,7 @@
 {% block stylesheets %}
 
     <link href="/css/project_presentation_page.css" rel="stylesheet">
+    <link href="/css/project_presentation_misc.css" rel="stylesheet">
     <link href="/css/comments.css" rel="stylesheet">
     <link href="/css/project_card.css" rel="stylesheet">
     <link href="/css/titled_project_collection.css" rel="stylesheet">
@@ -145,43 +146,17 @@
     {% set likesCount = presentation.likes | length %}
 
     {% set pageInfo %}
-        {% set sourceUrl = presentation.ingestion ? presentation.ingestion.sourceUrl : null %}
-        {% set ingestedAt = presentation.ingestion ? presentation.ingestion.ingestedAt : null %}
-        {% set sourceCreatedAt = presentation.ingestion ? presentation.ingestion.sourceCreatedAt : null %}
-        {% set sourceUpdatedAt = presentation.ingestion ? presentation.ingestion.sourceUpdatedAt : null %}
-        {% set hasAutomationInfo = sourceUrl or ingestedAt or sourceCreatedAt or sourceUpdatedAt %}
-
-        <li class="mb-1">
-            Page créée le {{ presentation.createdAt ? presentation.createdAt|date('Y - m - d') : 'N/A' }}.
-        </li>
-
-        <li class="mb-1">
-            Par {{ presentation.creator ? presentation.creator.username : 'Non renseigné' }}.
-        </li>
-
-        {% if hasAutomationInfo %}
-            <li class="mb-1">
-                Présentation automatisée — veuillez vérifier les informations importantes.
-            </li>
-        {% endif %}
-
-        {% if sourceCreatedAt or sourceUpdatedAt %}
-            <li class="mb-1">
-                Source :
-                {% if sourceCreatedAt %}
-                    créé le {{ sourceCreatedAt|date('d/m/Y') }}
-                {% endif %}
-                {% if sourceUpdatedAt %}
-                    {% if sourceCreatedAt %} · {% endif %}
-                    mis à jour le {{ sourceUpdatedAt|date('d/m/Y') }}
-                {% endif %}
-            </li>
-        {% endif %}
-
-        <li>
-            <p class="text-muted mb-1">Propon souhaite vous fournir une information fiable mais ne peut garantir l'exactitude ou la complétude des informations présentées.</p>
-        </li>
-        
+        {% include 'project_presentation/edit_show/_partials/more_page_info_content.html.twig' with {
+            presentation: presentation,
+            showWarning: true,
+            showPageCreated: true,
+            showAuthor: true,
+            showSourceUrl: true,
+            showSourceDates: true,
+            showImportedAt: false,
+            showLegalDisclaimer: true,
+            showClaim: true
+        } %}
     {% endset %}
 
 
@@ -441,8 +416,6 @@
 
         </div>
 
-        {% include 'project_presentation/edit_show/_partials/automated_notice.html.twig' %}
-
         {% if not userPresenter and relatedBottomBlocks|default([]) is not empty %}
             <section class="pp-related-rails mt-5">
                 {% for block in relatedBottomBlocks %}
@@ -562,6 +535,7 @@
 
     {% include 'project_presentation/edit_show/statuses/javascripts.html.twig' %}
     <script src="/js/show_more_less_button.js"></script>
+    <script src="/js/project_presentation_misc.js"></script>
 
     {% if userPresenter %}
     

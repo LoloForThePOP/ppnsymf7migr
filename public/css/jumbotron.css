@@ -80,6 +80,11 @@ html[data-theme="classic"] .jumbotron {
     --jbtr-accent-soft: #eaffe6;
 }
 
+/* Keep the original two-tone add-presentation icon in classic theme. */
+html[data-theme="classic"] .jumbotron .jbtr-add-presentation-icon {
+    filter: none;
+}
+
 
 .jumbotron-btn{
     padding: 0.5rem 1.5rem;

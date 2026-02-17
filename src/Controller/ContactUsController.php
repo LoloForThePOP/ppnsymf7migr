@@ -24,6 +24,8 @@ class ContactUsController extends AbstractController
         $subject = 'Contact';
         if ($context === 'report_abuse' && $item && $identifier) {
             $subject = sprintf('Signalement %s (%s)', $item, $identifier);
+        } elseif ($context === 'claim_project_presentation' && $item && $identifier) {
+            $subject = sprintf('Demande de modification/retrait %s (%s)', $item, $identifier);
         } elseif ($context === 'feedback') {
             $subject = 'Retour utilisateur';
         }

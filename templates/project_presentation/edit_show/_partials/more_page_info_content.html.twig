@@ -1,0 +1,74 @@
+{% set showWarning = showWarning|default(false) %}
+{% set showPageCreated = showPageCreated|default(true) %}
+{% set showAuthor = showAuthor|default(true) %}
+{% set showSourceUrl = showSourceUrl|default(true) %}
+{% set showSourceDates = showSourceDates|default(true) %}
+{% set showImportedAt = showImportedAt|default(false) %}
+{% set showLegalDisclaimer = showLegalDisclaimer|default(true) %}
+{% set showClaim = showClaim|default(true) %}
+
+{% set ingestion = presentation.ingestion ?? null %}
+{% set sourceUrl = ingestion ? ingestion.sourceUrl : null %}
+{% set safeSourceUrl = sourceUrl|safe_href %}
+{% set ingestedAt = ingestion ? ingestion.ingestedAt : null %}
+{% set sourceCreatedAt = ingestion ? ingestion.sourceCreatedAt : null %}
+{% set sourceUpdatedAt = ingestion ? ingestion.sourceUpdatedAt : null %}
+{% set hasAutomationInfo = sourceUrl or ingestedAt or sourceCreatedAt or sourceUpdatedAt %}
+{% set claimIdentifier = presentation.stringId ?: presentation.id %}
+{% set creatorName = presentation.creator ? presentation.creator.username : 'Non renseigné' %}
+
+{% if showWarning and hasAutomationInfo %}
+    <li class="mb-1">Présentation automatisée — veuillez vérifier les informations importantes.</li>
+{% endif %}
+
+{% if showPageCreated %}
+    <li class="mb-1">Page créée le {{ presentation.createdAt ? presentation.createdAt|date('Y - m - d') : 'N/A' }}.</li>
+{% endif %}
+
+{% if showAuthor %}
+    <li class="mb-1">Par {{ creatorName }}.</li>
+{% endif %}
+
+{% if showSourceUrl and sourceUrl %}
+    <li class="mb-1">
+        URL source :
+        {% if safeSourceUrl %}
+            <a href="{{ safeSourceUrl }}" target="_blank" rel="noopener">{{ sourceUrl|truncate(60) }}</a>
+        {% else %}
+            {{ sourceUrl|truncate(60) }}
+        {% endif %}
+    </li>
+{% endif %}
+
+{% if showSourceDates and (sourceCreatedAt or sourceUpdatedAt) %}
+    <li class="mb-1">
+        {% if sourceCreatedAt %}
+            Source créée le {{ sourceCreatedAt|date('d/m/Y') }}
+        {% endif %}
+        {% if sourceUpdatedAt %}
+            {% if sourceCreatedAt %}
+                · Mise à jour le {{ sourceUpdatedAt|date('d/m/Y') }}
+            {% else %}
+                Mise à jour le {{ sourceUpdatedAt|date('d/m/Y') }}
+            {% endif %}
+        {% endif %}
+    </li>
+{% endif %}
+
+{% if showImportedAt and ingestedAt %}
+    <li class="mb-1">Importé le {{ ingestedAt|date('d/m/Y') }}.</li>
+{% endif %}
+
+{% if showLegalDisclaimer %}
+    <li class="text-muted mb-1">Propon souhaite vous fournir une information fiable mais ne peut garantir l'exactitude ou la complétude des informations présentées.</li>
+{% endif %}
+
+{% if showClaim and hasAutomationInfo and claimIdentifier %}
+    <li class="mb-1">
+        Vous portez ce projet ?
+        <a href="{{ path('contact_us', { context: 'claim_project_presentation', item: 'project_presentation', identifier: claimIdentifier }) }}">
+            Contactez-nous ici
+        </a>
+        si vous souhaitez demander la modification ou le retrait de cette page.
+    </li>
+{% endif %}

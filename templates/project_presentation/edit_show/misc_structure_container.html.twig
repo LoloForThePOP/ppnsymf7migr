@@ -1,12 +1,19 @@
 {# Misc Info & Buttons #}
 
 <div class="col-lg-6 pp-struct-container-wrapper pp-consultation-mode">
+
+    {% set ingestion = presentation.ingestion ?? null %}
+    {% set sourceUrl = ingestion ? ingestion.sourceUrl : null %}
+    {% set ingestedAt = ingestion ? ingestion.ingestedAt : null %}
+    {% set sourceCreatedAt = ingestion ? ingestion.sourceCreatedAt : null %}
+    {% set sourceUpdatedAt = ingestion ? ingestion.sourceUpdatedAt : null %}
+    {% set hasAutomationInfo = sourceUrl or ingestedAt or sourceCreatedAt or sourceUpdatedAt %}
     
-    <div id="misc-struct-container" class="pp-struct-container sm-border-none d-flex justify-content-center is-expanded" data-pp-default-expanded="true" data-pp-collapse="disabled">
+    <div id="misc-struct-container" class="pp-struct-container d-flex justify-content-center is-expanded" data-pp-default-expanded="true" data-pp-collapse="disabled">
 
-        <div class="flex-wrapper d-flex flex-column align-items-center justify-content-center py-md-5">
+        <div class="flex-wrapper d-flex flex-column align-items-center justify-content-center">
 
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center misc-primary-actions">
             
                 {% include 'project_presentation/edit_show/follow_button.html.twig' %}
 
@@ -56,17 +63,21 @@
             
             </div>
 
-            {% include 'project_presentation/edit_show/share_modal.html.twig' %}    
-                        
+            {% if hasAutomationInfo %}
+                <div class="misc-automation-warning px-2 text-center">
+                    <span>Présentation automatisée — veuillez vérifier les informations importantes.</span>
+                </div>
+            {% endif %}
+
             {# Misc Buttons Row #}
 
-            <div class="sm-text-center mt-5">
+            <div class="sm-text-center misc-secondary-actions">
 
                 {# Page Info #}
 
-                <button id="page-info-dropdown" data-bs-toggle="dropdown" aria-expanded="false" type="button" class="page-info-btn pp-consultation-mode btn btn-light fw-normal me-2 mb-2 ">Informations sur la page ▾</button>
+                <button id="misc-page-info-dropdown" data-bs-toggle="dropdown" aria-expanded="false" type="button" class="page-info-btn pp-consultation-mode btn btn-light fw-normal me-2 mb-2">Informations sur la page ▾</button>
 
-                <ul id="page-info-dropdown-content" class="dropdown-menu px-3" aria-labelledby="page-info-dropdown">
+                <ul id="misc-page-info-dropdown-content" class="dropdown-menu px-3" aria-labelledby="misc-page-info-dropdown">
 
                     {{ pageInfo }}
 
@@ -74,10 +85,11 @@
                 
                 {# Report a Problem Button #}
 
-                <a class="text-decoration-none" href="{{ path('contact_us', {'context': 'report_abuse', 'item' : 'project_presentation', 'identifier': presentation.stringId }) }}">
-
-                    <button type="button" class="report-problem-btn pp-consultation-mode btn btn-light fw-normal mb-2 ">Signaler un problème</button>
-                    
+                <a
+                    class="report-problem-btn pp-consultation-mode btn btn-light fw-normal mb-2 text-decoration-none"
+                    href="{{ path('contact_us', {'context': 'report_abuse', 'item' : 'project_presentation', 'identifier': presentation.stringId }) }}"
+                >
+                    Signaler un problème
                 </a>
 
 
@@ -88,213 +100,3 @@
     </div>
 
 </div>
-
-<style>
-
-    #misc-struct-container {
-        --follow-button-border: var(--pp-action-border);
-        --follow-button-text: var(--pp-action-text);
-        --follow-button-bg: var(--pp-action-bg);
-    }
-
-    #page-info-dropdown-content {
-        max-width: 360px;
-    }
-
-    #misc-struct-container .follow-button {
-
-        padding: 8px 16px;
-        margin-right: 18px;
-        border: 2px solid var(--pp-action-border);
-        border-radius: 33px;
-        font-size: 22px;
-        font-weight: 700;
-        color: var(--pp-action-text);
-        background-color: var(--pp-action-bg);
-        transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-
-    }
-
-    #misc-struct-container .follow-button .not-followed-display .follow-icon {
-        width: 34px;
-        height: 27px;
-        margin-bottom: 3px;
-        margin-right: 3px;
-    }
-
-    #misc-struct-container .follow-button .check-icon {
-        width: 28px;
-        height: 22px;
-    }
-
-    #misc-struct-container .follow-button .followed-display .text {
-
-        margin-right: 5px;
-        margin-left: 6px;
-    }
-
-    #misc-struct-container .report-problem-btn, #misc-struct-container .page-info-btn {
-
-        border-radius: 11px;
-
-    }
-
-    @media (max-width: 575px) {
-
-        #misc-struct-container .follow-button {
-
-            padding: 8px 16px;
-            margin-right: 18px;
-            font-size: 15px;
-
-        }
-
-        #misc-struct-container .follow-button .followed-display .text{
-
-            margin-right: 2px;
-
-        }
-
-        
-        #misc-struct-container .follow-button .not-followed-display .follow-icon {
-
-            margin-right: 2px;
-        }
-
-        #misc-struct-container .follow-button .followed-display .check-icon {
-            margin-left: 3px;
-        }
-
-    }
-
-    .share-presentation-button,
-    .bookmark-presentation-button{
-
-        display: flex;
-        align-items: center;
-        padding: 8px 16px;
-        margin-right: 18px;
-        border: 2px solid var(--pp-action-border);
-        border-radius: 33px;
-        color: var(--pp-action-text);
-        background-color: var(--pp-action-bg);
-        transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-
-    }
-
-    .share-presentation-button{
-        margin-right: 0;
-    }
-
-    .share-presentation-button .icon,
-    .bookmark-presentation-button .bookmarkIcon{
-
-        margin-right: 3px;
-        margin-bottom: 1px;
-
-    }
-
-    .share-presentation-button .icon {
-        color: var(--pp-action-icon-color, currentColor);
-    }
-
-    .bookmark-presentation-button .bookmarkIcon {
-        color: var(--pp-action-icon-color, currentColor);
-    }
-
-    .bookmark-presentation-button .bookmarkIcon {
-        width: 22px;
-        height: 22px;
-    }
-
-    .bookmark-presentation-button .bookmarkIcon.filled {
-        display: none;
-    }
-
-    .bookmark-presentation-button.isBookmarked .bookmarkIcon.filled {
-        display: inline;
-    }
-
-    .bookmark-presentation-button.isBookmarked .bookmarkIcon.notFilled {
-        display: none;
-    }
-
-    .share-presentation-button .text,
-    .bookmark-presentation-button .text{
-
-        display: inline-block;
-        font-size: 22px;
-        margin-bottom: 3px;
-        padding-left: 5px;
-        color: inherit;
-
-    }
-
-    @media screen and (max-width: 580px) {
-
-        .share-presentation-button,
-        .bookmark-presentation-button{
-
-            padding: 6px 13px;
-
-        }
-
-        .share-presentation-button .icon,
-        .bookmark-presentation-button .icon{
-
-            width: 22px;
-
-        }
-
-        .share-presentation-button .text,
-        .bookmark-presentation-button .text{
-
-            font-size: 15px;
-
-        }
-        
-    }
-
-</style>
-
-
-<script>
-
-    if (!window.__ppMiscBookmarkBound) {
-        window.__ppMiscBookmarkBound = true;
-
-        $(document).on('click', '.js-ajax-bookmark-pp-misc', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const $tag = $(this);
-            if ($tag.data('busy')) {
-                return;
-            }
-
-            $tag.data('busy', true).addClass('is-loading');
-
-            $.ajax({
-                url: $tag.data('url'),
-                data: { _token: $tag.data('token') },
-                type: 'POST',
-                success: function (data) {
-                    $tag.toggleClass('isBookmarked', data && data.action === 'created');
-
-                    const isBookmarked = $tag.hasClass('isBookmarked');
-                    const label = isBookmarked ? 'Retirer des marque-pages' : 'Ajouter aux marque-pages';
-                    const text = isBookmarked ? 'Marqué' : 'Marquer';
-                    $tag.attr('aria-label', label).attr('title', label);
-                    $tag.find('.text').text(text);
-                },
-                error: function () {
-                    // Keep silent.
-                },
-                complete: function () {
-                    $tag.data('busy', false).removeClass('is-loading');
-                }
-            });
-        });
-    }
-
-</script>
