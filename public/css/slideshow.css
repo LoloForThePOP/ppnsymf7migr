@@ -472,6 +472,10 @@ body[data-theme-scope="presentation"] .edit-slide-button {
         padding: 4px 0;
     }
 
+    .in-consultation-mode .caption-container.no-caption + .row {
+        margin-top: 17px !important;
+    }
+
     .slide-content-licence {
         max-width: calc(100% - 20px);
         white-space: nowrap;
