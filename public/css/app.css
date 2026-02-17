@@ -1520,7 +1520,7 @@ label.toggle-switch-label {
     text-indent: -9999px;
     width: 64px;
     height: 37px;
-    background: #e74c3c;
+    background: color-mix(in srgb, #e74c3c 65%, var(--theme-surface-alt));
     display: inline-block;
     border-radius: 6px;
     position: relative;
@@ -1534,14 +1534,14 @@ label.toggle-switch-label:after {
     left: 5px;
     width: 15px;
     height: 43px;
-    background: #fff;
+    background: var(--theme-surface);
     border-radius: 4px;
     transition: 0.3s;
-    border : 1px solid black;
+    border: 1px solid var(--theme-border);
 }
 
 input.toggle-switch:checked + label {
-    background: #18bc9c;
+    background: color-mix(in srgb, var(--theme-accent) 78%, #18bc9c 22%);
 }
 
 input.toggle-switch:checked + label:after {
@@ -1597,8 +1597,9 @@ label:active:after {
 
 
 .btn-see-result{
-
-    background-color: #c8efb6;
+    background-color: color-mix(in srgb, var(--theme-accent) 20%, var(--theme-surface-alt));
+    border: 1px solid color-mix(in srgb, var(--theme-accent) 58%, var(--theme-border));
+    color: var(--theme-text);
 }
 
 
@@ -1692,16 +1693,10 @@ label:active:after {
 
 /* Homepage motto */
 
-.last-moto {
-    color: #287152;
-}
-
 @media screen and (max-width: 580px) {
     .last-moto {
-        color: #168016;
         font-size: 15px !important;
         padding: 15px 0;
-        background-color: #46af461f;
         border-radius: 5px;
         width: 99%;
         margin: auto;
