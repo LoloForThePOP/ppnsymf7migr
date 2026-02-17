@@ -9,7 +9,7 @@ use App\Service\HomeFeed\HomeFeedCollectionUtils;
 use App\Service\HomeFeed\HomeFeedContext;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 
-#[AsTaggedItem(priority: 260)]
+#[AsTaggedItem(priority: 340)]
 final class NearbyLocationFeedBlockProvider implements HomeFeedBlockProviderInterface
 {
     private const FETCH_MULTIPLIER = 10;

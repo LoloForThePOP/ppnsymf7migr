@@ -9,7 +9,7 @@ use App\Service\HomeFeed\HomeFeedCollectionUtils;
 use App\Service\HomeFeed\HomeFeedContext;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 
-#[AsTaggedItem(priority: 140)]
+#[AsTaggedItem(priority: 320)]
 final class LatestPublishedFeedBlockProvider implements HomeFeedBlockProviderInterface
 {
     private const FETCH_MULTIPLIER = 8;

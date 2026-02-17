@@ -101,13 +101,13 @@ Flow:
 
 Current providers (priority order):
 
-1. `CategoryAffinityFeedBlockProvider` (personalized by categories)
-2. `NeighborAffinityFeedBlockProvider` (personalized by nearest neighbors from recent seeds)
-3. `KeywordAffinityFeedBlockProvider` (personalized by keywords)
-4. `NearbyLocationFeedBlockProvider` (location-based)
-5. `FollowedProjectsFeedBlockProvider` (logged only)
-6. `TrendingFeedBlockProvider` (general)
-7. `LatestPublishedFeedBlockProvider` (general fallback)
+1. `NeighborAffinityFeedBlockProvider` (personalized by nearest neighbors from recent seeds)
+2. `CategoryAffinityFeedBlockProvider` (personalized by categories)
+3. `NearbyLocationFeedBlockProvider` (location-based)
+4. `TrendingFeedBlockProvider` (general)
+5. `LatestPublishedFeedBlockProvider` (general fallback)
+6. `FollowedProjectsFeedBlockProvider` (logged only, fallback rail)
+7. `KeywordAffinityFeedBlockProvider` (personalized by keywords, fallback rail)
 
 ## 3P Bottom Rails
 
@@ -133,13 +133,13 @@ This section describes what users see on homepage depending on audience state.
 
 Expected blocks (in order, when data exists):
 
-1. `Basé sur vos catégories` (`category-affinity`)
-2. `Parce que vous avez consulté` (`neighbor-affinity`)
-3. `Domaines d’intérêt` (`domain-interest`)
-4. `Autour de vous` (`around-you`)
-5. `Projets suivis` (`followed-projects`)
-6. `Tendance sur Propon` (`trending`)
-7. `Derniers projets présentés` (`latest`)
+1. `Parce que vous avez consulté` (`neighbor-affinity`)
+2. `Basé sur vos catégories` (`category-affinity`)
+3. `Autour de vous` (`around-you`)
+4. `Tendance sur Propon` (`trending`)
+5. `Derniers projets présentés` (`latest`)
+6. `Projets suivis` (`followed-projects`) (fallback rail)
+7. `Domaines d’intérêt` (`domain-interest`) (fallback rail)
 
 Notes:
 
@@ -151,12 +151,12 @@ Notes:
 
 Expected blocks (in order, when data exists):
 
-1. `Selon vos centres d’intérêt récents` (`anon-category-affinity`)
-2. `Parce que vous avez consulté` (`anon-neighbor-affinity`)
-3. `Domaines d’intérêt` (`anon-domain-interest`)
-4. `Autour de vous` (`around-you`)
-5. `Tendance sur Propon` (`trending`)
-6. `Derniers projets présentés` (`latest`)
+1. `Parce que vous avez consulté` (`anon-neighbor-affinity`)
+2. `Selon vos centres d’intérêt récents` (`anon-category-affinity`)
+3. `Autour de vous` (`around-you`)
+4. `Tendance sur Propon` (`trending`)
+5. `Derniers projets présentés` (`latest`)
+6. `Domaines d’intérêt` (`anon-domain-interest`) (fallback rail)
 
 Definition of opt-in here:
 

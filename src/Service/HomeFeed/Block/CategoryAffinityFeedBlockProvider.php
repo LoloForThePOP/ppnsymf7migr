@@ -14,15 +14,17 @@ use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 
-#[AsTaggedItem(priority: 320)]
+#[AsTaggedItem(priority: 350)]
 final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderInterface
 {
     private const ANON_CACHE_KEY_PREFIX = 'home_feed_anon_category_affinity_v1_';
-    private const WINDOW_FETCH_MULTIPLIER_LOGGED = 8;
-    private const WINDOW_FETCH_MIN_LOGGED = 64;
+    private const LOGGED_CACHE_KEY_PREFIX = 'home_feed_logged_category_affinity_v1_';
+    private const WINDOW_FETCH_MULTIPLIER_LOGGED = 6;
+    private const WINDOW_FETCH_MIN_LOGGED = 48;
     private const WINDOW_FETCH_MULTIPLIER_ANON = 1;
     private const WINDOW_FETCH_MIN_ANON = 16;
-    private const WINDOW_OFFSETS_LOGGED = [0, 180, 720];
+    private const WINDOW_OFFSETS_LOGGED_PREFERENCE = [0];
+    private const WINDOW_OFFSETS_LOGGED_FALLBACK = [0, 180];
     private const WINDOW_OFFSETS_ANON = [0];
     private const MERGED_CANDIDATE_LIMIT = 900;
     private const PRIMARY_POOL_MULTIPLIER = 6;
@@ -35,6 +37,8 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
         private readonly UserPreferenceRepository $userPreferenceRepository,
         #[Autowire(service: 'cache.app')]
         private readonly CacheItemPoolInterface $cache,
+        #[Autowire('%app.home_feed.category_affinity.logged_cache_ttl_seconds%')]
+        private readonly int $loggedCategoryCacheTtlSeconds,
         #[Autowire('%app.home_feed.category_affinity.anon_cache_ttl_seconds%')]
         private readonly int $anonCategoryCacheTtlSeconds,
     ) {
@@ -63,7 +67,17 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
                 self::WINDOW_FETCH_MIN_LOGGED,
                 $context->getCardsPerBlock() * self::WINDOW_FETCH_MULTIPLIER_LOGGED
             );
-            $items = $this->collectCategoryCandidates($categories, $fetchLimit, $viewer, self::WINDOW_OFFSETS_LOGGED);
+            if ($usedPreferenceCategories) {
+                $items = $this->collectLoggedPreferenceCategoryCandidates($viewer, $categories, $fetchLimit);
+            } else {
+                $items = $this->collectCategoryCandidates(
+                    $categories,
+                    $fetchLimit,
+                    $viewer,
+                    self::WINDOW_OFFSETS_LOGGED_FALLBACK
+                );
+            }
+
             if ($items === [] && $usedPreferenceCategories) {
                 $fallbackCategories = $this->resolveCreatorCategories($viewer);
                 if ($fallbackCategories !== []) {
@@ -71,7 +85,7 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
                         $fallbackCategories,
                         $fetchLimit,
                         $viewer,
-                        self::WINDOW_OFFSETS_LOGGED
+                        self::WINDOW_OFFSETS_LOGGED_FALLBACK
                     );
                 }
             }
@@ -159,6 +173,50 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
      *
      * @return array<int,mixed>
      */
+    private function collectLoggedPreferenceCategoryCandidates(User $viewer, array $categories, int $windowLimit): array
+    {
+        $cacheItem = $this->cache->getItem($this->buildLoggedCacheKey($viewer, $categories, $windowLimit));
+
+        if ($cacheItem->isHit()) {
+            $cachedIds = $this->normalizeCachedIds($cacheItem->get());
+            if ($cachedIds !== []) {
+                return $this->ppBaseRepository->findPublishedByIdsPreserveOrder($cachedIds);
+            }
+        }
+
+        $items = $this->collectCategoryCandidates(
+            $categories,
+            $windowLimit,
+            $viewer,
+            self::WINDOW_OFFSETS_LOGGED_PREFERENCE
+        );
+
+        $cachedIds = [];
+        foreach ($items as $item) {
+            if (!$item instanceof PPBase) {
+                continue;
+            }
+
+            $itemId = $item->getId();
+            if ($itemId === null || $itemId <= 0) {
+                continue;
+            }
+
+            $cachedIds[] = $itemId;
+        }
+
+        $cacheItem->set($cachedIds);
+        $cacheItem->expiresAfter(max(20, $this->loggedCategoryCacheTtlSeconds));
+        $this->cache->save($cacheItem);
+
+        return $items;
+    }
+
+    /**
+     * @param string[] $categories
+     *
+     * @return array<int,mixed>
+     */
     private function collectAnonCategoryCandidates(array $categories, int $windowLimit): array
     {
         $cacheItem = $this->cache->getItem($this->buildAnonCacheKey($categories, $windowLimit));
@@ -236,6 +294,31 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
         $payload = implode('|', $slugs) . ':' . max(1, $windowLimit);
 
         return self::ANON_CACHE_KEY_PREFIX . hash('sha256', $payload);
+    }
+
+    /**
+     * @param string[] $categories
+     */
+    private function buildLoggedCacheKey(User $viewer, array $categories, int $windowLimit): string
+    {
+        $normalized = [];
+        foreach ($categories as $category) {
+            $slug = trim((string) $category);
+            if ($slug === '') {
+                continue;
+            }
+
+            $normalized[$slug] = true;
+        }
+
+        $slugs = array_keys($normalized);
+        sort($slugs, SORT_STRING);
+
+        $payload = implode('|', $slugs)
+            . ':' . max(1, $windowLimit)
+            . ':u' . (string) ($viewer->getId() ?? 0);
+
+        return self::LOGGED_CACHE_KEY_PREFIX . hash('sha256', $payload);
     }
 
     /**

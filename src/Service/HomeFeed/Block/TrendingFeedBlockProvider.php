@@ -11,7 +11,7 @@ use App\Service\HomeFeed\HomeFeedCollectionUtils;
 use App\Service\HomeFeed\HomeFeedContext;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 
-#[AsTaggedItem(priority: 220)]
+#[AsTaggedItem(priority: 330)]
 final class TrendingFeedBlockProvider implements HomeFeedBlockProviderInterface
 {
     private const WINDOW_FETCH_MULTIPLIER = 8;

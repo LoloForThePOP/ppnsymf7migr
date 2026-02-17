@@ -14,10 +14,10 @@ use App\Service\HomeFeed\HomeFeedCollectionUtils;
 use App\Service\HomeFeed\HomeFeedContext;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 
-#[AsTaggedItem(priority: 310)]
+#[AsTaggedItem(priority: 360)]
 final class NeighborAffinityFeedBlockProvider implements HomeFeedBlockProviderInterface
 {
-    private const LOGGED_SEED_LIMIT = 8;
+    private const LOGGED_SEED_LIMIT = 5;
     private const ANON_SEED_LIMIT = 6;
     private const PER_SEED_NEIGHBOR_LIMIT_MULTIPLIER = 1;
     private const PER_SEED_NEIGHBOR_LIMIT_MIN = 8;

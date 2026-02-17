@@ -30,6 +30,7 @@ parameters:
     app.home_feed.max_blocks.anon: 5
     app.home_feed.creator_cap.enabled: false
     app.home_feed.creator_cap.per_block: 2
+    app.home_feed.category_affinity.logged_cache_ttl_seconds: 90
     app.home_feed.category_affinity.anon_cache_ttl_seconds: 120
     app.home_feed.keyword_affinity.enabled: true
     app.home_feed.keyword_affinity.neighbor_min_items_for_skip: 6
