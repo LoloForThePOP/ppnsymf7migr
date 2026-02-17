@@ -50,6 +50,7 @@ Use this section as the quick reference before reading details.
   - Logged-in source: follow table (`follow`).
 - `TrendingFeedBlockProvider`:
   - General source: recent published projects ranked by engagement + freshness.
+  - Guarded by feature flag `app.home_feed.trending.enabled` (currently disabled when set to `false`).
 - `LatestPublishedFeedBlockProvider`:
   - General source: latest published projects fallback.
 - `home_anon_preferences.js`:
@@ -227,6 +228,7 @@ Definition of opt-out here:
   - Feed source: published projects + engagement/freshness scoring (likes/comments/views/time decay)
   - Candidate strategy: recent candidate pool + lower freshness weight + top-window shuffle
   - Provider: `TrendingFeedBlockProvider`
+  - Runtime flag: rendered only when `app.home_feed.trending.enabled = true`
 - `latest`
   - Audience: logged-in + anonymous
   - Feed source: latest published projects (excluding own projects for logged-in users)

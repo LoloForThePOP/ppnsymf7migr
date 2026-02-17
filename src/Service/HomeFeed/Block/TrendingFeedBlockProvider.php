@@ -9,6 +9,7 @@ use App\Service\HomeFeed\HomeFeedBlock;
 use App\Service\HomeFeed\HomeFeedBlockProviderInterface;
 use App\Service\HomeFeed\HomeFeedCollectionUtils;
 use App\Service\HomeFeed\HomeFeedContext;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 
 #[AsTaggedItem(priority: 330)]
@@ -25,11 +26,17 @@ final class TrendingFeedBlockProvider implements HomeFeedBlockProviderInterface
 
     public function __construct(
         private readonly PPBaseRepository $ppBaseRepository,
+        #[Autowire('%app.home_feed.trending.enabled%')]
+        private readonly bool $trendingEnabled,
     ) {
     }
 
     public function provide(HomeFeedContext $context): ?HomeFeedBlock
     {
+        if (!$this->trendingEnabled) {
+            return null;
+        }
+
         $fetchLimit = max(self::WINDOW_FETCH_MIN, $context->getCardsPerBlock() * self::WINDOW_FETCH_MULTIPLIER);
         $candidates = $this->collectCandidates($fetchLimit, $context->getViewer());
 
