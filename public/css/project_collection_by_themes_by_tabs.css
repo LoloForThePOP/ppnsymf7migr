@@ -56,6 +56,15 @@
 	color: var(--theme-accent-contrast);
 }
 
+/* Classic homepage tabs: softer mint background for non-active tabs, keep first tab on default grey. */
+html[data-theme="classic"] .project-by-categories .nav-link:not(.selected) {
+    background-color: #f2ffef;
+}
+
+html[data-theme="classic"] .project-by-categories .nav-link:first-child:not(.selected) {
+    background-color: var(--theme-surface-alt);
+}
+
 .project-by-categories .nav-link:hover {
     background-color: var(--theme-surface);
 }

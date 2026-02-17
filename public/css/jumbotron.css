@@ -63,12 +63,21 @@
 .jumbotron{
     --jbtr-title-color: var(--theme-title);
     --jbtr-accent: var(--theme-accent);
-    --jbtr-accent-soft: var(--theme-surface-alt);
+    --jbtr-accent-soft: color-mix(in srgb, var(--theme-accent) 18%, var(--theme-surface-alt));
     --jbtr-border: var(--theme-border);
     --jbtr-btn-bg: var(--theme-surface);
     --jbtr-btn-hover: var(--theme-surface-alt);
     --jbtr-btn-accent-bg: var(--theme-surface-alt);
     --jbtr-text: var(--theme-text);
+}
+
+html[data-theme-tone="dark"] .jumbotron {
+    --jbtr-accent-soft: color-mix(in srgb, var(--theme-accent) 28%, var(--theme-surface-alt));
+}
+
+html[data-theme="classic"] .jumbotron {
+    --jbtr-title-color: #198754;
+    --jbtr-accent-soft: #eaffe6;
 }
 
 
