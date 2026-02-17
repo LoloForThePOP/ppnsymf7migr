@@ -1227,22 +1227,16 @@ html[data-theme-tone="dark"] #source-urls-table td[data-col="url"] a:focus {
 	line-height: 42px;
 	font-size: 28px;
 	cursor: pointer;
-	color: #94919b;
-	background-color: rgba(187, 220, 255, 0.5);
 	border-radius: 50%;
 	text-align: center;
-	border: 1px solid rgba(255,255,255,0.3);
+    color: var(--theme-text);
+    background-color: var(--theme-surface-alt);
+    border: 1px solid var(--theme-border);
 }
 
 #fullscreen-overlay {
     background-color: var(--theme-bg);
     color: var(--theme-text);
-}
-
-#fullscreen-overlay .close-button {
-    color: var(--theme-text);
-    background-color: var(--theme-surface-alt);
-    border-color: var(--theme-border);
 }
 
 @media screen and (max-width: 580px) {
@@ -1273,7 +1267,6 @@ html[data-theme-tone="dark"] #source-urls-table td[data-col="url"] a:focus {
     z-index: 10;
     width: 330px;
     padding: 10px;
-    background-color: rgb(255, 177, 177);
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
 }
@@ -1609,54 +1602,13 @@ label:active:after {
 }
 
 
-.btn-validate{
-
-    background-color: #efffde;
-}
-
-.btn-validate:hover{
-
-    background-color: #80cfa1;
-}
-
-.btn-go-back{
-
-    background-color: #F4FBFF;
-}
-
-/* Classic theme keeps a slightly stronger legacy button contrast. */
-html[data-theme="classic"] .btn-validate{
-    background-color: #c8efb6;
-    border-color: #a7dc8d;
-    color: #1f2937;
-}
-
-html[data-theme="classic"] .btn-validate:hover,
-html[data-theme="classic"] .btn-validate:focus,
-html[data-theme="classic"] .btn-validate:active{
-    background-color: #b3e19b;
-    border-color: #9acc84;
-    color: #1f2937;
-}
-
-html[data-theme="classic"] .btn-go-back{
-    background-color: var(--theme-surface-alt);
-    border: 1px solid var(--theme-border);
-    color: var(--theme-text);
-}
-
-html[data-theme="classic"] .btn-go-back:hover,
-html[data-theme="classic"] .btn-go-back:focus,
-html[data-theme="classic"] .btn-go-back:active{
-    background-color: var(--theme-surface);
-    color: var(--theme-text);
-}
-
 /* Social connect buttons */
 
 .connect-btn {
     width: 190px;
-    border-color: #c0c0c4;
+    border-color: var(--theme-border);
+    background-color: var(--theme-surface);
+    color: var(--theme-text);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1672,8 +1624,9 @@ html[data-theme="classic"] .btn-go-back:active{
 
 .sm-connect-btn {
     width: 210px;
-    border: 1px solid #c0c0c4;
-    background-color: #ffffff;
+    border: 1px solid var(--theme-border);
+    background-color: var(--theme-surface);
+    color: var(--theme-text);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1685,22 +1638,10 @@ html[data-theme="classic"] .btn-go-back:active{
     height: auto;
 }
 
-.connect-btn {
-    background-color: var(--theme-surface);
-    border-color: var(--theme-border);
-    color: var(--theme-text);
-}
-
 .connect-btn:hover,
 .connect-btn:focus {
     background-color: var(--theme-surface-alt);
     border-color: var(--theme-accent);
-    color: var(--theme-text);
-}
-
-.sm-connect-btn {
-    background-color: var(--theme-surface);
-    border-color: var(--theme-border);
     color: var(--theme-text);
 }
 
@@ -1731,19 +1672,11 @@ html[data-theme="classic"] .btn-go-back:active{
 .login-reauth-note {
     font-weight: 600;
     font-size: 0.95rem;
-    color: #2d3748;
-}
-
-.login-reauth-note {
     color: color-mix(in srgb, var(--theme-accent) 70%, var(--theme-text));
 }
 
 .login-info-note {
     font-size: 0.95rem;
-    color: #4a5568;
-}
-
-.login-info-note {
     color: var(--theme-text);
 }
 
