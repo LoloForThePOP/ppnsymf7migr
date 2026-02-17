@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const primarySelector = selectors[0];
     const isAuthenticated = primarySelector.dataset.authenticated === '1';
     const storageKey = 'propon_theme';
+    const cookieKey = 'propon_theme';
+    const cookieMaxAgeSeconds = 60 * 60 * 24 * 365;
     const optionsBySelector = selectors.map(function (selector) {
         return Array.from(selector.querySelectorAll('.js-theme-option'));
     });
@@ -133,9 +135,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const persistTheme = function (theme) {
         if (!isAuthenticated) {
+            const resolved = normalizeTheme(theme);
             try {
-                localStorage.setItem(storageKey, theme);
+                localStorage.setItem(storageKey, resolved);
             } catch (e) {}
+            document.cookie = `${cookieKey}=${encodeURIComponent(resolved)}; Path=/; Max-Age=${cookieMaxAgeSeconds}; SameSite=Lax`;
             return;
         }
 
@@ -173,6 +177,9 @@ document.addEventListener('DOMContentLoaded', function () {
     })();
 
     applyTheme(initialTheme);
+    if (!isAuthenticated) {
+        document.cookie = `${cookieKey}=${encodeURIComponent(initialTheme)}; Path=/; Max-Age=${cookieMaxAgeSeconds}; SameSite=Lax`;
+    }
     initThemePreviews();
 
     selectors.forEach(function (selector) {

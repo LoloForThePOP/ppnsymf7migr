@@ -2,7 +2,10 @@
 
 {% set showThemeSelector = showThemeSelector|default(true) %}
 {% set allowThemeSelection = showThemeSelector %}
-{% set storedTheme = allowThemeSelection and app.user and app.user.profile ? (app.user.profile.extra.theme|default('classic')) : 'classic' %}
+{% set loggedTheme = app.user and app.user.profile ? (app.user.profile.extra.theme|default('classic')) : '' %}
+{% set anonTheme = allowThemeSelection and not app.user ? (app.request.cookies.get('propon_theme')|default('')) : '' %}
+{% set rawTheme = loggedTheme != '' ? loggedTheme : (anonTheme != '' ? anonTheme : 'classic') %}
+{% set storedTheme = allowThemeSelection ? rawTheme : 'classic' %}
 {% set allowedThemes = ['classic', 'mint', 'dark', 'neon', 'matrix', 'retro-game', 'eco-green', 'pink-lady', 'luxury-black', 'deep-ocean'] %}
 {% set normalizedTheme = storedTheme == 'light' ? 'classic' : storedTheme %}
 {% set resolvedTheme = normalizedTheme in allowedThemes ? normalizedTheme : 'classic' %}
@@ -75,6 +78,7 @@
                             var tone = darkThemes.indexOf(storedTheme) !== -1 ? 'dark' : 'light';
                             document.documentElement.setAttribute('data-theme', storedTheme);
                             document.documentElement.setAttribute('data-theme-tone', tone);
+                            document.cookie = 'propon_theme=' + encodeURIComponent(storedTheme) + '; Path=/; Max-Age=' + (60 * 60 * 24 * 365) + '; SameSite=Lax';
                         }
                     } catch (e) {}
                 })();

@@ -1,4 +1,6 @@
-{% set storedTheme = app.user and app.user.profile ? (app.user.profile.extra.theme|default('classic')) : 'classic' %}
+{% set contextTheme = resolvedTheme|default('') %}
+{% set anonTheme = app.user ? '' : (app.request.cookies.get('propon_theme')|default('')) %}
+{% set storedTheme = contextTheme != '' ? contextTheme : (app.user and app.user.profile ? (app.user.profile.extra.theme|default('classic')) : (anonTheme != '' ? anonTheme : 'classic')) %}
 {% set allowedThemes = ['classic', 'mint', 'dark', 'neon', 'matrix', 'retro-game', 'eco-green', 'pink-lady', 'luxury-black', 'deep-ocean'] %}
 {% set normalizedTheme = storedTheme == 'light' ? 'classic' : storedTheme %}
 {% set currentTheme = normalizedTheme in allowedThemes ? normalizedTheme : 'classic' %}
