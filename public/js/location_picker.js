@@ -354,7 +354,7 @@
         applyBtn.classList.toggle('is-hidden', !hasPending);
         if (hasPending) {
           const pendingLabel = truncateText(formatLocationLabel(pendingLocation), 26);
-          applyBtn.textContent = `Appliquer: ${pendingLabel}`;
+          applyBtn.textContent = `Appliquer : ${pendingLabel}`;
           applyBtn.setAttribute('aria-label', `Appliquer la localisation (${formatLocationLabel(pendingLocation)})`);
         } else {
           applyBtn.textContent = 'Appliquer la localisation';

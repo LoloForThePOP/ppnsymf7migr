@@ -627,7 +627,7 @@
       const action = document.createElement('button');
       action.type = 'button';
       action.className = 'search-overlay__empty-action';
-      action.textContent = 'ou cliquez ici pour désactiver la localisation';
+      action.textContent = 'ou cliquez pour désactiver la localisation.';
       action.addEventListener('click', (event) => {
         event.preventDefault();
         locationPicker.clearLocation({ keepRadius: true, clearPersisted: true, emitReset: true });
@@ -636,6 +636,34 @@
     }
 
     emptyEl.classList.toggle('d-none', !show);
+  };
+
+  const showNoResultsState = () => {
+    const hints = [];
+    if (activeCategories.size > 0) {
+      hints.push('Essayez sans catégories');
+    }
+    if (activeLocation) {
+      hints.push('Augmentez la distance');
+    }
+
+    const hasLocationAction = !!activeLocation;
+    let message = 'Aucun résultat pour cette recherche.';
+
+    if (hints.length > 0) {
+      const hintsText = hints.join(' · ');
+      message = `Aucun résultat pour cette recherche. ${hintsText}`;
+      if (!hasLocationAction) {
+        message += '.';
+      }
+    }
+
+    setStatus('');
+    setEmpty(
+      true,
+      message,
+      { showDisableLocationAction: hasLocationAction }
+    );
   };
 
   const openMapModal = (item) => {
@@ -1105,20 +1133,7 @@
         renderCategories(currentResults, categoryCounts);
         renderResults(currentResults);
         if (currentResults.length === 0) {
-          setStatus('');
-          const hints = [];
-          if (activeCategories.size > 0) {
-            hints.push('Essayez sans catégories');
-          }
-          if (activeLocation) {
-            hints.push('Augmentez la distance');
-          }
-          const hintText = hints.length > 0 ? ` ${hints.join(' · ')}.` : '';
-          setEmpty(
-            true,
-            `Aucun résultat pour cette recherche.${hintText}`,
-            { showDisableLocationAction: !!activeLocation }
-          );
+          showNoResultsState();
         } else {
           setStatus('');
           setEmpty(false);
