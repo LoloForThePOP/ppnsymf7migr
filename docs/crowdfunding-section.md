@@ -34,6 +34,10 @@ The crowdfunding row is rendered in the 3P upper box:
   - Shows: “Projet avec financement participatif (Platform) - Collecte … - …”
   - Adds a favicon badge when available.
   - The platform label (and icon) link to `ingestion.sourceUrl` if present.
+  - Safety rule for stale scraped data:
+    - If `funding_end_at` exists, display text from the date only (`terminée le ...` or `en cours jusqu'au ...`).
+    - If no `funding_end_at`, fallback to normalized `funding_status`.
+    - This avoids contradictory strings like `terminée` with a future date.
 
 ## Platform icon resolution
 

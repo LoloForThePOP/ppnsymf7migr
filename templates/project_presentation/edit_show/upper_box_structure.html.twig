@@ -53,7 +53,6 @@
     {% set safeSourceUrl = sourceUrl|safe_href %}
     {% set platformIcon = platform_icon(fundingPlatform, sourceUrl) %}
     {% if fundingEndAt or fundingStatus or fundingPlatform %}
-        {% set isPast = fundingEndAt and fundingEndAt < date() %}
         {% set statusLabels = {
             ongoing: 'en cours',
             success: 'réussie',
@@ -61,17 +60,21 @@
             cancelled: 'annulée',
             ended: 'terminée'
         } %}
-        {% set statusText = fundingStatus ? (statusLabels[fundingStatus]|default(fundingStatus)) : null %}
-        {% if statusText is empty %}
-            {% set statusText = isPast ? 'terminée' : 'en cours' %}
-        {% endif %}
-        {% set dateText = null %}
+        {% set normalizedStatus = fundingStatus ? fundingStatus|lower : null %}
+        {% set statusText = normalizedStatus ? (statusLabels[normalizedStatus]|default(null)) : null %}
+        {% set collecteText = null %}
         {% if fundingEndAt %}
-            {% if isPast or statusText in ['réussie', 'échouée', 'annulée', 'terminée'] %}
-                {% set dateText = 'terminée le ' ~ fundingEndAt|date('d/m/Y') %}
+            {# With stale scraped statuses, date is the most reliable signal: avoid contradictory "terminée" in the future. #}
+            {% set isPast = fundingEndAt < date('today') %}
+            {% if isPast %}
+                {% set collecteText = 'terminée le ' ~ fundingEndAt|date('d/m/Y') %}
             {% else %}
-                {% set dateText = 'termine le ' ~ fundingEndAt|date('d/m/Y') %}
+                {% set collecteText = "en cours jusqu'au " ~ fundingEndAt|date('d/m/Y') %}
             {% endif %}
+        {% elseif statusText %}
+            {% set collecteText = statusText %}
+        {% else %}
+            {% set collecteText = 'statut non disponible' %}
         {% endif %}
         {% set platformLabelText = platform_label(fundingPlatform, sourceUrl) %}
         {% set platformLabel = '' %}
@@ -93,12 +96,7 @@
                 {% endif %}
             {% endif %}
             <span class="pp-funding-label">
-                Projet avec financement participatif{% if platformLabel %} {{ platformLabel|raw }}{% endif %} - Collecte
-                {% if statusText == 'terminée' and dateText %}
-                    {{ dateText }}.
-                {% else %}
-                    {{ statusText }}{% if dateText %} ({{ dateText }}){% endif %}
-                {% endif %}
+                Projet avec financement participatif{% if platformLabel %} {{ platformLabel|raw }}{% endif %} - Collecte {{ collecteText }}.
             </span>
         </div>
     {% endif %}
