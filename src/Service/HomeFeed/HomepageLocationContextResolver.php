@@ -92,7 +92,7 @@ final class HomepageLocationContextResolver
         return [
             'inline' => sprintf('%s · %d km', $locationText, $radius),
             'info' => sprintf(
-                'Basé sur votre localisation récente (%s, rayon %d km). La précision peut varier selon navigateur, GPS, Wi-Fi/IP ou VPN. Si besoin, cliquez sur Modifier et choisissez manuellement votre ville.',
+                'Basé sur votre localisation récente (%s, rayon %d km). La précision peut varier selon le navigateur, GPS, Wi-Fi/IP ou VPN. Si besoin, cliquez sur Modifier et choisissez manuellement votre ville.',
                 $locationText,
                 $radius
             ),
