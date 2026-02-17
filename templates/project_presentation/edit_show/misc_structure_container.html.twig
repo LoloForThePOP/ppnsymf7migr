@@ -75,7 +75,7 @@
 
                 {# Page Info #}
 
-                <button id="misc-page-info-dropdown" data-bs-toggle="dropdown" aria-expanded="false" type="button" class="page-info-btn pp-consultation-mode btn btn-light fw-normal me-2 mb-2">Informations sur la page ▾</button>
+                <button id="misc-page-info-dropdown" data-bs-toggle="dropdown" aria-expanded="false" type="button" class="page-info-btn pp-consultation-mode btn btn-light fw-normal me-2">Informations sur la page ▾</button>
 
                 <ul id="misc-page-info-dropdown-content" class="dropdown-menu px-3" aria-labelledby="misc-page-info-dropdown">
 
@@ -86,7 +86,7 @@
                 {# Report a Problem Button #}
 
                 <a
-                    class="report-problem-btn pp-consultation-mode btn btn-light fw-normal mb-2 text-decoration-none"
+                    class="report-problem-btn pp-consultation-mode btn btn-light fw-normal text-decoration-none"
                     href="{{ path('contact_us', {'context': 'report_abuse', 'item' : 'project_presentation', 'identifier': presentation.stringId }) }}"
                 >
                     Signaler un problème
