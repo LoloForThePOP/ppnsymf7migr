@@ -123,8 +123,12 @@
         {# tiny screens display #}
         
         <li class="nav-item d-md-none">
-          <button class="btn btn-link p-0" type="button" data-search-trigger aria-label="Rechercher">
-            <img id="search_icon_small_screens" class="navbar-icon icon-themed" src="{{ asset('search.svg', 'misc')}}" alt="search icon" style="height:26px;">
+          <button class="btn btn-link p-0 navbar-search-trigger" type="button" data-search-trigger aria-label="Rechercher">
+            <svg id="search_icon_small_screens" class="navbar-search-icon" viewBox="0 0 50.798 50.931" aria-hidden="true" focusable="false">
+              <g transform="translate(-23.902 -26.869)">
+                <path fill="currentColor" d="m61 59.8-0.4 0.4-1.2-1.2c2.7-3.5 4.2-7.7 4.2-12.2 0-5.3-2.1-10.3-5.8-14.1-8-8-21.3-7.8-28.9 0.8-7 7.8-6.6 20.1 0.9 27.5 3.9 3.8 8.9 5.7 14 5.7 4.3 0 8.6-1.4 12.2-4.2l1.2 1.2-0.5 0.3 12.9 12.9c1.2 1.2 3.1 1.2 4.2 0 1.2-1.2 1.2-3.1 0-4.2zm-27.9-2.5c-5.8-5.8-5.8-15.3 0-21.1 2.9-2.9 6.7-4.4 10.6-4.4 3.8 0 7.6 1.5 10.6 4.4 2.8 2.8 4.4 6.6 4.4 10.6s-1.6 7.7-4.4 10.6c-5.9 5.7-15.3 5.7-21.2-0.1z"></path>
+              </g>
+            </svg>
           </button>
         </li>
 

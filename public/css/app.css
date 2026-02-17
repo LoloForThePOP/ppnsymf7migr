@@ -136,6 +136,7 @@ a{
     --theme-button-weight: 700;
     --theme-home-cta-text: var(--theme-accent-contrast);
     --theme-feedback-button-text: var(--theme-accent-contrast);
+    --theme-navbar-search-icon-color: var(--theme-accent);
 
     --pp-card-bg: #ffffff;
     --pp-card-border: #dee2e6;
@@ -583,6 +584,21 @@ body[data-theme-scope="presentation"] header .navbar .navbar-icon {
 
 body[data-theme-scope="presentation"] header .navbar .navbar-icon.bg-white {
     background-color: var(--theme-surface-alt) !important;
+}
+
+header .navbar .navbar-search-trigger {
+    color: var(--theme-navbar-search-icon-color, var(--theme-accent));
+}
+
+header .navbar .navbar-search-trigger:hover,
+header .navbar .navbar-search-trigger:focus {
+    color: color-mix(in srgb, var(--theme-navbar-search-icon-color, var(--theme-accent)) 82%, var(--theme-text) 18%);
+}
+
+header .navbar .navbar-search-icon {
+    width: 26px;
+    height: 26px;
+    display: block;
 }
 
 .propon-logo-primary {
