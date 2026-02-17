@@ -612,9 +612,29 @@
       });
   };
 
-  const setEmpty = (show, message) => {
+  const setEmpty = (show, message, { showDisableLocationAction = false } = {}) => {
     if (!emptyEl) return;
-    if (message) emptyEl.textContent = message;
+    emptyEl.innerHTML = '';
+
+    if (message) {
+      const text = document.createElement('span');
+      text.className = 'search-overlay__empty-text';
+      text.textContent = message;
+      emptyEl.appendChild(text);
+    }
+
+    if (showDisableLocationAction && locationPicker && activeLocation) {
+      const action = document.createElement('button');
+      action.type = 'button';
+      action.className = 'search-overlay__empty-action';
+      action.textContent = 'ou cliquez ici pour désactiver la localisation';
+      action.addEventListener('click', (event) => {
+        event.preventDefault();
+        locationPicker.clearLocation({ keepRadius: true, clearPersisted: true, emitReset: true });
+      });
+      emptyEl.appendChild(action);
+    }
+
     emptyEl.classList.toggle('d-none', !show);
   };
 
@@ -1085,16 +1105,20 @@
         renderCategories(currentResults, categoryCounts);
         renderResults(currentResults);
         if (currentResults.length === 0) {
-          setStatus(data.message || 'Aucun résultat');
+          setStatus('');
           const hints = [];
           if (activeCategories.size > 0) {
             hints.push('Essayez sans catégories');
           }
           if (activeLocation) {
-            hints.push('Augmenter le rayon');
+            hints.push('Augmentez la distance');
           }
-          const hintText = hints.length > 0 ? `\n\n${hints.join(' · ')}` : '';
-          setEmpty(true, `Aucun résultat pour cette recherche.${hintText}`);
+          const hintText = hints.length > 0 ? ` ${hints.join(' · ')}.` : '';
+          setEmpty(
+            true,
+            `Aucun résultat pour cette recherche.${hintText}`,
+            { showDisableLocationAction: !!activeLocation }
+          );
         } else {
           setStatus('');
           setEmpty(false);
@@ -1210,6 +1234,8 @@
 
   if (locationPickerRoot && window.ProponLocationPicker && typeof window.ProponLocationPicker.create === 'function') {
     locationPicker = window.ProponLocationPicker.create(locationPickerRoot, {
+      // Keep homepage geo-rail memory, but avoid auto-activating location in search on page load/login.
+      loadPersisted: false,
       onApply: () => {
         syncActiveLocationFromPicker();
         const term = input.value.trim();

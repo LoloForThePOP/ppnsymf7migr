@@ -945,6 +945,32 @@ html[data-theme-tone="dark"] .search-overlay__suggestions-item {
     color: var(--theme-text-muted);
     background: var(--theme-surface-alt);
     margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.search-overlay__empty-text {
+    display: inline;
+}
+
+.search-overlay__empty-action {
+    border: none;
+    background: transparent;
+    color: var(--theme-accent);
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    font-weight: 600;
+    line-height: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+}
+
+.search-overlay__empty-action:hover {
+    color: color-mix(in srgb, var(--theme-accent) 86%, var(--theme-text) 14%);
 }
 
 .search-overlay__pagination {

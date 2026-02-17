@@ -4,19 +4,17 @@ namespace App\Service\HomeFeed\Block;
 
 use App\Entity\PPBase;
 use App\Repository\PPBaseRepository;
-use App\Repository\UserPreferenceRepository;
 use App\Service\HomeFeed\HomeFeedBlock;
 use App\Service\HomeFeed\HomeFeedBlockProviderInterface;
 use App\Service\HomeFeed\HomeFeedCollectionUtils;
 use App\Service\HomeFeed\HomeFeedContext;
+use App\Service\HomeFeed\Signal\ViewerSignalProvider;
 use App\Service\Recommendation\KeywordNormalizer;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 
 #[AsTaggedItem(priority: 300)]
 final class KeywordAffinityFeedBlockProvider implements HomeFeedBlockProviderInterface
 {
-    private const PROFILE_LIMIT_LOGGED = 60;
-    private const PROFILE_LIMIT_ANON = 16;
     private const CANDIDATE_FETCH_MULTIPLIER_LOGGED = 30;
     private const CANDIDATE_FETCH_MIN_LOGGED = 240;
     private const CANDIDATE_FETCH_MULTIPLIER_ANON = 24;
@@ -37,7 +35,7 @@ final class KeywordAffinityFeedBlockProvider implements HomeFeedBlockProviderInt
 
     public function __construct(
         private readonly PPBaseRepository $ppBaseRepository,
-        private readonly UserPreferenceRepository $userPreferenceRepository,
+        private readonly ViewerSignalProvider $viewerSignalProvider,
         private readonly KeywordNormalizer $keywordNormalizer,
     ) {
     }
@@ -45,9 +43,7 @@ final class KeywordAffinityFeedBlockProvider implements HomeFeedBlockProviderInt
     public function provide(HomeFeedContext $context): ?HomeFeedBlock
     {
         $isLoggedIn = $context->isLoggedIn();
-        $profileScores = $isLoggedIn
-            ? $this->buildLoggedProfileScores($context)
-            : $this->buildAnonProfileScores($context);
+        $profileScores = $this->viewerSignalProvider->resolveKeywordProfileScores($context);
 
         if (count($profileScores) < self::MIN_PROFILE_KEYWORDS) {
             return null;
@@ -184,66 +180,6 @@ final class KeywordAffinityFeedBlockProvider implements HomeFeedBlockProviderInt
             self::CANDIDATE_FETCH_MIN_ANON,
             $cardsPerBlock * self::CANDIDATE_FETCH_MULTIPLIER_ANON
         );
-    }
-
-    /**
-     * @return array<string,float>
-     */
-    private function buildLoggedProfileScores(HomeFeedContext $context): array
-    {
-        $viewer = $context->getViewer();
-        if ($viewer === null) {
-            return [];
-        }
-
-        $rawScores = $this->userPreferenceRepository->findTopKeywordScoresForUser($viewer, self::PROFILE_LIMIT_LOGGED);
-        if ($rawScores === []) {
-            return [];
-        }
-
-        $scores = [];
-        foreach ($rawScores as $rawKeyword => $rawScore) {
-            $keyword = $this->keywordNormalizer->normalizeKeyword((string) $rawKeyword);
-            if ($keyword === null) {
-                continue;
-            }
-
-            $score = max(0.0, (float) $rawScore);
-            if ($score <= 0.0) {
-                continue;
-            }
-
-            $scores[$keyword] = ($scores[$keyword] ?? 0.0) + $score;
-        }
-
-        return $scores;
-    }
-
-    /**
-     * @return array<string,float>
-     */
-    private function buildAnonProfileScores(HomeFeedContext $context): array
-    {
-        $hints = array_slice($context->getAnonKeywordHints(), 0, self::PROFILE_LIMIT_ANON);
-        if ($hints === []) {
-            return [];
-        }
-
-        $scores = [];
-        $rank = count($hints);
-
-        foreach ($hints as $index => $rawHint) {
-            $hint = str_replace(['_', '-'], ' ', (string) $rawHint);
-            $keyword = $this->keywordNormalizer->normalizeKeyword($hint);
-            if ($keyword === null) {
-                continue;
-            }
-
-            $weight = max(1.0, (float) ($rank - $index));
-            $scores[$keyword] = ($scores[$keyword] ?? 0.0) + $weight;
-        }
-
-        return $scores;
     }
 
     /**

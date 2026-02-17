@@ -6,10 +6,10 @@ use App\Entity\PPBase;
 use App\Entity\User;
 use App\Repository\PPBaseRepository;
 use App\Service\HomeFeed\HomeFeedCollectionUtils;
-use App\Repository\UserPreferenceRepository;
 use App\Service\HomeFeed\HomeFeedBlock;
 use App\Service\HomeFeed\HomeFeedBlockProviderInterface;
 use App\Service\HomeFeed\HomeFeedContext;
+use App\Service\HomeFeed\Signal\ViewerSignalProvider;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
@@ -34,7 +34,7 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
 
     public function __construct(
         private readonly PPBaseRepository $ppBaseRepository,
-        private readonly UserPreferenceRepository $userPreferenceRepository,
+        private readonly ViewerSignalProvider $viewerSignalProvider,
         #[Autowire(service: 'cache.app')]
         private readonly CacheItemPoolInterface $cache,
         #[Autowire('%app.home_feed.category_affinity.logged_cache_ttl_seconds%')]
@@ -46,81 +46,57 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
 
     public function provide(HomeFeedContext $context): ?HomeFeedBlock
     {
-        if ($context->isLoggedIn()) {
-            $viewer = $context->getViewer();
-            if ($viewer === null) {
-                return null;
-            }
+        $isLoggedIn = $context->isLoggedIn();
+        $viewer = $context->getViewer();
+        $categorySignals = $this->viewerSignalProvider->resolveCategorySignals($context);
+        $categories = $categorySignals->getPrimaryCategories();
+        if ($categories === []) {
+            return null;
+        }
 
-            $categories = $this->userPreferenceRepository->findTopCategorySlugsForUser($viewer, 8);
-            $usedPreferenceCategories = $categories !== [];
+        $fetchLimit = max(
+            $isLoggedIn ? self::WINDOW_FETCH_MIN_LOGGED : self::WINDOW_FETCH_MIN_ANON,
+            $context->getCardsPerBlock() * (
+                $isLoggedIn
+                    ? self::WINDOW_FETCH_MULTIPLIER_LOGGED
+                    : self::WINDOW_FETCH_MULTIPLIER_ANON
+            )
+        );
 
-            if ($categories === []) {
-                $categories = $this->resolveCreatorCategories($viewer);
-            }
-
-            if ($categories === []) {
-                return null;
-            }
-
-            $fetchLimit = max(
-                self::WINDOW_FETCH_MIN_LOGGED,
-                $context->getCardsPerBlock() * self::WINDOW_FETCH_MULTIPLIER_LOGGED
+        if (!$isLoggedIn) {
+            $items = $this->collectAnonCategoryCandidates($categories, $fetchLimit);
+        } elseif ($viewer !== null && $categorySignals->isPrimaryFromPreferences()) {
+            $items = $this->collectLoggedPreferenceCategoryCandidates($viewer, $categories, $fetchLimit);
+        } else {
+            $items = $this->collectCategoryCandidates(
+                $categories,
+                $fetchLimit,
+                $isLoggedIn ? $viewer : null,
+                $isLoggedIn ? self::WINDOW_OFFSETS_LOGGED_FALLBACK : self::WINDOW_OFFSETS_ANON
             );
-            if ($usedPreferenceCategories) {
-                $items = $this->collectLoggedPreferenceCategoryCandidates($viewer, $categories, $fetchLimit);
-            } else {
+        }
+
+        if ($items === [] && $isLoggedIn && $viewer !== null && $categorySignals->isPrimaryFromPreferences()) {
+            $fallbackCategories = $categorySignals->getFallbackCategories();
+            if ($fallbackCategories !== []) {
                 $items = $this->collectCategoryCandidates(
-                    $categories,
+                    $fallbackCategories,
                     $fetchLimit,
                     $viewer,
                     self::WINDOW_OFFSETS_LOGGED_FALLBACK
                 );
             }
-
-            if ($items === [] && $usedPreferenceCategories) {
-                $fallbackCategories = $this->resolveCreatorCategories($viewer);
-                if ($fallbackCategories !== []) {
-                    $items = $this->collectCategoryCandidates(
-                        $fallbackCategories,
-                        $fetchLimit,
-                        $viewer,
-                        self::WINDOW_OFFSETS_LOGGED_FALLBACK
-                    );
-                }
-            }
-
-            if ($items === []) {
-                return null;
-            }
-            $items = $this->diversifyItems($items, $context->getCardsPerBlock());
-
-            return new HomeFeedBlock(
-                'category-affinity',
-                'Basé sur vos catégories',
-                $items,
-                true
-            );
         }
 
-        $anonCategoryHints = $context->getAnonCategoryHints();
-        if ($anonCategoryHints === []) {
-            return null;
-        }
-
-        $fetchLimit = max(
-            self::WINDOW_FETCH_MIN_ANON,
-            $context->getCardsPerBlock() * self::WINDOW_FETCH_MULTIPLIER_ANON
-        );
-        $items = $this->collectAnonCategoryCandidates($anonCategoryHints, $fetchLimit);
         if ($items === []) {
             return null;
         }
+
         $items = $this->diversifyItems($items, $context->getCardsPerBlock());
 
         return new HomeFeedBlock(
-            'anon-category-affinity',
-            'Selon vos centres d’intérêt récents',
+            $isLoggedIn ? 'category-affinity' : 'anon-category-affinity',
+            $isLoggedIn ? 'Basé sur vos catégories' : 'Selon vos centres d’intérêt récents',
             $items,
             true
         );
@@ -365,23 +341,4 @@ final class CategoryAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
         return array_merge($primaryPool, $secondaryPool, $tail);
     }
 
-    /**
-     * @return string[]
-     */
-    private function resolveCreatorCategories(User $viewer): array
-    {
-        $creatorRecent = $this->ppBaseRepository->findLatestByCreator($viewer, 12);
-        $categories = [];
-
-        foreach ($creatorRecent as $project) {
-            foreach ($project->getCategories() as $category) {
-                $slug = trim((string) $category->getUniqueName());
-                if ($slug !== '') {
-                    $categories[$slug] = true;
-                }
-            }
-        }
-
-        return array_keys($categories);
-    }
 }

@@ -18,6 +18,11 @@ Use this section as the quick reference before reading details.
   - Keeps only valid blocks with items.
   - Deduplicates projects across blocks.
   - Applies creator cap only if enabled in config.
+- `ViewerSignalProvider`:
+  - Central read-path resolver for viewer signals used by multiple rails.
+  - Logged-in signals: `user_preferences` (cats/keywords) + recent views/follows/bookmarks (neighbor seeds).
+  - Anonymous signals: `anon_pref_categories`, `anon_pref_keywords`, `anon_pref_recent_views`.
+  - Note: this is read-only refactoring; existing signal writers/storage remain unchanged.
 - `CategoryAffinityFeedBlockProvider`:
   - Logged-in source: `user_preferences.fav_categories` (categories only).
   - Logged-in fallback: categories from user's recent created projects.

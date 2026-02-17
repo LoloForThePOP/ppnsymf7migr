@@ -2,23 +2,18 @@
 
 namespace App\Service\HomeFeed\Block;
 
-use App\Entity\Bookmark;
-use App\Repository\BookmarkRepository;
-use App\Repository\FollowRepository;
-use App\Repository\PresentationEventRepository;
 use App\Repository\PresentationNeighborRepository;
 use App\Service\AI\PresentationEmbeddingService;
 use App\Service\HomeFeed\HomeFeedBlock;
 use App\Service\HomeFeed\HomeFeedBlockProviderInterface;
 use App\Service\HomeFeed\HomeFeedCollectionUtils;
 use App\Service\HomeFeed\HomeFeedContext;
+use App\Service\HomeFeed\Signal\ViewerSignalProvider;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 
 #[AsTaggedItem(priority: 360)]
 final class NeighborAffinityFeedBlockProvider implements HomeFeedBlockProviderInterface
 {
-    private const LOGGED_SEED_LIMIT = 5;
-    private const ANON_SEED_LIMIT = 6;
     private const PER_SEED_NEIGHBOR_LIMIT_MULTIPLIER = 1;
     private const PER_SEED_NEIGHBOR_LIMIT_MIN = 8;
     private const MIN_UNIQUE_RESULTS = 6;
@@ -28,18 +23,14 @@ final class NeighborAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
 
     public function __construct(
         private readonly PresentationNeighborRepository $presentationNeighborRepository,
-        private readonly PresentationEventRepository $presentationEventRepository,
-        private readonly FollowRepository $followRepository,
-        private readonly BookmarkRepository $bookmarkRepository,
         private readonly PresentationEmbeddingService $presentationEmbeddingService,
+        private readonly ViewerSignalProvider $viewerSignalProvider,
     ) {
     }
 
     public function provide(HomeFeedContext $context): ?HomeFeedBlock
     {
-        $seedIds = $context->isLoggedIn()
-            ? $this->resolveLoggedSeedIds($context)
-            : array_slice($context->getAnonRecentViewIds(), 0, self::ANON_SEED_LIMIT);
+        $seedIds = $this->viewerSignalProvider->resolveNeighborSeedIds($context);
 
         if ($seedIds === []) {
             return null;
@@ -137,44 +128,5 @@ final class NeighborAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
             $rankedItems,
             true
         );
-    }
-
-    /**
-     * @return int[]
-     */
-    private function resolveLoggedSeedIds(HomeFeedContext $context): array
-    {
-        $viewer = $context->getViewer();
-        if ($viewer === null) {
-            return [];
-        }
-
-        $seedIds = [];
-        foreach ($this->presentationEventRepository->findRecentViewedPresentationIdsForUser($viewer, self::LOGGED_SEED_LIMIT) as $id) {
-            $seedIds[$id] = true;
-        }
-
-        if (count($seedIds) < self::LOGGED_SEED_LIMIT) {
-            $followLimit = self::LOGGED_SEED_LIMIT - count($seedIds);
-            foreach ($this->followRepository->findLatestFollowedPresentations($viewer, $followLimit) as $presentation) {
-                $presentationId = $presentation->getId();
-                if ($presentationId !== null) {
-                    $seedIds[$presentationId] = true;
-                }
-            }
-        }
-
-        if (count($seedIds) < self::LOGGED_SEED_LIMIT) {
-            $bookmarkLimit = self::LOGGED_SEED_LIMIT - count($seedIds);
-            /** @var Bookmark $bookmark */
-            foreach ($this->bookmarkRepository->findLatestForUser($viewer, $bookmarkLimit) as $bookmark) {
-                $presentationId = $bookmark->getProjectPresentation()?->getId();
-                if ($presentationId !== null) {
-                    $seedIds[$presentationId] = true;
-                }
-            }
-        }
-
-        return array_slice(array_keys($seedIds), 0, self::LOGGED_SEED_LIMIT);
     }
 }
