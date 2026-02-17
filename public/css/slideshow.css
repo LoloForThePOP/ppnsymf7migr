@@ -250,7 +250,7 @@
     font-family: helvetica;
     font-weight: 700;
     position: absolute;
-    bottom: 0;
+    bottom: 5px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 12;
@@ -470,6 +470,13 @@ body[data-theme-scope="presentation"] .edit-slide-button {
 
     .caption-container span {
         padding: 4px 0;
+    }
+
+    .slide-content-licence {
+        max-width: calc(100% - 20px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .numbertext {
