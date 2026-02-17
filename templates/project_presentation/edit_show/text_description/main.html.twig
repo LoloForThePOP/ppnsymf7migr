@@ -36,7 +36,7 @@
                 - long text description we use a collapsible
             #}
             
-            <div id="read-text-description" class="{{ longTextLargeScreens or longTextSmallScreens ? 'long-text' }}  pp-consultation-mode container">
+            <div id="read-text-description" class="{{ longTextLargeScreens or longTextSmallScreens ? 'long-text' }} {{ longTextLargeScreens ? 'pp-text-scroll-lg' }} pp-consultation-mode container">
 
                 <!-- Text Description (Display & trigger edit for user presenter) -->
 
@@ -54,7 +54,7 @@
                     
                     <!-- Toggle Collapse Button -->
 
-                    <div class="d-none d-lg-block mt-4">
+                    <div class="d-none d-lg-block mt-4 text-description-toggle-lg">
 
                         <button style="z-index: index 5;" class="collapsed btn btn-sm pp-text-toggle-btn" data-bs-toggle="collapse" data-bs-target="#collapseTextDescription"></button>
                         
@@ -219,6 +219,20 @@
                     max-height: 395px;
                     overflow: auto;
 
+                }
+
+            }
+
+            @media screen and (min-width: 992px) {
+
+                #read-text-description.pp-text-scroll-lg .text-description-toggle-lg {
+                    display: none !important;
+                }
+
+                #read-text-description.pp-text-scroll-lg #collapseTextDescription.collapse-lg:not(.show) {
+                    max-height: 395px;
+                    overflow-y: auto;
+                    overflow-x: hidden;
                 }
 
             }
