@@ -134,6 +134,7 @@ a{
     --theme-navbar-toggler-icon-dark: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
     --theme-btn-close-filter: none;
     --theme-button-weight: 700;
+    --theme-home-cta-text: var(--theme-accent-contrast);
 
     --pp-card-bg: #ffffff;
     --pp-card-border: #dee2e6;
@@ -159,6 +160,7 @@ a{
     --theme-text-muted: #64748b;
     --theme-accent: green;
     --theme-accent-contrast: #0b0f16;
+    --theme-home-cta-text: #ffffff;
     --theme-accent-warm: #ffa500;
     --theme-accent-static: #3f8f5b;
     --theme-border: #e5e7eb;
@@ -506,7 +508,7 @@ body[data-theme-scope="presentation"] header .navbar .btn-outline-primary:focus 
 body[data-theme-scope="presentation"] header .create-presentation-button {
     background-color: var(--theme-accent) !important;
     border-color: var(--theme-accent) !important;
-    color: var(--theme-accent-contrast) !important;
+    color: var(--theme-home-cta-text) !important;
     font-weight: var(--theme-button-weight, 700);
 }
 

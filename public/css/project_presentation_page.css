@@ -327,6 +327,16 @@ body[data-theme-scope="presentation"] .pp-upper-box {
     --follow-button-bg: var(--theme-surface-alt);
 }
 
+/* 3P header interactions (comment/share/like/bookmark) for classic theme. */
+html[data-theme="classic"] body[data-theme-scope="presentation"] .pp-upper-box {
+    --pp-interaction-icon-color: #63af53;
+}
+
+/* Keep bookmarked icon aligned with header interaction color in classic (avoid fallback to accent green). */
+html[data-theme="classic"] body[data-theme-scope="presentation"] .pp-upper-box .bookmark-button.isBookmarked {
+    --pp-bookmark-icon-color: #63af53;
+}
+
 body[data-theme-scope="presentation"] .pp-edit-thumbnail-link {
     color: var(--pp-tags-color, var(--theme-accent));
 }

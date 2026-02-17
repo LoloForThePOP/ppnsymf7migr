@@ -107,8 +107,15 @@
     
     <a href="#" class="d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#pp-share" >
 
-        <svg class="shareIcon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M18 16a2.98 2.98 0 0 0-2.17.93L8.91 13a3.04 3.04 0 0 0 0-2l6.92-3.93A3 3 0 1 0 15 5a3.1 3.1 0 0 0 .02.33L8.1 9.27a3 3 0 1 0 0 5.46l6.92 3.94A2.91 2.91 0 0 0 15 19a3 3 0 1 0 3-3z" fill="currentColor"/>
+        {# Inline trial: keep original share.svg geometry while still inheriting theme color through currentColor. #}
+        <svg class="shareIcon" width="22" height="22" viewBox="0 0 35.7 36.5" aria-hidden="true" focusable="false">
+            <g transform="translate(-31 -150)">
+                <circle cx="37.3" cy="167" r="6.27" fill="currentColor" fill-rule="evenodd"/>
+                <circle transform="rotate(-17.5)" cx="3.53" cy="190" r="6.27" fill="currentColor" fill-rule="evenodd"/>
+                <path d="m60.8 180-23.3-12" fill="none" stroke="currentColor" stroke-width="3.15"/>
+                <circle transform="matrix(.954 .3 .3 -.954 0 0)" cx="104" cy="-131" r="6.27" fill="currentColor" fill-rule="evenodd"/>
+                <path d="m60.1 155-23.3 12" fill="none" stroke="currentColor" stroke-width="3.15"/>
+            </g>
         </svg>
     
     </a>

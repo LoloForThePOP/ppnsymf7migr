@@ -43,6 +43,15 @@ html[data-theme="classic"] .connected-title .connected-username {
 
 .connected-actions .btn-primary {
     border-radius: 10px;
+    background-color: var(--theme-accent);
+    border-color: var(--theme-accent);
+    color: var(--theme-home-cta-text);
+}
+
+.connected-actions .btn-primary:hover,
+.connected-actions .btn-primary:focus,
+.connected-actions .btn-primary:active {
+    color: var(--theme-home-cta-text);
 }
 
 .connected-resume {
