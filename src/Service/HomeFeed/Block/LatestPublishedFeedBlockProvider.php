@@ -7,6 +7,7 @@ use App\Service\HomeFeed\HomeFeedBlock;
 use App\Service\HomeFeed\HomeFeedBlockProviderInterface;
 use App\Service\HomeFeed\HomeFeedCollectionUtils;
 use App\Service\HomeFeed\HomeFeedContext;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 
 #[AsTaggedItem(priority: 320)]
@@ -19,11 +20,17 @@ final class LatestPublishedFeedBlockProvider implements HomeFeedBlockProviderInt
 
     public function __construct(
         private readonly PPBaseRepository $ppBaseRepository,
+        #[Autowire('%app.home_feed.latest.enabled%')]
+        private readonly bool $latestEnabled,
     ) {
     }
 
     public function provide(HomeFeedContext $context): ?HomeFeedBlock
     {
+        if (!$this->latestEnabled) {
+            return null;
+        }
+
         $fetchLimit = max(self::FETCH_MIN, $context->getCardsPerBlock() * self::FETCH_MULTIPLIER);
         $viewer = $context->getViewer();
 
