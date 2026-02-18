@@ -65,8 +65,9 @@
 }
 
 .collection-title-info {
-    --ui-info-hint-font-size: 0.46em;
+    --ui-info-hint-font-size: 0.75em;
     --ui-info-hint-opacity: 0.86;
+    font-family: initial;
 }
 
 .collection-title-action {

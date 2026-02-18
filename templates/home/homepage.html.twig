@@ -12,6 +12,7 @@
     <link href="/css/show_more_less_button.css" rel="stylesheet">
     <link href="/css/home_connected.css" rel="stylesheet">
     <link href="/css/home_location_prompt.css" rel="stylesheet">
+    <link href="/css/home_conversion.css" rel="stylesheet">
     {% if app.user and addNewsForm %}
         <link href="/css/create_news.css" rel="stylesheet">
     {% endif %}
@@ -93,7 +94,6 @@
         {# Case user not logged in : displaying homepage jumbotron #}
 
         {% if not app.user %}
-
         {# Explore Propon - Display some projects by categories (tabs navigation) #}
         
             <div class="mt-1">
@@ -120,6 +120,8 @@
             </style>
 
         </div>
+
+        {% include "home/_conversion_sections.html.twig" %}
 
         {% endif %}
 
