@@ -1,12 +1,10 @@
 <?php
 
-
 namespace App\Controller;
 
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
-use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class FacebookController extends AbstractController
@@ -16,7 +14,7 @@ class FacebookController extends AbstractController
      */
 
     #[Route('/connect/facebook', name: 'connect_facebook_start')]
-    public function connect(ClientRegistry $clientRegistry)
+    public function connect(ClientRegistry $clientRegistry): Response
     {
         // define the scopes here, not in the config
         return $clientRegistry
@@ -30,11 +28,10 @@ class FacebookController extends AbstractController
      * in config/packages/knpu_oauth2_client.yaml
      */
     #[Route('/connect/facebook/check', name: 'connect_facebook_check')]
-    public function connectCheckAction(Request $request, ClientRegistry $clientRegistry)
+    public function connectCheckAction(): void
     {
-        // ** if you want to *authenticate* the user, then
-        // leave this method blank and create a Guard authenticator
-       
-        
+        // Symfony Security will handle this automatically.
+        // This method must remain blank.
+        throw new \LogicException('This should never be reached!');
     }
 }
