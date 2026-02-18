@@ -1,10 +1,10 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Propon Manifesto{% endblock %}
+{% block title %}Manifesto{% endblock %}
 
 {% block headTag %}
 
-    <meta name="description" content="Nous sommes engagés vers un monde meilleur. En présentant les projets, on espère souhaite favoriser leur réalisation. Découvrez comment !">
+    <meta name="description" content="Découvrez le manifeste du Projet des Projets : pourquoi présenter les projets, comment accélérer leur réalisation et comment participer.">
 
 {% endblock %}
 
@@ -20,7 +20,10 @@
  
         <div class="title-container">
 
-            <h1 class="page-title fw-bold"><span class="d-lg-none me-2">🧭</span><span class="d-none d-md-inline">-</span> Rejoignez-Nous <span class="d-none d-md-inline">-</span></h1>
+            <h1 class="page-title fw-bold mb-3">Manifesto</h1>
+            <p class="manifesto-intro">
+                Propon vise à présenter les projets à grande échelle pour favoriser leur réalisation.
+            </p>
 
         </div>
 
@@ -28,22 +31,22 @@
 
             <dl>
 
-                <dt>🤚 Engagés</dt>
+                <dt>Engagement</dt>
 
-                    <dd>Propon est une <b>initiative gratuite</b>. Son objectif est d'avoir un <b>impact positif</b> sur la société et notre environnement.</dd>
+                    <dd>Propon est une <strong>initiative gratuite</strong>. Son objectif est d'avoir un <strong>impact positif</strong> sur la société et notre environnement.</dd>
 
-                <dt>👉 Agir</dt>
+                <dt>Action</dt>
 
-                    <dd>Les projets sont déterminants pour <b>lutter contre les défis majeurs qui nous concernent tous</b>.</dd>
+                    <dd>Les projets sont déterminants pour <strong>lutter contre les défis majeurs qui nous concernent tous</strong>.</dd>
 
 
-                <dt>⚡️ Accélérer</dt>
+                <dt>Accélération</dt>
 
-                    <dd>En présentant vos projets et vos besoins, <b>on améliore leur découverte et vos chances de trouver des participants</b>.</dd>
+                    <dd>En présentant vos projets et vos besoins, <strong>vous améliorez leur découverte et vos chances de trouver des participants</strong>.</dd>
                 
-                <dt>💪 Ensemble</dt>
+                <dt>Coopération</dt>
 
-                    <dd>Les projets de toutes tailles sont <b>les briques des plus grands projets</b>. Chaque projet réussi, c’est potentiellement <b>des centaines d’autres qui progressent</b>.</dd>
+                    <dd>Les projets de toutes tailles sont <strong>les briques des plus grands projets</strong>. Chaque projet réussi, c’est potentiellement <strong>des centaines d’autres qui progressent</strong>.</dd>
 
             </dl>
 
@@ -52,47 +55,45 @@
 
         <section>
 
-            <h2 class="text-center fw-bold mb-5">⏱️ Et Maintenant ?</h2>
+            <h2 class="text-center fw-bold mb-5">Et maintenant ?</h2>
 
             <ul class="horizontal-list">
 
                 {# Use search engine to find a project #}
 
-                 <a href="#" data-search-trigger>
-                     
                     <li class="now-action-item">
+                        <a class="now-action-link" href="#" data-search-trigger>
 
-                        <img id="search_icon_small_screens" class="cta-item-img cta-search-icon icon-themed" src="{{ asset('search.svg', 'misc')}}" alt="search icon" style="height:40px;">
+                        <svg class="cta-item-img cta-search-icon-inline" viewBox="0 0 50.798 50.931" aria-hidden="true" focusable="false">
+                            <g transform="translate(-23.902 -26.869)">
+                                <path fill="currentColor" d="m61 59.8-0.4 0.4-1.2-1.2c2.7-3.5 4.2-7.7 4.2-12.2 0-5.3-2.1-10.3-5.8-14.1-8-8-21.3-7.8-28.9 0.8-7 7.8-6.6 20.1 0.9 27.5 3.9 3.8 8.9 5.7 14 5.7 4.3 0 8.6-1.4 12.2-4.2l1.2 1.2-0.5 0.3 12.9 12.9c1.2 1.2 3.1 1.2 4.2 0 1.2-1.2 1.2-3.1 0-4.2zm-27.9-2.5c-5.8-5.8-5.8-15.3 0-21.1 2.9-2.9 6.7-4.4 10.6-4.4 3.8 0 7.6 1.5 10.6 4.4 2.8 2.8 4.4 6.6 4.4 10.6s-1.6 7.7-4.4 10.6c-5.9 5.7-15.3 5.7-21.2-0.1z"></path>
+                            </g>
+                        </svg>
 
-                        <div class="cta-item-text">Trouver un Projet</div>
-                    
+                        <div class="cta-item-text">Trouver un projet</div>
+                        </a>
                     </li>
-                
-                </a>
 
-                <a href="{{ path ('create_project_presentation') }}">
-                    
                     <li class="now-action-item">
+                        <a class="now-action-link" href="{{ path('create_project_presentation') }}">
 
-                        <img class="cta-item-img pp-theme-icon" src="{{ asset('add_presentation.svg', 'misc')}}" height="34"  alt="bucket with a plus icon">
+                        <svg class="cta-item-img cta-add-presentation-icon-inline" viewBox="0 0 793.24307 707.2881" aria-hidden="true" focusable="false">
+                            <path class="cta-add-presentation-icon-plus" d="M 361.50876,0 V 192.97432 H 168.53622 v 38.95968 39.01136 1.03389 H 361.50876 V 463.92096 464.90271 H 439.49657 V 271.97925 h 193.97155 v -77.97104 h -0.98175 -192.9898 V 0 Z"/>
+                            <path class="cta-add-presentation-icon-bucket" d="m 683.2898,602.2837 v -181.8184 c 0,-1.7398 1.0092,-3.4797 2.0185,-6.0896 1.0092,-1.7399 3.0277,-2.6098 5.046,-4.3497 2.0185,-0.87 5.0461,-1.7399 7.0645,-1.7399 h 81.7465 c 2.0185,0 5.0461,0.8699 7.0644,1.7399 2.0185,1.7399 4.037,2.6098 5.0461,4.3497 1.0092,2.6099 2.0186,4.3498 2.0186,6.0896 v 269.6828 c 0,1.7398 -1.0094,4.3496 -2.0186,6.0896 -1.0091,1.7398 -3.0276,3.4797 -5.0461,4.3496 -2.0183,0.87 -5.0459,1.7399 -7.0644,1.7399 h -764.985 c -2.0184,0 -5.046,-0.8699 -7.0645,-1.7399 -2.0184,-0.8699 -4.0368,-2.6098 -5.0461,-4.3496 -1.0092,-1.74 -2.0184,-4.3498 -2.0184,-6.0896 v -269.6828 c 0,-1.7398 1.0092,-3.4797 2.0184,-6.0896 1.0093,-1.7399 3.0277,-2.6098 5.0461,-4.3497 2.0185,-0.87 5.0461,-1.7399 7.0645,-1.7399 h 77.7095 c 2.0185,0 5.0461,0.8699 7.0646,1.7399 2.0184,1.7399 4.0368,2.6098 5.0461,4.3497 1.0092,2.6099 2.0184,4.3498 2.0184,6.0896 v 181.8184 z"/>
+                        </svg>
 
                         <div class="cta-item-text">Présenter votre projet gratuitement</div>
-
+                        </a>
                     </li>
-                
-                </a>
-
-                <a href="{{ asset('pdf/project-of-projects-manifesto-fr.pdf', 'static')}}" target="_blank" rel="noopener noreferrer">
 
                     <li class="now-action-item">
+                        <a class="now-action-link" href="{{ asset('pdf/project-of-projects-manifesto-fr.pdf', 'static')}}" target="_blank" rel="noopener noreferrer">
 
-                        <img id="search_icon_small_screens" class="cta-item-img" src="{{ asset('pdf-file.png', 'misc')}}" alt="pdf file icon" style="height:50px;">
+                        <img class="cta-item-img cta-pdf-icon" src="{{ asset('pdf-file.png', 'misc')}}" alt="pdf file icon">
 
-                        <div class="cta-item-text">Le Manifeste du<br>Projet des Projets</br>(version longue)</div>
-                    
+                        <div class="cta-item-text">Lire le manifeste complet (PDF)</div>
+                        </a>
                     </li>
-
-                </a>
 
                 
             </ul>

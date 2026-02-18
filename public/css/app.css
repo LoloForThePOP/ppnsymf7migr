@@ -1910,4 +1910,8 @@ label:active:after {
         padding: 0.5rem 0.85rem;
     }
 
+    .global-feedback-inline-slot {
+        margin-bottom: 2rem;
+    }
+
 }
