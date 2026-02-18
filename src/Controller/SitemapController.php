@@ -16,6 +16,7 @@ final class SitemapController extends AbstractController
         'join_us',
         'short_manifesto',
         'credits',
+        'legal_notice',
         'terms',
         'privacy',
         'submit_theme',

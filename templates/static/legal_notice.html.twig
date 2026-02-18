@@ -1,0 +1,107 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mentions légales{% endblock %}
+
+{% block stylesheets %}<link href="/css/static_content.css" rel="stylesheet">{% endblock %}
+
+{% block body %}
+
+    <div class="page-container static-content container px-0 col-md-11 col-lg-7">
+
+        <h1 class="static-accent-title">Mentions légales</h1>
+
+        <p>Date de dernière mise à jour : le 18 février 2026.</p>
+
+        <section>
+            <h2>Éditeur du site</h2>
+
+            <p>
+                Pour toute question, vous pouvez contacter l’éditeur à l’adresse suivante.
+            </p>
+
+            <ul>
+                <li><strong>E-mail de contact :</strong> {{ contactEmail|default('contact@propon.org') }}</li>
+            </ul>
+
+        </section>
+
+        <section>
+            <h2>Direction de la publication</h2>
+
+            <ul>
+                <li><strong>Directeur de la publication :</strong> Laurent GAILLARD</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Hébergement</h2>
+
+            <ul>
+                <li><strong>Hébergeur :</strong> OVH SAS</li>
+                <li><strong>Adresse :</strong> 2 rue Kellermann, 59100 Roubaix, France</li>
+                <li><strong>Téléphone :</strong> 1007 (France) / +33 9 72 10 10 07</li>
+                <li><strong>Site web :</strong> <a href="https://www.ovhcloud.com/fr/" target="_blank" rel="noopener">ovhcloud.com</a></li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Propriété intellectuelle</h2>
+
+            <p>
+                Sauf mention contraire, les éléments de ce site (textes, visuels, logos, éléments graphiques et code)
+                sont protégés par le droit de la propriété intellectuelle.
+            </p>
+
+            <p>
+                Toute reproduction, adaptation ou exploitation, totale ou partielle, sans autorisation préalable de l’éditeur
+                est interdite, sauf exceptions prévues par la loi.
+            </p>
+        </section>
+
+        <section>
+            <h2 id="contenus-tiers">Contenus de tiers (images, logos, marques)</h2>
+
+            <p>
+                Certaines pages de présentation de projets peuvent afficher des contenus issus de sources externes publiques
+                (notamment des logos, images ou marques, y compris depuis des plateformes comme Ulule ou Fondation du Patrimoine).
+            </p>
+
+            <p>
+                Ces éléments restent la propriété exclusive de leurs titulaires respectifs. Leur affichage sur ce site
+                n’emporte aucun transfert de droits, aucune revendication de propriété par l’éditeur, et ne vaut pas
+                affiliation ou approbation.
+            </p>
+
+            <p>
+                Ces éléments sont affichés à des fins d’information, d’identification de projets et de référencement des sources.
+                Les crédits ou licences sont indiqués lorsque disponibles.
+            </p>
+
+            <p>
+                Si vous êtes titulaire de droits et souhaitez une correction, une mention complémentaire ou un retrait,
+                vous pouvez utiliser le formulaire <a href="{{ path('contact_us') }}">Contactez-nous</a>.
+            </p>
+        </section>
+
+        <section>
+            <h2>Signalement de contenu</h2>
+
+            <p>
+                Pour signaler un contenu illicite, inexact ou portant atteinte à vos droits, vous pouvez utiliser le formulaire
+                <a href="{{ path('contact_us') }}">Contactez-nous</a>.
+            </p>
+        </section>
+
+        <section>
+            <h2>Documents liés</h2>
+
+            <ul>
+                <li><a href="{{ path('static_page', {'slug': 'terms'}) }}">Conditions d’utilisation</a></li>
+                <li><a href="{{ path('static_page', {'slug': 'privacy'}) }}">Politique de confidentialité</a></li>
+                <li><a href="{{ path('static_page', {'slug': 'credits'}) }}">Crédits & Remerciements</a></li>
+            </ul>
+        </section>
+
+    </div>
+
+{% endblock %}

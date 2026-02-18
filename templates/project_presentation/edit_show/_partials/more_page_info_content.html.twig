@@ -6,6 +6,7 @@
 {% set showImportedAt = showImportedAt|default(false) %}
 {% set showLegalDisclaimer = showLegalDisclaimer|default(true) %}
 {% set showClaim = showClaim|default(true) %}
+{% set showThirdPartyRights = showThirdPartyRights|default(true) %}
 
 {% set ingestion = presentation.ingestion ?? null %}
 {% set sourceUrl = ingestion ? ingestion.sourceUrl : null %}
@@ -57,6 +58,13 @@
 
 {% if showImportedAt and ingestedAt %}
     <li class="mb-1">Importé le {{ ingestedAt|date('d/m/Y') }}.</li>
+{% endif %}
+
+{% if showThirdPartyRights and hasAutomationInfo %}
+    <li class="mb-1">
+        Les images, logos et marques de tiers restent la propriété de leurs titulaires respectifs.
+        <a href="{{ path('static_page', {'slug': 'legal_notice'}) }}#contenus-tiers">En savoir plus</a>.
+    </li>
 {% endif %}
 
 {% if showLegalDisclaimer %}

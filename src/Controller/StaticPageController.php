@@ -19,6 +19,7 @@ class StaticPageController extends AbstractController
         'join_us'        => ['template' => 'static/about_us.html.twig', 'title' => 'À propos'],
         'short_manifesto' => ['template' => 'static/short_manifesto.html.twig', 'title' => 'Manifeste'],
         'credits'         => ['template' => 'static/credits.html.twig', 'title' => 'Crédits & remerciements'],
+        'legal_notice'    => ['template' => 'static/legal_notice.html.twig', 'title' => 'Mentions légales'],
         'terms'           => ['template' => 'static/terms.html.twig', 'title' => 'Conditions d’utilisation'],
         'privacy'         => ['template' => 'static/privacy.html.twig', 'title' => 'Politique de confidentialité'],
         'submit_theme'    => ['template' => 'static/submit_theme.html.twig', 'title' => 'Proposer un thème'],
