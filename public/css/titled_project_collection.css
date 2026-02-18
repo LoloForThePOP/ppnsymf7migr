@@ -22,6 +22,16 @@
 
 }
 
+.collection-title.has-meta {
+    align-items: baseline;
+}
+
+.collection-title.has-meta .collection-icon,
+.collection-title.has-meta .collection-title-info,
+.collection-title.has-meta .collection-title-action {
+    align-self: center;
+}
+
 .collection-container{
 
     display: flex;
@@ -43,7 +53,8 @@
 .collection-title-meta {
     display: inline-flex;
     align-items: center;
-    font-size: 0.5em;
+    font-size: 0.56em;
+    line-height: 1.1;
     font-weight: 600;
     color: color-mix(in srgb, var(--theme-text) 72%, var(--theme-bg) 28%);
     max-width: 100%;
@@ -116,7 +127,7 @@
     }
 
     .collection-title-meta {
-        font-size: 0.56em;
+        font-size: 0.6em;
     }
 
     .collection-title-action {
