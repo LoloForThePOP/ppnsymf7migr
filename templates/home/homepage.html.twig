@@ -75,6 +75,14 @@
             }
 
             }
+
+            @media screen and (min-width: 1280px) {
+
+            .homepage-container{
+            overflow-x: visible;
+            }
+
+            }
         
         </style>
 
@@ -128,6 +136,11 @@
 
         {% if not app.user %}
             {% for block in feedBlocks %}
+                {% set isExploreFallback = block.key == 'anon-explore-fallback' %}
+                {% set blockContainerClass = isExploreFallback
+                    ? 'container-fluid px-1 px-md-2 px-xl-2 my-5 home-feed-block--explore-fallback'
+                    : 'container my-5'
+                %}
                 {% set blockTitleMeta = block.key == 'around-you' ? homepageLocationSummaryInline|default('') : '' %}
                 {% set blockTitleInfo = block.key == 'around-you' ? homepageLocationSummaryInfo|default('') : '' %}
                 {% set blockTitleAction = block.key == 'around-you'
@@ -141,7 +154,7 @@
                     }
                     : {} %}
                 <div
-                    class="container my-5"
+                    class="{{ blockContainerClass }}"
                     data-home-feed-block-key="{{ block.key }}"
                     data-home-feed-block-position="{{ loop.index }}"
                     {% if block.key == 'around-you' %}id="home-around-you-rail"{% endif %}

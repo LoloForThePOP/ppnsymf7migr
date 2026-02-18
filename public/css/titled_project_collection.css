@@ -162,3 +162,22 @@
         max-height: 250px;
     }
 }
+
+@media screen and (min-width: 1280px) {
+    /* Wide desktop layout for anon fallback rail ("Explorer sur Propon"). */
+    .home-feed-block--explore-fallback[data-home-feed-block-key="anon-explore-fallback"] {
+        width: min(1660px, calc(100vw - 36px));
+        margin-left: 50%;
+        margin-right: 0;
+        transform: translateX(-50%);
+    }
+
+    .home-feed-block--explore-fallback[data-home-feed-block-key="anon-explore-fallback"] .collection-container {
+        justify-content: center;
+        gap: 16px;
+    }
+
+    .home-feed-block--explore-fallback[data-home-feed-block-key="anon-explore-fallback"] .project-card {
+        --project-card-width: clamp(198px, calc((100% - 64px) / 5), 300px);
+    }
+}
