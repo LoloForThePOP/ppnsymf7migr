@@ -3,11 +3,11 @@
 
 {% block headTag %}
 
-    <meta name="description" content="Nous créons LA plateforme de présentation de projets. On est très demandeurs de vos suggestions et propositions de participation. Rejoignez-nous !">
+    <meta name="description" content="Propon présente les projets pour favoriser leur réalisation. Rejoignez-nous pour proposer des idées, des retours et des contributions.">
 
 {% endblock %}
 
-{% block title %}Qui sommes-nous ?{% endblock %}
+{% block title %}Rejoignez-nous{% endblock %}
 
 {% block stylesheets %}<link href="/css/static_content.css" rel="stylesheet">{% endblock %}
 
@@ -15,21 +15,25 @@
 
     <div class="page-container static-content container px-0 col-md-11 col-lg-7">
         
-        <h1 class="static-accent-title">Bienvenue !</h1>
+        <h1 class="static-accent-title">Bienvenue!</h1>
 
         <section>
 
                 <p>
-                    <b>Propon est une initiative qui vise à présenter les projets à grande échelle</b>. Cette initiative permettrait d'<b>accélérer la réalisation de projets importants</b>, par exemple lutter contre le changement climatique.
+                    <b>Propon est une initiative qui vise à présenter les projets à grande échelle</b>.
+                    Cette initiative permettrait d'<b>accélérer la réalisation de projets utiles et variés</b>.
                 </p>
 
                 <p>
-                    <b>En effet, recenser, présenter, et trier les projets, c'est déjà favoriser leur découverte</b> par des personnes susceptibles de <b>participer à leur réalisation</b>. <b>Chaque projet compte, présentez le vôtre</b>. 
+                    <b>Recenser, présenter et trier les projets favorise leur découverte</b> par des personnes susceptibles de
+                    <b>participer à leur réalisation</b>. <b>Chaque projet compte, présentez le vôtre.</b>
 
                 </p>
 
                 <p>
-                    À ce jour le Projet des Projets est porté par Laurent GAILLARD. Pour en savoir plus sur mes motivations, vous pouvez consulter le <a href="{{path('static_page', {'slug': "short_manifesto",})}}"><b>Manifeste du Projet des Projets</b></a>.
+                    À ce jour, le Projet des Projets est porté par Laurent GAILLARD.
+                    Pour en savoir plus sur ses motivations, vous pouvez consulter le
+                    <a href="{{ path('static_page', {'slug': 'short_manifesto'}) }}"><b>Manifeste du Projet des Projets</b></a>.
                 </p>
 
         </section>
@@ -40,7 +44,9 @@
 
             <p class="">
 
-               <b>Propon a besoin de vous pour être amélioré</b>. Toutes vos idées, critiques, et remarques sont bienvenues. Si vous souhaitez participer plus activement à cette aventure, vous pouvez <a class="fw-bold" href="https://www.propon.org/projet-des-projets" target="_blank" rel="noopener noreferrer" >consulter nos besoins ici</a> ou suggérer vos propres propositions de participation en <a class="fw-bold" href="{{path('contact_us')}}">nous contacter ici</a>. 
+               <b>Propon a besoin de vous pour progresser.</b> Vos idées, critiques et remarques sont les bienvenues.
+               Vous pouvez aussi proposer votre propre manière de contribuer.
+               <a class="fw-bold" href="{{ path('contact_us') }}">Contactez-nous ici.</a>
     
             </p>
 

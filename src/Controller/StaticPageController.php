@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class StaticPageController extends AbstractController
 {
     private const PAGE_MAP = [
-        'join_us'        => ['template' => 'static/about_us.html.twig', 'title' => 'À propos'],
+        'join_us'        => ['template' => 'static/about_us.html.twig', 'title' => 'Rejoignez-nous'],
         'short_manifesto' => ['template' => 'static/short_manifesto.html.twig', 'title' => 'Manifeste'],
         'credits'         => ['template' => 'static/credits.html.twig', 'title' => 'Crédits & remerciements'],
         'legal_notice'    => ['template' => 'static/legal_notice.html.twig', 'title' => 'Mentions légales'],
