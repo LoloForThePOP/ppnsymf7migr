@@ -41,17 +41,26 @@
     border-bottom: 1px solid var(--pp-create-border);
 }
 
+#createPPModal.create-pp-modal .box-header-brand {
+    display: flex;
+    align-items: center;
+    align-self: center;
+}
+
 #createPPModal.create-pp-modal .website-logo {
     width: 135px;
 }
 
 #createPPModal.create-pp-modal .box-title {
-    font-size: 15px;
+    font-size: 18px;
+    font-weight: 600;
+    display: inline-block;
+    margin-left: 0.25rem;
+    line-height: 1;
+    align-self: flex-end;
+    padding-bottom: 0.18rem;
+    opacity: 0.9;
     color: var(--pp-create-title);
-}
-
-#createPPModal.create-pp-modal .box-title {
-    color: var(--theme-accent);
 }
 
 #createPPModal.create-pp-modal .propon-logo {
@@ -213,7 +222,12 @@
 
 @media (max-width: 576px) {
     #createPPModal.create-pp-modal .website-logo {
-        width: 75px;
+        width: 92px;
+    }
+
+    #createPPModal.create-pp-modal .box-title {
+        font-size: 16px;
+        padding-bottom: 0.12rem;
     }
 }
 
