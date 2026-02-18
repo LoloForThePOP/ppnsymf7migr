@@ -1644,19 +1644,60 @@ label:active:after {
 /* Tiny screens connect buttons (navbar) */
 
 .sm-connect-btn {
-    width: 210px;
+    width: min(100%, 290px);
     border: 1px solid var(--theme-border);
     background-color: var(--theme-surface);
     color: var(--theme-text);
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+    justify-content: flex-start;
+    gap: 0.6rem;
+    text-align: left;
+    padding: 0.52rem 0.82rem;
+}
+
+.sm-connect-btn span {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.sm-auth-panel {
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.sm-auth-title {
+    color: var(--theme-title);
+    font-size: 1.2rem;
+}
+
+.sm-auth-subtitle {
+    color: var(--theme-text-muted);
+    font-size: 0.9rem;
+}
+
+.sm-connect-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.95rem;
 }
 
 .sm-connect-btn img {
     width: 30px;
     height: auto;
+}
+
+.sm-connect-btn__icon {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+}
+
+.sm-connect-btn__icon--email {
+    color: var(--theme-accent);
 }
 
 .connect-btn:hover,
