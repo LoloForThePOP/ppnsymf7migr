@@ -7,89 +7,84 @@
 {% block body %}
 
     <div class="page-container static-content container px-0 col-md-11 col-lg-7">
-        
+
         <h1 class="mt-md-1 static-accent-title">Crédits & Remerciements</h1>
 
+        <p>Date de dernière mise à jour : le 18 février 2026.</p>
+
+        <p>
+            Cette page recense les principaux crédits techniques et visuels du site.
+            Pour le cadre juridique général relatif aux contenus tiers (images, logos, marques),
+            consultez également la section
+            <a href="{{ path('static_page', {'slug': 'legal_notice'}) }}#contenus-tiers">Contenus de tiers</a>
+            des Mentions légales.
+        </p>
+
         <section>
+            <h2>Remerciements</h2>
 
-            <h2><span class="h4">👉</span> Remerciements</h2>
+            <p>
+                Remerciement général et confraternel aux créateurs, mainteneurs et communautés, en particulier open source et pas seulement, qui partagent de leur temps, de leurs compétences, ainsi que des outils qu'ils ont développés, mais aussi leurs retours d'expérience. Le site web Propon n'existerait pas sans vous.
+            </p>
 
-                <div class="ps-md-3">
+            <p>
+                Merci également aux personnes qui ont consacré du temps à tester le site et signaler des points d'amélioration, en particulier en terme d'ergonomie.
 
-                    <p>Merci fondamental à tous les contributeurs du web qui partagent des outils qu'ils ont créés, qui enseignent leurs compétences et qui offrent de leur temps pour résoudre des problèmes. Ce site n'existerait pas sans vous.</p>
-
-                    <p>Plusieurs personnes ont données un peu de leur temps et de leurs conseils pour améliorer ce site qu'elles en soient ici sincèrement remerciées.</p>
-
-
-                </div>
+            </p>
         </section>
 
-        
         <section>
+            <h2>Technologies principales</h2>
 
-            <h2 class=""><span class="h4">👉</span> Technologies Utilisées</h2>
-
-            <div class="ps-md-3">
-
-                <p>
-                Ce site web est fabriqué avec le <a href="https://symfony.com/" target="_blank" rel="noopener noreferrer" class="fw-bold"> Framework PHP Symfony 🚀</a>.
-                </p>
-
-            </div>
-
+            <ul>
+                <li><a href="https://symfony.com/" target="_blank" rel="noopener noreferrer">Symfony</a> (framework applicatif PHP)</li>
+                <li><a href="https://twig.symfony.com/" target="_blank" rel="noopener noreferrer">Twig</a> (moteur de templates)</li>
+                <li><a href="https://www.doctrine-project.org/projects/orm.html" target="_blank" rel="noopener noreferrer">Doctrine ORM</a> (persistance des données)</li>
+                <li><a href="https://getbootstrap.com/" target="_blank" rel="noopener noreferrer">Bootstrap</a> (composants d'interface)</li>
+            </ul>
         </section>
 
+        <section>
+            <h2>Crédits visuels</h2>
+
+            <p>
+                Les attributions ci-dessous regroupent les principales bibliothèques et auteurs utilisés.
+                Les mentions de licence sont indiquées lorsque disponibles.
+            </p>
+
+            <h3>Flaticon</h3>
+            <ul>
+                <li>Source : <a href="https://www.flaticon.com" target="_blank" rel="noopener noreferrer">flaticon.com</a></li>
+                <li>Auteurs crédités : freepik, DinosoftLabs, Vitaly Gorbachev, pixelmeetup, smalllikeart, mynamepong, mangsaabguru, azmianshori, Darius San.</li>
+            </ul>
+
+            <h3>Freepik</h3>
+            <ul>
+                <li>Source : <a href="https://www.freepik.com" target="_blank" rel="noopener noreferrer">freepik.com</a></li>
+                <li>Auteurs crédités : kjpargeter, kotkoa, starline, Freepik.</li>
+            </ul>
+
+            <h3>The Noun Project</h3>
+            <ul>
+                <li>Source : <a href="https://www.thenounproject.com" target="_blank" rel="noopener noreferrer">thenounproject.com</a></li>
+                <li>Licence mentionnée : CC BY 3.0.</li>
+                <li>Auteurs crédités : shashank singh, shwepes, Erik Bagossy, Helmi Salam Said.</li>
+            </ul>
+
+            <h3>Autres sources</h3>
+            <ul>
+                <li>Nenad Stojkovic, <i>Two embracing lonely teddy bears look out the window</i>, Flickr, licence CC BY 2.0 Deed.</li>
+            </ul>
+        </section>
 
         <section>
+            <h2>Correction d'attribution</h2>
 
-            <h2 class=""><span class="h4">👉</span> Crédits Images</h2>
-
-            <div class="ps-md-3">
-    
-                {# Flaticon #}
-
-                <div class="mb-3">
-
-                    <h5 class="d-inline">• Images en provenance du site <a href="https://www.flaticon.com" target="_blank" rel="noopener noreferrer"><b>flaticon.com</b></a></h5><span class="fs-6"> (Thanks: freepik, DinosoftLabs, Vitaly Gorbachev, pixelmeetup, smalllikeart, mynamepong, reading book by mangsaabguru, Broadcast icon by azmianshori, Finance icon (euro) by Darius San).</span>
-
-                </div>
-
-                {# Freepik #}
-
-                <div class="mb-3">
-
-                    <h5 class="d-inline">• Images en provenance du site <a href="https://www.freepik.com" target="_blank" rel="noopener noreferrer"><b>freepik.com</b></a></h5><span class="fs-6"> (Thanks: kjpargeter, kotkoa, starline, Freepik).</span>
-
-                </div>
-
-
-                {# The noun project #}
-
-                <div class="mb-3">
-
-                    <h5 class="d-inline">• Images en provenance du site <a href="https://www.thenounproject.com" target="_blank" rel="noopener noreferrer"><b>thenounproject.com</b></a></h5><span class="fs-6"> (CC BY 3.0) (Thanks: shashank singh, shwepes, Erik Bagossy, Helmi Salam Said).</span>
-
-                </div>
-
-
-                {# Other images credits #}
-
-                <div class="mb-3">
-
-                    <h5 class="mb-2">• Images en provenance d'autres sources : Thanks:</h5>
-
-                    <ul>
-                    
-                        <li>Nenad Stojkovic - Two embracing lonely teddy bears look out the window. - CC BY 2.0 Deed - flickr.com</li>
-                    
-                    </ul>
-
-                </div>
-
-
-
-            </div>
-
+            <p>
+                Si vous êtes titulaire de droits ou auteur d'un contenu cité et souhaitez
+                corriger, compléter ou retirer une attribution, vous pouvez utiliser le formulaire
+                <a href="{{ path('contact_us') }}">Contactez-nous</a>.
+            </p>
         </section>
 
     </div>
