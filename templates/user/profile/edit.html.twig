@@ -66,8 +66,9 @@
                     <div class="my-4">
 
                         <!-- Collapsible Trigger Button -->
-    
-                        <a class="btn btn-light mb-4" onclick="this.remove();" data-bs-toggle="collapse" href="#collapseOtherWebsites" role="button" aria-expanded="false" aria-controls="collapseOtherWebsites">Ajouter des sites webs ou réseaux sociaux</a>
+                        <div class="text-center text-md-start">
+                            <a class="btn btn-light mb-4" onclick="this.remove();" data-bs-toggle="collapse" href="#collapseOtherWebsites" role="button" aria-expanded="false" aria-controls="collapseOtherWebsites">Ajouter des sites webs ou réseaux sociaux</a>
+                        </div>
     
     
                         <!-- Collapsible Other Websites Container -->
@@ -122,14 +123,9 @@
 
                     <!-- Action Buttons -->
 
-                    <div class="mt-4">
-
-                        <a href="{{path('user_profile_show', {'usernameSlug': app.user.usernameSlug})}}">
-                            <button type="button" class="btn btn-go-back me-2">Retour</button>
-                        </a>
-
-                        <button class="btn btn-validate">Enregistrer</button>
-    
+                    <div class="mt-4 d-flex justify-content-center justify-content-md-start align-items-center flex-wrap gap-3">
+                        <a href="{{ path('user_profile_show', {'usernameSlug': app.user.usernameSlug}) }}" class="btn btn-go-back">Retour</a>
+                        <button class="btn btn-validate" type="submit">Enregistrer</button>
                     </div>
 
                     {{ form_end(profileForm) }}

@@ -33,7 +33,7 @@ final class ProfileType extends AbstractType
             ->add('description', TextareaType::class, [
                 'label' => 'Ajouter des informations ou des remarques ?',
                 'attr' => [
-                    'placeholder' => "Exemple (cas d'une personne) : Aime la lecture, la musique, et la marche. Autre exemple (cas d'une organisation) : Leader dans le domaine de la construction écologique.",
+                    'placeholder' => "Présentez-vous en quelques lignes (mission, activité, expertise). Exemple : Association locale engagée dans la rénovation du patrimoine et l'éducation à l'environnement.",
                     'rows' => 4,
                 ],
                 'required' => false,

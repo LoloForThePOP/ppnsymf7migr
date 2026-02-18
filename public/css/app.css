@@ -843,9 +843,15 @@ html[data-theme="pink-lady"] .btn-outline-primary:active {
 .form-control:focus,
 .form-select:focus {
     border-color: var(--theme-accent);
+    background-color: var(--theme-surface);
+    color: var(--theme-text);
     box-shadow: none;
     outline: 2px solid var(--theme-accent);
     outline-offset: 1px;
+}
+
+body[data-theme-scope="presentation"] header .navbar .form-control:focus {
+    background-color: var(--theme-surface-alt);
 }
 
 .form-control:disabled,
@@ -1139,6 +1145,20 @@ html[data-theme-tone="dark"] #source-urls-table td[data-col="url"] a:focus {
     .theme-selector-menu .dropdown-header {
         font-size: 1.1rem;
         margin-bottom: 4px;
+    }
+}
+
+@media screen and (max-width: 580px) {
+    /* Keep tiny-screen theme menu viewport-anchored to avoid navbar reflow/truncation. */
+    header .static-menu .theme-selector .theme-selector-menu {
+        position: fixed;
+        top: 58px;
+        right: 8px;
+        left: auto;
+        width: min(92vw, 380px);
+        max-width: calc(100vw - 16px);
+        max-height: calc(100vh - 70px);
+        z-index: 1080;
     }
 }
 
