@@ -1387,7 +1387,13 @@ body.user-offline .no-internet-connection{
 
 .avatar-circle {
     position: relative;
-    background-color: #27ae60;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: color-mix(in srgb, var(--theme-surface-alt) 82%, var(--theme-accent) 18%);
+    border: 1px solid color-mix(in srgb, var(--theme-accent) 42%, var(--theme-border) 58%);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--theme-accent) 14%, transparent);
     text-align: center;
     border-radius: 50%;
     -webkit-border-radius: 50%;
@@ -1396,7 +1402,13 @@ body.user-offline .no-internet-connection{
 
 .avatar-square-rounded {
     position: relative;
-    background-color: #27ae60;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: color-mix(in srgb, var(--theme-surface-alt) 82%, var(--theme-accent) 18%);
+    border: 1px solid color-mix(in srgb, var(--theme-accent) 42%, var(--theme-border) 58%);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--theme-accent) 14%, transparent);
     text-align: center;
     border-radius: 9%;
     -webkit-border-radius: 9%;
@@ -1500,25 +1512,23 @@ body.user-offline .no-internet-connection{
 
 
 .avatar-initial {
-    position: absolute;
-    color: #fff;
-    font-family: "Courier New", monospace;
-    font-weight: bold;
+    position: static;
+    display: block;
+    color: color-mix(in srgb, var(--theme-accent) 78%, var(--theme-text) 22%);
+    font-family: var(--theme-font-heading);
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+    user-select: none;
 }
 
 
 .avatar-initial-80 {
-    top: 26px; 
-    left: 24px;
-    font-size: 60px; 
-    line-height: 32px; 
+    font-size: 2.2rem;
 }
 
 .avatar-initial-100 {
-    top: 31px; 
-    left: 27px;
-    font-size: 80px; 
-    line-height: 40px; 
+    font-size: 2.8rem;
 }
 
 /* end of One Letter Avatars */
@@ -1929,10 +1939,7 @@ label:active:after {
 
         
     .avatar-initial-80 {
-        top: 20px;
-        left: 22px;
-        font-size: 50px;
-        line-height: 32px;
+        font-size: 2rem;
     }
 
     .notification {

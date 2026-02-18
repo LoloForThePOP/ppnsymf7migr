@@ -67,15 +67,10 @@
 
         {% if user is same as(app.user) %}
             
-            <div class="mt-0 mt-md-3">
-
-                <a href="{{ path ('public_profile_edit')}} " class="btn btn-light me-md-3 mb-2">Mes informations publiques</a>
-
-               
-                <a href="{{ path ('update_account_menu') }}" class="btn btn-light me-2 mb-2">Mon compte utilisateur</a>            
-
-                <a href="{{ path('user_bookmarks_index') }}" class="btn btn-light me-2 mb-2">Mes marque-pages</a>
-
+            <div class="mt-0 mt-md-3 d-grid gap-3 gap-md-2 d-md-flex justify-content-md-center">
+                <a href="{{ path ('public_profile_edit')}} " class="btn btn-light">Mes informations publiques</a>
+                <a href="{{ path ('update_account_menu') }}" class="btn btn-light">Mon compte utilisateur</a>
+                <a href="{{ path('user_bookmarks_index') }}" class="btn btn-light">Mes marque-pages</a>
             </div>
 
         {% endif %}
@@ -104,7 +99,7 @@
 
                             Vous pouvez remplir une description 
                             
-                            <a href="{{ path ('public_profile_edit')}}" class=""> <span class="badge bg-primary">ici</span></a>
+                            <a href="{{ path ('public_profile_edit')}}" class=""> <span class="badge profile-edit-badge">ici</span></a>
 
                         </div>
 
@@ -241,6 +236,12 @@
         font-size: 1.1em;
         font-family: Georgia, 'Times New Roman', Times, serif;
         text-decoration: none;
+    }
+
+    .profile-edit-badge {
+        background-color: var(--theme-accent) !important;
+        color: var(--theme-accent-contrast) !important;
+        border: 1px solid color-mix(in srgb, var(--theme-accent) 65%, var(--theme-border) 35%);
     }
 
 </style>

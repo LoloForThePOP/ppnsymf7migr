@@ -6,50 +6,30 @@
 
 {% block body %}
 
-    <div class="container">
+    <div class="container col-md-10 col-lg-7 px-3 px-md-4 my-4 my-md-5">
 
-        <h3 class="mt-2 mb-3 my-md-5 fw-bold">Modifier votre compte utilisateur</h3>
-                    
-        <div class="row">
+        <h3 class="fw-bold mb-4 mb-md-5 text-center text-md-start">Modifier votre compte utilisateur</h3>
 
-            <div class="container">
+        <div class="d-grid gap-3 d-md-flex flex-md-wrap mb-4 justify-content-md-start">
+            <!-- access update account email -->
+            <a href="{{ path ('update_account_email') }}" class="btn btn-primary fw-bold">Modifier l'e-mail de mon compte</a>
 
-                <div class="mb-4">
-
-                    <!-- access update account email -->
-
-                    <a href="{{ path ('update_account_email') }}" class="btn btn-primary fw-bold me-3 my-2">Modifier l'e-mail de mon compte</a>
-        
-                    <!-- access change password -->
-
-                    <a href="{{ path ('update_account_password') }}" class="btn btn-primary fw-bold me-2 my-2">Modifier mon mot de passe</a>
-
-                </div>
-
-                <!-- Other possibilities -->
-
-                <div class="">
-
-                    <!-- Access other possibilities trigger collapsible -->
-
-                    <a class="btn btn-light" onclick="this.remove();" data-bs-toggle="collapse" href="#collapseOtherPossibilities" role="button" aria-expanded="false">Autres possibilités</a>
-
-                    <!-- Collapsible Other Possibilities Container -->
-
-                    <div class="collapse" id="collapseOtherPossibilities">
-
-                        <!-- access delete user account page -->
-
-                        <a href="{#{path ("delete_account")}#}" class="btn btn-danger fw-bold me-2 my-2">Suppression du compte utilisateur</a>
-
-                    </div>
-
-                </div>
-
-            </div>
-
+            <!-- access change password -->
+            <a href="{{ path ('update_account_password') }}" class="btn btn-primary fw-bold">Modifier mon mot de passe</a>
         </div>
-        
+
+        <!-- Other possibilities -->
+        <div class="text-center text-md-start">
+            <!-- Access other possibilities trigger collapsible -->
+            <a class="btn btn-light" onclick="this.remove();" data-bs-toggle="collapse" href="#collapseOtherPossibilities" role="button" aria-expanded="false">Autres possibilités</a>
+
+            <!-- Collapsible Other Possibilities Container -->
+            <div class="collapse mt-3" id="collapseOtherPossibilities">
+                <!-- access delete user account page -->
+                <a href="{#{path ("delete_account")}#}" class="btn btn-danger fw-bold">Suppression du compte utilisateur</a>
+            </div>
+        </div>
+
     </div>
     
 {% endblock %}
