@@ -27,7 +27,7 @@
 
             {% if user.profile.image is not empty %}
 
-            <img class="rounded-1" src="{{ vich_uploader_asset(user.profile)  | imagine_filter('persorg_thumbnail_sm') }}" width="" height="" style="max-width:100%; max-height:100px;">
+            <img class="rounded-1 profile-avatar-image" src="{{ vich_uploader_asset(user.profile)  | imagine_filter('persorg_thumbnail_sm') }}" alt="Avatar de {{ user.username }}">
 
             <!-- else default one letter image -->
 
@@ -51,7 +51,7 @@
 
         <div class="col-auto ps-0 ps-md-3 d-flex align-items-center">
 
-            <h3><b>{{user.username}}</b></h3>
+            <h3 class="mb-0 fw-bold">{{ user.username }}</h3>
 
         </div>
 
@@ -145,7 +145,7 @@
 
                 {% if user.profile.website3 is not empty %}
 
-                    <a class="user-persorg-website" href="{{user.persorg.website3}}" target="_blank" rel="noopener noreferrer">{{user.persorg.website3}}</a>
+                    <a class="user-persorg-website" href="{{user.profile.website3}}" target="_blank" rel="noopener noreferrer">{{user.profile.website3}}</a>
 
                 {% endif %}
 
@@ -222,28 +222,5 @@
 </div>
 
 
-
-<style>
-
-    .user-persorg-description{
-        font-size: 1.1em;
-        font-family: Georgia, 'Times New Roman', Times, serif;
-    }
-
-    .user-persorg-website{
-        display: block;
-        margin-bottom: 10px;
-        font-size: 1.1em;
-        font-family: Georgia, 'Times New Roman', Times, serif;
-        text-decoration: none;
-    }
-
-    .profile-edit-badge {
-        background-color: var(--theme-accent) !important;
-        color: var(--theme-accent-contrast) !important;
-        border: 1px solid color-mix(in srgb, var(--theme-accent) 65%, var(--theme-border) 35%);
-    }
-
-</style>
 
 {% endblock %}
