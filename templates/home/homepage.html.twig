@@ -58,6 +58,13 @@
         
             .homepage-container{
             padding-top: 38px;
+            overflow-x: clip;
+            }
+
+            @supports not (overflow: clip) {
+            .homepage-container{
+            overflow-x: hidden;
+            }
             }
 
             @media screen and (max-width: 580px) {
