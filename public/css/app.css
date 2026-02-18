@@ -145,6 +145,7 @@ a{
     --pp-title-color: #1e3a8a;
     --pp-card-goal-color: var(--theme-accent);
     --pp-card-title-color: var(--theme-title);
+    --project-card-stat-icon-filter: var(--theme-icon-filter);
     --pp-icon-filter: var(--theme-icon-filter);
     --pp-struct-icon-color: var(--theme-accent);
     --pp-interaction-icon-color: var(--theme-text);
@@ -290,6 +291,7 @@ a{
     --pp-card-radius: 18px;
     --pp-card-shadow: 0 12px 24px rgba(47, 184, 91, 0.18);
     --pp-title-color: #1f8f43;
+    --project-card-stat-icon-filter: var(--theme-icon-filter-sky);
     --pp-icon-filter: var(--theme-icon-filter);
     --pp-struct-icon-color: var(--theme-highlight);
     --pp-interaction-icon-color: var(--theme-sky);

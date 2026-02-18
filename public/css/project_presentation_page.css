@@ -461,6 +461,10 @@ html[data-theme="deep-ocean"] body[data-theme-scope="presentation"] .question-co
         margin-bottom: 14px;
     }
 
+    .pp-related-rails .collection-container {
+        padding-inline: 4px;
+    }
+
     .pp-related-rails .read-more {
         display: none !important;
     }

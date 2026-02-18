@@ -35,10 +35,6 @@
     max-height: 358px;
 }
 
-.collection-title {
-    color: var(--theme-title);
-}
-
 .collection-title-text {
     display: inline-flex;
     align-items: center;
@@ -133,12 +129,18 @@
         justify-content: unset;
         flex-wrap: nowrap;
         overflow-x: auto;
+        overflow-y: visible;
         gap: 12px;
+        padding-inline: 4px;
+        scroll-padding-inline: 4px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
     }
 
     .collection-container > * {
         flex-shrink: 0;
-
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
     }
 
 }

@@ -24,7 +24,7 @@
     } %}
     {% set options = defaults|merge(opts) %}
     {% set imageUrl = options.image %}
-    {% set ariaLabel = presentation.title ?? presentation.goal %}
+    {% set ariaLabel = (presentation.title ?? presentation.goal ?? 'Voir le projet')|trim %}
     {% set fallbackSource = (presentation.title ?? presentation.goal ?? '')|trim %}
     {% set fallbackLetter = fallbackSource ? fallbackSource|slice(0, 1)|upper : '' %}
     {% set isAdminSession = is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN') %}
@@ -143,11 +143,11 @@
 
         <div class="goal-container">
             {% set goalText = presentation.goal|default('') %}
-            <div class="goal">{{ goalText ? goalText|truncate(57) : '' }}</div> 
             {% if presentation.title %}
                 {% set titleText = presentation.title %}
-                <div class="title">{{ titleText ? titleText|truncate(60) : '' }}</div>
+                <h3 class="title">{{ titleText ? titleText|truncate(60) : '' }}</h3>
             {% endif %}
+            <p class="goal">{{ goalText ? goalText|truncate(57) : '' }}</p>
         </div>
 
         {# {% if options.showKeywords and presentation.keywords %}

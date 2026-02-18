@@ -1,20 +1,26 @@
 /* Card-only styles for project presentation tiles */
 
 .project-card {
-    display: inline-block;
+    --project-card-width: 300px;
+    --project-card-height: 358px;
+    --project-card-image-height: 195px;
+    --project-card-goal-color: var(--pp-card-goal-color, var(--theme-accent));
+    --project-card-title-color: var(--pp-card-title-color, var(--theme-title));
     position: relative;
     z-index: 0;
     isolation: isolate;
-    width: 300px;
-    height: 358px;
+    display: flex;
+    flex-direction: column;
+    width: var(--project-card-width);
+    min-height: var(--project-card-height);
+    height: var(--project-card-height);
+    max-width: 100%;
     overflow: hidden;
-    border: 1px solid rgb(227, 221, 211);
+    border: 1px solid var(--theme-border, #e3ddd3);
     border-radius: 10px;
     margin-bottom: 15px;
-}
-
-.project-card:hover {
-    box-shadow: 1px 1px 5px 1px rgb(238, 237, 237);
+    background-color: var(--theme-surface);
+    color: var(--theme-text);
 }
 
 .project-card__bookmark {
@@ -67,37 +73,44 @@
 }
 
 .project-card .goal {
-    color: #45429a;
-    margin-bottom: 0;
+    color: var(--project-card-goal-color);
+    margin: 0;
     font-size: var(--project-card-goal-font-size, 17px);
     font-weight: bold;
-    line-height: 1.2em;
-    max-height: 40px;
+    line-height: 1.24;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .project-card .title {
-    margin-top: 3px;
-    margin-bottom: 2px;
-    line-height: 1.13em;
+    margin: 0;
+    line-height: 1.2;
     font-size: var(--project-card-title-font-size, 17px);
     font-weight: bold;
-    color: #2C3E50;
-}
-
-.project-card .goal-container .title {
-    padding-top: 6px;
+    color: var(--project-card-title-color);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .project-card .keywords {
     font-size: 15px;
     font-weight: bold;
     line-height: 1.2em;
+    color: var(--project-card-goal-color);
 }
 
 .project-card .image-container {
-    height: 195px;
+    height: var(--project-card-image-height);
     padding: 10px;
     margin-bottom: 8px;
 }
@@ -169,7 +182,7 @@ html[data-theme="deep-ocean"] .project-card .image-container.has-image {
         align-items: center;
         justify-content: center;
         box-sizing: border-box;
-        height: 187px;
+        height: calc(var(--project-card-image-height) - 8px);
         margin: 8px 10px 8px;
         padding: 6px;
         border: 1px solid var(--theme-border, #e3ddd3);
@@ -194,38 +207,48 @@ html[data-theme="deep-ocean"] .project-card .image-container.has-image {
     text-align: center;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    gap: 5px;
     min-height: 88px;
     border: 1px solid var(--theme-border, #e3ddd3);
     border-radius: 8px;
     background: var(--theme-surface, #ffffff);
+    overflow: hidden;
+    min-width: 0;
+}
+
+.goal-container .title,
+.goal-container .goal {
+    margin: 0;
 }
 
 .collection-container .other-info-container {
-    position: absolute;
+    position: static;
     display: flex;
-    justify-content: end; /* space-between; */
-    width: 100%;
-    bottom: 0;
-    padding-left: 9px;
-    padding-right: 13px;
-    padding-bottom: 8px;
-    color: #7f7f7f;
+    justify-content: flex-end;
+    align-items: center;
+    width: auto;
+    margin-top: auto;
+    padding: 0 13px 8px 9px;
+    color: var(--theme-text-muted);
     font-size: 14px;
+    gap: 6px;
 }
 
-.stat-chunk {
-    margin-right: 5px;
-}
-
-.stat-chunk:last-child {
-    margin-right: 0;
+.collection-container .other-info-container .stats {
+    display: inline-flex;
+    align-items: center;
 }
 
 .stat-chunk {
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    margin-right: 5px;
+}
+
+.stat-chunk:last-child {
+    margin-right: 0;
 }
 
 .pp-card-stat-icon-image {
@@ -234,19 +257,12 @@ html[data-theme="deep-ocean"] .project-card .image-container.has-image {
     flex: 0 0 auto;
 }
 
-.project-card {
-    background-color: var(--theme-surface);
-    border-color: var(--theme-border);
-    color: var(--theme-text);
+.project-card .pp-card-stat-icon-image.icon-themed {
+    filter: brightness(0) saturate(100%) var(--project-card-stat-icon-filter, var(--theme-icon-filter));
 }
 
 .project-card:hover {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.16);
-}
-
-.project-card .goal,
-.project-card .keywords {
-    color: var(--pp-card-goal-color, var(--theme-accent));
 }
 
 html[data-theme="retro-game"] .project-card .goal,
@@ -258,51 +274,81 @@ html[data-theme="retro-game"] .project-card .goal {
     color: var(--theme-sky);
 }
 
-.project-card .title {
-    color: var(--pp-card-title-color, var(--theme-title));
-}
-
-.collection-container .other-info-container {
-    color: var(--theme-text-muted);
-}
-
 @media screen and (max-width: 810px) {
     .project-card {
-        width: 210px;
-        height: 250px;
+        --project-card-width: clamp(206px, 44vw, 228px);
+        --project-card-height: auto;
+        --project-card-image-height: 136px;
+        min-height: 0;
+        height: auto;
         padding-top: 0;
-        margin-right: 10px;
-        margin-bottom: unset;
+        margin-right: 0;
+        margin-bottom: 0;
     }
 
     .project-card .goal {
-        line-height: 1.12;
+        line-height: 1.2;
+        font-size: var(--project-card-goal-font-size-tablet, 14px);
+    }
+
+    .project-card .title {
+        font-size: var(--project-card-title-font-size-tablet, 14.5px);
     }
 
     .project-card .image-container {
-        height: 140px;
-        margin-bottom: 0;
+        margin-bottom: 6px;
+        padding: 8px;
+    }
+
+    .goal-container {
+        margin: 0 8px 6px;
+        padding: 7px 8px;
+        min-height: 0;
     }
 
     @supports selector(.image-container:has(img)) {
         .project-card .image-container:has(img[src*="/pp/logos/"]) {
-            height: 128px;
+            height: calc(var(--project-card-image-height) - 8px);
             margin: 6px 8px;
             padding: 6px;
         }
+    }
+
+    .collection-container .other-info-container {
+        font-size: 12px;
+        padding: 0 8px 8px;
     }
 }
 
 @media screen and (max-width: 580px) {
     .project-card {
-        height: 250px;
+        --project-card-width: clamp(220px, 78vw, 258px);
+        --project-card-image-height: 142px;
+        border-radius: 12px;
     }
 
     .project-card .goal {
-        font-size: var(--project-card-goal-font-size-mobile, 14px);
+        font-size: var(--project-card-goal-font-size-mobile, 14.5px);
+    }
+
+    .project-card .title {
+        font-size: var(--project-card-title-font-size-mobile, 14.5px);
+    }
+
+    .project-card__bookmark {
+        bottom: 8px;
+        left: 8px;
+        width: 27px;
+        height: 27px;
+    }
+
+    .project-card__bookmark .bookmarkIcon {
+        width: 14px;
+        height: 14px;
     }
 
     .collection-container .other-info-container {
         font-size: 12px;
+        padding: 0 9px 9px;
     }
 }
