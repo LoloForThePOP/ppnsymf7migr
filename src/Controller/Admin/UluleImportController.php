@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Controller\SafeRefererRedirectTrait;
 use App\Entity\PPBase;
 use App\Entity\UluleProjectCatalog;
 use App\Repository\UluleProjectCatalogRepository;
@@ -20,6 +21,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 #[IsGranted(ScraperAccessVoter::ATTRIBUTE)]
 class UluleImportController extends AbstractController
 {
+    use SafeRefererRedirectTrait;
+
     private const MAX_SECONDARY_IMAGES = 5;
     private const DEFAULT_PROMPT_EXTRA = 'Ce complément de prompt définit des instructions hautement prioritaires par rapport aux précédentes : Pour chaque image remplit le champ licence avec "Copyright Ulule.fr". N\'inclue pas la localisation (ville/commune/région/pays) dans les keywords, sauf si la localisation fait partie du titre du projet. Pour goal, évite toute sémantique de collecte/soutien/financement (ex: "soutenir", "collecter", "financer") et formule l\'objectif comme la réalisation concrète du projet (ex: "Produire…", "Réaliser…", "Créer…" ou autre tournure).';
 
@@ -30,13 +33,12 @@ class UluleImportController extends AbstractController
         UluleImportService $importService
     ): Response {
         $isAjax = $request->isXmlHttpRequest();
-        $redirectUrl = $request->headers->get('referer') ?? $this->generateUrl('admin_ulule_catalog');
         $respond = function (
             string $status,
             string $message,
             array $extra = [],
             int $httpStatus = Response::HTTP_OK
-        ) use ($isAjax, $redirectUrl) {
+        ) use ($isAjax, $request) {
             if ($isAjax) {
                 return $this->json(array_merge([
                     'status' => $status,
@@ -54,8 +56,13 @@ class UluleImportController extends AbstractController
                 $this->addFlash($level, $message);
             }
 
-            return $this->redirect($redirectUrl);
+            return $this->redirectToSafeReferer($request, 'admin_ulule_catalog');
         };
+
+        $token = (string) $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('admin_ulule_catalog', $token)) {
+            return $respond('error', 'Jeton CSRF invalide.', [], Response::HTTP_FORBIDDEN);
+        }
 
         $lang = trim((string) $request->request->get('lang', 'fr'));
         $country = trim((string) $request->request->get('country', 'FR'));
@@ -216,6 +223,16 @@ class UluleImportController extends AbstractController
         string $appNormalizeTextPromptPath,
         string $appScraperModel
     ): Response {
+        $token = (string) $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('admin_ulule_catalog', $token)) {
+            return $this->json([
+                'id' => $ululeId,
+                'status' => 'error',
+                'reason' => 'csrf_invalid',
+                'error' => 'Jeton CSRF invalide.',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
         $lang = trim((string) $request->request->get('lang', 'fr'));
         $country = trim((string) $request->request->get('country', 'FR'));
         $minDescriptionLength = max(0, (int) $request->request->get('min_description_length', 500));

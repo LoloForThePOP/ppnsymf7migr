@@ -7,6 +7,7 @@
         <h1 class="h4 mb-3">Ulule — Suivi des imports</h1>
 
         <form id="ulule-catalog-form" method="post" action="{{ path('admin_ulule_catalog') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('admin_ulule_catalog') }}">
             <div class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label" for="lang">Langue</label>
@@ -291,10 +292,12 @@
                                         Importer + ouvrir
                                     </button>
                                     <form method="post" action="{{ path('admin_ulule_catalog_status', {'ululeId': item.ululeId}) }}" class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('admin_ulule_catalog_status') }}">
                                         <input type="hidden" name="status" value="skipped">
                                         <button type="submit" class="btn btn-sm btn-outline-secondary">Ignorer</button>
                                     </form>
                                     <form method="post" action="{{ path('admin_ulule_catalog_status', {'ululeId': item.ululeId}) }}" class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('admin_ulule_catalog_status') }}">
                                         <input type="hidden" name="status" value="pending">
                                         <button type="submit" class="btn btn-sm btn-outline-secondary">Réinitialiser</button>
                                     </form>

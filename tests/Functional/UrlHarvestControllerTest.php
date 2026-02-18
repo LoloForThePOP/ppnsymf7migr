@@ -18,8 +18,13 @@ final class UrlHarvestControllerTest extends WebTestCase
 
         $scraper = $this->createUser($em, ['ROLE_SCRAPER']);
         $client->loginUser($scraper);
+        $crawler = $client->request('GET', '/admin/project/harvest-urls');
+        $csrfToken = (string) $crawler
+            ->filter('form[action="/admin/project/harvest-urls"] input[name="_token"]')
+            ->attr('value');
 
         $client->request('POST', '/admin/project/harvest-urls', [
+            '_token' => $csrfToken,
             'action' => 'manual',
             'urls' => "http://127.0.0.1\n",
         ]);

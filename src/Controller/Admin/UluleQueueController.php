@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Controller\SafeRefererRedirectTrait;
 use App\Entity\UluleProjectCatalog;
 use App\Message\UluleImportTickMessage;
 use App\Repository\UluleProjectCatalogRepository;
@@ -22,6 +23,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/admin/ulule/queue')]
 final class UluleQueueController extends AbstractController
 {
+    use SafeRefererRedirectTrait;
+
     #[Route('/start', name: 'admin_ulule_queue_start', methods: ['POST'])]
     public function start(
         Request $request,
@@ -29,6 +32,11 @@ final class UluleQueueController extends AbstractController
         UluleQueueStateService $stateService,
         MessageBusInterface $bus
     ): Response {
+        $csrfError = $this->validateCsrfToken($request, 'admin_ulule_catalog');
+        if ($csrfError instanceof Response) {
+            return $csrfError;
+        }
+
         $filters = $this->readFilters($request);
         $batchSize = max(0, (int) $request->request->get('batch_size', 0));
         $runId = bin2hex(random_bytes(8));
@@ -69,12 +77,17 @@ final class UluleQueueController extends AbstractController
             ]);
         }
 
-        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('admin_ulule_catalog'));
+        return $this->redirectToSafeReferer($request, 'admin_ulule_catalog');
     }
 
     #[Route('/pause', name: 'admin_ulule_queue_pause', methods: ['POST'])]
     public function pause(Request $request, UluleQueueStateService $stateService): Response
     {
+        $csrfError = $this->validateCsrfToken($request, 'admin_ulule_catalog');
+        if ($csrfError instanceof Response) {
+            return $csrfError;
+        }
+
         $stateService->writeState([
             'queue' => [
                 'paused' => true,
@@ -89,7 +102,7 @@ final class UluleQueueController extends AbstractController
             ]);
         }
 
-        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('admin_ulule_catalog'));
+        return $this->redirectToSafeReferer($request, 'admin_ulule_catalog');
     }
 
     #[Route('/resume', name: 'admin_ulule_queue_resume', methods: ['POST'])]
@@ -99,6 +112,11 @@ final class UluleQueueController extends AbstractController
         MessageBusInterface $bus,
         UluleProjectCatalogRepository $catalogRepository
     ): Response {
+        $csrfError = $this->validateCsrfToken($request, 'admin_ulule_catalog');
+        if ($csrfError instanceof Response) {
+            return $csrfError;
+        }
+
         $state = $stateService->readState();
         $queue = $state['queue'];
         $filters = $state['filters'];
@@ -126,7 +144,7 @@ final class UluleQueueController extends AbstractController
             ]);
         }
 
-        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('admin_ulule_catalog'));
+        return $this->redirectToSafeReferer($request, 'admin_ulule_catalog');
     }
 
     #[Route('/status', name: 'admin_ulule_queue_status', methods: ['GET'])]
@@ -311,5 +329,21 @@ final class UluleQueueController extends AbstractController
         }
 
         return true;
+    }
+
+    private function validateCsrfToken(Request $request, string $tokenId): ?Response
+    {
+        $token = (string) $request->request->get('_token');
+        if ($this->isCsrfTokenValid($tokenId, $token)) {
+            return null;
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(['error' => 'csrf_invalid'], Response::HTTP_FORBIDDEN);
+        }
+
+        $this->addFlash('danger', 'Jeton CSRF invalide.');
+
+        return $this->redirectToRoute('admin_ulule_catalog');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Controller\ProjectPresentation;
 
+use App\Controller\SafeRefererRedirectTrait;
 use App\Entity\PPBase;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -12,6 +13,8 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class SettingsController extends AbstractController
 {
+    use SafeRefererRedirectTrait;
+
     #[Route('/projects/{stringId}/settings/publish', name: 'pp_update_publish_status', methods: ['POST'])]
     public function updatePublishStatus(
         #[MapEntity(mapping: ['stringId' => 'stringId'])] PPBase $presentation,
@@ -38,12 +41,7 @@ final class SettingsController extends AbstractController
             $shouldPublish ? '✅ Présentation publiée.' : '✅ Présentation dépubliée.'
         );
 
-        $referer = $request->headers->get('referer');
-        if ($referer) {
-            return $this->redirect($referer);
-        }
-
-        return $this->redirectToRoute('edit_show_project_presentation', [
+        return $this->redirectToSafeReferer($request, 'edit_show_project_presentation', [
             'stringId' => $presentation->getStringId(),
         ]);
     }
@@ -76,12 +74,7 @@ final class SettingsController extends AbstractController
             $shouldValidate ? '✅ Présentation validée.' : '✅ Présentation invalidée.'
         );
 
-        $referer = $request->headers->get('referer');
-        if ($referer) {
-            return $this->redirect($referer);
-        }
-
-        return $this->redirectToRoute('edit_show_project_presentation', [
+        return $this->redirectToSafeReferer($request, 'edit_show_project_presentation', [
             'stringId' => $presentation->getStringId(),
         ]);
     }

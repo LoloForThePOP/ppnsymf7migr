@@ -22,6 +22,13 @@ class HarvestRunController extends AbstractController
         ScraperPersistenceService $persistence,
         ScraperUserResolver $scraperUserResolver
     ): Response {
+        $token = (string) $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('admin_harvest_run', $token)) {
+            $this->addFlash('danger', 'Jeton CSRF invalide.');
+
+            return $this->redirectToRoute('admin_harvest');
+        }
+
         $creator = $scraperUserResolver->resolve();
         if (!$creator) {
             $this->addFlash('warning', sprintf(

@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Controller\SafeRefererRedirectTrait;
 use App\Entity\PPBase;
 use App\Entity\UluleProjectCatalog;
 use App\Repository\UluleProjectCatalogRepository;
@@ -18,6 +19,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted(ScraperAccessVoter::ATTRIBUTE)]
 class UluleCatalogController extends AbstractController
 {
+    use SafeRefererRedirectTrait;
+
     private const PER_PAGE = 20;
     private const MAX_PAGES = 50;
     private const LATEST_REFRESH_PAGE_COUNT = 3;
@@ -73,6 +76,15 @@ class UluleCatalogController extends AbstractController
             $eligibleOnly = true;
         } else {
             $eligibleOnly = filter_var($eligibleOnlyParam, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        if ($request->isMethod('POST')) {
+            $token = (string) $request->request->get('_token');
+            if (!$this->isCsrfTokenValid('admin_ulule_catalog', $token)) {
+                $this->addFlash('danger', 'Jeton CSRF invalide.');
+
+                return $this->redirectToRoute('admin_ulule_catalog');
+            }
         }
 
         if ($request->isMethod('POST') && $request->request->has('save_prompt')) {
@@ -153,6 +165,13 @@ class UluleCatalogController extends AbstractController
         UluleProjectCatalogRepository $catalogRepository,
         EntityManagerInterface $em
     ): Response {
+        $token = (string) $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('admin_ulule_catalog_status', $token)) {
+            $this->addFlash('danger', 'Jeton CSRF invalide.');
+
+            return $this->redirectToSafeReferer($request, 'admin_ulule_catalog');
+        }
+
         $status = trim((string) $request->request->get('status', ''));
         $allowed = [
             UluleProjectCatalog::STATUS_PENDING,
@@ -160,13 +179,13 @@ class UluleCatalogController extends AbstractController
         ];
         if (!in_array($status, $allowed, true)) {
             $this->addFlash('danger', 'Statut demandé invalide.');
-            return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('admin_ulule_catalog'));
+            return $this->redirectToSafeReferer($request, 'admin_ulule_catalog');
         }
 
         $entry = $catalogRepository->findOneByUluleId($ululeId);
         if (!$entry) {
             $this->addFlash('danger', 'Projet Ulule introuvable.');
-            return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('admin_ulule_catalog'));
+            return $this->redirectToSafeReferer($request, 'admin_ulule_catalog');
         }
 
         $entry->setImportStatus($status);
@@ -179,7 +198,7 @@ class UluleCatalogController extends AbstractController
         $em->flush();
         $this->addFlash('success', 'Statut mis à jour.');
 
-        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('admin_ulule_catalog'));
+        return $this->redirectToSafeReferer($request, 'admin_ulule_catalog');
     }
 
     private function refreshCatalog(

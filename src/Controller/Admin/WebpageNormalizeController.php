@@ -39,6 +39,21 @@ class WebpageNormalizeController extends AbstractController
 
         $extracted = ['text' => '', 'links' => [], 'images' => []];
 
+        if ($request->isMethod('POST')) {
+            $token = (string) $request->request->get('_token');
+            if (!$this->isCsrfTokenValid('admin_project_normalize_html', $token)) {
+                return $this->render('admin/project_normalize_html.html.twig', [
+                    'rawHtml' => $rawHtml,
+                    'promptExtra' => $promptExtra,
+                    'extracted' => $extracted,
+                    'result' => null,
+                    'error' => 'Jeton CSRF invalide.',
+                    'created' => null,
+                    'persist' => $persist,
+                ]);
+            }
+        }
+
         if ($persist) {
             $creator = $scraperUserResolver->resolve();
             if (!$creator) {

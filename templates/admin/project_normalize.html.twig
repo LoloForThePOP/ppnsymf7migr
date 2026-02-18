@@ -11,6 +11,7 @@
         {% endif %}
 
         <form id="normalize-form" method="post" action="{{ path('admin_project_normalize') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('admin_project_normalize') }}">
             <div class="mb-3">
                 <label for="raw_text" class="form-label">Coller le contenu brut (FR/EN)</label>
                 <textarea id="raw_text" name="raw_text" class="form-control" rows="12" placeholder="Coller ici le texte non normalisé">{{ raw }}</textarea>

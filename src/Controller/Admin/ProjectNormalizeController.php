@@ -33,6 +33,19 @@ class ProjectNormalizeController extends AbstractController
         $created = null;
         $creator = null;
 
+        if ($request->isMethod('POST')) {
+            $token = (string) $request->request->get('_token');
+            if (!$this->isCsrfTokenValid('admin_project_normalize', $token)) {
+                return $this->render('admin/project_normalize.html.twig', [
+                    'raw' => $raw,
+                    'result' => null,
+                    'error' => 'Jeton CSRF invalide.',
+                    'created' => null,
+                    'persist' => $persist,
+                ]);
+            }
+        }
+
         if ($persist) {
             $creator = $scraperUserResolver->resolve();
             if (!$creator) {

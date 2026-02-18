@@ -33,6 +33,11 @@ final class OpenAIResponsesController extends AbstractController
     #[Route('/admin/openai/responses/run', name: 'admin_openai_responses_run', methods: ['POST'])]
     public function run(Request $request, string $appScraperModel): JsonResponse
     {
+        $token = (string) $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('admin_openai_responses_run', $token)) {
+            return $this->json(['error' => 'CSRF token invalid.'], 403);
+        }
+
         $input = trim((string) $request->request->get('input', ''));
         if ($input === '') {
             return $this->json(['error' => 'Input is empty.'], 400);

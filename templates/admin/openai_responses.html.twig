@@ -8,6 +8,7 @@
         <p class="text-muted small">Responses API with optional web search and reasoning effort.</p>
 
         <form id="openai-responses-form" method="post" action="{{ path('admin_openai_responses_run') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('admin_openai_responses_run') }}">
             <div class="row g-3">
                 <div class="col-md-6">
                     <label for="model" class="form-label">Model</label>

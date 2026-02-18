@@ -2,6 +2,7 @@
 
 namespace App\Controller\ProjectPresentation;
 
+use App\Controller\SafeRefererRedirectTrait;
 use App\Entity\PPBase;
 use App\Form\ProjectPresentation\CategoriesKeywordsType;
 use App\Service\AssessPPScoreService;
@@ -15,6 +16,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class UpdateCategoriesKeywordsController extends AbstractController
 {
+    use SafeRefererRedirectTrait;
+
     #[Route('/projects/{stringId}/categories-keywords', name: 'pp_update_categories_keywords', methods: ['POST'])]
     #[IsGranted('edit', subject: 'presentation')]
     public function __invoke(
@@ -39,8 +42,8 @@ class UpdateCategoriesKeywordsController extends AbstractController
             $this->addFlash('danger', $message);
         }
 
-        return $this->redirect($request->headers->get('referer') ?: $this->generateUrl('edit_show_project_presentation', [
+        return $this->redirectToSafeReferer($request, 'edit_show_project_presentation', [
             'stringId' => $presentation->getStringId(),
-        ]));
+        ]);
     }
 }

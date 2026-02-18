@@ -58,6 +58,7 @@
                     {% endif %}
 
                     <form method="post" action="{{ path('admin_project_harvest_urls', {source: selectedSource}) }}" id="source-run-form">
+                        <input type="hidden" name="_token" value="{{ csrf_token('admin_project_harvest_urls') }}">
                         <input type="hidden" name="source" value="{{ selectedSource }}">
                         <div class="row g-3">
                             <div class="col-lg-6">
@@ -250,6 +251,7 @@
 
         <h2 class="h6 mb-3">Collecte manuelle</h2>
         <form method="post" action="{{ path('admin_project_harvest_urls') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('admin_project_harvest_urls') }}">
             <input type="hidden" name="action" value="manual">
             <div class="mb-3">
                 <label for="prompt_extra" class="form-label">Complément de prompt</label>

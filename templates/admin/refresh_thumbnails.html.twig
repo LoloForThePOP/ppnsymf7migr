@@ -12,6 +12,7 @@
 
         {% if hasMore %}
             <form method="post" action="{{ path('admin_thumbnails_refresh') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('admin_thumbnails_refresh') }}">
                 <input type="hidden" name="offset" value="{{ nextOffset }}">
                 <input type="hidden" name="limit" value="{{ limit }}">
                 <button type="submit" class="btn btn-primary">{{ started ? 'Continuer' : 'Lancer' }}</button>

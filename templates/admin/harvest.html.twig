@@ -39,6 +39,7 @@
                         <h2 class="h6">🤖 Collecte scraper</h2>
                         <p class="text-muted small">Lancer la collecte automatique</p>
                         <form method="post" action="{{ path('admin_harvest_run') }}" id="harvest-run-form">
+                            <input type="hidden" name="_token" value="{{ csrf_token('admin_harvest_run') }}">
                             <button type="submit" class="btn btn-outline-primary mt-auto d-flex align-items-center gap-2" id="harvest-run-btn">
                                 <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                                 <span class="btn-text">Lancer depuis l’admin</span>

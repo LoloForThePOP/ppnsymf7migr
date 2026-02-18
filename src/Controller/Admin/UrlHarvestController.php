@@ -44,6 +44,13 @@ final class UrlHarvestController extends AbstractController
             $selectedSource = trim((string) $request->request->get('source', ''));
         }
 
+        if ($request->isMethod('POST')) {
+            $csrfError = $this->validateCsrfToken($request, 'admin_project_harvest_urls', $selectedSource);
+            if ($csrfError instanceof Response) {
+                return $csrfError;
+            }
+        }
+
         $sources = $listService->listSources();
         $sourcePrompt = $selectedSource !== '' ? $listService->readPrompt($selectedSource) : '';
         $queueState = $selectedSource !== '' ? $listService->readQueueState($selectedSource) : $this->defaultQueueState();
@@ -324,6 +331,26 @@ final class UrlHarvestController extends AbstractController
             'persist' => true,
             'remaining' => null,
         ];
+    }
+
+    private function validateCsrfToken(Request $request, string $tokenId, string $selectedSource): ?Response
+    {
+        $token = (string) $request->request->get('_token');
+        if ($this->isCsrfTokenValid($tokenId, $token)) {
+            return null;
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(['error' => 'csrf_invalid'], Response::HTTP_FORBIDDEN);
+        }
+
+        $this->addFlash('danger', 'Jeton CSRF invalide.');
+
+        if ($selectedSource !== '') {
+            return $this->redirectToRoute('admin_project_harvest_urls', ['source' => $selectedSource]);
+        }
+
+        return $this->redirectToRoute('admin_project_harvest_urls');
     }
 
     /**

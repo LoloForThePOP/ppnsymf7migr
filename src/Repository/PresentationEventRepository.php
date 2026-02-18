@@ -73,20 +73,29 @@ class PresentationEventRepository extends ServiceEntityRepository
 
     public function countReturningVisitors(\DateTimeImmutable $start, \DateTimeImmutable $end): int
     {
-        $rows = $this->createQueryBuilder('e')
-            ->select('e.visitorHash AS visitor', 'COUNT(e.id) AS total')
-            ->andWhere('e.type = :type')
-            ->andWhere('e.visitorHash IS NOT NULL')
-            ->andWhere('e.createdAt BETWEEN :start AND :end')
-            ->groupBy('e.visitorHash')
-            ->having('COUNT(e.id) > 1')
-            ->setParameter('type', PresentationEvent::TYPE_VIEW)
-            ->setParameter('start', $start)
-            ->setParameter('end', $end)
-            ->getQuery()
-            ->getArrayResult();
+        $sql = <<<SQL
+            SELECT COUNT(*) AS total
+            FROM (
+                SELECT visitor_hash
+                FROM presentation_event
+                WHERE type = :type
+                  AND visitor_hash IS NOT NULL
+                  AND created_at BETWEEN :start AND :end
+                GROUP BY visitor_hash
+                HAVING COUNT(*) > 1
+            ) AS returning_visitors
+        SQL;
 
-        return count($rows);
+        $total = $this->getEntityManager()->getConnection()->executeQuery(
+            $sql,
+            [
+                'type' => PresentationEvent::TYPE_VIEW,
+                'start' => $start->format('Y-m-d H:i:s'),
+                'end' => $end->format('Y-m-d H:i:s'),
+            ]
+        )->fetchOne();
+
+        return max(0, (int) $total);
     }
 
     /**
