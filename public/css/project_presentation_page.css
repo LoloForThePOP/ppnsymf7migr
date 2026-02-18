@@ -462,7 +462,9 @@ html[data-theme="deep-ocean"] body[data-theme-scope="presentation"] .question-co
     }
 
     .pp-related-rails .collection-container {
+        justify-content: flex-start;
         padding-inline: 4px;
+        scroll-padding-inline: 4px;
     }
 
     .pp-related-rails .read-more {

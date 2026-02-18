@@ -124,9 +124,27 @@ final class NeighborAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
 
         return new HomeFeedBlock(
             $context->isLoggedIn() ? 'neighbor-affinity' : 'anon-neighbor-affinity',
-            'Parce que vous avez consulté',
+            $this->resolveBlockTitle($context->isLoggedIn(), $seedCount),
             $rankedItems,
             true
         );
+    }
+
+    private function resolveBlockTitle(bool $isLoggedIn, int $seedCount): string
+    {
+        if ($seedCount >= 3) {
+            return $isLoggedIn
+                ? 'Dans la continuité de vos consultations'
+                : 'Inspiré de vos dernières consultations';
+        }
+
+        if ($seedCount === 2) {
+            return $isLoggedIn
+                ? 'Basé sur vos consultations récentes'
+                : 'Selon vos consultations récentes';
+        }
+
+        // Legacy fallback kept for very low-signal cases.
+        return 'Parce que vous avez consulté';
     }
 }
