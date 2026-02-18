@@ -57,8 +57,17 @@
             
             <div class="mt-5">
 
-                <h5 class="lead" data-bs-toggle="collapse" href="#imageSlideMoreOptions" role="button" aria-expanded="false" aria-controls="imageSlideMoreOptions">
-                    Afficher plus d'options ▾
+                <h5 class="lead">
+                    <button
+                        type="button"
+                        class="btn p-0 border-0 bg-transparent"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#imageSlideMoreOptions"
+                        aria-expanded="false"
+                        aria-controls="imageSlideMoreOptions"
+                    >
+                        Afficher plus d'options ▾
+                    </button>
                 </h5>
 
                 <div id="imageSlideMoreOptions" class="collapse no-transition mt-4">
@@ -77,4 +86,3 @@
     {% block seeResultAnchor %}slideshow-struct-container{% endblock %}
 
 {% endembed %}
-

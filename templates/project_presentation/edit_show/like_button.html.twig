@@ -28,12 +28,11 @@
 
 {% else %} {# Logged In User; they can like / unlike a project presentation #}
 
-    <a 
-        href="#"
-        class="js-ajax-like-pp d-inline-flex align-items-center"
+    <button
+        type="button"
+        class="js-ajax-like-pp d-inline-flex align-items-center btn p-0 border-0 bg-transparent"
         data-url="{{ path('ajax_like_pp', { stringId: presentation.stringId }) }}"
         data-token="{{ csrf_token('like' ~ presentation.stringId) }}"
-        
     >
 
         {% if presentation.isLikedBy(app.user) %}
@@ -47,7 +46,7 @@
 
         {% endif %}
 
-    </a>
+    </button>
     
 {% endif %} 
 

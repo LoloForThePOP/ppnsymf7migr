@@ -19,8 +19,8 @@
 
                 {% set isBookmarked = app.user and presentation.id is defined ? app.user.hasBookmarkedProjectId(presentation.id) : (app.user and presentation.isBookmarkedBy(app.user)) %}
                 {% if app.user %}
-                    <a
-                        href="#"
+                    <button
+                        type="button"
                         class="bookmark-presentation-button btn js-ajax-bookmark-pp-misc {{ isBookmarked ? 'isBookmarked' }}"
                         data-url="{{ path('ajax_bookmark_pp', { stringId: presentation.stringId }) }}"
                         data-token="{{ csrf_token('bookmark' ~ presentation.stringId) }}"
@@ -34,7 +34,7 @@
                             <path d="M6 3.75A2.25 2.25 0 0 0 3.75 6v13.5c0 .6.68.95 1.17.6L12 15.95l7.08 4.15a.75.75 0 0 0 1.17-.6V6A2.25 2.25 0 0 0 18 3.75H6Z" fill="currentColor"></path>
                         </svg>
                         <div class="text">{{ isBookmarked ? 'Marqué' : 'Marquer' }}</div>
-                    </a>
+                    </button>
                 {% else %}
                     <a href="{{ path('app_login') }}" class="bookmark-presentation-button btn">
                         <svg class="icon bookmarkIcon notFilled" viewBox="0 0 24 24" aria-hidden="true" focusable="false">

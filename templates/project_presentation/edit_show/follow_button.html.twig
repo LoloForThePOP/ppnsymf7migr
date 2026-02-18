@@ -46,10 +46,12 @@
 
 {% else %} {# User is logged in #}
 
-    <a 
-        class="js-ajax-follow-pp d-inline-flex align-items-center" 
+    <button
+        type="button"
+        class="js-ajax-follow-pp d-inline-flex align-items-center btn p-0 border-0 bg-transparent"
         data-url="{{ path('ajax_follow_pp', { stringId: presentation.stringId }) }}"
         data-token="{{ csrf_token('follow' ~ presentation.stringId) }}"
+        aria-label="Suivre ce projet"
     >
 
         {% if presentation.isFollowedBy(app.user) %}
@@ -62,7 +64,7 @@
 
         {% endif %}
 
-    </a>
+    </button>
 
 {% endif %}
 

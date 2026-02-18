@@ -114,7 +114,7 @@
 
 {% set shareIcon %}
     
-    <a href="#" class="d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#pp-share" aria-label="Partager cette présentation">
+    <button type="button" class="d-flex align-items-center btn p-0 border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#pp-share" aria-label="Partager cette présentation">
 
         {# Inline trial: keep original share.svg geometry while still inheriting theme color through currentColor. #}
         <svg class="shareIcon" width="22" height="22" viewBox="0 0 35.7 36.5" aria-hidden="true" focusable="false">
@@ -127,7 +127,7 @@
             </g>
         </svg>
     
-    </a>
+    </button>
     
 {% endset %}
 

@@ -41,14 +41,14 @@
 
             <div id="pp-categories">
 
-                <div id="categories-dropdown" data-bs-toggle="dropdown" aria-expanded="false" class="" type="button">
+                <button id="categories-dropdown" data-bs-toggle="dropdown" aria-expanded="false" type="button" class="btn p-0 border-0 bg-transparent">
 
                     <svg id="categories-unroll-icon" viewBox="0 0 475.248 228.092" aria-hidden="true" focusable="false">
                         <path d="M 462.836,114.054 412.799,85.158 v 20.613 H 157.046 l 49.798,-52.612 c 4.238,-3.397 9.783,-5.78 15.487,-5.912 23.075,0 36.778,-0.006 41.822,-0.016 3.419,9.741 12.603,16.772 23.521,16.772 13.812,0 25.021,-11.208 25.021,-25.025 0,-13.823 -11.208,-25.027 -25.021,-25.027 -10.918,0 -20.102,7.027 -23.521,16.76 l -41.332,-0.007 c -11.202,0 -22.94,6.146 -30.411,13.351 0.204,-0.214 0.416,-0.442 -0.012,0.004 -0.158,0.178 -52.834,55.814 -52.834,55.814 -4.229,3.392 -9.771,5.76 -15.471,5.896 H 95.161 C 91.326,86.656 74.448,72.256 54.202,72.256 c -23.083,0 -41.794,18.711 -41.794,41.787 0,23.083 18.711,41.795 41.794,41.795 20.25,0 37.128,-14.412 40.963,-33.541 h 28.425 c 0.073,0 0.146,0.004 0.22,0 h 62.871 c 5.689,0.145 11.224,2.516 15.449,5.912 0,0 52.664,55.632 52.827,55.812 0.422,0.447 0.212,0.214 0.004,0.004 7.471,7.204 19.214,13.346 30.418,13.346 l 39.832,-0.009 v 16.777 h 50.05 v -50.045 h -50.05 v 16.755 c 0,0 -10.491,-0.019 -40.32,-0.019 -5.705,-0.131 -11.256,-2.511 -15.492,-5.908 L 219.59,122.3 h 193.209 v 20.646 z" fill="currentColor" />
                     </svg>
                     Catégories<span class=""> ▾</span>
 
-                </div>
+                </button>
 
                 <ul id="categories-dropdown-content" class="dropdown-menu" aria-labelledby="categories-dropdown">
 
@@ -127,7 +127,7 @@
         {% if userPresenter %} {# Edit Project Categories & Keywords covering link#}
  
         
-            <a class="pp-edition-mode coverable-link" href="#" data-bs-toggle="modal" data-bs-target="#categoriesKeywordsModal" aria-label="Modifier les catégories et mots-clés"></a> 
+            <button type="button" class="pp-edition-mode coverable-link btn p-0 border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#categoriesKeywordsModal" aria-label="Modifier les catégories et mots-clés"></button> 
         {% endif %}
 
     </div>
@@ -165,12 +165,12 @@
 {% elseif userPresenter %} {# placeholder when no keywords and no category #}
 
     <div class="d-flex align-items-center gap-2">
-        <a class="pp-edition-mode text-decoration-none ps-md-0" href="#" data-bs-toggle="modal" data-bs-target="#categoriesKeywordsModal">
+        <button type="button" class="pp-edition-mode text-decoration-none ps-md-0 btn p-0 border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#categoriesKeywordsModal" aria-label="Ajouter des catégories et mots-clés">
             <div id="categories-keywords-placeholder" class="">
                 <img class="keywordsIcon icon-themed img-fluid mb-1 me-1" src="{{ asset('hashtag.svg', 'pp_wysiwyg') }}" height="25" width="25" alt="add keywords icon" >
                 <span class="">Catégories<span class="d-none d-md-inline"> & Mots-clés</span></span>
             </div>
-        </a>
+        </button>
     </div>
 
     <style>

@@ -28,13 +28,13 @@
     </button>
 
     {% if userPresenter | default(false) %}
-        <a
+        <button
+            type="button"
             class="pp-edition-mode coverable-link"
-            href="#"
             data-bs-toggle="modal"
             data-bs-target="#project_status_edition"
             aria-label="Modifier le statut du projet"
-        ></a>
+        ></button>
     {% endif %}
 </div>
 

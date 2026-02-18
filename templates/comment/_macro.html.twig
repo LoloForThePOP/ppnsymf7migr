@@ -52,7 +52,20 @@
 
             <!-- Reply to Comment Button -->
 
-                <span class="replyCommentButton position-relative" data-commented-entity-type="{{commentedEntityType}}" data-commented-entity-id="{{commentedEntityId}}" data-comment-id="{{comment.id}}" data-parent-comment-id="{{parentCommentId}}">Répondre{% if not is_granted('ROLE_USER') %}<a class="coverable-link" href="{{path('app_login')}}"></a>{% endif %}</span >
+                {% if is_granted('ROLE_USER') %}
+                    <button
+                        type="button"
+                        class="replyCommentButton btn p-0 border-0 bg-transparent"
+                        data-commented-entity-type="{{commentedEntityType}}"
+                        data-commented-entity-id="{{commentedEntityId}}"
+                        data-comment-id="{{comment.id}}"
+                        data-parent-comment-id="{{parentCommentId}}"
+                    >
+                        Répondre
+                    </button>
+                {% else %}
+                    <a class="replyCommentButton text-decoration-none" href="{{ path('app_login') }}">Répondre</a>
+                {% endif %}
 
             <!-- End of Reply to Comment Button -->
 
@@ -74,7 +87,7 @@
 
             {% if is_granted('delete', comment) %}
 
-                <span class="js-remove-comment text-danger cursor-pointer" data-comment-id="{{comment.id}}" href="#">Supprimer</span>
+                <button type="button" class="js-remove-comment btn p-0 border-0 bg-transparent text-danger cursor-pointer" data-comment-id="{{comment.id}}">Supprimer</button>
 
             {% endif %}
 
