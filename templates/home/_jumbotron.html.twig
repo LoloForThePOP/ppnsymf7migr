@@ -16,30 +16,28 @@
 
             {# Access Propon Manifesto Button #}
 
-            <a class="" href="{{ path('static_page', {'slug': 'short_manifesto'}) }}">
-
-                <button class="jbtr-cta-btn fw-bold btn d-flex justify-content-center align-items-center pt-2 pe-4 me-md-4 mb-3 mb-md-0" data-track-click='{"key":"read-the-pop-manifesto"}'>
+            <a class="jbtr-cta-btn fw-bold btn d-flex justify-content-center align-items-center pt-2 pe-4 me-md-4 mb-3 mb-md-0 text-decoration-none"
+               href="{{ path('static_page', {'slug': 'short_manifesto'}) }}"
+               data-track-click='{"key":"read-the-pop-manifesto"}'
+               aria-label="Lire notre manifeste">
 
                 <img class="m" src="{{ asset('reading_book.png', 'misc')}}" width="32" alt="a opened book with hands handling it">
                 <span class="ps-1">Lire notre Manifeste</span>
             
-                </button>
-        
             </a>
 
 
             {# Access Present a Project Button #}
 
-            <a href="{{path('create_project_presentation')}}">
-
-                <button class="jbtr-cta-btn jbtr-cta-btn-present-project btn d-flex justify-content-center align-items-center px-3 pt-2" data-track-click='{"key":"clicked-jumbotron-create-presentation"}'>
+            <a class="jbtr-cta-btn jbtr-cta-btn-present-project btn d-flex justify-content-center align-items-center px-3 pt-2 text-decoration-none"
+               href="{{path('create_project_presentation')}}"
+               data-track-click='{"key":"clicked-jumbotron-create-presentation"}'
+               aria-label="Présenter son projet maintenant">
         
                   <img class="pp-theme-icon jbtr-add-presentation-icon" src="{{ asset('add_presentation.svg', 'misc')}}" alt="bucket with a plus icon">
                   
                   <span class="fw-bold ps-2">Présenter son projet maintenant</span>
               
-                </button>
-        
             </a>
 
         </div>

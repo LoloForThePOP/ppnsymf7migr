@@ -74,7 +74,7 @@
 
             {% if is_granted('delete', comment) %}
 
-                <sapn class="js-remove-comment text-danger cursor-pointer" data-comment-id="{{comment.id}}" href="#">Supprimer</span>
+                <span class="js-remove-comment text-danger cursor-pointer" data-comment-id="{{comment.id}}" href="#">Supprimer</span>
 
             {% endif %}
 
@@ -89,15 +89,19 @@
 
 {% macro commentForm(commentedEntityType, commentedEntityId) %}
 
-<form id="" method="post" name="newCommentForm" class="commentForm position-relative" data-commented-entity-type="{{commentedEntityType}}" data-commented-entity-id="{{commentedEntityId}}">
+{% set formId = 'comment-form-' ~ commentedEntityType ~ '-' ~ commentedEntityId %}
+{% set textareaId = 'comment-content-' ~ commentedEntityType ~ '-' ~ commentedEntityId %}
 
-    <textarea id="" class="commentContentTextarea" name="commentContent" placeholder="Ajouter un commentaire..." rows="4" cols="50"></textarea>
+<form id="{{ formId }}" method="post" name="newCommentForm" class="commentForm position-relative" data-commented-entity-type="{{commentedEntityType}}" data-commented-entity-id="{{commentedEntityId}}">
+
+    <label for="{{ textareaId }}" class="visually-hidden">Votre commentaire</label>
+    <textarea id="{{ textareaId }}" class="commentContentTextarea" name="commentContent" placeholder="Ajouter un commentaire..." rows="4" cols="50" aria-label="Votre commentaire"></textarea>
 
     {# Antispam protection based on time #}
     <span class="formTimeLoaded" style="display:none;">{{ 'now' | date('U') }}</span>
 
     {# Antispam protection based on honey pot #}
-    <input type="text" class="hnyPt" name="hnyPt" autocomplete="off" style="width: 1px; height: 1px; border: none; display: contents;"/>
+    <input type="text" class="hnyPt" name="hnyPt" autocomplete="off" aria-hidden="true" tabindex="-1" style="width: 1px; height: 1px; border: none; display: contents;"/>
 
     <!-- Submit Form -->
 

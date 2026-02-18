@@ -105,6 +105,11 @@ html[data-theme-tone="dark"] .search-overlay {
     position: relative;
 }
 
+.search-overlay__input-wrap:focus-within {
+    border-color: var(--theme-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme-accent) 35%, transparent);
+}
+
 .search-overlay__input {
     flex: 1;
     border: none;
@@ -149,6 +154,23 @@ html[data-theme-tone="dark"] .search-overlay {
 .search-overlay__close-btn:hover {
     border-color: var(--theme-accent);
     background: var(--theme-surface-alt);
+}
+
+.search-overlay__clear:focus-visible,
+.search-overlay__close-btn:focus-visible,
+.search-overlay__filters-tab:focus-visible,
+.search-overlay__filters-clear:focus-visible,
+.search-overlay__location-clear:focus-visible,
+.search-overlay__location-btn:focus-visible,
+.search-overlay__apply:focus-visible,
+.search-overlay__more:focus-visible,
+.search-result-card__map-btn:focus-visible,
+.search-result-card__bookmark:focus-visible,
+.search-overlay__suggestions-item:focus-visible,
+.search-overlay__suggestions-item-append:focus-visible,
+.search-overlay__suggestions-item-remove:focus-visible {
+    outline: 2px solid var(--theme-accent);
+    outline-offset: 2px;
 }
 
 @media (min-width: 581px) {

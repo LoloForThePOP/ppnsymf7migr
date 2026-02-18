@@ -24,6 +24,8 @@
                 class="search-overlay__input"
                 type="search"
                 placeholder="Rechercher un projet, un mot-cle..."
+                aria-label="Rechercher un projet"
+                aria-describedby="search-overlay-status search-overlay-count-total"
                 autocomplete="off"
                 autocorrect="off"
                 spellcheck="false"
@@ -92,10 +94,10 @@
 
         <section class="search-overlay__results">
             <div class="search-overlay__meta">
-                <span id="search-overlay-status" class="search-overlay__status">Tapez au moins 2 caracteres.</span>
+                <span id="search-overlay-status" class="search-overlay__status" aria-live="polite" aria-atomic="true">Tapez au moins 2 caracteres.</span>
             </div>
-            <div id="search-overlay-count" class="search-overlay__count">
-                <div id="search-overlay-count-total" class="search-overlay__count-line"></div>
+            <div id="search-overlay-count" class="search-overlay__count" aria-live="polite" aria-atomic="true">
+                <div id="search-overlay-count-total" class="search-overlay__count-line" role="status"></div>
             </div>
             <div id="search-overlay-results" class="search-results-grid"></div>
             <div id="search-overlay-empty" class="search-overlay__empty d-none"></div>
