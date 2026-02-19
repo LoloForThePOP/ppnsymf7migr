@@ -138,8 +138,8 @@
             {% for block in feedBlocks %}
                 {% set isExploreFallback = block.key == 'anon-explore-fallback' %}
                 {% set blockContainerClass = isExploreFallback
-                    ? 'container-fluid px-1 px-md-2 px-xl-2 my-5 home-feed-block--explore-fallback'
-                    : 'container my-5'
+                    ? 'container-fluid px-1 px-md-2 px-xl-2 my-5 home-feed-block home-feed-block--explore-fallback'
+                    : 'container my-5 home-feed-block'
                 %}
                 {% set blockTitleMeta = block.key == 'around-you' ? homepageLocationSummaryInline|default('') : '' %}
                 {% set blockTitleInfo = block.key == 'around-you' ? homepageLocationSummaryInfo|default('') : '' %}

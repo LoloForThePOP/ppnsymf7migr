@@ -155,6 +155,15 @@
         scroll-snap-stop: always;
     }
 
+    .homepage-container .home-feed-block {
+        padding-inline: 0.28rem !important;
+    }
+
+    .homepage-container .home-feed-block .collection-container {
+        padding-inline: 2px;
+        scroll-padding-inline: 2px;
+    }
+
 }
 
 @media screen and (min-width: 581px) and (max-width: 810px) {

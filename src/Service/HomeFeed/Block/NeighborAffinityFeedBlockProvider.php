@@ -144,7 +144,6 @@ final class NeighborAffinityFeedBlockProvider implements HomeFeedBlockProviderIn
                 : 'Selon vos consultations récentes';
         }
 
-        // Legacy fallback kept for very low-signal cases.
-        return 'Parce que vous avez consulté';
+        return 'Projets similaires';
     }
 }
